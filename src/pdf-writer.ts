@@ -5,8 +5,16 @@
 import { jsPDF } from "jspdf";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
-/** Parse a CSS color string to RGB components (0–255). */
-function parseColor(color: string | undefined): { r: number; g: number; b: number } | null {
+/** Parsed color with alpha. */
+interface ParsedColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+/** Parse a CSS color string to RGBA components (RGB 0–255, A 0–1). */
+function parseColor(color: string | undefined): ParsedColor | null {
   if (!color || color === "transparent" || color === "none") return null;
 
   // Hex
@@ -15,20 +23,56 @@ function parseColor(color: string | undefined): { r: number; g: number; b: numbe
     if (hex.length === 3) {
       hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
     }
+    // #rrggbbaa
+    const a = hex.length >= 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
     return {
       r: parseInt(hex.slice(0, 2), 16),
       g: parseInt(hex.slice(2, 4), 16),
       b: parseInt(hex.slice(4, 6), 16),
+      a,
     };
   }
 
   // rgb/rgba
-  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
   if (m) {
-    return { r: parseInt(m[1]), g: parseInt(m[2]), b: parseInt(m[3]) };
+    return {
+      r: parseInt(m[1]),
+      g: parseInt(m[2]),
+      b: parseInt(m[3]),
+      a: m[4] !== undefined ? parseFloat(m[4]) : 1,
+    };
   }
 
   return null;
+}
+
+/** Returns a parsed color only if it's actually visible (alpha > 0). */
+function parseVisibleColor(color: string | undefined): ParsedColor | null {
+  const c = parseColor(color);
+  if (!c || c.a <= 0) return null;
+  return c;
+}
+
+/** Parse border-radius to rx, ry in pixels. */
+function parseBorderRadius(borderRadius: string | undefined): { rx: number; ry: number } | null {
+  if (!borderRadius || borderRadius === "0px") return null;
+  // borderRadius can be "10px", "10px 20px", "50%", etc.
+  const parts = borderRadius.split(/\s+/).map((s) => parseFloat(s)).filter((n) => !isNaN(n) && n > 0);
+  if (parts.length === 0) return null;
+  return { rx: parts[0], ry: parts.length > 1 ? parts[1] : parts[0] };
+}
+
+/** Check if a quad is an axis-aligned rectangle (no rotation/skew). */
+function isAxisAlignedRect(points: Quad): boolean {
+  // For an axis-aligned rect, top-left.y == top-right.y, bottom-left.y == bottom-right.y, etc.
+  const eps = 0.5;
+  return (
+    Math.abs(points[0].y - points[1].y) < eps &&
+    Math.abs(points[2].y - points[3].y) < eps &&
+    Math.abs(points[0].x - points[3].x) < eps &&
+    Math.abs(points[1].x - points[2].x) < eps
+  );
 }
 
 /** Parse CSS font size to pt. */
@@ -77,9 +121,21 @@ export class PDFWriter implements Writer<jsPDF> {
   }
 
   drawPolygon(points: Quad, style: Style): void {
-    this.applyStyle(style);
+    const drawMode = this.applyStyleAndGetMode(style);
+    if (!drawMode) return; // fully transparent, skip
 
-    const drawMode = this.getDrawMode(style);
+    // Check if this is an axis-aligned rect with border-radius
+    const radius = parseBorderRadius(style.borderRadius);
+    if (radius && isAxisAlignedRect(points)) {
+      const x = pxToPt(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
+      const y = pxToPt(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
+      const w = pxToPt(Math.abs(points[1].x - points[0].x));
+      const h = pxToPt(Math.abs(points[3].y - points[0].y));
+      const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
+      const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
+      this.doc.roundedRect(x, y, w, h, rx, ry, drawMode);
+      return;
+    }
 
     // Build path using lines array format for jsPDF
     const startX = pxToPt(points[0].x);
@@ -105,8 +161,8 @@ export class PDFWriter implements Writer<jsPDF> {
   drawPolyline(points: Point[], closed: boolean, style: Style): void {
     if (points.length < 2) return;
 
-    this.applyStyle(style);
-    const drawMode = this.getDrawMode(style);
+    const drawMode = this.applyStyleAndGetMode(style);
+    if (!drawMode) return; // fully transparent, skip
 
     const startX = pxToPt(points[0].x);
     const startY = pxToPt(points[0].y);
@@ -141,9 +197,10 @@ export class PDFWriter implements Writer<jsPDF> {
       this.doc.setFont("helvetica", fontWeight);
     }
 
-    const fillColor = parseColor(style.fill);
-    if (fillColor) {
-      this.doc.setTextColor(fillColor.r, fillColor.g, fillColor.b);
+    // Text color: prefer style.color (CSS color), then style.fill
+    const textColor = parseVisibleColor(style.color) ?? parseVisibleColor(style.fill);
+    if (textColor) {
+      this.doc.setTextColor(textColor.r, textColor.g, textColor.b);
     } else {
       this.doc.setTextColor(0, 0, 0);
     }
@@ -159,9 +216,20 @@ export class PDFWriter implements Writer<jsPDF> {
     return this.doc;
   }
 
-  private applyStyle(style: Style): void {
-    const fillColor = parseColor(style.fill);
-    const strokeColor = parseColor(style.stroke);
+  /**
+   * Apply fill/stroke style to doc and return the draw mode.
+   * Returns null if the shape is fully transparent and should be skipped.
+   */
+  private applyStyleAndGetMode(style: Style): "S" | "F" | "FD" | null {
+    const fillColor = parseVisibleColor(style.fill);
+    const strokeColor = parseVisibleColor(style.stroke);
+    const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
+
+    // Determine effective visibility
+    const hasFill = fillColor !== null;
+    const hasStroke = strokeColor !== null && strokeWidth > 0;
+
+    if (!hasFill && !hasStroke) return null; // nothing to draw
 
     if (fillColor) {
       this.doc.setFillColor(fillColor.r, fillColor.g, fillColor.b);
@@ -172,16 +240,10 @@ export class PDFWriter implements Writer<jsPDF> {
       this.doc.setDrawColor(0, 0, 0);
     }
 
-    const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 1;
-    this.doc.setLineWidth(pxToPt(strokeWidth));
-  }
-
-  private getDrawMode(style: Style): "S" | "F" | "FD" {
-    const hasFill = style.fill && style.fill !== "transparent" && style.fill !== "none";
-    const hasStroke = style.stroke && style.stroke !== "transparent" && style.stroke !== "none";
+    this.doc.setLineWidth(pxToPt(hasStroke ? strokeWidth : 0.5));
 
     if (hasFill && hasStroke) return "FD";
     if (hasFill) return "F";
-    return "S"; // stroke only (default)
+    return "S";
   }
 }

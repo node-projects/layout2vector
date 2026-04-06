@@ -5,7 +5,7 @@
 import { DxfWriter, point3d, point2d } from "@tarikjabiri/dxf";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
-/** Parse a CSS color to an RGB hex string for DXF trueColor. */
+/** Parse a CSS color, returning hex and alpha. Returns undefined for invisible colors. */
 function cssColorToHex(color: string | undefined): string | undefined {
   if (!color || color === "transparent" || color === "none") return undefined;
 
@@ -16,12 +16,21 @@ function cssColorToHex(color: string | undefined): string | undefined {
       const r = color[1], g = color[2], b = color[3];
       return `#${r}${r}${g}${g}${b}${b}`;
     }
+    // #rrggbbaa — check alpha
+    if (color.length === 9) {
+      const alpha = parseInt(color.slice(7, 9), 16);
+      if (alpha === 0) return undefined;
+    }
     return color.substring(0, 7);
   }
 
   // Handle rgb/rgba
-  const rgbMatch = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  const rgbMatch = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
   if (rgbMatch) {
+    // Check alpha channel
+    if (rgbMatch[4] !== undefined && parseFloat(rgbMatch[4]) <= 0) {
+      return undefined; // fully transparent
+    }
     const r = parseInt(rgbMatch[1]).toString(16).padStart(2, "0");
     const g = parseInt(rgbMatch[2]).toString(16).padStart(2, "0");
     const b = parseInt(rgbMatch[3]).toString(16).padStart(2, "0");
@@ -29,6 +38,42 @@ function cssColorToHex(color: string | undefined): string | undefined {
   }
 
   return undefined;
+}
+
+/** Check if stroke is visible (has color and non-zero width). */
+function hasVisibleStroke(style: Style): boolean {
+  const strokeHex = cssColorToHex(style.stroke);
+  if (!strokeHex) return false;
+  const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
+  return strokeWidth > 0;
+}
+
+/** Parse border-radius to a radius value in pixels. */
+function parseBorderRadius(borderRadius: string | undefined): number {
+  if (!borderRadius || borderRadius === "0px") return 0;
+  const val = parseFloat(borderRadius);
+  return isNaN(val) ? 0 : val;
+}
+
+/** Generate arc points for a rounded corner. */
+function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAngle: number, segments: number): { x: number; y: number }[] {
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const a = startAngle + (endAngle - startAngle) * (i / segments);
+    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+  }
+  return pts;
+}
+
+/** Check if a quad is an axis-aligned rectangle. */
+function isAxisAlignedRect(points: [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }, { x: number; y: number }]): boolean {
+  const eps = 0.5;
+  return (
+    Math.abs(points[0].y - points[1].y) < eps &&
+    Math.abs(points[2].y - points[3].y) < eps &&
+    Math.abs(points[0].x - points[3].x) < eps &&
+    Math.abs(points[1].x - points[2].x) < eps
+  );
 }
 
 export class DXFWriter implements Writer<string> {
@@ -48,6 +93,53 @@ export class DXFWriter implements Writer<string> {
   }
 
   drawPolygon(points: Quad, style: Style): void {
+    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
+    const fillHex = cssColorToHex(style.fill);
+    const strokeVisible = hasVisibleStroke(style);
+
+    // Skip fully transparent elements
+    if (!fillHex && !strokeVisible) return;
+
+    // Check for rounded rect
+    const radius = parseBorderRadius(style.borderRadius);
+    if (radius > 0 && isAxisAlignedRect(points)) {
+      const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
+      const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
+      const w = Math.abs(points[1].x - points[0].x);
+      const h = Math.abs(points[3].y - points[0].y);
+      const r = Math.min(radius, w / 2, h / 2);
+      const ARC_SEGS = 8;
+
+      // Build rounded rectangle polyline
+      const verts: { x: number; y: number }[] = [];
+      // Top edge (left to right)
+      verts.push({ x: x + r, y: y });
+      verts.push({ x: x + w - r, y: y });
+      // Top-right corner
+      verts.push(...arcPoints(x + w - r, y + r, r, -Math.PI / 2, 0, ARC_SEGS));
+      // Right edge
+      verts.push({ x: x + w, y: y + h - r });
+      // Bottom-right corner
+      verts.push(...arcPoints(x + w - r, y + h - r, r, 0, Math.PI / 2, ARC_SEGS));
+      // Bottom edge
+      verts.push({ x: x + r, y: y + h });
+      // Bottom-left corner
+      verts.push(...arcPoints(x + r, y + h - r, r, Math.PI / 2, Math.PI, ARC_SEGS));
+      // Left edge
+      verts.push({ x: x, y: y + r });
+      // Top-left corner
+      verts.push(...arcPoints(x + r, y + r, r, Math.PI, Math.PI * 1.5, ARC_SEGS));
+
+      const vertices = verts.map((p) => ({
+        point: point2d(p.x, this.flipY(p.y)),
+      }));
+      // Close
+      vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+
+      this.dxf.addLWPolyline(vertices, trueColor ? { trueColor } : undefined);
+      return;
+    }
+
     const vertices = points.map((p) => ({
       point: point2d(p.x, this.flipY(p.y)),
     }));
@@ -57,8 +149,6 @@ export class DXFWriter implements Writer<string> {
       point: point2d(points[0].x, this.flipY(points[0].y)),
     });
 
-    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
-
     this.dxf.addLWPolyline(
       vertices,
       trueColor ? { trueColor } : undefined
@@ -66,6 +156,13 @@ export class DXFWriter implements Writer<string> {
   }
 
   drawPolyline(points: Point[], closed: boolean, style: Style): void {
+    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
+    const fillHex = cssColorToHex(style.fill);
+    const strokeVisible = hasVisibleStroke(style);
+
+    // Skip fully transparent elements
+    if (!fillHex && !strokeVisible && !trueColor) return;
+
     const vertices = points.map((p) => ({
       point: point2d(p.x, this.flipY(p.y)),
     }));
@@ -75,8 +172,6 @@ export class DXFWriter implements Writer<string> {
         point: point2d(points[0].x, this.flipY(points[0].y)),
       });
     }
-
-    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
 
     this.dxf.addLWPolyline(
       vertices,
@@ -92,7 +187,8 @@ export class DXFWriter implements Writer<string> {
     // Estimate text height from the quad
     const height = Math.abs(topLeft.y - bottomLeft.y) || 12;
 
-    const trueColor = cssColorToHex(style.fill);
+    // Text color: prefer style.color (CSS color), then style.fill
+    const trueColor = cssColorToHex(style.color) ?? cssColorToHex(style.fill);
 
     this.dxf.addText(
       point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
