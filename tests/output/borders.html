@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Basic Boxes &amp; Borders</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+
+    /* Solid borders */
+    .box-solid {
+      width: 200px; height: 80px;
+      border: 3px solid #333;
+      background: #ffe0b2;
+      margin: 10px;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    /* Dashed border */
+    .box-dashed {
+      width: 200px; height: 80px;
+      border: 2px dashed #1565c0;
+      background: #bbdefb;
+      margin: 10px;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    /* Dotted border */
+    .box-dotted {
+      width: 200px; height: 80px;
+      border: 2px dotted #c62828;
+      background: #ffcdd2;
+      margin: 10px;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    /* Mixed borders */
+    .box-mixed {
+      width: 200px; height: 80px;
+      border-top: 4px solid red;
+      border-right: 2px dashed green;
+      border-bottom: 3px double blue;
+      border-left: 1px solid orange;
+      background: #e8f5e9;
+      margin: 10px;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    /* Border radius */
+    .box-rounded {
+      width: 200px; height: 80px;
+      border: 2px solid #6a1b9a;
+      border-radius: 15px;
+      background: #e1bee7;
+      margin: 10px;
+      display: inline-block;
+      padding: 10px;
+    }
+
+    /* Circle via border-radius */
+    .box-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: #ef5350;
+      margin: 10px;
+      display: inline-block;
+    }
+
+    /* Pill shape */
+    .box-pill {
+      width: 200px; height: 40px;
+      border-radius: 20px;
+      background: #26a69a;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px;
+      font-size: 14px;
+    }
+
+    /* Thick border with padding */
+    .box-thick {
+      width: 150px; height: 100px;
+      border: 10px solid #ff6f00;
+      padding: 20px;
+      background: #fff8e1;
+      margin: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Borders &amp; Border Radius</h2>
+    <div class="box-solid">Solid border</div>
+    <div class="box-dashed">Dashed border</div>
+    <div class="box-dotted">Dotted border</div>
+    <div class="box-mixed">Mixed borders</div>
+    <div class="box-rounded">Rounded corners</div>
+    <div class="box-circle"></div>
+    <div class="box-pill">Pill Shape</div>
+    <div class="box-thick">Thick border + padding</div>
+  </div>
+</body>
+</html>

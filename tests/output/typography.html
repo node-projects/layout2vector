@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Typography &amp; Text Features</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin: 15px 0 8px; font-size: 18px; }
+
+    .text-wrap {
+      width: 250px;
+      padding: 10px;
+      background: #fff3e0;
+      border: 1px solid #ffcc80;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .text-large {
+      font-size: 32px;
+      font-weight: 900;
+      color: #1a237e;
+      margin: 8px 0;
+    }
+
+    .text-italic {
+      font-style: italic;
+      font-size: 16px;
+      color: #4a148c;
+      margin: 8px 0;
+    }
+
+    .text-underline {
+      text-decoration: underline;
+      font-size: 16px;
+      color: #b71c1c;
+      margin: 8px 0;
+    }
+
+    .text-strikethrough {
+      text-decoration: line-through;
+      font-size: 16px;
+      color: #757575;
+      margin: 8px 0;
+    }
+
+    .text-shadow-demo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #1e88e5;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin: 8px 0;
+    }
+
+    .text-overflow-ellipsis {
+      width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #e8eaf6;
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+    }
+
+    .text-multicolumn {
+      column-count: 2;
+      column-gap: 20px;
+      width: 400px;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 10px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      margin: 10px 0;
+    }
+
+    .text-right { text-align: right; margin: 4px 0; font-size: 14px; }
+    .text-center { text-align: center; margin: 4px 0; font-size: 14px; }
+    .text-justify { text-align: justify; margin: 4px 0; font-size: 14px; width: 300px; }
+
+    .inline-formatting {
+      margin: 10px 0;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .inline-formatting em { color: #d32f2f; }
+    .inline-formatting strong { color: #1565c0; }
+    .inline-formatting code {
+      background: #263238;
+      color: #80cbc4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Text Wrapping</h2>
+    <div class="text-wrap">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    </div>
+
+    <h2>Font Sizes &amp; Weights</h2>
+    <div class="text-large">Large Bold Title</div>
+    <div class="text-italic">Italic text content</div>
+
+    <h2>Text Decorations</h2>
+    <div class="text-underline">Underlined text</div>
+    <div class="text-strikethrough">Strikethrough text</div>
+
+    <h2>Text Shadow</h2>
+    <div class="text-shadow-demo">Shadow Text</div>
+
+    <h2>Text Overflow</h2>
+    <div class="text-overflow-ellipsis">This is a very long text that should be truncated with an ellipsis at the end</div>
+
+    <h2>Text Alignment</h2>
+    <div style="width: 300px; background: #e8f5e9; padding: 10px; border: 1px solid #c8e6c9;">
+      <div class="text-right">Right aligned</div>
+      <div class="text-center">Center aligned</div>
+      <div class="text-justify">Justified text that spans across the full width of the container element here.</div>
+    </div>
+
+    <h2>Multi-column Text</h2>
+    <div class="text-multicolumn">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+    </div>
+
+    <h2>Inline Formatting</h2>
+    <div class="inline-formatting">
+      This has <em>italic emphasis</em> and <strong>bold text</strong> and <code>inline code</code> mixed together in a single paragraph.
+    </div>
+  </div>
+</body>
+</html>

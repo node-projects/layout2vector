@@ -194,6 +194,10 @@ export class DXFWriter implements Writer<string> {
   }
 
   drawText(quad: Quad, text: string, style: Style): void {
+    // Sanitize text: collapse whitespace/newlines to single spaces (DXF is line-based)
+    const sanitized = text.replace(/\s+/g, " ").trim();
+    if (!sanitized) return;
+
     // Position text at the bottom-left of the quad (DXF convention)
     const bottomLeft = quad[3];
     const topLeft = quad[0];
@@ -208,7 +212,7 @@ export class DXFWriter implements Writer<string> {
     this.dxf.addText(
       point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
       height,
-      text,
+      sanitized,
       opts
     );
   }

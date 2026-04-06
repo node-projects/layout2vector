@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: CSS Transforms</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+    .container { position: relative; width: 500px; height: 300px; border: 1px solid #ccc; margin: 20px 0; }
+
+    .rotate-45 {
+      position: absolute; top: 100px; left: 50px;
+      width: 80px; height: 80px;
+      background: #e53935;
+      transform: rotate(45deg);
+    }
+
+    .scale-up {
+      position: absolute; top: 100px; left: 200px;
+      width: 60px; height: 60px;
+      background: #1e88e5;
+      transform: scale(1.5);
+    }
+
+    .skew {
+      position: absolute; top: 100px; left: 350px;
+      width: 80px; height: 60px;
+      background: #43a047;
+      transform: skew(20deg, 5deg);
+    }
+
+    .translate-rotate {
+      position: absolute; top: 20px; left: 50px;
+      width: 100px; height: 40px;
+      background: #ff9800;
+      transform: translate(30px, 10px) rotate(15deg);
+      color: white;
+      text-align: center;
+      line-height: 40px;
+      font-size: 12px;
+    }
+
+    .perspective-box {
+      position: absolute; top: 200px; left: 50px;
+      width: 120px; height: 80px;
+      background: #7b1fa2;
+      transform: perspective(300px) rotateY(30deg);
+      color: white;
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    .nested-transforms {
+      position: absolute; top: 200px; left: 250px;
+      width: 100px; height: 100px;
+      background: rgba(0, 150, 136, 0.3);
+      transform: rotate(10deg);
+      border: 2px solid #009688;
+    }
+
+    .nested-inner {
+      width: 50px; height: 50px;
+      margin: 10px auto;
+      background: #009688;
+      transform: rotate(30deg);
+    }
+
+    .scale-rotate-combo {
+      position: absolute; top: 20px; left: 300px;
+      width: 80px; height: 80px;
+      background: linear-gradient(45deg, #f06292, #ba68c8);
+      transform: rotate(-20deg) scale(1.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>CSS Transforms</h2>
+    <div class="container">
+      <div class="rotate-45"></div>
+      <div class="scale-up"></div>
+      <div class="skew"></div>
+      <div class="translate-rotate">Translated + Rotated</div>
+      <div class="perspective-box">3D perspective</div>
+      <div class="nested-transforms">
+        <div class="nested-inner"></div>
+      </div>
+      <div class="scale-rotate-combo"></div>
+    </div>
+  </div>
+</body>
+</html>

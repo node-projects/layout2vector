@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Declarative Shadow DOM</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #fafafa; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Declarative Shadow DOM</h2>
+
+    <!-- Card component with declarative shadow DOM -->
+    <div class="my-card" style="margin: 10px 0;">
+      <template shadowrootmode="open">
+        <style>
+          :host {
+            display: block;
+            width: 280px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            background: white;
+          }
+          .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+          }
+          .body {
+            padding: 16px;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          .footer {
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #888;
+          }
+        </style>
+        <div class="header">Shadow Card Title</div>
+        <div class="body">
+          This content is inside a declarative shadow DOM. It demonstrates
+          encapsulated styling and layout extraction.
+        </div>
+        <div class="footer">Footer text</div>
+      </template>
+    </div>
+
+    <!-- Button component with shadow DOM -->
+    <div class="my-button" style="margin: 10px 0; display: inline-block;">
+      <template shadowrootmode="open">
+        <style>
+          :host {
+            display: inline-block;
+          }
+          button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            background: #1e88e5;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          }
+        </style>
+        <button>Shadow Button</button>
+      </template>
+    </div>
+
+    <!-- Badge component with shadow DOM -->
+    <div class="my-badge" style="margin: 10px; display: inline-block;">
+      <template shadowrootmode="open">
+        <style>
+          :host {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+          }
+          .label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            background: #e8f5e9;
+            padding: 4px 12px;
+            border-radius: 12px;
+          }
+        </style>
+        <div class="dot"></div>
+        <div class="label">Online</div>
+      </template>
+    </div>
+
+    <!-- Nested shadow DOM -->
+    <div class="my-outer" style="margin: 20px 0;">
+      <template shadowrootmode="open">
+        <style>
+          :host {
+            display: block;
+            padding: 16px;
+            background: #e3f2fd;
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            width: 320px;
+          }
+          .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #1565c0;
+          }
+        </style>
+        <div class="title">Outer Shadow Root</div>
+        <div class="my-inner">
+          <template shadowrootmode="open">
+            <style>
+              :host {
+                display: block;
+                padding: 12px;
+                background: #fff3e0;
+                border: 1px dashed #ff9800;
+                border-radius: 6px;
+              }
+              .inner-text {
+                font-size: 13px;
+                color: #e65100;
+              }
+            </style>
+            <div class="inner-text">Nested inner shadow DOM content</div>
+          </template>
+        </div>
+      </template>
+    </div>
+  </div>
+</body>
+</html>

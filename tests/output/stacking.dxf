@@ -2733,9 +2733,7 @@ AcDbText
 40
 17
 1
-
-      contain:paint
-    
+contain:paint
 7
 STANDARD
 100

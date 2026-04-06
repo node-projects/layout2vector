@@ -42,6 +42,9 @@ for (const demoFile of demoFiles) {
 
     await page.setContent(htmlContent, { waitUntil: "load" });
 
+    // Copy HTML to output dir
+    fs.writeFileSync(path.join(outputDir, demoFile), htmlContent, "utf-8");
+
     // Inject polyfill + library via helpers
     const { injectBoxQuadsPolyfill, injectLibrary } = await import(
       "../helpers.js"

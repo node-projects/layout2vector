@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Gradients &amp; Backgrounds</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+
+    .gradient-linear {
+      width: 250px; height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 8px;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+    }
+
+    .gradient-radial {
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, #ff9a9e 0%, #fecfef 50%, #fdfcfb 100%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
+    .gradient-conic {
+      width: 150px; height: 150px;
+      background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
+    .gradient-repeating {
+      width: 250px; height: 80px;
+      background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
+      margin: 10px;
+      display: inline-block;
+      color: white;
+      padding: 10px;
+    }
+
+    .gradient-multi {
+      width: 300px; height: 100px;
+      background:
+        linear-gradient(to right, rgba(255,0,0,0.5), transparent),
+        linear-gradient(to bottom, rgba(0,0,255,0.5), transparent),
+        #e8e8e8;
+      margin: 10px;
+      display: inline-block;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .box-shadow-demo {
+      width: 200px; height: 80px;
+      background: white;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.3), -2px -2px 8px rgba(0,0,0,0.1);
+      margin: 20px;
+      display: inline-block;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .box-shadow-inset {
+      width: 200px; height: 80px;
+      background: #eceff1;
+      box-shadow: inset 3px 3px 10px rgba(0,0,0,0.2), inset -3px -3px 10px rgba(255,255,255,0.5);
+      margin: 20px;
+      display: inline-block;
+      border-radius: 8px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Gradients</h2>
+    <div class="gradient-linear">Linear gradient</div>
+    <div class="gradient-radial"></div>
+    <div class="gradient-conic"></div>
+    <div class="gradient-repeating">Repeating stripes</div>
+    <div class="gradient-multi">Multiple backgrounds</div>
+
+    <h2 style="margin-top: 20px;">Box Shadows</h2>
+    <div class="box-shadow-demo">Drop shadow</div>
+    <div class="box-shadow-inset">Inset shadow</div>
+  </div>
+</body>
+</html>
