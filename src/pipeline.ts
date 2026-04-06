@@ -12,6 +12,7 @@ import {
 } from "./traversal.js";
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
+import { isImageElement, extractImageGeometry } from "./image-extractor.js";
 
 /**
  * Extract the full IR from a root DOM element.
@@ -52,6 +53,13 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
     const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
     irNodes.push(...htmlNodes);
     globalIndex += htmlNodes.length || 1;
+
+    // Image element extraction (on top of HTML geometry)
+    if (options.includeImages && isImageElement(el)) {
+      const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
+      irNodes.push(...imageNodes);
+      globalIndex += imageNodes.length || 1;
+    }
   }
 
   return irNodes;
@@ -74,6 +82,11 @@ export function renderIR<T>(nodes: IRNode[], writer: Writer<T>): T {
         break;
       case "polyline":
         writer.drawPolyline(node.points, node.closed, node.style);
+        break;
+      case "image":
+        if (writer.drawImage) {
+          writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style);
+        }
         break;
     }
   }

@@ -87,6 +87,18 @@ function escapePdfText(text: string): string {
   return text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
+/** Decode a data URL to raw bytes and MIME type. */
+function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } | null {
+  const match = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+  if (!match) return null;
+  const mimeType = match[1];
+  const base64 = match[2];
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return { data: bytes, mimeType };
+}
+
 // ── Gradient parsing (identical logic to jspdf-writer) ──────────────
 
 interface GradientStop { offset: number; color: ParsedColor; }
@@ -215,6 +227,14 @@ interface ShadingDef {
   stops: { offset: number; r: number; g: number; b: number }[];
 }
 
+interface ImageDef {
+  name: string;
+  data: Uint8Array;
+  width: number;
+  height: number;
+  filter: string;        // "DCTDecode" for JPEG
+}
+
 // ── PDF-Lite Writer ─────────────────────────────────────────────────
 
 /** Bezier approximation constant for quarter-circle arcs. */
@@ -231,6 +251,8 @@ export class PDFWriter implements Writer<PdfDocument> {
   private gstates: GStateDef[] = [];
   private shadings: ShadingDef[] = [];
   private shadingCounter = 0;
+  private images: ImageDef[] = [];
+  private imageCounter = 0;
 
   /**
    * @param pageWidth Page width in mm (default A4 = 210)
@@ -248,6 +270,8 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.gstates = [];
     this.shadings = [];
     this.shadingCounter = 0;
+    this.images = [];
+    this.imageCounter = 0;
   }
 
   // ── Coordinate helpers ──────────────────────────────────────────
@@ -482,6 +506,34 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("Q");
   }
 
+  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): void {
+    // Decode the data URL to raw bytes
+    const decoded = decodeDataUrl(dataUrl);
+    if (!decoded) return;
+
+    // Register the image for embedding in end()
+    const imgName = `Im${++this.imageCounter}`;
+    this.images.push({
+      name: imgName,
+      data: decoded.data,
+      width,
+      height,
+      filter: decoded.mimeType === "image/jpeg" ? "DCTDecode" : "DCTDecode",
+    });
+
+    // Compute placement in PDF coordinates
+    const x = this.ptX(quad[0].x);
+    const yBottom = this.ptY(quad[3].y);
+    const w = pxToPt(Math.abs(quad[1].x - quad[0].x));
+    const h = pxToPt(Math.abs(quad[3].y - quad[0].y));
+
+    // Image XObjects render in a 1×1 unit square; use cm to scale and position
+    this.ops.push("q");
+    this.ops.push(`${pn(w)} 0 0 ${pn(h)} ${pn(x)} ${pn(yBottom)} cm`);
+    this.ops.push(`/${imgName} Do`);
+    this.ops.push("Q");
+  }
+
   end(): PdfDocument {
     const doc = new PdfDocument();
 
@@ -525,6 +577,29 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (this.fontMap.size > 0) resourcesDict.set("Font", fontDict);
     if (this.gstates.length > 0) resourcesDict.set("ExtGState", gsDict);
     if (this.shadings.length > 0) resourcesDict.set("Shading", shadingDict);
+
+    // ── Create Image XObject entries ──────────────────────────────
+    if (this.images.length > 0) {
+      const xobjectDict = new PdfDictionary();
+      for (const img of this.images) {
+        const imgDict = new PdfDictionary();
+        imgDict.set("Type", new PdfName("XObject"));
+        imgDict.set("Subtype", new PdfName("Image"));
+        imgDict.set("Width", new PdfNumber(img.width));
+        imgDict.set("Height", new PdfNumber(img.height));
+        imgDict.set("ColorSpace", new PdfName("DeviceRGB"));
+        imgDict.set("BitsPerComponent", new PdfNumber(8));
+        imgDict.set("Filter", new PdfName(img.filter));
+
+        const imgObj = new PdfIndirectObject({
+          content: new PdfStream({ header: imgDict, binary: img.data }),
+        });
+        doc.add(imgObj);
+        xobjectDict.set(img.name, imgObj.reference);
+      }
+      resourcesDict.set("XObject", xobjectDict);
+    }
+
     const resources = new PdfIndirectObject({ content: resourcesDict });
     doc.add(resources);
 

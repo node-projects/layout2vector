@@ -217,6 +217,22 @@ export class DXFWriter implements Writer<string> {
     );
   }
 
+  drawImage(quad: Quad, _dataUrl: string, _width: number, _height: number, style: Style): void {
+    // DXF does not natively embed raster images via this library.
+    // Draw a bounding rectangle placeholder.
+    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+
+    const vertices = quad.map((p) => ({
+      point: point2d(p.x, this.flipY(p.y)),
+    }));
+    vertices.push({
+      point: point2d(quad[0].x, this.flipY(quad[0].y)),
+    });
+
+    this.dxf.addLWPolyline(vertices, opts);
+  }
+
   end(): string {
     return this.dxf.stringify();
   }

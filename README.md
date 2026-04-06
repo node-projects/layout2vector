@@ -60,6 +60,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 |---|---|---|---|
 | `boxType` | `"border" \| "content"` | `"border"` | Which CSS box to use for element quads |
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
+| `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `flattenTransforms` | `boolean` | — | Reserved for future use |
 
@@ -111,6 +112,7 @@ class MyWriter implements Writer<string> {
   drawPolygon(points: Quad, style: Style): void { /* ... */ }
   drawPolyline(points: Point[], closed: boolean, style: Style): void { /* ... */ }
   drawText(quad: Quad, text: string, style: Style): void { /* ... */ }
+  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void { /* ... */ }
   end(): string { return "result"; }
 }
 ```
@@ -125,7 +127,8 @@ A discriminated union:
 type IRNode =
   | { type: "polygon"; points: Quad; style: Style; zIndex: number }
   | { type: "text"; quad: Quad; text: string; style: Style; zIndex: number }
-  | { type: "polyline"; points: Point[]; closed: boolean; style: Style; zIndex: number };
+  | { type: "polyline"; points: Point[]; closed: boolean; style: Style; zIndex: number }
+  | { type: "image"; quad: Quad; dataUrl: string; width: number; height: number; style: Style; zIndex: number };
 ```
 
 #### `Quad`
@@ -169,6 +172,8 @@ import {
   createsStackingContext, // Check if element creates stacking context
   isSVGElement,        // Check SVG namespace
   isSVGRoot,           // Check if <svg> root
+  isImageElement,      // Check if <img> element
+  extractImageGeometry, // Extract image data from <img>
 } from "@node-projects/layout2vector";
 ```
 
@@ -194,6 +199,17 @@ import {
 ### Shadow DOM
 - Traverses open/declarative shadow roots (`element.shadowRoot`)
 - Declarative shadow DOM (`<template shadowrootmode="open">`) supported
+
+### Image Handling
+
+Enable with `includeImages: true`. Supports `<img>` elements with any `src`:
+
+- **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization
+- **Raster images** (PNG, JPEG, GIF, WebP, data URLs, remote URLs): extracted as `image` IR nodes with embedded data URL
+- **Data URLs**: all `data:` schemes are supported (`base64`, URL-encoded, UTF-8)
+- **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`
+- **DXF output**: images are rendered as bounding-rectangle placeholders (DXF has limited raster support)
+- **PDF output**: JPEG images are embedded natively via DCTDecode; other formats are converted to JPEG automatically
 
 ### Color Handling
 - Parses `rgb()`, `rgba()`, hex (`#rgb`, `#rrggbb`, `#rrggbbaa`)

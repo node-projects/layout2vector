@@ -71,6 +71,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "traversal.js",
       "html-extractor.js",
       "svg-extractor.js",
+      "image-extractor.js",
       "pipeline.js",
     ];
 
@@ -100,6 +101,8 @@ window.__HC = {
   isSVGRoot,
   extractHTMLGeometry,
   extractSVGSubtree,
+  extractImageGeometry,
+  isImageElement,
 };
 })();`;
   } else {

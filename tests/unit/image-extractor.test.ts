@@ -1,0 +1,288 @@
+import { test, expect, type Page } from "@playwright/test";
+import { setupPage } from "../helpers.js";
+
+// A 1x1 red pixel JPEG as base64 data URL
+const RED_PIXEL_JPEG =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=";
+
+// A 2x2 red PNG as base64 data URL
+const RED_PIXEL_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVQIW2P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
+
+// A simple SVG as data URL
+const SVG_CIRCLE_DATA_URL =
+  "data:image/svg+xml;base64," +
+  btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red"/></svg>');
+
+// SVG as UTF-8 data URL (URL-encoded)
+const SVG_RECT_DATA_URL =
+  "data:image/svg+xml," +
+  encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50"><rect width="100" height="50" fill="blue"/></svg>');
+
+test.describe("Image Extraction", () => {
+  test("extracts raster image (JPEG data URL) as image IR node", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${RED_PIXEL_JPEG}" style="width:100px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+    expect(imageNode.dataUrl).toMatch(/^data:image\//);
+    expect(imageNode.quad).toBeDefined();
+    expect(imageNode.width).toBeGreaterThan(0);
+    expect(imageNode.height).toBeGreaterThan(0);
+
+    // Quad should be approximately 100x100
+    const [tl, tr, _br, bl] = imageNode.quad;
+    expect(tr.x - tl.x).toBeCloseTo(100, 0);
+    expect(bl.y - tl.y).toBeCloseTo(100, 0);
+  });
+
+  test("extracts raster image (PNG data URL) as image IR node", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${RED_PIXEL_PNG}" style="width:80px;height:60px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+    expect(imageNode.dataUrl).toMatch(/^data:image\//);
+    expect(imageNode.quad[1].x - imageNode.quad[0].x).toBeCloseTo(80, 0);
+    expect(imageNode.quad[3].y - imageNode.quad[0].y).toBeCloseTo(60, 0);
+  });
+
+  test("converts SVG data URL (base64) to vector geometry", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${SVG_CIRCLE_DATA_URL}" style="width:100px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    // SVG circle should be converted to polyline geometry, not an image node
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    const polylineNodes = ir.filter((n: any) => n.type === "polyline");
+
+    // Should have vector geometry from the circle
+    expect(polylineNodes.length).toBeGreaterThan(0);
+    // Should NOT have a raster image node (SVG was converted)
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("converts SVG data URL (UTF-8 encoded) to vector geometry", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${SVG_RECT_DATA_URL}" style="width:200px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    // SVG rect should be converted to polygon geometry
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    const polygonNodes = ir.filter((n: any) => n.type === "polygon");
+
+    expect(polygonNodes.length).toBeGreaterThan(0);
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("does NOT extract images when includeImages is false/unset", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${RED_PIXEL_JPEG}" style="width:100px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: false,
+        includeText: false,
+      });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("default (no includeImages option) does not extract images", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${RED_PIXEL_JPEG}" style="width:100px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, { includeText: false });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("skips broken/unloaded images gracefully", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="data:image/png;base64,INVALID" style="width:100px;height:100px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    // Should not crash; broken images are skipped
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    // Broken image — naturalWidth is 0
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("extracts multiple images in a container", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="root">
+          <img src="${RED_PIXEL_JPEG}" style="width:50px;height:50px;" />
+          <img src="${RED_PIXEL_PNG}" style="width:75px;height:75px;" />
+        </div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("root")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    expect(imageNodes.length).toBe(2);
+  });
+
+  test("image IR node has correct structure", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${RED_PIXEL_JPEG}" style="width:120px;height:80px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+
+    // Validate IR node structure
+    expect(imageNode.type).toBe("image");
+    expect(imageNode.quad).toHaveLength(4);
+    expect(imageNode.quad[0]).toHaveProperty("x");
+    expect(imageNode.quad[0]).toHaveProperty("y");
+    expect(typeof imageNode.dataUrl).toBe("string");
+    expect(typeof imageNode.width).toBe("number");
+    expect(typeof imageNode.height).toBe("number");
+    expect(typeof imageNode.zIndex).toBe("number");
+    expect(imageNode.style).toBeDefined();
+  });
+
+  test("isImageElement utility works", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body>
+        <img id="img" src="${RED_PIXEL_JPEG}" />
+        <div id="div">not an image</div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(() => {
+      const hc = (window as any).__HC;
+      const img = document.getElementById("img")!;
+      const div = document.getElementById("div")!;
+      return {
+        imgIsImage: hc.isImageElement(img),
+        divIsImage: hc.isImageElement(div),
+      };
+    });
+
+    expect(result.imgIsImage).toBe(true);
+    expect(result.divIsImage).toBe(false);
+  });
+
+  test("SVG in img tag produces geometry at correct position", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div style="height:50px;"></div>
+        <img id="target" src="${SVG_CIRCLE_DATA_URL}" style="width:100px;height:100px;display:block;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    // The SVG geometry should be positioned below the 50px spacer
+    const polylineNodes = ir.filter((n: any) => n.type === "polyline");
+    if (polylineNodes.length > 0) {
+      // At least some points should be below y=50
+      const hasPointsBelowSpacer = polylineNodes.some((n: any) =>
+        n.points.some((p: any) => p.y >= 50)
+      );
+      expect(hasPointsBelowSpacer).toBe(true);
+    }
+  });
+});

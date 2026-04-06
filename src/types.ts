@@ -67,12 +67,22 @@ export type IRNode =
       closed: boolean;
       style: Style;
       zIndex: number;
+    }
+  | {
+      type: "image";
+      quad: Quad;
+      dataUrl: string;
+      width: number;
+      height: number;
+      style: Style;
+      zIndex: number;
     };
 
 /** Extraction options. */
 export type Options = {
   boxType?: "border" | "content";
   includeText?: boolean;
+  includeImages?: boolean;
   includeInvisible?: boolean;
   flattenTransforms?: boolean;
 };
@@ -83,5 +93,6 @@ export interface Writer<TOutput> {
   drawPolygon(points: Quad, style: Style): void;
   drawPolyline(points: Point[], closed: boolean, style: Style): void;
   drawText(quad: Quad, text: string, style: Style): void;
+  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void;
   end(): TOutput;
 }

@@ -85,13 +85,19 @@ export class PdfDictionary implements PdfSerializable {
 export class PdfStream implements PdfSerializable {
   header: PdfDictionary;
   data: string;
+  binaryData?: Uint8Array;
 
-  constructor(opts: { header: PdfDictionary; original: string }) {
+  constructor(opts: { header: PdfDictionary; original?: string; binary?: Uint8Array }) {
     this.header = opts.header;
-    this.data = opts.original;
+    this.data = opts.original ?? '';
+    this.binaryData = opts.binary;
   }
 
   serialize(): string {
+    if (this.binaryData) {
+      // Binary streams are handled specially in PdfDocument.buildPdf
+      throw new Error("Binary streams must be serialized by PdfDocument.buildPdf");
+    }
     const bytes = new TextEncoder().encode(this.data);
     this.header.set("Length", new PdfNumber(bytes.length));
     return `${this.header.serialize()}\nstream\n${this.data}\nendstream`;
@@ -210,6 +216,11 @@ export class PdfDocument {
       pos += bytes.length;
     };
 
+    const writeBinary = (data: Uint8Array): void => {
+      chunks.push(data);
+      pos += data.length;
+    };
+
     // Header
     write("%PDF-1.4\n");
     // Binary comment to indicate binary content
@@ -219,7 +230,19 @@ export class PdfDocument {
     for (const obj of this.objects) {
       offsets.set(obj.objNum, pos);
       write(`${obj.objNum} 0 obj\n`);
-      write(obj.serializeBody());
+
+      // Check for binary stream content
+      if (obj.content instanceof PdfStream && obj.content.binaryData) {
+        const stream = obj.content;
+        const binaryData = stream.binaryData!;
+        stream.header.set("Length", new PdfNumber(binaryData.length));
+        write(`${stream.header.serialize()}\nstream\n`);
+        writeBinary(binaryData);
+        write("\nendstream");
+      } else {
+        write(obj.serializeBody());
+      }
+
       write("\nendobj\n");
     }
 
