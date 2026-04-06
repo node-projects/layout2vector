@@ -52,6 +52,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     color: cs.color || undefined,
     textDecoration: cs.textDecoration || undefined,
     textAlign: cs.textAlign || undefined,
+    textTransform: cs.textTransform || undefined,
     lineHeight: cs.lineHeight || undefined,
 
     opacity: cs.opacity ? parseFloat(cs.opacity) : undefined,

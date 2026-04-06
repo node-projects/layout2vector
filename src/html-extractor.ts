@@ -103,10 +103,21 @@ function extractTextNode(
       { x: rect.left, y: rect.bottom },
     ];
 
+    let text = textNode.textContent ?? "";
+    if (parentStyle.textTransform) {
+      switch (parentStyle.textTransform) {
+        case "uppercase": text = text.toUpperCase(); break;
+        case "lowercase": text = text.toLowerCase(); break;
+        case "capitalize":
+          text = text.replace(/\b\w/g, (c) => c.toUpperCase());
+          break;
+      }
+    }
+
     results.push({
       type: "text",
       quad,
-      text: textNode.textContent ?? "",
+      text,
       style: parentStyle,
       zIndex: globalIndex,
     });

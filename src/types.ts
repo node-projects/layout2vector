@@ -21,6 +21,7 @@ export type Style = {
   color?: string;
   textDecoration?: string;
   textAlign?: string;
+  textTransform?: string;
   lineHeight?: string;
 
   opacity?: number;
