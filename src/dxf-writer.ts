@@ -157,13 +157,14 @@ export class DXFWriter implements Writer<string> {
   }
 
   drawPolygon(points: Quad, style: Style): void {
-    const fillColor = getTrueColor(style.fill);
-    const strokeColor = getTrueColor(style.stroke);
+    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
     const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
 
     // Skip fully transparent elements
     if (!fillVisible && !strokeVisible) return;
+
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     // Check for rounded rect
     const radius = parseBorderRadius(style.borderRadius);
@@ -195,57 +196,26 @@ export class DXFWriter implements Writer<string> {
       // Top-left corner
       verts.push(...arcPoints(x + r, y + r, r, Math.PI, Math.PI * 1.5, ARC_SEGS));
 
-      // Solid fill via HATCH
-      if (fillVisible && fillColor !== undefined) {
-        this.addSolidHatch(verts, fillColor);
-      }
+      const vertices = verts.map((p) => ({
+        point: point2d(p.x, this.flipY(p.y)),
+      }));
+      // Close
+      vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
 
-      // Stroke outline
-      if (strokeVisible) {
-        const strokeOpts = strokeColor !== undefined ? { trueColor: String(strokeColor) } : undefined;
-        const vertices = verts.map((p) => ({
-          point: point2d(p.x, this.flipY(p.y)),
-        }));
-        vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
-        this.dxf.addLWPolyline(vertices, strokeOpts);
-      } else if (!fillVisible) {
-        // No fill, no stroke — draw outline with fill color as fallback
-        const opts = fillColor !== undefined ? { trueColor: String(fillColor) } : undefined;
-        const vertices = verts.map((p) => ({
-          point: point2d(p.x, this.flipY(p.y)),
-        }));
-        vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
-        this.dxf.addLWPolyline(vertices, opts);
-      }
+      this.dxf.addLWPolyline(vertices, opts);
       return;
     }
 
-    // Solid fill via HATCH
-    if (fillVisible && fillColor !== undefined) {
-      this.addSolidHatch(
-        points.map(p => ({ x: p.x, y: p.y })),
-        fillColor,
-      );
-    }
+    const vertices = points.map((p) => ({
+      point: point2d(p.x, this.flipY(p.y)),
+    }));
 
-    // Stroke outline
-    if (strokeVisible) {
-      const strokeOpts = strokeColor !== undefined ? { trueColor: String(strokeColor) } : undefined;
-      const vertices = points.map((p) => ({
-        point: point2d(p.x, this.flipY(p.y)),
-      }));
-      vertices.push({ point: point2d(points[0].x, this.flipY(points[0].y)) });
-      this.dxf.addLWPolyline(vertices, strokeOpts);
-    } else if (!fillVisible) {
-      // Fallback: draw outline
-      const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
-      const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
-      const vertices = points.map((p) => ({
-        point: point2d(p.x, this.flipY(p.y)),
-      }));
-      vertices.push({ point: point2d(points[0].x, this.flipY(points[0].y)) });
-      this.dxf.addLWPolyline(vertices, opts);
-    }
+    // Close the polygon
+    vertices.push({
+      point: point2d(points[0].x, this.flipY(points[0].y)),
+    });
+
+    this.dxf.addLWPolyline(vertices, opts);
   }
 
   drawPolyline(points: Point[], closed: boolean, style: Style): void {
@@ -265,21 +235,18 @@ export class DXFWriter implements Writer<string> {
       );
     }
 
-    // Stroke outline (or fallback outline if no fill)
-    const drawOutline = strokeVisible || !fillVisible;
-    if (drawOutline) {
-      const trueColor = strokeColor ?? fillColor;
-      const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
-      const vertices = points.map((p) => ({
-        point: point2d(p.x, this.flipY(p.y)),
-      }));
-      if (closed && points.length > 0) {
-        vertices.push({
-          point: point2d(points[0].x, this.flipY(points[0].y)),
-        });
-      }
-      this.dxf.addLWPolyline(vertices, opts);
+    // Always draw the polyline outline — use stroke color if available, otherwise fill color
+    const trueColor = strokeColor ?? fillColor;
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+    const vertices = points.map((p) => ({
+      point: point2d(p.x, this.flipY(p.y)),
+    }));
+    if (closed && points.length > 0) {
+      vertices.push({
+        point: point2d(points[0].x, this.flipY(points[0].y)),
+      });
     }
+    this.dxf.addLWPolyline(vertices, opts);
   }
 
   drawText(quad: Quad, text: string, style: Style): void {
