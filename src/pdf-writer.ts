@@ -441,11 +441,23 @@ export class PDFWriter implements Writer<jsPDF> {
       this.doc.setTextColor(0, 0, 0);
     }
 
-    // Place text at top-left of quad
-    const x = pxToPt(quad[0].x);
-    const y = pxToPt(quad[0].y) + fontSize; // offset by font size since PDF text baseline is bottom
+    // Compute rotation angle from the quad's top edge (p0 → p1)
+    const dx = quad[1].x - quad[0].x;
+    const dy = quad[1].y - quad[0].y;
+    const angleDeg = Math.atan2(dy, dx) * (180 / Math.PI);
 
-    this.doc.text(text, x, y);
+    // Place text at top-left of quad, offset by font size along the
+    // perpendicular (down) direction of the rotated baseline
+    const angleRad = angleDeg * (Math.PI / 180);
+    const x = pxToPt(quad[0].x) - fontSize * Math.sin(angleRad);
+    const y = pxToPt(quad[0].y) + fontSize * Math.cos(angleRad);
+
+    if (Math.abs(angleDeg) > 0.5) {
+      // jsPDF angle is counter-clockwise in degrees
+      this.doc.text(text, x, y, { angle: -angleDeg });
+    } else {
+      this.doc.text(text, x, y);
+    }
   }
 
   end(): jsPDF {

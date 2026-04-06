@@ -216,20 +216,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 43,
-        "y": 137
+        "x": 46,
+        "y": 140
       },
       {
-        "x": 129.28125,
-        "y": 137
+        "x": 132.28125,
+        "y": 140
       },
       {
-        "x": 129.28125,
-        "y": 154
+        "x": 132.28125,
+        "y": 157
       },
       {
-        "x": 43,
-        "y": 154
+        "x": 46,
+        "y": 157
       }
     ],
     "text": "Solid border",
@@ -323,20 +323,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 266.453125,
-        "y": 137
+        "x": 268,
+        "y": 139
       },
       {
-        "x": 372.296875,
-        "y": 137
+        "x": 373.84375,
+        "y": 139
       },
       {
-        "x": 372.296875,
-        "y": 154
+        "x": 373.84375,
+        "y": 156
       },
       {
-        "x": 266.453125,
-        "y": 154
+        "x": 268,
+        "y": 156
       }
     ],
     "text": "Dashed border",
@@ -430,20 +430,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 490.90625,
-        "y": 137
+        "x": 493,
+        "y": 139
       },
       {
-        "x": 588.75,
-        "y": 137
+        "x": 590.84375,
+        "y": 139
       },
       {
-        "x": 588.75,
-        "y": 154
+        "x": 590.84375,
+        "y": 156
       },
       {
-        "x": 490.90625,
-        "y": 154
+        "x": 493,
+        "y": 156
       }
     ],
     "text": "Dotted border",
@@ -537,20 +537,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 714.359375,
-        "y": 137
+        "x": 715,
+        "y": 141
       },
       {
-        "x": 815.734375,
-        "y": 137
+        "x": 816.375,
+        "y": 141
       },
       {
-        "x": 815.734375,
-        "y": 154
+        "x": 816.375,
+        "y": 158
       },
       {
-        "x": 714.359375,
-        "y": 154
+        "x": 715,
+        "y": 158
       }
     ],
     "text": "Mixed borders",
@@ -644,20 +644,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 939.8125,
-        "y": 137
+        "x": 942,
+        "y": 139
       },
       {
-        "x": 1062.5625,
-        "y": 137
+        "x": 1064.75,
+        "y": 139
       },
       {
-        "x": 1062.5625,
-        "y": 154
+        "x": 1064.75,
+        "y": 156
       },
       {
-        "x": 939.8125,
-        "y": 154
+        "x": 942,
+        "y": 156
       }
     ],
     "text": "Rounded corners",
@@ -911,74 +911,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 284.453125,
-        "y": 255
+        "x": 294,
+        "y": 265
       },
       {
-        "x": 373.375,
-        "y": 255
+        "x": 382.921875,
+        "y": 265
       },
       {
-        "x": 373.375,
-        "y": 272
+        "x": 382.921875,
+        "y": 300
       },
       {
-        "x": 284.453125,
-        "y": 272
-      }
-    ],
-    "text": "Thick border + padding",
-    "style": {
-      "fill": "rgb(255, 248, 225)",
-      "stroke": "rgb(255, 111, 0)",
-      "strokeWidth": "10px",
-      "fontSize": "16px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "normal",
-      "opacity": 1,
-      "borderTopColor": "rgb(255, 111, 0)",
-      "borderRightColor": "rgb(255, 111, 0)",
-      "borderBottomColor": "rgb(255, 111, 0)",
-      "borderLeftColor": "rgb(255, 111, 0)",
-      "borderTopWidth": "10px",
-      "borderRightWidth": "10px",
-      "borderBottomWidth": "10px",
-      "borderLeftWidth": "10px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 16
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 284.453125,
-        "y": 273
-      },
-      {
-        "x": 355.1875,
-        "y": 273
-      },
-      {
-        "x": 355.1875,
-        "y": 290
-      },
-      {
-        "x": 284.453125,
-        "y": 290
+        "x": 294,
+        "y": 300
       }
     ],
     "text": "Thick border + padding",

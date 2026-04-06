@@ -428,74 +428,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 117.02595520019531,
-        "y": 96.62065124511719
+        "x": 122.7825624113369,
+        "y": 94.5680306165371
       },
       {
-        "x": 184.9740447998047,
-        "y": 96.62065124511719
+        "x": 190.73065201094627,
+        "y": 112.77465990499326
       },
       {
-        "x": 184.9740447998047,
-        "y": 127.37934875488281
+        "x": 172.98783518548998,
+        "y": 178.99177721456357
       },
       {
-        "x": 117.02595520019531,
-        "y": 127.37934875488281
-      }
-    ],
-    "text": "Translated + Rotated",
-    "style": {
-      "fill": "rgb(255, 152, 0)",
-      "stroke": "rgb(255, 255, 255)",
-      "strokeWidth": "0px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(255, 255, 255)",
-      "textDecoration": "none",
-      "textAlign": "center",
-      "textTransform": "none",
-      "lineHeight": "40px",
-      "opacity": 1,
-      "borderTopColor": "rgb(255, 255, 255)",
-      "borderRightColor": "rgb(255, 255, 255)",
-      "borderBottomColor": "rgb(255, 255, 255)",
-      "borderLeftColor": "rgb(255, 255, 255)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "matrix(0.965926, 0.258819, -0.258819, 0.965926, 30, 10)"
-    },
-    "zIndex": 7
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 118.53597259521484,
-        "y": 138.43630981445312
-      },
-      {
-        "x": 162.7584991455078,
-        "y": 138.43630981445312
-      },
-      {
-        "x": 162.7584991455078,
-        "y": 162.8377685546875
-      },
-      {
-        "x": 118.53597259521484,
-        "y": 162.8377685546875
+        "x": 105.03974558588062,
+        "y": 160.7851479261074
       }
     ],
     "text": "Translated + Rotated",
@@ -583,26 +529,26 @@
       "boxShadow": "none",
       "transform": "matrix3d(0.866025, 0, -0.5, 0.00166667, 0, 1, 0, 0, 0.5, 0, 0.866025, -0.00288675, 0, 0, 0, 1)"
     },
-    "zIndex": 10
+    "zIndex": 9
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 83.76225280761719,
-        "y": 269.272705078125
+        "x": 85.81625094787054,
+        "y": 269.98428950143875
       },
       {
-        "x": 155.7803955078125,
-        "y": 269.272705078125
+        "x": 146.4737832633667,
+        "y": 273.42254521960496
       },
       {
-        "x": 155.7803955078125,
-        "y": 286.7630310058594
+        "x": 146.4737832633667,
+        "y": 290.3920419046291
       },
       {
-        "x": 83.76225280761719,
-        "y": 286.7630310058594
+        "x": 85.81625094787054,
+        "y": 288.99544698026153
       }
     ],
     "text": "3D perspective",
@@ -637,7 +583,7 @@
       "boxShadow": "none",
       "transform": "matrix3d(0.866025, 0, -0.5, 0.00166667, 0, 1, 0, 0, 0.5, 0, 0.866025, -0.00288675, 0, 0, 0, 1)"
     },
-    "zIndex": 10
+    "zIndex": 9
   },
   {
     "type": "polygon",
@@ -690,7 +636,7 @@
       "boxShadow": "none",
       "transform": "matrix(0.984808, 0.173648, -0.173648, 0.984808, 0, 0)"
     },
-    "zIndex": 12
+    "zIndex": 11
   },
   {
     "type": "polygon",
@@ -743,7 +689,7 @@
       "boxShadow": "none",
       "transform": "matrix(0.866025, 0.5, -0.5, 0.866025, 0, 0)"
     },
-    "zIndex": 13
+    "zIndex": 12
   },
   {
     "type": "polygon",
@@ -796,6 +742,6 @@
       "boxShadow": "none",
       "transform": "matrix(1.12763, -0.410424, 0.410424, 1.12763, 0, 0)"
     },
-    "zIndex": 14
+    "zIndex": 13
   }
 ]

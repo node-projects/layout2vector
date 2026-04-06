@@ -10,7 +10,7 @@
 endobj
 4 0 obj
 <<
-/Length 5451
+/Length 4746
 >>
 stream
 0.200025 w
@@ -67,36 +67,6 @@ T* (          This content is inside a declarative shadow DOM. It demonstrates) 
 T* (          encapsulated styling and layout extraction.) Tj
 T* (        ) Tj
 ET
-BT
-/F9 10.5 Tf
-12.0749999999999993 TL
-0.2 g
-27. 422.3515200000000505 Td
-() Tj
-T* (          This content is inside a declarative shadow DOM. It demonstrates) Tj
-T* (          encapsulated styling and layout extraction.) Tj
-T* (        ) Tj
-ET
-BT
-/F9 10.5 Tf
-12.0749999999999993 TL
-0.2 g
-27. 406.6015200000000505 Td
-() Tj
-T* (          This content is inside a declarative shadow DOM. It demonstrates) Tj
-T* (          encapsulated styling and layout extraction.) Tj
-T* (        ) Tj
-ET
-BT
-/F9 10.5 Tf
-12.0749999999999993 TL
-0.2 g
-27. 390.8515200000000505 Td
-() Tj
-T* (          This content is inside a declarative shadow DOM. It demonstrates) Tj
-T* (          encapsulated styling and layout extraction.) Tj
-T* (        ) Tj
-ET
 0.96 g
 0.88 G
 0.75 w
@@ -111,7 +81,7 @@ BT
 /F9 9 Tf
 10.3499999999999996 TL
 0.533 g
-27. 356.3515200000000505 Td
+27. 355.6015200000000505 Td
 (Footer text) Tj
 ET
 0.12 0.53 0.9 rg
@@ -132,7 +102,7 @@ BT
 /F9 10.5 Tf
 12.0749999999999993 TL
 1. g
-33. 309.8515200000000505 Td
+33.0410699844360352 309.8515200000000505 Td
 (Shadow Button) Tj
 ET
 0.3 0.69 0.31 rg
@@ -167,7 +137,7 @@ BT
 /F9 10.5 Tf
 12.0749999999999993 TL
 0.2 g
-147.83203125 309.8515200000000505 Td
+147.6845612525939941 309.8515200000000505 Td
 (Online) Tj
 ET
 0.89 0.95 0.99 rg
@@ -412,7 +382,7 @@ endobj
 21 0 obj
 <<
 /Producer (jsPDF 4.2.1)
-/CreationDate (D:20260406144754+02'00')
+/CreationDate (D:20260406145706+02'00')
 >>
 endobj
 22 0 obj
@@ -426,35 +396,35 @@ endobj
 xref
 0 23
 0000000000 65535 f 
-0000005655 00000 n 
-0000007993 00000 n 
+0000004950 00000 n 
+0000007288 00000 n 
 0000000015 00000 n 
 0000000152 00000 n 
-0000005712 00000 n 
-0000005837 00000 n 
-0000005967 00000 n 
-0000006100 00000 n 
-0000006237 00000 n 
-0000006360 00000 n 
-0000006489 00000 n 
-0000006621 00000 n 
-0000006757 00000 n 
-0000006885 00000 n 
-0000007012 00000 n 
-0000007141 00000 n 
-0000007274 00000 n 
-0000007376 00000 n 
-0000007472 00000 n 
-0000007803 00000 n 
-0000008283 00000 n 
-0000008369 00000 n 
+0000005007 00000 n 
+0000005132 00000 n 
+0000005262 00000 n 
+0000005395 00000 n 
+0000005532 00000 n 
+0000005655 00000 n 
+0000005784 00000 n 
+0000005916 00000 n 
+0000006052 00000 n 
+0000006180 00000 n 
+0000006307 00000 n 
+0000006436 00000 n 
+0000006569 00000 n 
+0000006671 00000 n 
+0000006767 00000 n 
+0000007098 00000 n 
+0000007578 00000 n 
+0000007664 00000 n 
 trailer
 <<
 /Size 23
 /Root 22 0 R
 /Info 21 0 R
-/ID [ <2DE8EE1528EE41444BB69C5790952820> <2DE8EE1528EE41444BB69C5790952820> ]
+/ID [ <7236393DAC00224D5D5B8A01207B2350> <7236393DAC00224D5D5B8A01207B2350> ]
 >>
 startxref
-8473
+7768
 %%EOF

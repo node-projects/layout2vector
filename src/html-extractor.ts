@@ -82,26 +82,37 @@ function domQuadToQuad(dq: DOMQuad): Quad {
   ];
 }
 
-/** Extract text node geometry using Range.getClientRects. */
+/** Extract text node geometry using getBoxQuads (transform-aware). */
 function extractTextNode(
   textNode: Text,
   parentStyle: Style,
   globalIndex: number
 ): IRNode[] {
   const results: IRNode[] = [];
-  const range = document.createRange();
-  range.selectNodeContents(textNode);
-  const rects = range.getClientRects();
 
-  for (const rect of Array.from(rects)) {
-    if (rect.width === 0 && rect.height === 0) continue;
+  // Prefer getBoxQuads (transform-aware) over Range.getClientRects
+  let quads: Quad[];
+  if ("getBoxQuads" in textNode && typeof (textNode as any).getBoxQuads === "function") {
+    const rawQuads: DOMQuad[] = (textNode as any).getBoxQuads({ box: "border" });
+    quads = rawQuads.map(domQuadToQuad);
+  } else {
+    // Fallback: Range.getClientRects (axis-aligned only)
+    const range = document.createRange();
+    range.selectNodeContents(textNode);
+    const rects = range.getClientRects();
+    quads = [];
+    for (const rect of Array.from(rects)) {
+      if (rect.width === 0 && rect.height === 0) continue;
+      quads.push([
+        { x: rect.left, y: rect.top },
+        { x: rect.right, y: rect.top },
+        { x: rect.right, y: rect.bottom },
+        { x: rect.left, y: rect.bottom },
+      ]);
+    }
+  }
 
-    const quad: Quad = [
-      { x: rect.left, y: rect.top },
-      { x: rect.right, y: rect.top },
-      { x: rect.right, y: rect.bottom },
-      { x: rect.left, y: rect.bottom },
-    ];
+  for (const quad of quads) {
 
     let text = textNode.textContent ?? "";
     if (parentStyle.textTransform) {

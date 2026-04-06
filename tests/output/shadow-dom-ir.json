@@ -385,168 +385,6 @@
       },
       {
         "x": 250,
-        "y": 138
-      },
-      {
-        "x": 36,
-        "y": 138
-      }
-    ],
-    "text": "\n          This content is inside a declarative shadow DOM. It demonstrates\n          encapsulated styling and layout extraction.\n        ",
-    "style": {
-      "fill": "rgba(0, 0, 0, 0)",
-      "stroke": "rgb(51, 51, 51)",
-      "strokeWidth": "0px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "21px",
-      "opacity": 1,
-      "borderTopColor": "rgb(51, 51, 51)",
-      "borderRightColor": "rgb(51, 51, 51)",
-      "borderBottomColor": "rgb(51, 51, 51)",
-      "borderLeftColor": "rgb(51, 51, 51)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 6
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 36,
-        "y": 143
-      },
-      {
-        "x": 225.078125,
-        "y": 143
-      },
-      {
-        "x": 225.078125,
-        "y": 159
-      },
-      {
-        "x": 36,
-        "y": 159
-      }
-    ],
-    "text": "\n          This content is inside a declarative shadow DOM. It demonstrates\n          encapsulated styling and layout extraction.\n        ",
-    "style": {
-      "fill": "rgba(0, 0, 0, 0)",
-      "stroke": "rgb(51, 51, 51)",
-      "strokeWidth": "0px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "21px",
-      "opacity": 1,
-      "borderTopColor": "rgb(51, 51, 51)",
-      "borderRightColor": "rgb(51, 51, 51)",
-      "borderBottomColor": "rgb(51, 51, 51)",
-      "borderLeftColor": "rgb(51, 51, 51)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 6
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 36,
-        "y": 164
-      },
-      {
-        "x": 231.359375,
-        "y": 164
-      },
-      {
-        "x": 231.359375,
-        "y": 180
-      },
-      {
-        "x": 36,
-        "y": 180
-      }
-    ],
-    "text": "\n          This content is inside a declarative shadow DOM. It demonstrates\n          encapsulated styling and layout extraction.\n        ",
-    "style": {
-      "fill": "rgba(0, 0, 0, 0)",
-      "stroke": "rgb(51, 51, 51)",
-      "strokeWidth": "0px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "21px",
-      "opacity": 1,
-      "borderTopColor": "rgb(51, 51, 51)",
-      "borderRightColor": "rgb(51, 51, 51)",
-      "borderBottomColor": "rgb(51, 51, 51)",
-      "borderLeftColor": "rgb(51, 51, 51)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 6
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 36,
-        "y": 185
-      },
-      {
-        "x": 100.59375,
-        "y": 185
-      },
-      {
-        "x": 100.59375,
         "y": 201
       },
       {
@@ -639,26 +477,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 11
+    "zIndex": 8
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 36,
-        "y": 233
+        "y": 234
       },
       {
         "x": 93.359375,
-        "y": 233
+        "y": 234
       },
       {
         "x": 93.359375,
-        "y": 247
+        "y": 248
       },
       {
         "x": 36,
-        "y": 247
+        "y": 248
       }
     ],
     "text": "Footer text",
@@ -693,7 +531,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 11
+    "zIndex": 8
   },
   {
     "type": "polygon",
@@ -746,7 +584,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 13
+    "zIndex": 10
   },
   {
     "type": "polygon",
@@ -799,25 +637,25 @@
       "boxShadow": "rgba(0, 0, 0, 0.2) 0px 2px 4px 0px",
       "transform": "none"
     },
-    "zIndex": 14
+    "zIndex": 11
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 44,
+        "x": 44.05475997924805,
         "y": 293
       },
       {
-        "x": 146.65625,
+        "x": 146.71100997924805,
         "y": 293
       },
       {
-        "x": 146.65625,
+        "x": 146.71100997924805,
         "y": 309
       },
       {
-        "x": 44,
+        "x": 44.05475997924805,
         "y": 309
       }
     ],
@@ -853,7 +691,7 @@
       "boxShadow": "rgba(0, 0, 0, 0.2) 0px 2px 4px 0px",
       "transform": "none"
     },
-    "zIndex": 14
+    "zIndex": 11
   },
   {
     "type": "polygon",
@@ -906,7 +744,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 16
+    "zIndex": 13
   },
   {
     "type": "polygon",
@@ -959,7 +797,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 17
+    "zIndex": 14
   },
   {
     "type": "polygon",
@@ -1012,25 +850,25 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 18
+    "zIndex": 15
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 197.109375,
+        "x": 196.912748336792,
         "y": 293
       },
       {
-        "x": 237.578125,
+        "x": 237.381498336792,
         "y": 293
       },
       {
-        "x": 237.578125,
+        "x": 237.381498336792,
         "y": 309
       },
       {
-        "x": 197.109375,
+        "x": 196.912748336792,
         "y": 309
       }
     ],
@@ -1066,7 +904,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 18
+    "zIndex": 15
   },
   {
     "type": "polygon",
@@ -1119,7 +957,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 20
+    "zIndex": 17
   },
   {
     "type": "polygon",
@@ -1172,7 +1010,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 21
+    "zIndex": 18
   },
   {
     "type": "text",
@@ -1226,7 +1064,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 21
+    "zIndex": 18
   },
   {
     "type": "polygon",
@@ -1279,7 +1117,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 23
+    "zIndex": 20
   },
   {
     "type": "polygon",
@@ -1332,7 +1170,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 24
+    "zIndex": 21
   },
   {
     "type": "text",
@@ -1386,6 +1224,6 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 24
+    "zIndex": 21
   }
 ]

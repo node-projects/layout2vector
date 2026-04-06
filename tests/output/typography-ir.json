@@ -216,182 +216,20 @@
     "type": "text",
     "quad": [
       {
-        "x": 31,
-        "y": 80
+        "x": 32,
+        "y": 81.05490207672119
       },
       {
-        "x": 203.734375,
-        "y": 80
+        "x": 253.796875,
+        "y": 81.05490207672119
       },
       {
-        "x": 203.734375,
-        "y": 96
+        "x": 253.796875,
+        "y": 164.2267770767212
       },
       {
-        "x": 31,
-        "y": 96
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n    ",
-    "style": {
-      "fill": "rgb(255, 243, 224)",
-      "stroke": "rgb(255, 204, 128)",
-      "strokeWidth": "1px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "22.4px",
-      "opacity": 1,
-      "borderTopColor": "rgb(255, 204, 128)",
-      "borderRightColor": "rgb(255, 204, 128)",
-      "borderBottomColor": "rgb(255, 204, 128)",
-      "borderLeftColor": "rgb(255, 204, 128)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "6px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 3
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 102.390625
-      },
-      {
-        "x": 243.46875,
-        "y": 102.390625
-      },
-      {
-        "x": 243.46875,
-        "y": 118.390625
-      },
-      {
-        "x": 31,
-        "y": 118.390625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n    ",
-    "style": {
-      "fill": "rgb(255, 243, 224)",
-      "stroke": "rgb(255, 204, 128)",
-      "strokeWidth": "1px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "22.4px",
-      "opacity": 1,
-      "borderTopColor": "rgb(255, 204, 128)",
-      "borderRightColor": "rgb(255, 204, 128)",
-      "borderBottomColor": "rgb(255, 204, 128)",
-      "borderLeftColor": "rgb(255, 204, 128)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "6px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 3
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 124.78125
-      },
-      {
-        "x": 252.796875,
-        "y": 124.78125
-      },
-      {
-        "x": 252.796875,
-        "y": 140.78125
-      },
-      {
-        "x": 31,
-        "y": 140.78125
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n    ",
-    "style": {
-      "fill": "rgb(255, 243, 224)",
-      "stroke": "rgb(255, 204, 128)",
-      "strokeWidth": "1px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(51, 51, 51)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "22.4px",
-      "opacity": 1,
-      "borderTopColor": "rgb(255, 204, 128)",
-      "borderRightColor": "rgb(255, 204, 128)",
-      "borderBottomColor": "rgb(255, 204, 128)",
-      "borderLeftColor": "rgb(255, 204, 128)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "6px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 3
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 147.171875
-      },
-      {
-        "x": 177.328125,
-        "y": 147.171875
-      },
-      {
-        "x": 177.328125,
-        "y": 163.171875
-      },
-      {
-        "x": 31,
-        "y": 163.171875
+        "x": 32,
+        "y": 164.2267770767212
       }
     ],
     "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n    ",
@@ -479,26 +317,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 8
+    "zIndex": 5
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 192.5625
+        "y": 193
       },
       {
         "x": 202.6875,
-        "y": 192.5625
+        "y": 193
       },
       {
         "x": 202.6875,
-        "y": 212.5625
+        "y": 213
       },
       {
         "x": 20,
-        "y": 212.5625
+        "y": 213
       }
     ],
     "text": "Font Sizes & Weights",
@@ -533,7 +371,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 8
+    "zIndex": 5
   },
   {
     "type": "polygon",
@@ -586,26 +424,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 10
+    "zIndex": 7
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 221.5625
+        "y": 222
       },
       {
         "x": 299.921875,
-        "y": 221.5625
+        "y": 222
       },
       {
         "x": 299.921875,
-        "y": 266.5625
+        "y": 267
       },
       {
         "x": 20,
-        "y": 266.5625
+        "y": 267
       }
     ],
     "text": "Large Bold Title",
@@ -640,7 +478,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 10
+    "zIndex": 7
   },
   {
     "type": "polygon",
@@ -693,26 +531,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 12
+    "zIndex": 9
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 274.5625
+        "y": 275
       },
       {
         "x": 140.0625,
-        "y": 274.5625
+        "y": 275
       },
       {
         "x": 140.0625,
-        "y": 291.5625
+        "y": 292
       },
       {
         "x": 20,
-        "y": 291.5625
+        "y": 292
       }
     ],
     "text": "Italic text content",
@@ -747,7 +585,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 12
+    "zIndex": 9
   },
   {
     "type": "polygon",
@@ -800,26 +638,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 14
+    "zIndex": 11
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 307.5625
+        "y": 308
       },
       {
         "x": 164.703125,
-        "y": 307.5625
+        "y": 308
       },
       {
         "x": 164.703125,
-        "y": 327.5625
+        "y": 328
       },
       {
         "x": 20,
-        "y": 327.5625
+        "y": 328
       }
     ],
     "text": "Text Decorations",
@@ -854,7 +692,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 14
+    "zIndex": 11
   },
   {
     "type": "polygon",
@@ -907,26 +745,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 16
+    "zIndex": 13
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 336.5625
+        "y": 337
       },
       {
         "x": 127.625,
-        "y": 336.5625
+        "y": 337
       },
       {
         "x": 127.625,
-        "y": 353.5625
+        "y": 354
       },
       {
         "x": 20,
-        "y": 353.5625
+        "y": 354
       }
     ],
     "text": "Underlined text",
@@ -961,7 +799,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 16
+    "zIndex": 13
   },
   {
     "type": "polygon",
@@ -1014,26 +852,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 18
+    "zIndex": 15
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 362.5625
+        "y": 363
       },
       {
         "x": 145.40625,
-        "y": 362.5625
+        "y": 363
       },
       {
         "x": 145.40625,
-        "y": 379.5625
+        "y": 380
       },
       {
         "x": 20,
-        "y": 379.5625
+        "y": 380
       }
     ],
     "text": "Strikethrough text",
@@ -1068,7 +906,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 18
+    "zIndex": 15
   },
   {
     "type": "polygon",
@@ -1121,26 +959,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 20
+    "zIndex": 17
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 395.5625
+        "y": 396
       },
       {
         "x": 129.6875,
-        "y": 395.5625
+        "y": 396
       },
       {
         "x": 129.6875,
-        "y": 415.5625
+        "y": 416
       },
       {
         "x": 20,
-        "y": 415.5625
+        "y": 416
       }
     ],
     "text": "Text Shadow",
@@ -1175,7 +1013,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 20
+    "zIndex": 17
   },
   {
     "type": "polygon",
@@ -1228,26 +1066,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 22
+    "zIndex": 19
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 424.5625
+        "y": 425
       },
       {
         "x": 190.625,
-        "y": 424.5625
+        "y": 425
       },
       {
         "x": 190.625,
-        "y": 455.5625
+        "y": 456
       },
       {
         "x": 20,
-        "y": 455.5625
+        "y": 456
       }
     ],
     "text": "Shadow Text",
@@ -1282,7 +1120,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 22
+    "zIndex": 19
   },
   {
     "type": "polygon",
@@ -1335,26 +1173,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 24
+    "zIndex": 21
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 471.5625
+        "y": 472
       },
       {
         "x": 137.703125,
-        "y": 471.5625
+        "y": 472
       },
       {
         "x": 137.703125,
-        "y": 491.5625
+        "y": 492
       },
       {
         "x": 20,
-        "y": 491.5625
+        "y": 492
       }
     ],
     "text": "Text Overflow",
@@ -1389,7 +1227,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 24
+    "zIndex": 21
   },
   {
     "type": "polygon",
@@ -1442,26 +1280,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 26
+    "zIndex": 23
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 28,
-        "y": 508.5625
+        "y": 509
       },
       {
         "x": 546.515625,
-        "y": 508.5625
+        "y": 509
       },
       {
         "x": 546.515625,
-        "y": 525.5625
+        "y": 526
       },
       {
         "x": 28,
-        "y": 525.5625
+        "y": 526
       }
     ],
     "text": "This is a very long text that should be truncated with an ellipsis at the end",
@@ -1496,61 +1334,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 26
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 28,
-        "y": 508.5625
-      },
-      {
-        "x": 191.625,
-        "y": 508.5625
-      },
-      {
-        "x": 191.625,
-        "y": 525.5625
-      },
-      {
-        "x": 28,
-        "y": 525.5625
-      }
-    ],
-    "text": "This is a very long text that should be truncated with an ellipsis at the end",
-    "style": {
-      "fill": "rgb(232, 234, 246)",
-      "stroke": "rgb(0, 0, 0)",
-      "strokeWidth": "0px",
-      "fontSize": "16px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "normal",
-      "opacity": 1,
-      "borderTopColor": "rgb(0, 0, 0)",
-      "borderRightColor": "rgb(0, 0, 0)",
-      "borderBottomColor": "rgb(0, 0, 0)",
-      "borderLeftColor": "rgb(0, 0, 0)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "4px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 26
+    "zIndex": 23
   },
   {
     "type": "polygon",
@@ -1603,26 +1387,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 29
+    "zIndex": 25
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 549.5625
+        "y": 550
       },
       {
         "x": 148.015625,
-        "y": 549.5625
+        "y": 550
       },
       {
         "x": 148.015625,
-        "y": 569.5625
+        "y": 570
       },
       {
         "x": 20,
-        "y": 569.5625
+        "y": 570
       }
     ],
     "text": "Text Alignment",
@@ -1657,7 +1441,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 29
+    "zIndex": 25
   },
   {
     "type": "polygon",
@@ -1710,7 +1494,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 31
+    "zIndex": 27
   },
   {
     "type": "polygon",
@@ -1763,26 +1547,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 32
+    "zIndex": 28
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 227.265625,
-        "y": 593.5625
+        "y": 594
       },
       {
         "x": 309,
-        "y": 593.5625
+        "y": 594
       },
       {
         "x": 309,
-        "y": 609.5625
+        "y": 610
       },
       {
         "x": 227.265625,
-        "y": 609.5625
+        "y": 610
       }
     ],
     "text": "Right aligned",
@@ -1817,7 +1601,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 32
+    "zIndex": 28
   },
   {
     "type": "polygon",
@@ -1870,26 +1654,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 34
+    "zIndex": 30
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 124.46875,
-        "y": 613.5625
+        "y": 614
       },
       {
         "x": 215.53125,
-        "y": 613.5625
+        "y": 614
       },
       {
         "x": 215.53125,
-        "y": 629.5625
+        "y": 630
       },
       {
         "x": 124.46875,
-        "y": 629.5625
+        "y": 630
       }
     ],
     "text": "Center aligned",
@@ -1924,7 +1708,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 34
+    "zIndex": 30
   },
   {
     "type": "polygon",
@@ -1977,26 +1761,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 36
+    "zIndex": 32
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 31,
-        "y": 633.5625
+        "y": 634
       },
       {
         "x": 331,
-        "y": 633.5625
+        "y": 634
       },
       {
         "x": 331,
-        "y": 649.5625
+        "y": 666
       },
       {
         "x": 31,
-        "y": 649.5625
+        "y": 666
       }
     ],
     "text": "Justified text that spans across the full width of the container element here.",
@@ -2031,61 +1815,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 36
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 649.5625
-      },
-      {
-        "x": 201.453125,
-        "y": 649.5625
-      },
-      {
-        "x": 201.453125,
-        "y": 665.5625
-      },
-      {
-        "x": 31,
-        "y": 665.5625
-      }
-    ],
-    "text": "Justified text that spans across the full width of the container element here.",
-    "style": {
-      "fill": "rgba(0, 0, 0, 0)",
-      "stroke": "rgb(0, 0, 0)",
-      "strokeWidth": "0px",
-      "fontSize": "14px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "justify",
-      "textTransform": "none",
-      "lineHeight": "normal",
-      "opacity": 1,
-      "borderTopColor": "rgb(0, 0, 0)",
-      "borderRightColor": "rgb(0, 0, 0)",
-      "borderBottomColor": "rgb(0, 0, 0)",
-      "borderLeftColor": "rgb(0, 0, 0)",
-      "borderTopWidth": "0px",
-      "borderRightWidth": "0px",
-      "borderBottomWidth": "0px",
-      "borderLeftWidth": "0px",
-      "borderTopStyle": "none",
-      "borderRightStyle": "none",
-      "borderBottomStyle": "none",
-      "borderLeftStyle": "none",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 36
+    "zIndex": 32
   },
   {
     "type": "polygon",
@@ -2138,26 +1868,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 39
+    "zIndex": 34
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 695.5625
+        "y": 696
       },
       {
         "x": 172.671875,
-        "y": 695.5625
+        "y": 696
       },
       {
         "x": 172.671875,
-        "y": 715.5625
+        "y": 716
       },
       {
         "x": 20,
-        "y": 715.5625
+        "y": 716
       }
     ],
     "text": "Multi-column Text",
@@ -2192,7 +1922,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 39
+    "zIndex": 34
   },
   {
     "type": "polygon",
@@ -2245,26 +1975,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 41
+    "zIndex": 36
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 31,
-        "y": 739.5625
+        "x": 32,
+        "y": 741
       },
       {
-        "x": 179.0625,
-        "y": 739.5625
+        "x": 405.109375,
+        "y": 741
       },
       {
-        "x": 179.0625,
-        "y": 753.5625
+        "x": 405.109375,
+        "y": 809
       },
       {
-        "x": 31,
-        "y": 753.5625
+        "x": 32,
+        "y": 809
       }
     ],
     "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
@@ -2299,331 +2029,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 757.5625
-      },
-      {
-        "x": 202.421875,
-        "y": 757.5625
-      },
-      {
-        "x": 202.421875,
-        "y": 771.5625
-      },
-      {
-        "x": 31,
-        "y": 771.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 775.5625
-      },
-      {
-        "x": 191.078125,
-        "y": 775.5625
-      },
-      {
-        "x": 191.078125,
-        "y": 789.5625
-      },
-      {
-        "x": 31,
-        "y": 789.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 31,
-        "y": 793.5625
-      },
-      {
-        "x": 191.765625,
-        "y": 793.5625
-      },
-      {
-        "x": 191.765625,
-        "y": 807.5625
-      },
-      {
-        "x": 31,
-        "y": 807.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 230,
-        "y": 739.5625
-      },
-      {
-        "x": 404.109375,
-        "y": 739.5625
-      },
-      {
-        "x": 404.109375,
-        "y": 753.5625
-      },
-      {
-        "x": 230,
-        "y": 753.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 230,
-        "y": 757.5625
-      },
-      {
-        "x": 404.09375,
-        "y": 757.5625
-      },
-      {
-        "x": 404.09375,
-        "y": 771.5625
-      },
-      {
-        "x": 230,
-        "y": 771.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
-  },
-  {
-    "type": "text",
-    "quad": [
-      {
-        "x": 230,
-        "y": 775.5625
-      },
-      {
-        "x": 352.09375,
-        "y": 775.5625
-      },
-      {
-        "x": 352.09375,
-        "y": 789.5625
-      },
-      {
-        "x": 230,
-        "y": 789.5625
-      }
-    ],
-    "text": "\n      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.\n    ",
-    "style": {
-      "fill": "rgb(245, 245, 245)",
-      "stroke": "rgb(221, 221, 221)",
-      "strokeWidth": "1px",
-      "fontSize": "12px",
-      "fontFamily": "Arial, sans-serif",
-      "fontWeight": "400",
-      "fontStyle": "normal",
-      "color": "rgb(0, 0, 0)",
-      "textDecoration": "none",
-      "textAlign": "start",
-      "textTransform": "none",
-      "lineHeight": "18px",
-      "opacity": 1,
-      "borderTopColor": "rgb(221, 221, 221)",
-      "borderRightColor": "rgb(221, 221, 221)",
-      "borderBottomColor": "rgb(221, 221, 221)",
-      "borderLeftColor": "rgb(221, 221, 221)",
-      "borderTopWidth": "1px",
-      "borderRightWidth": "1px",
-      "borderBottomWidth": "1px",
-      "borderLeftWidth": "1px",
-      "borderTopStyle": "solid",
-      "borderRightStyle": "solid",
-      "borderBottomStyle": "solid",
-      "borderLeftStyle": "solid",
-      "borderRadius": "0px",
-      "backgroundImage": "none",
-      "boxShadow": "none",
-      "transform": "none"
-    },
-    "zIndex": 41
+    "zIndex": 36
   },
   {
     "type": "polygon",
@@ -2676,26 +2082,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 49
+    "zIndex": 38
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 835.5625
+        "y": 836
       },
       {
         "x": 166,
-        "y": 835.5625
+        "y": 836
       },
       {
         "x": 166,
-        "y": 855.5625
+        "y": 856
       },
       {
         "x": 20,
-        "y": 855.5625
+        "y": 856
       }
     ],
     "text": "Inline Formatting",
@@ -2730,7 +2136,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 49
+    "zIndex": 38
   },
   {
     "type": "polygon",
@@ -2783,26 +2189,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 51
+    "zIndex": 40
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 20,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 80.859375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 80.859375,
-        "y": 888.5625
+        "y": 889
       },
       {
         "x": 20,
-        "y": 888.5625
+        "y": 889
       }
     ],
     "text": "\n      This has ",
@@ -2837,26 +2243,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 51
+    "zIndex": 40
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 179.234375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 212.609375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 212.609375,
-        "y": 888.5625
+        "y": 889
       },
       {
         "x": 179.234375,
-        "y": 888.5625
+        "y": 889
       }
     ],
     "text": " and ",
@@ -2891,26 +2297,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 51
+    "zIndex": 40
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 275.109375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 308.484375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 308.484375,
-        "y": 888.5625
+        "y": 889
       },
       {
         "x": 275.109375,
-        "y": 888.5625
+        "y": 889
       }
     ],
     "text": " and ",
@@ -2945,26 +2351,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 51
+    "zIndex": 40
   },
   {
     "type": "text",
     "quad": [
       {
         "x": 399.109375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 650.9375,
-        "y": 871.5625
+        "y": 872
       },
       {
         "x": 650.9375,
-        "y": 888.5625
+        "y": 889
       },
       {
         "x": 399.109375,
-        "y": 888.5625
+        "y": 889
       }
     ],
     "text": " mixed together in a single paragraph.\n    ",
@@ -2999,7 +2405,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 51
+    "zIndex": 40
   },
   {
     "type": "polygon",
@@ -3052,26 +2458,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 56
+    "zIndex": 45
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 80.859375,
-        "y": 871.5625
+        "x": 81,
+        "y": 872
       },
       {
-        "x": 179.234375,
-        "y": 871.5625
+        "x": 179.375,
+        "y": 872
       },
       {
-        "x": 179.234375,
-        "y": 888.5625
+        "x": 179.375,
+        "y": 889
       },
       {
-        "x": 80.859375,
-        "y": 888.5625
+        "x": 81,
+        "y": 889
       }
     ],
     "text": "italic emphasis",
@@ -3106,7 +2512,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 56
+    "zIndex": 45
   },
   {
     "type": "polygon",
@@ -3159,26 +2565,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 58
+    "zIndex": 47
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 212.609375,
-        "y": 871.5625
+        "x": 213,
+        "y": 872
       },
       {
-        "x": 275.109375,
-        "y": 871.5625
+        "x": 275.5,
+        "y": 872
       },
       {
-        "x": 275.109375,
-        "y": 888.5625
+        "x": 275.5,
+        "y": 889
       },
       {
-        "x": 212.609375,
-        "y": 888.5625
+        "x": 213,
+        "y": 889
       }
     ],
     "text": "bold text",
@@ -3213,7 +2619,7 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 58
+    "zIndex": 47
   },
   {
     "type": "polygon",
@@ -3266,26 +2672,26 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 60
+    "zIndex": 49
   },
   {
     "type": "text",
     "quad": [
       {
-        "x": 314.484375,
-        "y": 873.5625
+        "x": 314.02482748031616,
+        "y": 874
       },
       {
-        "x": 393.109375,
-        "y": 873.5625
+        "x": 392.64982748031616,
+        "y": 874
       },
       {
-        "x": 393.109375,
-        "y": 888.5625
+        "x": 392.64982748031616,
+        "y": 889
       },
       {
-        "x": 314.484375,
-        "y": 888.5625
+        "x": 314.02482748031616,
+        "y": 889
       }
     ],
     "text": "inline code",
@@ -3320,6 +2726,6 @@
       "boxShadow": "none",
       "transform": "none"
     },
-    "zIndex": 60
+    "zIndex": 49
   }
 ]
