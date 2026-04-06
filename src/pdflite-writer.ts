@@ -17,7 +17,7 @@ import {
   PdfDocument,
   PdfPage,
   PdfPages,
-} from "pdf-lite";
+} from "./pdf-objects.js";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
 // ── Shared helpers ──────────────────────────────────────────────────

@@ -1,15 +1,17 @@
-%PDF-2.0
+%PDF-1.4
+%√¢√£√è√ì
+1 0 obj
+<</Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding>>
+endobj
 2 0 obj
-<< /BaseFont /Helvetica-Bold /Type /Font /Subtype /Type1 >>
+<</Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding>>
 endobj
 3 0 obj
-<< /BaseFont /Helvetica /Type /Font /Subtype /Type1 >>
+<</Font <</F1 1 0 R /F2 2 0 R>>>>
 endobj
 4 0 obj
-<< /Font << /F1 2 0 R /F2 3 0 R >> >>
-endobj
-5 0 obj
-<< /Length 10358 >>stream
+<</Length 10358>>
+stream
 q
 Q
 q
@@ -630,21 +632,30 @@ q
 278.25 148.6015 l
 h
 S
-Qendstream
+Q
+endstream
+endobj
+5 0 obj
+<</Type /Page /Parent 6 0 R /MediaBox [0 0 960.18048 540.10152] /Resources 3 0 R /Contents 4 0 R>>
 endobj
 6 0 obj
-<< /MediaBox [ 0 0 960.18048 540.10152 ] /Contents 5 0 R /Resources 4 0 R /Parent 7 0 R >>
+<</Type /Pages /Kids [5 0 R] /Count 1>>
 endobj
 7 0 obj
-<< /Type /Pages /Kids [ 6 0 R ] /Count 1 >>
+<</Type /Catalog /Pages 6 0 R>>
 endobj
-8 0 obj
-<< /Type /Catalog /Pages 7 0 R >>
-endobj
-1 0 obj
-<< /Type /XRef /W [ 1 2 1 ] /Index [ 1 8 ] /Size 9 /Length 32 /Root 8 0 R >>stream
-*N  	  T  ö  œ )x )‚ * endstream
-endobj
+xref
+0 8
+0000000000 65535 f 
+0000000019 00000 n 
+0000000119 00000 n 
+0000000214 00000 n 
+0000000263 00000 n 
+0000010672 00000 n 
+0000010786 00000 n 
+0000010841 00000 n 
+trailer
+<</Root 7 0 R /Size 8>>
 startxref
-10830
+10888
 %%EOF
