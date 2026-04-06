@@ -83,15 +83,39 @@ function extractSVGElement(
 function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement): Style {
   const base = extractStyle(cs);
   // SVG uses fill/stroke attributes directly
-  const fill = cs.fill || el.getAttribute("fill") || undefined;
+  let fill = cs.fill || el.getAttribute("fill") || undefined;
   const stroke = cs.stroke || el.getAttribute("stroke") || undefined;
   const strokeWidth = cs.strokeWidth || el.getAttribute("stroke-width") || undefined;
+
+  // Resolve url(#id) gradient references to a solid color
+  if (fill && fill.startsWith("url(")) {
+    fill = resolveGradientColor(fill, el) ?? fill;
+  }
+
   return {
     ...base,
     fill: fill !== "none" ? fill : undefined,
     stroke: stroke !== "none" ? stroke : undefined,
     strokeWidth,
   };
+}
+
+/** Resolve a url(#id) gradient reference to its first stop color. */
+function resolveGradientColor(urlRef: string, el: SVGGraphicsElement): string | undefined {
+  const match = urlRef.match(/url\(["']?#([^"')]+)["']?\)/);
+  if (!match) return undefined;
+  const id = match[1];
+  const ownerSvg = el.ownerSVGElement;
+  if (!ownerSvg) return undefined;
+  const gradEl = ownerSvg.querySelector(`#${id}`);
+  if (!gradEl) return undefined;
+  // Get stop colors from the gradient
+  const stops = gradEl.querySelectorAll("stop");
+  if (stops.length === 0) return undefined;
+  // Use the first stop's color as a representative solid color
+  const stopColor = (stops[0] as SVGStopElement).getAttribute("stop-color")
+    ?? getComputedStyle(stops[0]).stopColor;
+  return stopColor || undefined;
 }
 
 /** Apply the CTM (current transformation matrix) to a point. */
@@ -102,10 +126,11 @@ function applyCtm(point: Point, ctm: DOMMatrix): Point {
   };
 }
 
-/** Get the CTM for an SVG element, falling back to identity. */
+/** Get the screen CTM for an SVG element (maps to page coordinates), falling back to identity. */
 function getCtm(el: SVGGraphicsElement): DOMMatrix {
   try {
-    const ctm = el.getCTM();
+    // getScreenCTM maps from element coords to page/screen coords
+    const ctm = el.getScreenCTM();
     if (ctm) return ctm;
   } catch {
     // Fallback

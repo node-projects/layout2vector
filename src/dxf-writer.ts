@@ -40,6 +40,22 @@ function cssColorToHex(color: string | undefined): string | undefined {
   return undefined;
 }
 
+/**
+ * Convert a hex color string to a DXF trueColor integer.
+ * DXF group 420 requires a 24-bit decimal integer: (R << 16) | (G << 8) | B
+ */
+function hexToTrueColor(hex: string): number {
+  const stripped = hex.startsWith("#") ? hex.slice(1) : hex;
+  return parseInt(stripped, 16);
+}
+
+/** Get trueColor integer from a CSS color, or undefined if invisible. */
+function getTrueColor(color: string | undefined): number | undefined {
+  const hex = cssColorToHex(color);
+  if (!hex) return undefined;
+  return hexToTrueColor(hex);
+}
+
 /** Check if stroke is visible (has color and non-zero width). */
 function hasVisibleStroke(style: Style): boolean {
   const strokeHex = cssColorToHex(style.stroke);
@@ -93,12 +109,14 @@ export class DXFWriter implements Writer<string> {
   }
 
   drawPolygon(points: Quad, style: Style): void {
-    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
-    const fillHex = cssColorToHex(style.fill);
+    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+    const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
 
     // Skip fully transparent elements
-    if (!fillHex && !strokeVisible) return;
+    if (!fillVisible && !strokeVisible) return;
+
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     // Check for rounded rect
     const radius = parseBorderRadius(style.borderRadius);
@@ -136,7 +154,7 @@ export class DXFWriter implements Writer<string> {
       // Close
       vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
 
-      this.dxf.addLWPolyline(vertices, trueColor ? { trueColor } : undefined);
+      this.dxf.addLWPolyline(vertices, opts);
       return;
     }
 
@@ -149,19 +167,18 @@ export class DXFWriter implements Writer<string> {
       point: point2d(points[0].x, this.flipY(points[0].y)),
     });
 
-    this.dxf.addLWPolyline(
-      vertices,
-      trueColor ? { trueColor } : undefined
-    );
+    this.dxf.addLWPolyline(vertices, opts);
   }
 
   drawPolyline(points: Point[], closed: boolean, style: Style): void {
-    const trueColor = cssColorToHex(style.stroke) ?? cssColorToHex(style.fill);
-    const fillHex = cssColorToHex(style.fill);
+    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+    const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
 
     // Skip fully transparent elements
-    if (!fillHex && !strokeVisible && !trueColor) return;
+    if (!fillVisible && !strokeVisible) return;
+
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     const vertices = points.map((p) => ({
       point: point2d(p.x, this.flipY(p.y)),
@@ -173,10 +190,7 @@ export class DXFWriter implements Writer<string> {
       });
     }
 
-    this.dxf.addLWPolyline(
-      vertices,
-      trueColor ? { trueColor } : undefined
-    );
+    this.dxf.addLWPolyline(vertices, opts);
   }
 
   drawText(quad: Quad, text: string, style: Style): void {
@@ -188,13 +202,14 @@ export class DXFWriter implements Writer<string> {
     const height = Math.abs(topLeft.y - bottomLeft.y) || 12;
 
     // Text color: prefer style.color (CSS color), then style.fill
-    const trueColor = cssColorToHex(style.color) ?? cssColorToHex(style.fill);
+    const trueColor = getTrueColor(style.color) ?? getTrueColor(style.fill);
+    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     this.dxf.addText(
       point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
       height,
       text,
-      trueColor ? { trueColor } : undefined
+      opts
     );
   }
 

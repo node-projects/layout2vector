@@ -76,7 +76,8 @@ for (const demoFile of demoFiles) {
     fs.writeFileSync(dxfPath, dxfContent, "utf-8");
 
     // --- PDF output ---
-    const pdfWriter = new PDFWriter();
+    // Convert viewport px to mm (1px ≈ 0.2646mm)
+    const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646);
     const pdfDoc = renderIR(ir, pdfWriter);
     expect(pdfDoc).toBeTruthy();
 

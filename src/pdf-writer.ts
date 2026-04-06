@@ -2,7 +2,7 @@
  * PDF Writer using jsPDF.
  * Maps IR nodes to PDF drawing operations.
  */
-import { jsPDF } from "jspdf";
+import { jsPDF, GState } from "jspdf";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
 /** Parsed color with alpha. */
@@ -230,6 +230,17 @@ export class PDFWriter implements Writer<jsPDF> {
     const hasStroke = strokeColor !== null && strokeWidth > 0;
 
     if (!hasFill && !hasStroke) return null; // nothing to draw
+
+    // Apply opacity via GState if the element has partial opacity
+    const opacity = style.opacity ?? 1;
+    if (opacity < 1) {
+      (this.doc as any).setGState(
+        new GState({
+          opacity: hasFill ? opacity : 1,
+          "stroke-opacity": hasStroke ? opacity : 1,
+        })
+      );
+    }
 
     if (fillColor) {
       this.doc.setFillColor(fillColor.r, fillColor.g, fillColor.b);

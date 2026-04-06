@@ -14,10 +14,34 @@ export interface StackingNode {
   zIndex: number;
 }
 
+/**
+ * Extract the first color stop from a CSS gradient string.
+ * e.g. "linear-gradient(135deg, rgb(26, 35, 126), rgb(57, 73, 171))" → "rgb(26, 35, 126)"
+ */
+function extractGradientColor(bgImage: string): string | undefined {
+  // Match rgb/rgba color values in the gradient
+  const colorMatch = bgImage.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*[\d.]+)?\s*\)/);
+  if (colorMatch) return colorMatch[0];
+  // Match hex colors
+  const hexMatch = bgImage.match(/#[0-9a-fA-F]{3,8}/);
+  if (hexMatch) return hexMatch[0];
+  return undefined;
+}
+
 /** Extract a subset of computed styles relevant to rendering. */
 export function extractStyle(cs: CSSStyleDeclaration): Style {
+  // Determine fill: prefer backgroundColor, fall back to gradient first color stop
+  let fill: string | undefined = cs.backgroundColor || cs.fill || undefined;
+  const bgImage = cs.backgroundImage || undefined;
+
+  // If backgroundColor is transparent but there's a gradient, extract its first color
+  if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImage && bgImage !== "none") {
+    const gradientColor = extractGradientColor(bgImage);
+    if (gradientColor) fill = gradientColor;
+  }
+
   return {
-    fill: cs.backgroundColor || cs.fill || undefined,
+    fill,
     stroke: cs.borderColor || cs.stroke || undefined,
     strokeWidth: cs.borderWidth || cs.strokeWidth || undefined,
 
