@@ -29,4 +29,4 @@ export { extractSVGSubtree } from "./svg-extractor.js";
 
 // Writers
 export { DXFWriter } from "./dxf-writer.js";
-export { PDFWriter } from "./pdf-writer.js";
+export { PDFWriter } from "./pdflite-writer.js";

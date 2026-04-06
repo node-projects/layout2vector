@@ -9,7 +9,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { setupPage } from "../helpers.js";
 import { DXFWriter } from "../../src/dxf-writer.js";
-import { PDFWriter } from "../../src/pdf-writer.js";
+import { PDFWriter } from "../../src/pdflite-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
@@ -84,9 +84,10 @@ for (const demoFile of demoFiles) {
     const pdfDoc = renderIR(ir, pdfWriter);
     expect(pdfDoc).toBeTruthy();
 
-    const pdfBuffer = pdfDoc.output("arraybuffer");
+    await pdfDoc.finalize();
+    const pdfBuffer = pdfDoc.toBytes();
     const pdfPath = path.join(outputDir, `${name}.pdf`);
-    fs.writeFileSync(pdfPath, Buffer.from(pdfBuffer));
+    fs.writeFileSync(pdfPath, pdfBuffer);
 
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
