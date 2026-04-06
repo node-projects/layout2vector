@@ -1,0 +1,190 @@
+import { test, expect } from "@playwright/test";
+import { setupPage } from "../helpers.js";
+
+test.describe("SVG Geometry Extraction", () => {
+  test("extracts SVG rect", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="80" height="60" fill="blue" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polygons = ir.filter((n: any) => n.type === "polygon");
+    expect(polygons.length).toBeGreaterThanOrEqual(1);
+
+    // Find the rect polygon (80x60)
+    const rectPolygon = polygons.find((p: any) => {
+      const w = Math.abs(p.points[1].x - p.points[0].x);
+      const h = Math.abs(p.points[3].y - p.points[0].y);
+      return Math.abs(w - 80) < 2 && Math.abs(h - 60) < 2;
+    });
+    expect(rectPolygon).toBeDefined();
+  });
+
+  test("extracts SVG circle as polyline", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="50" fill="red" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+
+    // Circle should be closed and have multiple points
+    const circle = polylines.find((p: any) => p.closed && p.points.length > 10);
+    expect(circle).toBeDefined();
+  });
+
+  test("extracts SVG line", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="10" x2="190" y2="190" stroke="black" stroke-width="2" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+
+    const line = polylines.find((p: any) => p.points.length === 2);
+    expect(line).toBeDefined();
+  });
+
+  test("extracts SVG path by sampling", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 10 10 L 100 10 L 100 100 Z" fill="green" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+    // Path should have many sampled points
+    expect(polylines[0].points.length).toBeGreaterThan(2);
+  });
+
+  test("extracts SVG text", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="50" font-size="20">SVG Text</text>
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, { includeText: true });
+    });
+
+    const texts = ir.filter((n: any) => n.type === "text");
+    expect(texts.length).toBeGreaterThanOrEqual(1);
+    expect(texts[0].text).toContain("SVG Text");
+  });
+
+  test("extracts SVG polygon", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="100,10 40,198 190,78 10,78 160,198" fill="purple" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+    expect(polylines[0].closed).toBe(true);
+    expect(polylines[0].points.length).toBe(5);
+  });
+
+  test("extracts SVG ellipse", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="100" cy="100" rx="80" ry="40" fill="yellow" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+    expect(polylines[0].closed).toBe(true);
+    expect(polylines[0].points.length).toBeGreaterThan(10);
+  });
+
+  test("applies SVG transforms via CTM", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(50, 50)">
+            <rect x="0" y="0" width="40" height="30" fill="orange" />
+          </g>
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polygons = ir.filter((n: any) => n.type === "polygon");
+    expect(polygons.length).toBeGreaterThanOrEqual(1);
+
+    // The rect should be translated by (50,50)
+    const rect = polygons.find((p: any) => {
+      const w = Math.abs(p.points[1].x - p.points[0].x);
+      return Math.abs(w - 40) < 2;
+    });
+    expect(rect).toBeDefined();
+    // Top-left should be around (50, 50)
+    expect(rect.points[0].x).toBeCloseTo(50, 0);
+    expect(rect.points[0].y).toBeCloseTo(50, 0);
+  });
+});

@@ -1,0 +1,37 @@
+{
+  "name": "@node-projects/layout2vector",
+  "version": "0.0.1",
+  "description": "DOM → Geometry → DXF/PDF library",
+  "license": "MIT",
+  "author": "Jochen Kühner <jochen.kuehner@gmx.de>",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npx playwright test",
+    "test:unit": "npx playwright test tests/unit",
+    "test:integration": "npx playwright test tests/integration",
+    "test:ui": "npx playwright test tests/ui",
+    "test:demos": "npx playwright test tests/demos"
+  },
+  "dependencies": {
+    "@tarikjabiri/dxf": "^2.8.9",
+    "jspdf": "^4.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.5.2",
+    "get-box-quads-polyfill": "^4.26.0",
+    "typescript": "^6.0.2"
+  }
+}
