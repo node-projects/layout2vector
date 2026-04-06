@@ -5,6 +5,21 @@
 import { DxfWriter, point3d, point2d } from "@tarikjabiri/dxf";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
+/** Determine file extension from a data URL MIME type. */
+function dataUrlToExtension(dataUrl: string): string {
+  const match = dataUrl.match(/^data:image\/([^;,]+)/);
+  if (match) {
+    const mime = match[1].toLowerCase();
+    if (mime === "jpeg" || mime === "jpg") return "jpg";
+    if (mime === "png") return "png";
+    if (mime === "gif") return "gif";
+    if (mime === "webp") return "webp";
+    if (mime === "bmp") return "bmp";
+    if (mime === "tiff") return "tiff";
+  }
+  return "jpg";
+}
+
 /** Parse a CSS color, returning hex and alpha. Returns undefined for invisible colors. */
 function cssColorToHex(color: string | undefined): string | undefined {
   if (!color || color === "transparent" || color === "none") return undefined;
@@ -95,6 +110,14 @@ function isAxisAlignedRect(points: [{ x: number; y: number }, { x: number; y: nu
 export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriter;
   private maxY: number;
+  private imageCounter = 0;
+
+  /**
+   * Image files referenced by the DXF output.
+   * Maps relative file paths (as used in the DXF IMAGE entities) to data URL strings.
+   * After calling `end()`, save these files alongside the DXF to display raster images.
+   */
+  imageFiles = new Map<string, string>();
 
   /**
    * @param maxY The maximum Y coordinate (viewport height) for Y-axis flipping.
@@ -106,6 +129,8 @@ export class DXFWriter implements Writer<string> {
 
   begin(): void {
     this.dxf = new DxfWriter();
+    this.imageCounter = 0;
+    this.imageFiles.clear();
   }
 
   drawPolygon(points: Quad, style: Style): void {
@@ -217,20 +242,31 @@ export class DXFWriter implements Writer<string> {
     );
   }
 
-  drawImage(quad: Quad, _dataUrl: string, _width: number, _height: number, style: Style): void {
-    // DXF does not natively embed raster images via this library.
-    // Draw a bounding rectangle placeholder.
-    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
-    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): void {
+    // Determine file extension from data URL MIME type
+    const ext = dataUrlToExtension(dataUrl);
+    const idx = ++this.imageCounter;
+    const fileName = `images/image${idx}.${ext}`;
 
-    const vertices = quad.map((p) => ({
-      point: point2d(p.x, this.flipY(p.y)),
-    }));
-    vertices.push({
-      point: point2d(quad[0].x, this.flipY(quad[0].y)),
-    });
+    // Store the image data for external saving
+    this.imageFiles.set(fileName, dataUrl);
 
-    this.dxf.addLWPolyline(vertices, opts);
+    // Compute placement in DXF coordinates
+    const x = quad[0].x;
+    const y = this.flipY(quad[3].y);
+    const displayWidth = Math.abs(quad[1].x - quad[0].x);
+    const displayHeight = Math.abs(quad[3].y - quad[0].y);
+    const scale = Math.max(displayWidth / width, displayHeight / height) || 1;
+
+    this.dxf.addImage(
+      fileName,
+      `image${idx}`,
+      point3d(x, y, 0),
+      width,
+      height,
+      scale,
+      0
+    );
   }
 
   end(): string {

@@ -58,6 +58,7 @@ for (const demoFile of demoFiles) {
       return (window as any).__HC.extractIR(root, {
         boxType: "border",
         includeText: true,
+        includeImages: true,
       });
     });
 
