@@ -169,7 +169,16 @@ function buildStackingNode(
   // Determine which root to traverse children from
   const childRoot = (element.shadowRoot as ShadowRoot | null) ?? element;
 
-  for (const child of Array.from(childRoot.childNodes)) {
+  // Collect child nodes; for <slot> elements, use assigned nodes (slotted light DOM)
+  let childNodes: Node[];
+  if (element.tagName === 'SLOT' && (element as HTMLSlotElement).assignedNodes) {
+    const assigned = (element as HTMLSlotElement).assignedNodes({ flatten: true });
+    childNodes = assigned.length > 0 ? Array.from(assigned) : Array.from(childRoot.childNodes);
+  } else {
+    childNodes = Array.from(childRoot.childNodes);
+  }
+
+  for (const child of childNodes) {
     if (child.nodeType === Node.TEXT_NODE) {
       const text = child as Text;
       if (text.textContent && text.textContent.trim().length > 0) {

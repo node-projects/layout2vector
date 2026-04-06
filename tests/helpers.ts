@@ -103,6 +103,8 @@ window.__HC = {
   extractSVGSubtree,
   extractImageGeometry,
   isImageElement,
+  hasBackgroundImage,
+  extractBackgroundImage,
 };
 })();`;
   } else {

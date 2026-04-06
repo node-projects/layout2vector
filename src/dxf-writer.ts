@@ -2,7 +2,15 @@
  * DXF Writer using @tarikjabiri/dxf.
  * Maps IR nodes to DXF entities.
  */
-import { DxfWriter, point3d, point2d } from "@tarikjabiri/dxf";
+import {
+  DxfWriter,
+  point3d,
+  point2d,
+  HatchBoundaryPaths,
+  HatchPolylineBoundary,
+  HatchPredefinedPatterns,
+  pattern,
+} from "@tarikjabiri/dxf";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
 /** Determine file extension from a data URL MIME type. */
@@ -133,15 +141,29 @@ export class DXFWriter implements Writer<string> {
     this.imageFiles.clear();
   }
 
+  /** Add a HATCH entity with SOLID fill for the given vertices. */
+  private addSolidHatch(verts: { x: number; y: number }[], fillColor: number): void {
+    const boundary = new HatchBoundaryPaths();
+    const polyBoundary = new HatchPolylineBoundary();
+    for (const v of verts) {
+      polyBoundary.add({ x: v.x, y: this.flipY(v.y) });
+    }
+    boundary.addPolylineBoundary(polyBoundary);
+    this.dxf.addHatch(
+      boundary,
+      pattern({ name: HatchPredefinedPatterns.SOLID }),
+      { trueColor: String(fillColor) },
+    );
+  }
+
   drawPolygon(points: Quad, style: Style): void {
-    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+    const fillColor = getTrueColor(style.fill);
+    const strokeColor = getTrueColor(style.stroke);
     const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
 
     // Skip fully transparent elements
     if (!fillVisible && !strokeVisible) return;
-
-    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     // Check for rounded rect
     const radius = parseBorderRadius(style.borderRadius);
@@ -173,49 +195,91 @@ export class DXFWriter implements Writer<string> {
       // Top-left corner
       verts.push(...arcPoints(x + r, y + r, r, Math.PI, Math.PI * 1.5, ARC_SEGS));
 
-      const vertices = verts.map((p) => ({
-        point: point2d(p.x, this.flipY(p.y)),
-      }));
-      // Close
-      vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+      // Solid fill via HATCH
+      if (fillVisible && fillColor !== undefined) {
+        this.addSolidHatch(verts, fillColor);
+      }
 
-      this.dxf.addLWPolyline(vertices, opts);
+      // Stroke outline
+      if (strokeVisible) {
+        const strokeOpts = strokeColor !== undefined ? { trueColor: String(strokeColor) } : undefined;
+        const vertices = verts.map((p) => ({
+          point: point2d(p.x, this.flipY(p.y)),
+        }));
+        vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+        this.dxf.addLWPolyline(vertices, strokeOpts);
+      } else if (!fillVisible) {
+        // No fill, no stroke — draw outline with fill color as fallback
+        const opts = fillColor !== undefined ? { trueColor: String(fillColor) } : undefined;
+        const vertices = verts.map((p) => ({
+          point: point2d(p.x, this.flipY(p.y)),
+        }));
+        vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+        this.dxf.addLWPolyline(vertices, opts);
+      }
       return;
     }
 
-    const vertices = points.map((p) => ({
-      point: point2d(p.x, this.flipY(p.y)),
-    }));
+    // Solid fill via HATCH
+    if (fillVisible && fillColor !== undefined) {
+      this.addSolidHatch(
+        points.map(p => ({ x: p.x, y: p.y })),
+        fillColor,
+      );
+    }
 
-    // Close the polygon
-    vertices.push({
-      point: point2d(points[0].x, this.flipY(points[0].y)),
-    });
-
-    this.dxf.addLWPolyline(vertices, opts);
+    // Stroke outline
+    if (strokeVisible) {
+      const strokeOpts = strokeColor !== undefined ? { trueColor: String(strokeColor) } : undefined;
+      const vertices = points.map((p) => ({
+        point: point2d(p.x, this.flipY(p.y)),
+      }));
+      vertices.push({ point: point2d(points[0].x, this.flipY(points[0].y)) });
+      this.dxf.addLWPolyline(vertices, strokeOpts);
+    } else if (!fillVisible) {
+      // Fallback: draw outline
+      const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+      const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+      const vertices = points.map((p) => ({
+        point: point2d(p.x, this.flipY(p.y)),
+      }));
+      vertices.push({ point: point2d(points[0].x, this.flipY(points[0].y)) });
+      this.dxf.addLWPolyline(vertices, opts);
+    }
   }
 
   drawPolyline(points: Point[], closed: boolean, style: Style): void {
-    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
+    const fillColor = getTrueColor(style.fill);
+    const strokeColor = getTrueColor(style.stroke);
     const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
 
     // Skip fully transparent elements
     if (!fillVisible && !strokeVisible) return;
 
-    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
-
-    const vertices = points.map((p) => ({
-      point: point2d(p.x, this.flipY(p.y)),
-    }));
-
-    if (closed && points.length > 0) {
-      vertices.push({
-        point: point2d(points[0].x, this.flipY(points[0].y)),
-      });
+    // Solid fill via HATCH for closed shapes with a visible fill
+    if (closed && fillVisible && fillColor !== undefined && points.length >= 3) {
+      this.addSolidHatch(
+        points.map(p => ({ x: p.x, y: p.y })),
+        fillColor,
+      );
     }
 
-    this.dxf.addLWPolyline(vertices, opts);
+    // Stroke outline (or fallback outline if no fill)
+    const drawOutline = strokeVisible || !fillVisible;
+    if (drawOutline) {
+      const trueColor = strokeColor ?? fillColor;
+      const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+      const vertices = points.map((p) => ({
+        point: point2d(p.x, this.flipY(p.y)),
+      }));
+      if (closed && points.length > 0) {
+        vertices.push({
+          point: point2d(points[0].x, this.flipY(points[0].y)),
+        });
+      }
+      this.dxf.addLWPolyline(vertices, opts);
+    }
   }
 
   drawText(quad: Quad, text: string, style: Style): void {

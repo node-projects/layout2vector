@@ -12,7 +12,7 @@ import {
 } from "./traversal.js";
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
-import { isImageElement, extractImageGeometry } from "./image-extractor.js";
+import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage } from "./image-extractor.js";
 
 /**
  * Extract the full IR from a root DOM element.
@@ -59,6 +59,13 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
       const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
       irNodes.push(...imageNodes);
       globalIndex += imageNodes.length || 1;
+    }
+
+    // CSS background-image url() extraction
+    if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
+      const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
+      irNodes.push(...bgNodes);
+      globalIndex += bgNodes.length || 1;
     }
   }
 

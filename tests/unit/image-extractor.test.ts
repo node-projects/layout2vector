@@ -258,6 +258,109 @@ test.describe("Image Extraction", () => {
     expect(result.divIsImage).toBe(false);
   });
 
+  test("extracts CSS background-image url() as image IR node", async ({ page }) => {
+    const RED_PIXEL_DATA_URL =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVQIW2P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:120px;height:80px;background-image:url('${RED_PIXEL_DATA_URL}');background-size:cover;"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+    expect(imageNode.dataUrl).toMatch(/^data:image\//);
+    expect(imageNode.quad).toBeDefined();
+
+    const [tl, tr, _br, bl] = imageNode.quad;
+    expect(tr.x - tl.x).toBeCloseTo(120, 0);
+    expect(bl.y - tl.y).toBeCloseTo(80, 0);
+  });
+
+  test("extracts CSS background-image SVG data URL as vector geometry", async ({ page }) => {
+    const SVG_BG = "data:image/svg+xml," +
+      encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="blue"/></svg>');
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:100px;height:100px;background-image:url('${SVG_BG}');background-size:cover;"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    // SVG background should produce polygon geometry (from rect), not an image node
+    const polygonNodes = ir.filter((n: any) => n.type === "polygon");
+    // Should have at least the element's own polygon + the SVG rect polygon
+    expect(polygonNodes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test("does NOT extract background-image when includeImages is false", async ({ page }) => {
+    const RED_PIXEL_DATA_URL =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVQIW2P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:100px;height:100px;background-image:url('${RED_PIXEL_DATA_URL}');background-size:cover;"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: false,
+        includeText: false,
+      });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    expect(imageNodes.length).toBe(0);
+  });
+
+  test("hasBackgroundImage utility works", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body>
+        <div id="bg" style="background-image:url('data:image/png;base64,AAAA');width:10px;height:10px;"></div>
+        <div id="grad" style="background-image:linear-gradient(red,blue);width:10px;height:10px;"></div>
+        <div id="none" style="width:10px;height:10px;"></div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(() => {
+      const hc = (window as any).__HC;
+      return {
+        bgHasImage: hc.hasBackgroundImage({ backgroundImage: "url('data:image/png;base64,AAAA')" }),
+        gradHasImage: hc.hasBackgroundImage({ backgroundImage: "linear-gradient(red, blue)" }),
+        noneHasImage: hc.hasBackgroundImage({ backgroundImage: "none" }),
+        emptyHasImage: hc.hasBackgroundImage({}),
+      };
+    });
+
+    expect(result.bgHasImage).toBe(true);
+    expect(result.gradHasImage).toBe(false);
+    expect(result.noneHasImage).toBe(false);
+    expect(result.emptyHasImage).toBe(false);
+  });
+
   test("SVG in img tag produces geometry at correct position", async ({ page }) => {
     await setupPage(
       page,

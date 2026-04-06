@@ -84,6 +84,8 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - Rounded rectangles → `LWPOLYLINE` with arc-approximated corners
 - Colors → `trueColor` from CSS `backgroundColor` / `color` / SVG fill/stroke
 - Transparent elements (rgba alpha=0, `transparent`) are skipped
+- SVG images in `<img>` tags → converted to native DXF vector entities
+- Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
 
 #### `PDFWriter`
 
@@ -99,6 +101,8 @@ Produces a `jsPDF` document. Page dimensions default to A4 (210×297 mm). Coordi
 - Fill/stroke mode automatically determined from style (fill only, stroke only, or both)
 - Transparent elements are skipped
 - Font fallback: tries the CSS font family, falls back to `helvetica`
+- SVG images in `<img>` tags → converted to native PDF vector paths
+- Raster images → embedded as JPEG XObject images via DCTDecode
 
 #### Custom Writers
 

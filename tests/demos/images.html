@@ -145,7 +145,32 @@
       </div>
     </div>
 
-    <!-- Section 5: Mixed content -->
+    <!-- Section 5: CSS background-image url() -->
+    <div class="section">
+      <h3>CSS background-image url() — extracted as image nodes</h3>
+      <div class="row">
+        <div class="card">
+          <div
+            style="width:80px;height:80px;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2P4z8Dwn4EBFAAAfwQF/THRmXcAAAAASUVORK5CYII=');background-size:cover;image-rendering:pixelated;"
+          ></div>
+          <span class="label">PNG bg-image (data URL)</span>
+        </div>
+        <div class="card">
+          <div
+            style="width:100px;height:80px;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 80%27%3E%3Crect width=%27100%27 height=%2780%27 fill=%27%23e91e63%27 rx=%2710%27/%3E%3Ccircle cx=%2750%27 cy=%2740%27 r=%2725%27 fill=%27white%27/%3E%3C/svg%3E');background-size:cover;"
+          ></div>
+          <span class="label">SVG bg-image (vector)</span>
+        </div>
+        <div class="card">
+          <div
+            style="width:80px;height:80px;background-image:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=');background-size:cover;"
+          ></div>
+          <span class="label">JPEG bg-image (data URL)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Mixed content -->
     <div class="section">
       <h3>Mixed: Images alongside HTML and inline SVG</h3>
       <div class="row">
