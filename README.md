@@ -1,5 +1,7 @@
 # @node-projects/layout2vector
 
+[![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
+
 A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF** or **PDF**.
 
 ## Overview
@@ -11,6 +13,8 @@ layout2vector works in three stages:
 3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`) and PDF (via `jspdf`). Implement the `Writer<T>` interface to add your own.
 
 ## Installation
+
+Package: [@node-projects/layout2vector](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
 ```bash
 npm install @node-projects/layout2vector
@@ -233,6 +237,8 @@ npm run test:demos
 ### Demo Conversion
 
 The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes both `.dxf` and `.pdf` files to `tests/output/`.
+
+For GitHub-friendly browsing of the generated HTML, PDF, and preview screenshots, see [tests/output/README.md](./tests/output/README.md).
 
 Demo files cover: borders, gradients, transforms, SVG shapes, declarative shadow DOM, stacking contexts, typography, flexbox/grid layouts, and a comprehensive combined example.
 
