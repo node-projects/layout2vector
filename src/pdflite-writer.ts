@@ -737,6 +737,47 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
     this.ops.push("ET");
     this.ops.push("Q");
+
+    // Text decorations: underline, line-through, overline
+    const dec = style.textDecoration;
+    if (dec && dec !== "none" && (dec.includes("underline") || dec.includes("line-through") || dec.includes("overline"))) {
+      // Compute the text line extent in PDF coordinates
+      const topEdgePx = Math.sqrt(dxScreen * dxScreen + dyScreen * dyScreen);
+      const lineWidthPt = Math.max(0.5, fontSize / 14);
+
+      this.ops.push("q");
+      this.ops.push(`${pn(r)} ${pn(g)} ${pn(b)} RG`);
+      this.ops.push(`${pn(lineWidthPt)} w`);
+
+      if (dec.includes("underline")) {
+        // Underline: slightly below baseline
+        const underlineOffset = baselineOffset + fontSize * 0.15;
+        const ux = this.ptX(quad[0].x) + sinA * underlineOffset;
+        const uy = this.ptY(quad[0].y) - cosA * underlineOffset;
+        const ex = ux + cosA * pxToPt(topEdgePx);
+        const ey = uy + sinA * pxToPt(topEdgePx);
+        this.ops.push(`${pn(ux)} ${pn(uy)} m ${pn(ex)} ${pn(ey)} l S`);
+      }
+      if (dec.includes("line-through")) {
+        // Line-through: ~40% above baseline (middle of x-height)
+        const strikeOffset = baselineOffset - fontSize * 0.3;
+        const sx = this.ptX(quad[0].x) + sinA * strikeOffset;
+        const sy = this.ptY(quad[0].y) - cosA * strikeOffset;
+        const ex = sx + cosA * pxToPt(topEdgePx);
+        const ey = sy + sinA * pxToPt(topEdgePx);
+        this.ops.push(`${pn(sx)} ${pn(sy)} m ${pn(ex)} ${pn(ey)} l S`);
+      }
+      if (dec.includes("overline")) {
+        // Overline: near top of text
+        const overlineOffset = baselineOffset - fontSize * 0.85;
+        const ox = this.ptX(quad[0].x) + sinA * overlineOffset;
+        const oy = this.ptY(quad[0].y) - cosA * overlineOffset;
+        const ex = ox + cosA * pxToPt(topEdgePx);
+        const ey = oy + sinA * pxToPt(topEdgePx);
+        this.ops.push(`${pn(ox)} ${pn(oy)} m ${pn(ex)} ${pn(ey)} l S`);
+      }
+      this.ops.push("Q");
+    }
   }
 
   drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): void {
