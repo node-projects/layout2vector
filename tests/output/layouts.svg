@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="1165" viewBox="0 0 1240 1165">
+<path d="M0,0 L1240,0 L1240,1165 L0,1165 Z" fill="none"/>
+<path d="M0,0 L1240,0 L1240,21 L0,21 Z" fill="none"/>
+<text x="0" y="20" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Flexbox Row</text>
+<path d="M0,31 L400,31 L400,71 L0,71 Z" fill="none"/>
+<rect x="0" y="31" width="101" height="40" rx="6" ry="6" fill="rgb(229, 57, 53)"/>
+<text x="43" y="59" fill="rgb(255, 255, 255)" font-weight="700" font-size="14px" font-family="Arial">1x</text>
+<rect x="111" y="31" width="178" height="40" rx="6" ry="6" fill="rgb(30, 136, 229)"/>
+<text x="192" y="59" fill="rgb(255, 255, 255)" font-weight="700" font-size="14px" font-family="Arial">2x</text>
+<rect x="299" y="31" width="101" height="40" rx="6" ry="6" fill="rgb(67, 160, 71)"/>
+<text x="342" y="59" fill="rgb(255, 255, 255)" font-weight="700" font-size="14px" font-family="Arial">1x</text>
+<path d="M0,86 L1240,86 L1240,107 L0,107 Z" fill="none"/>
+<text x="0" y="106" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Flexbox Column</text>
+<path d="M0,117 L200,117 L200,235 L0,235 Z" fill="none"/>
+<rect x="0" y="117" width="200" height="34" rx="4" ry="4" fill="rgb(233, 30, 99)"/>
+<text x="83" y="141" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Item A</text>
+<rect x="0" y="159" width="200" height="34" rx="4" ry="4" fill="rgb(156, 39, 176)"/>
+<text x="83" y="183" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Item B</text>
+<rect x="0" y="201" width="200" height="34" rx="4" ry="4" fill="rgb(103, 58, 183)"/>
+<text x="82" y="225" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Item C</text>
+<path d="M0,250 L1240,250 L1240,271 L0,271 Z" fill="none"/>
+<text x="0" y="270" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Flexbox Wrap</text>
+<path d="M0,281 L300,281 L300,447 L0,447 Z" fill="none"/>
+<rect x="0" y="281" width="80" height="50" rx="4" ry="4" fill="rgb(244, 67, 54)"/>
+<text x="37" y="312" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">1</text>
+<rect x="88" y="281" width="80" height="50" rx="4" ry="4" fill="rgb(233, 30, 99)"/>
+<text x="125" y="312" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">2</text>
+<rect x="176" y="281" width="80" height="50" rx="4" ry="4" fill="rgb(156, 39, 176)"/>
+<text x="213" y="312" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">3</text>
+<rect x="0" y="339" width="80" height="50" rx="4" ry="4" fill="rgb(103, 58, 183)"/>
+<text x="37" y="370" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">4</text>
+<rect x="88" y="339" width="80" height="50" rx="4" ry="4" fill="rgb(63, 81, 181)"/>
+<text x="125" y="370" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">5</text>
+<rect x="176" y="339" width="80" height="50" rx="4" ry="4" fill="rgb(33, 150, 243)"/>
+<text x="213" y="370" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">6</text>
+<rect x="0" y="397" width="80" height="50" rx="4" ry="4" fill="rgb(0, 150, 136)"/>
+<text x="37" y="428" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">7</text>
+<path d="M0,462 L1240,462 L1240,483 L0,483 Z" fill="none"/>
+<text x="0" y="482" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Centered Content</text>
+<rect x="0" y="493" width="250" height="100" rx="8" ry="8" fill="rgb(38, 50, 56)"/>
+<rect x="72" y="525" width="105" height="36" rx="18" ry="18" fill="rgb(255, 171, 64)"/>
+<text x="92" y="551" fill="rgb(0, 0, 0)" font-weight="700" font-size="14px" font-family="Arial">Centered!</text>
+<path d="M0,608 L1240,608 L1240,629 L0,629 Z" fill="none"/>
+<text x="0" y="628" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Grid Basic</text>
+<path d="M0,639 L350,639 L350,767 L0,767 Z" fill="none"/>
+<rect x="0" y="639" width="111" height="60" rx="4" ry="4" fill="rgb(244, 67, 54)"/>
+<text x="52" y="676" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">1</text>
+<rect x="119" y="639" width="111" height="60" rx="4" ry="4" fill="rgb(233, 30, 99)"/>
+<text x="172" y="676" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">2</text>
+<rect x="239" y="639" width="111" height="60" rx="4" ry="4" fill="rgb(156, 39, 176)"/>
+<text x="291" y="676" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">3</text>
+<rect x="0" y="707" width="111" height="60" rx="4" ry="4" fill="rgb(103, 58, 183)"/>
+<text x="52" y="744" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">4</text>
+<rect x="119" y="707" width="111" height="60" rx="4" ry="4" fill="rgb(63, 81, 181)"/>
+<text x="172" y="744" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">5</text>
+<rect x="239" y="707" width="111" height="60" rx="4" ry="4" fill="rgb(33, 150, 243)"/>
+<text x="291" y="744" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">6</text>
+<path d="M0,782 L1240,782 L1240,803 L0,803 Z" fill="none"/>
+<text x="0" y="802" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Grid Named Areas (Holy Grail Layout)</text>
+<path d="M0,813 L400,813 L400,1013 L0,1013 Z" fill="none"/>
+<rect x="0" y="813" width="400" height="40" rx="4" ry="4" fill="rgb(92, 107, 192)"/>
+<text x="180" y="840" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Header</text>
+<rect x="0" y="859" width="100" height="108" rx="4" ry="4" fill="rgb(38, 166, 154)"/>
+<text x="37" y="920" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Side</text>
+<rect x="106" y="859" width="208" height="108" rx="4" ry="4" fill="rgb(239, 83, 80)"/>
+<text x="172" y="920" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Main Content</text>
+<rect x="320" y="859" width="80" height="108" rx="4" ry="4" fill="rgb(255, 112, 67)"/>
+<text x="344" y="920" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Aside</text>
+<rect x="0" y="973" width="400" height="40" rx="4" ry="4" fill="rgb(120, 144, 156)"/>
+<text x="181" y="1000" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Footer</text>
+<path d="M0,1028 L1240,1028 L1240,1049 L0,1049 Z" fill="none"/>
+<text x="0" y="1048" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Grid Auto-fill</text>
+<path d="M0,1059 L350,1059 L350,1165 L0,1165 Z" fill="none"/>
+<rect x="0" y="1059" width="83" height="50" rx="4" ry="4" fill="rgb(0, 188, 212)"/>
+<text x="38" y="1090" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">A</text>
+<rect x="89" y="1059" width="83" height="50" rx="4" ry="4" fill="rgb(0, 150, 136)"/>
+<text x="127" y="1090" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">B</text>
+<rect x="178" y="1059" width="83" height="50" rx="4" ry="4" fill="rgb(76, 175, 80)"/>
+<text x="216" y="1090" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">C</text>
+<rect x="267" y="1059" width="83" height="50" rx="4" ry="4" fill="rgb(139, 195, 74)"/>
+<text x="305" y="1090" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">D</text>
+<rect x="0" y="1115" width="83" height="50" rx="4" ry="4" fill="rgb(205, 220, 57)"/>
+<text x="38" y="1146" fill="rgb(255, 255, 255)" font-size="11px" font-family="Arial">E</text>
+</svg>

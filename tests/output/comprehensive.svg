@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="812" viewBox="0 0 1240 812">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0, 0, 0, 0.1)" result="s0"/></filter>
+<linearGradient id="lg2" x1="67.25" y1="-65.25" x2="252.75" y2="120.25" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(26, 35, 126)"/><stop offset="100%" stop-color="rgb(57, 73, 171)"/></linearGradient>
+<linearGradient id="lg3" x1="43" y1="456" x2="43" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg4" x1="83" y1="426" x2="83" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg5" x1="123" y1="406" x2="123" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg6" x1="163" y1="436" x2="163" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg7" x1="203" y1="396" x2="203" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg8" x1="243" y1="421" x2="243" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg9" x1="283" y1="386" x2="283" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg10" x1="620" y1="582" x2="620" y2="632" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(237, 231, 246)"/><stop offset="100%" stop-color="rgb(209, 196, 233)"/></linearGradient>
+</defs>
+<path d="M0,0 L1240,0 L1240,812 L0,812 Z" fill="none"/>
+<rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1" filter="url(#ds1)"/>
+<path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/>
+<text x="21" y="37" fill="rgb(255, 255, 255)" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text>
+<path d="M1,54 L319,54 L319,165 L1,165 Z" fill="none"/>
+<path d="M21,70 L299,70 L299,137 L21,137 Z" fill="none"/>
+<text x="21" y="93.33" fill="rgb(85, 85, 85)" font-size="14px" font-family="Arial">This card combines gradients, borders,</text>
+<text x="21" y="113.67" fill="rgb(85, 85, 85)" font-size="14px" font-family="Arial">border-radius, box-shadow, and typography</text>
+<text x="21" y="134" fill="rgb(85, 85, 85)" font-size="14px" font-family="Arial">in a realistic component layout.</text>
+<path d="M1,165 L319,165 L319,225 L1,225 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(0, 0, 0) rgb(0, 0, 0)" stroke-width="1"/>
+<rect x="21" y="178" width="75" height="35" rx="6" ry="6" fill="rgb(30, 136, 229)"/>
+<text x="37" y="203" fill="rgb(255, 255, 255)" font-weight="600" font-size="13px" font-family="Arial">Accept</text>
+<rect x="106" y="178" width="79" height="35" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/>
+<text x="124" y="203" fill="rgb(30, 136, 229)" font-weight="600" font-size="13px" font-family="Arial">Cancel</text>
+<path d="M0,246 L600,246 L600,338 L0,338 Z" fill="none"/>
+<rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<path d="M17,263 L172,263 L172,303 L17,303 Z" fill="none"/>
+<text x="53" y="303" fill="rgb(26, 35, 126)" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
+<path d="M17,307 L172,307 L172,321 L17,321 Z" fill="none"/>
+<text x="71" y="321" fill="rgb(136, 136, 136)" font-size="12px" font-family="Arial">USERS</text>
+<rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<path d="M222,263 L377,263 L377,303 L222,303 Z" fill="none"/>
+<text x="263" y="303" fill="rgb(26, 35, 126)" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
+<path d="M222,307 L377,307 L377,321 L222,321 Z" fill="none"/>
+<text x="267" y="321" fill="rgb(136, 136, 136)" font-size="12px" font-family="Arial">REVENUE</text>
+<rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<path d="M428,263 L583,263 L583,303 L428,303 Z" fill="none"/>
+<text x="459" y="303" fill="rgb(26, 35, 126)" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
+<path d="M428,307 L583,307 L583,321 L428,321 Z" fill="none"/>
+<text x="480" y="321" fill="rgb(136, 136, 136)" font-size="12px" font-family="Arial">UPTIME</text>
+<rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="url(#lg3)"/>
+<rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="url(#lg4)"/>
+<rect x="108" y="406" width="30" height="90" rx="3" ry="3" fill="url(#lg5)"/>
+<rect x="148" y="436" width="30" height="60" rx="3" ry="3" fill="url(#lg6)"/>
+<rect x="188" y="396" width="30" height="100" rx="3" ry="3" fill="url(#lg7)"/>
+<rect x="228" y="421" width="30" height="75" rx="3" ry="3" fill="url(#lg8)"/>
+<rect x="268" y="386" width="30" height="110" rx="3" ry="3" fill="url(#lg9)"/>
+<path d="M43,446 L83,416 L123,396 L163,426 L203,386 L243,411 L283,381" fill="none" stroke="rgb(229, 57, 53)" stroke-width="2"/>
+<text x="128.54" y="496" fill="rgb(136, 136, 136)" font-size="10px" font-family="Arial">Monthly Data</text>
+<path d="M0,536 L1240,536 L1240,562 L0,562 Z" fill="none"/>
+<rect x="0" y="536" width="64" height="26" rx="13" ry="13" fill="rgb(67, 160, 71)"/>
+<text x="14" y="556" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Active</text>
+<path d="M75.37,537.99 L150.27,534.06 L151.63,560.03 L76.73,563.95 Z" fill="rgb(251, 140, 0)"/>
+<text x="90.4" y="557.23" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial" transform="rotate(-3,90.4,557.23)">Pending</text>
+<rect x="159.57" y="534.7" width="75.9" height="28.6" rx="14.3" ry="14.3" fill="rgb(229, 57, 53)"/>
+<text x="174.97" y="556.7" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Critical</text>
+<path d="M245.14,536 L295.14,536 L292.86,562 L242.86,562 Z" fill="rgb(30, 136, 229)"/>
+<text x="257.39" y="556" fill="rgb(255, 255, 255)" font-weight="700" font-size="12px" font-family="Arial">Info</text>
+<rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="url(#lg10)" stroke="rgb(126, 87, 194)" stroke-width="2"/>
+<path d="M2,584 L1238,584 L1238,602 L2,602 Z" fill="none"/>
+<text x="2" y="601" fill="rgb(69, 39, 160)" font-weight="700" font-size="16px" font-family="Arial">Shadow DOM Widget</text>
+<path d="M2,610 L1238,610 L1238,630 L2,630 Z" fill="none"/>
+<text x="2" y="627" fill="rgb(94, 53, 177)" font-size="13px" font-family="Arial">This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.</text>
+<path d="M0,652 L200,652 L200,812 L0,812 Z" fill="none"/>
+<rect x="0" y="652" width="100" height="100" rx="50" ry="50" fill="rgb(244, 67, 54)" opacity="0.7"/>
+<rect x="40" y="672" width="100" height="100" rx="50" ry="50" fill="rgb(76, 175, 80)" opacity="0.7"/>
+<rect x="80" y="692" width="100" height="100" rx="50" ry="50" fill="rgb(33, 150, 243)" opacity="0.7"/>
+</svg>

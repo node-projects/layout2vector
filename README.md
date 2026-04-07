@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, or **PNG**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, **PNG**, or **SVG**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), and PNG (via Canvas 2D API). Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), and SVG. Implement the `Writer<T>` interface to add your own.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter, SVGWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -52,6 +52,11 @@ const pngResult = renderIR(ir, pngWriter);
 await pngResult.finalize(); // loads and draws raster images
 const pngDataUrl = pngResult.toDataURL(); // data:image/png;base64,...
 const pngBytes = pngResult.toBytes(); // Uint8Array
+
+// 5. Render to SVG
+const svgWriter = new SVGWriter(800, 600); // width, height in px
+const svgString = renderIR(ir, svgWriter);
+// svgString is a complete standalone SVG document
 ```
 
 ## API Reference
@@ -116,6 +121,28 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 - Raster images → drawn via async `finalize()` step using `Image` element loading
 
 After `renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
+
+#### `SVGWriter`
+
+```ts
+new SVGWriter(width: number, height: number)
+```
+
+Produces a standalone SVG document string. Width and height define the viewport in CSS pixels.
+
+- Polygons → SVG `<rect>` (axis-aligned with border-radius) or `<path>` elements
+- Polylines → SVG `<path>` elements (open or closed)
+- Rounded rectangles → `<rect>` with `rx`/`ry` attributes
+- Gradients → SVG `<linearGradient>` / `<radialGradient>` definitions with `userSpaceOnUse` units
+- Text → SVG `<text>` elements with font properties, rotation, and decoration
+- Text shadow → SVG `<filter>` with `<feDropShadow>`
+- Box shadow → SVG `<filter>` with `<feDropShadow>` (outer) or clipped inset filter
+- Opacity → SVG `opacity` attribute
+- Stroke dash arrays → SVG `stroke-dasharray` attribute
+- Images → SVG `<image>` elements with embedded data URLs
+- Transparent elements are skipped
+
+The output is a self-contained SVG with all gradients, filters, and images embedded inline.
 
 #### `PDFWriter`
 

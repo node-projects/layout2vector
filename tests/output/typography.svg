@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="859" viewBox="0 0 1240 859">
+<defs>
+<filter id="ts1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="rgba(0, 0, 0, 0.3)"/></filter>
+</defs>
+<path d="M0,0 L1240,0 L1240,859 L0,859 Z" fill="none"/>
+<path d="M0,0 L1240,0 L1240,21 L0,21 Z" fill="none"/>
+<text x="0" y="20" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Wrapping</text>
+<rect x="0" y="31" width="250" height="112" rx="6" ry="6" fill="rgb(255, 243, 224)" stroke="rgb(255, 204, 128)" stroke-width="1"/>
+<text x="11" y="65.75" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="86.5" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">consectetur adipiscing elit. Sed do</text>
+<text x="11" y="107.25" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">eiusmod tempor incididunt ut labore</text>
+<text x="11" y="128" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">et dolore magna aliqua.</text>
+<path d="M0,158 L1240,158 L1240,179 L0,179 Z" fill="none"/>
+<text x="0" y="178" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Font Sizes &amp; Weights</text>
+<path d="M0,187 L1240,187 L1240,232 L0,232 Z" fill="none"/>
+<text x="0" y="232" fill="rgb(26, 35, 126)" font-weight="900" font-size="32px" font-family="Arial">Large Bold Title</text>
+<path d="M0,240 L1240,240 L1240,258 L0,258 Z" fill="none"/>
+<text x="0" y="257" fill="rgb(74, 20, 140)" font-style="italic" font-size="16px" font-family="Arial">Italic text content</text>
+<path d="M0,273 L1240,273 L1240,294 L0,294 Z" fill="none"/>
+<text x="0" y="293" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Decorations</text>
+<path d="M0,302 L1240,302 L1240,320 L0,320 Z" fill="none"/>
+<text x="0" y="319" fill="rgb(183, 28, 28)" font-size="16px" font-family="Arial" text-decoration="underline">Underlined text</text>
+<path d="M0,328 L1240,328 L1240,346 L0,346 Z" fill="none"/>
+<text x="0" y="345" fill="rgb(117, 117, 117)" font-size="16px" font-family="Arial" text-decoration="line-through">Strikethrough text</text>
+<path d="M0,361 L1240,361 L1240,382 L0,382 Z" fill="none"/>
+<text x="0" y="381" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Shadow</text>
+<path d="M0,390 L1240,390 L1240,422 L0,422 Z" fill="none"/>
+<text x="0" y="421" fill="rgb(30, 136, 229)" font-weight="700" font-size="28px" font-family="Arial" filter="url(#ts1)">Shadow Text</text>
+<path d="M0,437 L1240,437 L1240,458 L0,458 Z" fill="none"/>
+<text x="0" y="457" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Overflow</text>
+<rect x="0" y="466" width="200" height="34" rx="4" ry="4" fill="rgb(232, 234, 246)"/>
+<text x="8" y="482.5" fill="rgb(0, 0, 0)" font-size="8.5px" font-family="Arial">This is a very long text that should be truncated with an ellipsis at the end</text>
+<path d="M0,515 L1240,515 L1240,536 L0,536 Z" fill="none"/>
+<text x="0" y="535" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Alignment</text>
+<path d="M0,544 L300,544 L300,646 L0,646 Z" fill="rgb(232, 245, 233)" stroke="rgb(200, 230, 201)" stroke-width="1"/>
+<path d="M11,559 L289,559 L289,575 L11,575 Z" fill="none"/>
+<text x="207" y="575" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">Right aligned</text>
+<path d="M11,579 L289,579 L289,595 L11,595 Z" fill="none"/>
+<text x="104" y="595" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">Center aligned</text>
+<path d="M11,599 L311,599 L311,631 L11,631 Z" fill="none"/>
+<text x="11" y="615" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">Justified text that spans across the full width of</text>
+<text x="11" y="631" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">the container element here.</text>
+<path d="M0,661 L1240,661 L1240,682 L0,682 Z" fill="none"/>
+<text x="0" y="681" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text</text>
+<path d="M0,692 L400,692 L400,786 L0,786 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
+<text x="11" y="714.71" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="724.43" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">consectetur adipiscing elit. Nulla</text>
+<text x="11" y="734.14" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">facilisi. Duis aute irure dolor in</text>
+<text x="11" y="743.86" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">reprehenderit in voluptate velit</text>
+<text x="11" y="753.57" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">esse cillum dolore eu fugiat nulla</text>
+<text x="11" y="763.29" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">pariatur. Excepteur sint occaecat</text>
+<text x="11" y="773" fill="rgb(0, 0, 0)" font-size="9.71px" font-family="Arial">cupidatat non proident.</text>
+<path d="M0,801 L1240,801 L1240,822 L0,822 Z" fill="none"/>
+<text x="0" y="821" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Inline Formatting</text>
+<path d="M0,832 L1240,832 L1240,859 L0,859 Z" fill="none"/>
+<text x="0" y="854" fill="rgb(0, 0, 0)" font-size="15px" font-family="Arial">This has</text>
+<text x="159" y="854" fill="rgb(0, 0, 0)" font-size="15px" font-family="Arial">and</text>
+<text x="255" y="854" fill="rgb(0, 0, 0)" font-size="15px" font-family="Arial">and</text>
+<text x="379" y="854" fill="rgb(0, 0, 0)" font-size="15px" font-family="Arial">mixed together in a single paragraph.</text>
+<path d="M61,837 L159,837 L159,854 L61,854 Z" fill="none"/>
+<text x="61" y="854" fill="rgb(211, 47, 47)" font-style="italic" font-size="15px" font-family="Arial">italic emphasis</text>
+<path d="M193,837 L256,837 L256,854 L193,854 Z" fill="none"/>
+<text x="193" y="854" fill="rgb(21, 101, 192)" font-weight="700" font-size="15px" font-family="Arial">bold text</text>
+<rect x="288" y="837" width="91" height="19" rx="3" ry="3" fill="rgb(38, 50, 56)"/>
+<text x="294" y="854" fill="rgb(128, 203, 196)" font-size="13px" font-family="monospace">inline code</text>
+</svg>

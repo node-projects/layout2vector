@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { setupPage } from "../helpers.js";
 import { DXFWriter } from "../../src/dxf-writer.js";
 import { PDFWriter } from "../../src/pdflite-writer.js";
+import { SVGWriter } from "../../src/svg-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
@@ -214,16 +215,27 @@ for (const demoFile of demoFiles) {
     const pngPath = path.join(outputDir, `${name}.png`);
     fs.writeFileSync(pngPath, pngBuffer);
 
+    // --- SVG output ---
+    const svgWriter = new SVGWriter(viewport.width, viewport.height);
+    const svgContent = renderIR(ir, svgWriter);
+    expect(svgContent).toBeTruthy();
+    expect(svgContent.length).toBeGreaterThan(100);
+
+    const svgPath = path.join(outputDir, `${name}.svg`);
+    fs.writeFileSync(svgPath, svgContent, "utf-8");
+
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
     const pdfStat = fs.statSync(pdfPath);
     const pngStat = fs.statSync(pngPath);
+    const svgStat = fs.statSync(svgPath);
     expect(dxfStat.size).toBeGreaterThan(0);
     expect(pdfStat.size).toBeGreaterThan(0);
     expect(pngStat.size).toBeGreaterThan(0);
+    expect(svgStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  ✓ ${name}: ${ir.length} IR nodes → DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat.size} bytes)`
+      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat.size} bytes), SVG (${svgStat.size} bytes)`
     );
   });
 }
