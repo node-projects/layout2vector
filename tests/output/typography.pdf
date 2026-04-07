@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 4152>>
+<</Length 4100>>
 stream
 q
 Q
@@ -48,8 +48,7 @@ BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
 23.25 622.6303 Td
-(
-      Lorem ipsum dolor sit amet, ) Tj
+(Lorem ipsum dolor sit amet,) Tj
 ET
 Q
 q
@@ -57,7 +56,7 @@ BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
 23.25 605.8373 Td
-(consectetur adipiscing elit. Sed do ) Tj
+(consectetur adipiscing elit. Sed do) Tj
 ET
 Q
 q
@@ -65,7 +64,7 @@ BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
 23.25 589.0443 Td
-(eiusmod tempor incididunt ut labore ) Tj
+(eiusmod tempor incididunt ut labore) Tj
 ET
 Q
 q
@@ -73,8 +72,7 @@ BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
 23.25 572.2514 Td
-(et dolore magna aliqua.
-    ) Tj
+(et dolore magna aliqua.) Tj
 ET
 Q
 q
@@ -239,7 +237,7 @@ BT
 0 0 0 rg
 /F2 10.5 Tf
 23.25 207.4584 Td
-(Justified text that spans across the full width of ) Tj
+(Justified text that spans across the full width of) Tj
 ET
 Q
 q
@@ -276,8 +274,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 23.25 129.4584 Td
-(
-      Lorem ipsum dolor sit amet, ) Tj
+(Lorem ipsum dolor sit amet,) Tj
 ET
 Q
 q
@@ -285,7 +282,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 23.25 115.9584 Td
-(consectetur adipiscing elit. Nulla ) Tj
+(consectetur adipiscing elit. Nulla) Tj
 ET
 Q
 q
@@ -293,7 +290,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 23.25 102.4584 Td
-(facilisi. Duis aute irure dolor in ) Tj
+(facilisi. Duis aute irure dolor in) Tj
 ET
 Q
 q
@@ -301,7 +298,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 23.25 88.9584 Td
-(reprehenderit in voluptate velit ) Tj
+(reprehenderit in voluptate velit) Tj
 ET
 Q
 q
@@ -309,7 +306,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 172.5 129.4584 Td
-(esse cillum dolore eu fugiat nulla ) Tj
+(esse cillum dolore eu fugiat nulla) Tj
 ET
 Q
 q
@@ -317,7 +314,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 172.5 115.9584 Td
-(pariatur. Excepteur sint occaecat ) Tj
+(pariatur. Excepteur sint occaecat) Tj
 ET
 Q
 q
@@ -325,8 +322,7 @@ BT
 0 0 0 rg
 /F2 9 Tf
 172.5 102.4584 Td
-(cupidatat non proident.
-    ) Tj
+(cupidatat non proident.) Tj
 ET
 Q
 q
@@ -346,8 +342,7 @@ BT
 0 0 0 rg
 /F2 11.25 Tf
 15 28.2084 Td
-(
-      This has ) Tj
+(This has) Tj
 ET
 Q
 q
@@ -355,7 +350,7 @@ BT
 0 0 0 rg
 /F2 11.25 Tf
 134.4258 28.2084 Td
-( and ) Tj
+(and) Tj
 ET
 Q
 q
@@ -363,7 +358,7 @@ BT
 0 0 0 rg
 /F2 11.25 Tf
 206.332 28.2084 Td
-( and ) Tj
+(and) Tj
 ET
 Q
 q
@@ -371,8 +366,7 @@ BT
 0 0 0 rg
 /F2 11.25 Tf
 299.332 28.2084 Td
-( mixed together in a single paragraph.
-    ) Tj
+(mixed together in a single paragraph.) Tj
 ET
 Q
 q
@@ -438,11 +432,11 @@ xref
 0000000214 00000 n 
 0000000307 00000 n 
 0000000366 00000 n 
-0000004568 00000 n 
-0000004683 00000 n 
-0000004738 00000 n 
+0000004516 00000 n 
+0000004631 00000 n 
+0000004686 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-4785
+4733
 %%EOF

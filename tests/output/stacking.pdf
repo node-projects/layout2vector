@@ -22,7 +22,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R /GS3 5 0 R /GS4 6 0 R>>>>
 endobj
 8 0 obj
-<</Length 4414>>
+<</Length 4402>>
 stream
 q
 Q
@@ -419,9 +419,7 @@ BT
 1 1 1 rg
 /F2 12 Tf
 22.5 79.6684 Td
-(
-      contain:paint
-    ) Tj
+(contain:paint) Tj
 ET
 Q
 q
@@ -457,11 +455,11 @@ xref
 0000000366 00000 n 
 0000000416 00000 n 
 0000000524 00000 n 
-0000004988 00000 n 
-0000005104 00000 n 
-0000005160 00000 n 
+0000004976 00000 n 
+0000005092 00000 n 
+0000005148 00000 n 
 trailer
 <</Root 11 0 R /Size 12>>
 startxref
-5209
+5197
 %%EOF

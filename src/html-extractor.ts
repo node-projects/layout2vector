@@ -120,8 +120,8 @@ function extractTextNode(
     : splitTextByLines(textNode, quads.length);
 
   for (let i = 0; i < quads.length; i++) {
-    let text = i < lineTexts.length ? lineTexts[i] : "";
-    if (!text.trim()) continue;
+    let text = (i < lineTexts.length ? lineTexts[i] : "").trim();
+    if (!text) continue;
 
     if (parentStyle.textTransform) {
       switch (parentStyle.textTransform) {
