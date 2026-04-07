@@ -52,6 +52,17 @@ for (const demoFile of demoFiles) {
       fs.cpSync(svgsDir, svgsOutDir, { recursive: true });
     }
 
+    // Copy PNG files referenced by demo HTML files
+    for (const file of fs.readdirSync(demosDir)) {
+      if (file.endsWith(".png")) {
+        const src = path.join(demosDir, file);
+        const dest = path.join(outputDir, file);
+        if (!fs.existsSync(dest)) {
+          fs.copyFileSync(src, dest);
+        }
+      }
+    }
+
     // Inject polyfill + library via helpers
     const { injectBoxQuadsPolyfill, injectLibrary } = await import(
       "../helpers.js"
@@ -155,7 +166,19 @@ for (const demoFile of demoFiles) {
 
     // --- PDF output ---
     // Convert viewport px to mm (1px ≈ 0.2646mm)
-    const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646);
+    // Load custom TTF font files from the demos directory
+    const customFonts = new Map<string, Uint8Array>();
+    for (const file of fs.readdirSync(demosDir)) {
+      if (file.endsWith(".ttf") || file.endsWith(".otf")) {
+        const fontFamily = path.basename(file, path.extname(file));
+        const fontData = fs.readFileSync(path.join(demosDir, file));
+        customFonts.set(fontFamily, new Uint8Array(fontData));
+        // Also copy font file to output dir
+        const dest = path.join(outputDir, file);
+        if (!fs.existsSync(dest)) fs.copyFileSync(path.join(demosDir, file), dest);
+      }
+    }
+    const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646, customFonts.size > 0 ? customFonts : undefined);
     const pdfDoc = renderIR(ir, pdfWriter);
     expect(pdfDoc).toBeTruthy();
 

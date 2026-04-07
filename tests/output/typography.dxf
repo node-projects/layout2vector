@@ -25,7 +25,7 @@ $CLAYER
 9
 $VIEWCTR
 10
-189.5546875
+189.5
 20
 422
 0
@@ -75,7 +75,7 @@ AcDbViewportTableRecord
 21
 1
 12
-189.5546875
+189.5
 22
 422
 13
@@ -795,11 +795,11 @@ AcDbText
 10
 11
 20
-798
+793.25
 30
 0
 40
-16
+20.75
 1
 Lorem ipsum dolor sit amet,
 7
@@ -823,11 +823,11 @@ AcDbText
 10
 11
 20
-775.609375
+772.5
 30
 0
 40
-16
+20.75
 1
 consectetur adipiscing elit. Sed do
 7
@@ -851,11 +851,11 @@ AcDbText
 10
 11
 20
-753.21875
+751.75
 30
 0
 40
-16
+20.75
 1
 eiusmod tempor incididunt ut labore
 7
@@ -879,11 +879,11 @@ AcDbText
 10
 11
 20
-730.828125
+731
 30
 0
 40
-16
+20.75
 1
 et dolore magna aliqua.
 7
@@ -1351,11 +1351,11 @@ AcDbText
 10
 8
 20
-368
+376.5
 30
 0
 40
-17
+8.5
 1
 This is a very long text that should be truncated with an ellipsis at the end
 7
@@ -1449,7 +1449,7 @@ AcDbEntity
 100
 AcDbText
 10
-207.265625
+207
 20
 284
 30
@@ -1477,7 +1477,7 @@ AcDbEntity
 100
 AcDbText
 10
-104.46875
+104
 20
 264
 30
@@ -1635,11 +1635,11 @@ AcDbText
 10
 11
 20
-140
+144.28571428571433
 30
 0
 40
-14
+9.714285714285666
 1
 Lorem ipsum dolor sit amet,
 7
@@ -1663,11 +1663,11 @@ AcDbText
 10
 11
 20
-122
+134.57142857142856
 30
 0
 40
-14
+9.71428571428578
 1
 consectetur adipiscing elit. Nulla
 7
@@ -1691,11 +1691,11 @@ AcDbText
 10
 11
 20
-104
+124.85714285714289
 30
 0
 40
-14
+9.714285714285666
 1
 facilisi. Duis aute irure dolor in
 7
@@ -1719,11 +1719,11 @@ AcDbText
 10
 11
 20
-86
+115.14285714285711
 30
 0
 40
-14
+9.71428571428578
 1
 reprehenderit in voluptate velit
 7
@@ -1745,13 +1745,13 @@ AcDbEntity
 100
 AcDbText
 10
-210
+11
 20
-140
+105.42857142857144
 30
 0
 40
-14
+9.714285714285666
 1
 esse cillum dolore eu fugiat nulla
 7
@@ -1773,13 +1773,13 @@ AcDbEntity
 100
 AcDbText
 10
-210
+11
 20
-122
+95.71428571428567
 30
 0
 40
-14
+9.71428571428578
 1
 pariatur. Excepteur sint occaecat
 7
@@ -1801,13 +1801,13 @@ AcDbEntity
 100
 AcDbText
 10
-210
+11
 20
-104
+86
 30
 0
 40
-14
+9.714285714285666
 1
 cupidatat non proident.
 7
@@ -1885,7 +1885,7 @@ AcDbEntity
 100
 AcDbText
 10
-159.234375
+159
 20
 5
 30
@@ -1913,7 +1913,7 @@ AcDbEntity
 100
 AcDbText
 10
-255.109375
+255
 20
 5
 30
@@ -1941,7 +1941,7 @@ AcDbEntity
 100
 AcDbText
 10
-379.109375
+379
 20
 5
 30

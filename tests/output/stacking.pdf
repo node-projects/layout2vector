@@ -10,19 +10,31 @@ endobj
 <</Type /ExtGState /ca 0.75 /CA 1>>
 endobj
 4 0 obj
-<</Type /ExtGState /ca 0.5 /CA 1>>
+<</Type /ExtGState /ca 0.75 /CA 0.75>>
 endobj
 5 0 obj
-<</Type /ExtGState /ca 0.25 /CA 1>>
+<</Type /ExtGState /ca 0.5 /CA 1>>
 endobj
 6 0 obj
-<</Type /ExtGState /ca 0.1 /CA 1>>
+<</Type /ExtGState /ca 0.5 /CA 0.5>>
 endobj
 7 0 obj
-<</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R /GS3 5 0 R /GS4 6 0 R>>>>
+<</Type /ExtGState /ca 0.25 /CA 1>>
 endobj
 8 0 obj
-<</Length 4349>>
+<</Type /ExtGState /ca 0.25 /CA 0.25>>
+endobj
+9 0 obj
+<</Type /ExtGState /ca 0.1 /CA 1>>
+endobj
+10 0 obj
+<</Type /ExtGState /ca 0.1 /CA 0.1>>
+endobj
+11 0 obj
+<</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R /GS3 5 0 R /GS4 6 0 R /GS5 7 0 R /GS6 8 0 R /GS7 9 0 R /GS8 10 0 R>>>>
+endobj
+12 0 obj
+<</Length 4357>>
 stream
 q
 Q
@@ -32,7 +44,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 831.9089 Td
+0 834.9659 Td
 (Z-Index Stacking) Tj
 ET
 Q
@@ -53,7 +65,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-0 806.4089 Td
+0 809.4179 Td
 (z:1) Tj
 ET
 Q
@@ -72,7 +84,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-22.5 783.9089 Td
+22.5 786.9179 Td
 (z:2) Tj
 ET
 Q
@@ -91,7 +103,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-45 761.4089 Td
+45 764.4179 Td
 (z:3) Tj
 ET
 Q
@@ -101,7 +113,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 643.6589 Td
+0 646.7159 Td
 (Opacity Levels) Tj
 ET
 Q
@@ -127,7 +139,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-22.6992 595.6589 Td
+22.5 597.8699 Td
 (1.0) Tj
 ET
 Q
@@ -149,15 +161,16 @@ h
 f
 Q
 q
+/GS2 gs
 BT
 1 1 1 rg
 /F1 10.5 Tf
-87.2813 595.6589 Td
+87 597.8699 Td
 (0.75) Tj
 ET
 Q
 q
-/GS2 gs
+/GS3 gs
 0.4157 0.1059 0.6039 rg
 0 0 0 RG
 0.375 w
@@ -174,15 +187,16 @@ h
 f
 Q
 q
+/GS4 gs
 BT
 1 1 1 rg
 /F1 10.5 Tf
-157.6992 595.6589 Td
+157.5 597.8699 Td
 (0.5) Tj
 ET
 Q
 q
-/GS3 gs
+/GS5 gs
 0.4157 0.1059 0.6039 rg
 0 0 0 RG
 0.375 w
@@ -199,15 +213,16 @@ h
 f
 Q
 q
+/GS6 gs
 BT
 1 1 1 rg
 /F1 10.5 Tf
-222.2813 595.6589 Td
+222 597.8699 Td
 (0.25) Tj
 ET
 Q
 q
-/GS4 gs
+/GS7 gs
 0.4157 0.1059 0.6039 rg
 0 0 0 RG
 0.375 w
@@ -224,10 +239,11 @@ h
 f
 Q
 q
+/GS8 gs
 BT
 1 1 1 rg
 /F1 10.5 Tf
-292.6992 595.6589 Td
+292.5 597.8699 Td
 (0.1) Tj
 ET
 Q
@@ -237,7 +253,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 545.4089 Td
+0 548.4659 Td
 (Isolation: Isolate) Tj
 ET
 Q
@@ -267,7 +283,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-24 498.1589 Td
+24 501.1679 Td
 (B \(z:1\)) Tj
 ET
 Q
@@ -286,7 +302,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-9 513.1589 Td
+9 516.1679 Td
 (A \(z:2\)) Tj
 ET
 Q
@@ -296,7 +312,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 419.4089 Td
+0 422.4659 Td
 (Mix-Blend-Mode) Tj
 ET
 Q
@@ -326,7 +342,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-15 381.1589 Td
+15 384.1679 Td
 (Multiply) Tj
 ET
 Q
@@ -336,7 +352,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 293.4089 Td
+0 296.4659 Td
 (Will-Change) Tj
 ET
 Q
@@ -355,7 +371,7 @@ q
 BT
 1 1 1 rg
 /F1 12 Tf
-4.8281 239.4089 Td
+4.5 242.0429 Td
 (will-change) Tj
 ET
 Q
@@ -365,7 +381,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 182.4089 Td
+0 185.4659 Td
 (Filter) Tj
 ET
 Q
@@ -389,7 +405,7 @@ q
 BT
 1 1 1 rg
 /F1 12 Tf
-24.9961 135.9089 Td
+24.75 138.5429 Td
 (filtered) Tj
 ET
 Q
@@ -399,7 +415,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 86.4089 Td
+0 89.4659 Td
 (Contain: Paint) Tj
 ET
 Q
@@ -418,7 +434,7 @@ q
 BT
 1 1 1 rg
 /F2 12 Tf
-7.5 55.6589 Td
+7.5 58.6679 Td
 (contain:paint) Tj
 ET
 Q
@@ -435,31 +451,35 @@ f
 Q
 endstream
 endobj
-9 0 obj
-<</Type /Page /Parent 10 0 R /MediaBox [0 0 930.17484 845.408907] /Resources 7 0 R /Contents 8 0 R>>
+13 0 obj
+<</Type /Page /Parent 14 0 R /MediaBox [0 0 930.17484 845.408907] /Resources 11 0 R /Contents 12 0 R>>
 endobj
-10 0 obj
-<</Type /Pages /Kids [9 0 R] /Count 1>>
+14 0 obj
+<</Type /Pages /Kids [13 0 R] /Count 1>>
 endobj
-11 0 obj
-<</Type /Catalog /Pages 10 0 R>>
+15 0 obj
+<</Type /Catalog /Pages 14 0 R>>
 endobj
 xref
-0 12
+0 16
 0000000000 65535 f 
 0000000019 00000 n 
 0000000119 00000 n 
 0000000214 00000 n 
 0000000265 00000 n 
-0000000315 00000 n 
-0000000366 00000 n 
-0000000416 00000 n 
-0000000524 00000 n 
-0000004923 00000 n 
-0000005039 00000 n 
-0000005095 00000 n 
+0000000319 00000 n 
+0000000369 00000 n 
+0000000421 00000 n 
+0000000472 00000 n 
+0000000526 00000 n 
+0000000576 00000 n 
+0000000629 00000 n 
+0000000783 00000 n 
+0000005191 00000 n 
+0000005310 00000 n 
+0000005367 00000 n 
 trailer
-<</Root 11 0 R /Size 12>>
+<</Root 15 0 R /Size 16>>
 startxref
-5144
+5416
 %%EOF

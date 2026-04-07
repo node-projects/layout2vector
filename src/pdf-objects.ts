@@ -132,7 +132,10 @@ export class PdfFont extends PdfIndirectObject {
     dict.set("Type", new PdfName("Font"));
     dict.set("Subtype", new PdfName("Type1"));
     dict.set("BaseFont", new PdfName(name));
-    dict.set("Encoding", new PdfName("WinAnsiEncoding"));
+    // Symbolic fonts (ZapfDingbats, Symbol) use their own built-in encoding
+    if (name !== "ZapfDingbats" && name !== "Symbol") {
+      dict.set("Encoding", new PdfName("WinAnsiEncoding"));
+    }
     return new PdfFont({ content: dict });
   }
 }

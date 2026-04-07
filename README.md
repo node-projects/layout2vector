@@ -120,7 +120,7 @@ After `renderIR()`, call `await result.finalize()` to draw any queued raster ima
 #### `PDFWriter`
 
 ```ts
-new PDFWriter(pageWidth?: number, pageHeight?: number)
+new PDFWriter(pageWidth?: number, pageHeight?: number, customFonts?: Map<string, Uint8Array>)
 ```
 
 Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75). Call `await doc.finalize()` then `doc.toBytes()` to get the final PDF as a `Uint8Array`.
@@ -135,6 +135,29 @@ Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinat
 - Transparent elements are skipped
 - SVG images in `<img>` tags → converted to native PDF vector paths
 - Raster images → embedded as JPEG XObject images via DCTDecode
+- Custom TrueType fonts → embedded as CIDFontType2 (Unicode) or simple TrueType (symbol fonts)
+
+##### Embedding Custom Fonts
+
+To use fonts beyond the standard PDF fonts (Helvetica, Times, Courier, Symbol, ZapfDingbats), pass a `Map<string, Uint8Array>` of font family name → TTF file data:
+
+```ts
+import { PDFWriter, parseTTF } from "@node-projects/layout2vector";
+import * as fs from "node:fs";
+
+// Load TTF files
+const customFonts = new Map<string, Uint8Array>();
+customFonts.set("Wingdings", new Uint8Array(fs.readFileSync("wingding.ttf")));
+customFonts.set("MyFont", new Uint8Array(fs.readFileSync("myfont.ttf")));
+
+// Create writer with custom fonts
+const pdfWriter = new PDFWriter(210, 297, customFonts);
+const pdfDoc = renderIR(ir, pdfWriter);
+await pdfDoc.finalize();
+const pdfBytes = pdfDoc.toBytes();
+```
+
+The font family name in the map must match the CSS `font-family` used in the HTML. The library includes a minimal TrueType parser (`parseTTF`) that extracts the metrics needed for PDF embedding (glyph widths, ascent/descent, cmap tables). Both Unicode fonts and symbol fonts (like Wingdings) are supported.
 
 #### Custom Writers
 

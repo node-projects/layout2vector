@@ -867,11 +867,11 @@ AcDbText
 10
 16
 20
-286
+282.25
 30
 0
 40
-16
+19.75
 1
 This content is inside a declarative
 7
@@ -895,11 +895,11 @@ AcDbText
 10
 16
 20
-265
+262.5
 30
 0
 40
-16
+19.75
 1
 shadow DOM. It demonstrates
 7
@@ -923,11 +923,11 @@ AcDbText
 10
 16
 20
-244
+242.75
 30
 0
 40
-16
+19.75
 1
 encapsulated styling and layout
 7
@@ -955,7 +955,7 @@ AcDbText
 30
 0
 40
-16
+19.75
 1
 extraction.
 7

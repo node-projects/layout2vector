@@ -46,10 +46,14 @@ export function extractHTMLGeometry(
 }
 
 /**
- * Extract text node geometry using Range.getClientRects() for per-line splitting.
- * Range.getClientRects() returns one rect per visual line, which lets us correctly
- * assign text substrings to each line. getBoxQuads() on text nodes may return a single
- * bounding quad for the entire text, which loses line-break information.
+ * Extract text node geometry using getBoxQuads via a temporary inline wrapper.
+ *
+ * For single-line text, we wrap the text node in a temporary <span> and call
+ * getBoxQuads() on it — this produces the exact rotated quad including all
+ * ancestor CSS transforms.
+ *
+ * For multi-line text, we first use Range.getClientRects() to detect line
+ * breaks, then subdivide the full quad proportionally per line.
  */
 function extractTextNode(
   textNode: Text,
@@ -61,42 +65,28 @@ function extractTextNode(
   const fullText = textNode.textContent ?? "";
   if (!fullText.trim()) return results;
 
-  // Compute delta between parent's getBoundingClientRect and getBoxQuads.
-  // Range.getClientRects() returns coordinates in the same space as getBoundingClientRect,
-  // so we shift them to align with the getBoxQuads coordinate system.
-  let dx = 0, dy = 0;
-  const parentQuad = getElementQuad(parentEl);
-  if (parentQuad) {
-    const parentRect = parentEl.getBoundingClientRect();
-    dx = parentQuad[0].x - parentRect.left;
-    dy = parentQuad[0].y - parentRect.top;
-  }
-
-  // Use Range.getClientRects() which reliably returns one rect per visual line
+  // Detect line count using Range.getClientRects() (non-destructive)
   const range = document.createRange();
   range.selectNodeContents(textNode);
-  const rects = range.getClientRects();
-  const quads: Quad[] = [];
-  for (const rect of Array.from(rects)) {
-    if (rect.width === 0 && rect.height === 0) continue;
-    quads.push([
-      { x: rect.left + dx, y: rect.top + dy },
-      { x: rect.right + dx, y: rect.top + dy },
-      { x: rect.right + dx, y: rect.bottom + dy },
-      { x: rect.left + dx, y: rect.bottom + dy },
-    ]);
-  }
+  const rects = Array.from(range.getClientRects()).filter(
+    (r) => r.width > 0 || r.height > 0
+  );
+  if (rects.length === 0) return results;
 
-  if (quads.length === 0) return results;
+  // Get the text quad by wrapping in a temporary span and using getBoxQuads
+  const textQuad = getTextNodeQuad(textNode);
+  if (!textQuad) return results;
 
-  // Split text into per-line segments using character-level Range API
-  const lineTexts = quads.length === 1
-    ? [fullText]
-    : splitTextByLines(textNode, quads.length);
+  // Split text into per-line segments
+  const lineTexts =
+    rects.length === 1
+      ? [fullText]
+      : splitTextByLines(textNode, rects.length);
 
-  for (let i = 0; i < quads.length; i++) {
-    let text = (i < lineTexts.length ? lineTexts[i] : "").trim();
-    if (!text) continue;
+  if (rects.length === 1) {
+    // Single line: use the span quad directly
+    let text = lineTexts[0].trim();
+    if (!text) return results;
 
     if (parentStyle.textTransform) {
       switch (parentStyle.textTransform) {
@@ -110,14 +100,91 @@ function extractTextNode(
 
     results.push({
       type: "text",
-      quad: quads[i],
+      quad: textQuad,
       text,
       style: parentStyle,
       zIndex: globalIndex,
     });
+  } else {
+    // Multi-line: subdivide the full quad proportionally per line
+    const N = rects.length;
+    for (let i = 0; i < N; i++) {
+      let text = (i < lineTexts.length ? lineTexts[i] : "").trim();
+      if (!text) continue;
+
+      if (parentStyle.textTransform) {
+        switch (parentStyle.textTransform) {
+          case "uppercase": text = text.toUpperCase(); break;
+          case "lowercase": text = text.toLowerCase(); break;
+          case "capitalize":
+            text = text.replace(/\b\w/g, (c) => c.toUpperCase());
+            break;
+        }
+      }
+
+      const fTop = i / N;
+      const fBot = (i + 1) / N;
+      const lineQuad: Quad = [
+        lerpPt(textQuad[0], textQuad[3], fTop),
+        lerpPt(textQuad[1], textQuad[2], fTop),
+        lerpPt(textQuad[1], textQuad[2], fBot),
+        lerpPt(textQuad[0], textQuad[3], fBot),
+      ];
+
+      results.push({
+        type: "text",
+        quad: lineQuad,
+        text,
+        style: parentStyle,
+        zIndex: globalIndex,
+      });
+    }
   }
 
   return results;
+}
+
+/**
+ * Get the quad for a text node by wrapping it in a temporary inline <span>
+ * and calling getBoxQuads() on the span. This correctly handles CSS transforms.
+ */
+function getTextNodeQuad(textNode: Text): Quad | null {
+  const parent = textNode.parentNode;
+  if (!parent) return null;
+
+  // Detect if text is slotted into shadow DOM.
+  // The getBoxQuads polyfill returns wrong positions for slotted content,
+  // so we fall back to getBoundingClientRect in that case.
+  const parentEl = parent instanceof Element ? parent : null;
+  const isSlottedInShadowDOM = parentEl?.shadowRoot != null;
+
+  const span = document.createElement("span");
+  parent.insertBefore(span, textNode);
+  span.appendChild(textNode);
+
+  let quad: Quad | null;
+  if (isSlottedInShadowDOM) {
+    const r = span.getBoundingClientRect();
+    quad = (r.width === 0 && r.height === 0) ? null : [
+      { x: r.left, y: r.top },
+      { x: r.right, y: r.top },
+      { x: r.right, y: r.bottom },
+      { x: r.left, y: r.bottom },
+    ];
+  } else {
+    quad = getElementQuad(span);
+  }
+
+  // Restore original DOM structure
+  parent.insertBefore(textNode, span);
+  parent.removeChild(span);
+
+  return quad;
+}
+
+/** Linear interpolation between two points. */
+function lerpPt(a: Point, b: Point, t: number): Point {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
 /**

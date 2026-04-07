@@ -1,0 +1,6 @@
+Hand over fonts to PDFWriter so it can embed fonts somehow.
+
+GetBoxQuads does not return a transformation Matrix for rotation.... For text needed.
+But it can be calculated from 2 points
+
+-update readme about embeding fonts to pdf

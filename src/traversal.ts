@@ -142,16 +142,22 @@ export function traverseDOM(
   root: Element,
   includeInvisible = false
 ): StackingNode {
-  return buildStackingNode(root, includeInvisible);
+  return buildStackingNode(root, includeInvisible, 1);
 }
 
 function buildStackingNode(
   element: Element,
-  includeInvisible: boolean
+  includeInvisible: boolean,
+  parentOpacity: number
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
   const isCtx = createsStackingContext(cs);
+
+  // Compute effective opacity by multiplying with parent's accumulated opacity
+  const ownOpacity = extractedStyleVal.opacity ?? 1;
+  const effectiveOpacity = parentOpacity * ownOpacity;
+  extractedStyleVal.opacity = effectiveOpacity;
 
   const zVal =
     cs.zIndex && cs.zIndex !== "auto" ? parseInt(cs.zIndex, 10) : 0;
@@ -192,7 +198,7 @@ function buildStackingNode(
         continue;
       }
 
-      node.children.push(buildStackingNode(childEl, includeInvisible));
+      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity));
     }
   }
 

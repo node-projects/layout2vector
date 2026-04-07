@@ -13,11 +13,13 @@ import {
   PdfIndirectObject,
   PdfName,
   PdfNumber,
+  PdfReference,
   PdfStream,
   PdfDocument,
   PdfPage,
   PdfPages,
 } from "./pdf-objects.js";
+import { parseTTF, type ParsedTTF } from "./ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "./types.js";
 
 // ── Shared helpers ──────────────────────────────────────────────────
@@ -143,6 +145,32 @@ function escapePdfText(text: string): string {
         out += "\\" + winByte.toString(8).padStart(3, "0");
       }
       // Characters not in WinAnsiEncoding are dropped
+    }
+  }
+  return out;
+}
+
+/**
+ * Escape text for symbolic fonts (ZapfDingbats, Symbol).
+ * These fonts use their own encoding — emit raw byte values as octal escapes.
+ */
+function escapePdfSymbolic(text: string): string {
+  let out = "";
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const code = text.charCodeAt(i);
+    if (ch === "\\") { out += "\\\\"; }
+    else if (ch === "(") { out += "\\("; }
+    else if (ch === ")") { out += "\\)"; }
+    else if (code <= 0xFF) {
+      // Emit as octal for any byte to ensure correct encoding
+      if (code < 0x80 && code >= 0x20) {
+        out += ch;
+      } else {
+        out += "\\" + code.toString(8).padStart(3, "0");
+      }
+    } else {
+      // Characters outside single-byte range — drop
     }
   }
   return out;
@@ -315,13 +343,24 @@ export class PDFWriter implements Writer<PdfDocument> {
   private images: ImageDef[] = [];
   private imageCounter = 0;
 
+  // Custom TrueType fonts: CSS family (lowercase) → parsed TTF data
+  private customFonts = new Map<string, ParsedTTF>();
+  // Track which characters (Unicode code points) are used per custom font (PostScript name)
+  private customFontUsedChars = new Map<string, Set<number>>();
+
   /**
    * @param pageWidth Page width in mm (default A4 = 210)
    * @param pageHeight Page height in mm (default A4 = 297)
+   * @param customFonts Optional map of CSS font-family name → TTF file bytes
    */
-  constructor(pageWidth = 210, pageHeight = 297) {
+  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>) {
     this.pageWidthPt = pageWidth * 2.835;    // mm → pt
     this.pageHeightPt = pageHeight * 2.835;
+    if (customFonts) {
+      for (const [family, data] of customFonts) {
+        this.customFonts.set(family.toLowerCase(), parseTTF(data));
+      }
+    }
   }
 
   begin(): void {
@@ -333,6 +372,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.shadingCounter = 0;
     this.images = [];
     this.imageCounter = 0;
+    this.customFontUsedChars.clear();
   }
 
   // ── Coordinate helpers ──────────────────────────────────────────
@@ -345,9 +385,23 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   // ── Font helpers ────────────────────────────────────────────────
 
-  /** Map CSS font family + weight to a standard PDF font name. */
+  /** Map CSS font family + weight to a standard PDF font name (or custom font ID). */
   private mapToPdfFont(family: string, weight: "bold" | "normal"): string {
     const fam = family.toLowerCase();
+
+    // Check custom fonts first
+    for (const [cssFamily, parsed] of this.customFonts) {
+      if (fam.includes(cssFamily)) {
+        return `custom:${parsed.postScriptName}`;
+      }
+    }
+
+    if (fam.includes("wingdings") || fam.includes("zapfdingbats") || fam.includes("dingbats")) {
+      return "ZapfDingbats";
+    }
+    if (fam.includes("symbol")) {
+      return "Symbol";
+    }
     if (fam.includes("times") || (fam.includes("serif") && !fam.includes("sans"))) {
       return weight === "bold" ? "Times-Bold" : "Times-Roman";
     }
@@ -355,6 +409,47 @@ export class PDFWriter implements Writer<PdfDocument> {
       return weight === "bold" ? "Courier-Bold" : "Courier";
     }
     return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
+  }
+
+  /** Check if a PDF font name is a symbolic font (no WinAnsi encoding). */
+  private isSymbolicFont(pdfFontName: string): boolean {
+    return pdfFontName === "ZapfDingbats" || pdfFontName === "Symbol";
+  }
+
+  /** Check if a PDF font name refers to a custom TrueType font. */
+  private isCustomFont(pdfFontName: string): boolean {
+    return pdfFontName.startsWith("custom:");
+  }
+
+  /** Get the ascent ratio (ascent / unitsPerEm) for a PDF font. */
+  private getFontAscentRatio(pdfFontName: string): number {
+    // Custom TrueType fonts: use actual parsed metrics
+    const parsed = this.getCustomFontData(pdfFontName);
+    if (parsed) {
+      return parsed.ascent / parsed.unitsPerEm;
+    }
+    // Standard PDF font ascent values (per 1000 em units)
+    const standardAscents: Record<string, number> = {
+      "Helvetica":      0.718,
+      "Helvetica-Bold": 0.718,
+      "Times-Roman":    0.683,
+      "Times-Bold":     0.683,
+      "Courier":        0.629,
+      "Courier-Bold":   0.629,
+      "ZapfDingbats":   0.820,
+      "Symbol":         0.800,
+    };
+    return standardAscents[pdfFontName] ?? 0.75;
+  }
+
+  /** Get the parsed TTF data for a custom font name. */
+  private getCustomFontData(pdfFontName: string): ParsedTTF | null {
+    if (!pdfFontName.startsWith("custom:")) return null;
+    const psName = pdfFontName.slice(7); // strip "custom:"
+    for (const parsed of this.customFonts.values()) {
+      if (parsed.postScriptName === psName) return parsed;
+    }
+    return null;
   }
 
   /** Get or create a font resource name for the given PDF font. */
@@ -365,6 +460,53 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.fontMap.set(pdfFontName, name);
     }
     return name;
+  }
+
+  /**
+   * Encode text for a custom TrueType font.
+   * For symbol fonts: returns escaped single-byte string (for use in parentheses).
+   * For CID fonts: returns hex string of 4-digit glyph IDs (for use in angle brackets).
+   * Also tracks used characters for width tables and ToUnicode.
+   */
+  private encodeCustomText(text: string, pdfFontName: string): string {
+    const parsed = this.getCustomFontData(pdfFontName);
+    if (!parsed) return "";
+
+    // Track used characters
+    let usedChars = this.customFontUsedChars.get(parsed.postScriptName);
+    if (!usedChars) {
+      usedChars = new Set<number>();
+      this.customFontUsedChars.set(parsed.postScriptName, usedChars);
+    }
+
+    if (parsed.isSymbolFont) {
+      // Symbol font: single-byte encoding, use raw byte values
+      let out = "";
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        usedChars.add(charCode);
+        const byte = charCode & 0xFF;
+        if (byte === 0x28 || byte === 0x29 || byte === 0x5C) {
+          // Escape ( ) and backslash
+          out += "\\" + String.fromCharCode(byte);
+        } else if (byte >= 0x20 && byte < 0x7F) {
+          out += String.fromCharCode(byte);
+        } else {
+          out += "\\" + byte.toString(8).padStart(3, "0");
+        }
+      }
+      return out;
+    } else {
+      // CID font: encode as hex glyph IDs
+      let hex = "";
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        usedChars.add(charCode);
+        const glyphId = parsed.cmap.get(charCode) ?? 0;
+        hex += glyphId.toString(16).padStart(4, "0").toUpperCase();
+      }
+      return hex;
+    }
   }
 
   // ── GState helpers ──────────────────────────────────────────────
@@ -551,13 +693,26 @@ export class PDFWriter implements Writer<PdfDocument> {
     const dyScreen = quad[1].y - quad[0].y;
     const anglePdf = Math.atan2(-dyScreen, dxScreen); // negative because Y is flipped
 
-    // Baseline position: offset from top-left of quad by fontSize in the "down" direction
+    // Baseline position: offset from top-left of quad
+    // The quad represents the visual line box. Baseline = halfLeading + ascent.
+    const quadHeightPt = pxToPt(quadHeight);
+    const ascentRatio = this.getFontAscentRatio(pdfFontName);
+    const halfLeading = Math.max(0, (quadHeightPt - fontSize) / 2);
+    const baselineOffset = halfLeading + ascentRatio * fontSize;
+
     const sinA = Math.sin(anglePdf);
     const cosA = Math.cos(anglePdf);
-    const bx = this.ptX(quad[0].x) + sinA * fontSize;
-    const by = this.ptY(quad[0].y) - cosA * fontSize;
+    const bx = this.ptX(quad[0].x) + sinA * baselineOffset;
+    const by = this.ptY(quad[0].y) - cosA * baselineOffset;
 
     this.ops.push("q");
+
+    const opacity = style.opacity ?? 1;
+    if (opacity < 1) {
+      const gsName = this.getGStateResName(opacity, opacity);
+      this.ops.push(`/${gsName} gs`);
+    }
+
     this.ops.push("BT");
     this.ops.push(`${pn(r)} ${pn(g)} ${pn(b)} rg`);
     this.ops.push(`/${fontRes} ${pn(fontSize)} Tf`);
@@ -569,12 +724,22 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.ops.push(`${pn(bx)} ${pn(by)} Td`);
     }
 
-    this.ops.push(`(${escapePdfText(text)}) Tj`);
+    const escaped = this.isCustomFont(pdfFontName)
+      ? this.encodeCustomText(text, pdfFontName)
+      : this.isSymbolicFont(pdfFontName) ? escapePdfSymbolic(text) : escapePdfText(text);
+
+    const customData = this.getCustomFontData(pdfFontName);
+    if (this.isCustomFont(pdfFontName) && customData && !customData.isSymbolFont) {
+      // CID font: use hex string <...>
+      this.ops.push(`<${escaped}> Tj`);
+    } else {
+      this.ops.push(`(${escaped}) Tj`);
+    }
     this.ops.push("ET");
     this.ops.push("Q");
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style, rgbData?: number[]): void {
+  drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): void {
     const imgName = `Im${++this.imageCounter}`;
 
     if (rgbData) {
@@ -612,6 +777,13 @@ export class PDFWriter implements Writer<PdfDocument> {
     const e = bl.x, f = bl.y;                // (0,0) origin
 
     this.ops.push("q");
+
+    const opacity = style.opacity ?? 1;
+    if (opacity < 1) {
+      const gsName = this.getGStateResName(opacity, opacity);
+      this.ops.push(`/${gsName} gs`);
+    }
+
     this.ops.push(`${pn(a)} ${pn(b)} ${pn(c)} ${pn(d)} ${pn(e)} ${pn(f)} cm`);
     this.ops.push(`/${imgName} Do`);
     this.ops.push("Q");
@@ -623,10 +795,28 @@ export class PDFWriter implements Writer<PdfDocument> {
     // ── Create font objects ────────────────────────────────────────
     const fontDict = new PdfDictionary();
     for (const [pdfFontName, resName] of this.fontMap) {
-      const font = PdfFont.fromStandardFont(pdfFontName as any);
-      font.resourceName = resName;
-      doc.add(font);
-      fontDict.set(resName, font.reference);
+      if (this.isCustomFont(pdfFontName)) {
+        // TrueType font embedding
+        const parsed = this.getCustomFontData(pdfFontName);
+        if (!parsed) continue;
+
+        const usedChars = this.customFontUsedChars.get(parsed.postScriptName) ?? new Set<number>();
+        if (parsed.isSymbolFont) {
+          // Simple TrueType embedding for symbol fonts (better compatibility)
+          const fontRef = this.createSimpleTrueTypeFont(doc, parsed, usedChars);
+          fontDict.set(resName, fontRef);
+        } else {
+          // CID font embedding for Unicode fonts
+          const fontRef = this.createCIDFont(doc, parsed, usedChars);
+          fontDict.set(resName, fontRef);
+        }
+      } else {
+        // Standard Type1 font
+        const font = PdfFont.fromStandardFont(pdfFontName as any);
+        font.resourceName = resName;
+        doc.add(font);
+        fontDict.set(resName, font.reference);
+      }
     }
 
     // ── Create ExtGState objects ───────────────────────────────────
@@ -718,6 +908,214 @@ export class PDFWriter implements Writer<PdfDocument> {
 
     doc.trailerDict.set("Root", catalog.reference);
     return doc;
+  }
+
+  // ── Simple TrueType Font creation (for Symbol fonts) ─────────
+
+  /**
+   * Create a simple TrueType font with embedded data for symbol fonts.
+   * This is more compatible with PDF viewers than CIDFontType2 for single-byte fonts.
+   */
+  private createSimpleTrueTypeFont(
+    doc: PdfDocument,
+    parsed: ParsedTTF,
+    usedChars: Set<number>,
+  ): PdfReference {
+    const psName = parsed.postScriptName;
+    const scale = 1000 / parsed.unitsPerEm;
+
+    // 1. Embedded font stream (FontFile2)
+    const fontStreamHeader = new PdfDictionary();
+    fontStreamHeader.set("Length1", new PdfNumber(parsed.rawData.length));
+    const fontStreamObj = new PdfIndirectObject({
+      content: new PdfStream({ header: fontStreamHeader, binary: parsed.rawData }),
+    });
+    doc.add(fontStreamObj);
+
+    // 2. FontDescriptor
+    const fdDict = new PdfDictionary();
+    fdDict.set("Type", new PdfName("FontDescriptor"));
+    fdDict.set("FontName", new PdfName(psName));
+    fdDict.set("Flags", new PdfNumber(parsed.flags));
+    fdDict.set("FontBBox", new PdfArray(parsed.bbox.map(n => new PdfNumber(Math.round(n * scale)))));
+    fdDict.set("ItalicAngle", new PdfNumber(parsed.italicAngle));
+    fdDict.set("Ascent", new PdfNumber(Math.round(parsed.ascent * scale)));
+    fdDict.set("Descent", new PdfNumber(Math.round(parsed.descent * scale)));
+    fdDict.set("CapHeight", new PdfNumber(Math.round(parsed.ascent * scale * 0.8)));
+    fdDict.set("StemV", new PdfNumber(80));
+    fdDict.set("FontFile2", fontStreamObj.reference);
+    const fdObj = new PdfIndirectObject({ content: fdDict });
+    doc.add(fdObj);
+
+    // 3. Build Widths array for FirstChar..LastChar
+    // For symbol fonts, character bytes map to glyphs through the font's cmap.
+    // Determine FirstChar and LastChar from used characters.
+    let firstChar = 255, lastChar = 0;
+    for (const charCode of usedChars) {
+      const byte = charCode & 0xFF;
+      if (byte < firstChar) firstChar = byte;
+      if (byte > lastChar) lastChar = byte;
+    }
+    if (firstChar > lastChar) { firstChar = 32; lastChar = 255; }
+
+    const widths: number[] = [];
+    for (let i = firstChar; i <= lastChar; i++) {
+      const glyphId = parsed.cmap.get(i) ?? 0;
+      const rawWidth = parsed.glyphWidths.get(glyphId) ?? 0;
+      widths.push(Math.round(rawWidth * scale));
+    }
+
+    // 4. Simple TrueType font dictionary
+    const fontDict = new PdfDictionary();
+    fontDict.set("Type", new PdfName("Font"));
+    fontDict.set("Subtype", new PdfName("TrueType"));
+    fontDict.set("BaseFont", new PdfName(psName));
+    fontDict.set("FirstChar", new PdfNumber(firstChar));
+    fontDict.set("LastChar", new PdfNumber(lastChar));
+    fontDict.set("Widths", new PdfArray(widths.map(w => new PdfNumber(w))));
+    fontDict.set("FontDescriptor", fdObj.reference);
+    // No Encoding for symbolic fonts — uses font's built-in cmap
+
+    const fontObj = new PdfIndirectObject({ content: fontDict });
+    doc.add(fontObj);
+
+    return fontObj.reference;
+  }
+
+  // ── CID Font creation ──────────────────────────────────────────
+
+  /**
+   * Create a Type0 composite font with embedded TrueType data for PDF.
+   * Returns the PdfReference for the Type0 font dictionary.
+   */
+  private createCIDFont(
+    doc: PdfDocument,
+    parsed: ParsedTTF,
+    usedChars: Set<number>,
+  ): PdfReference {
+    const psName = parsed.postScriptName;
+    const scale = 1000 / parsed.unitsPerEm;
+
+    // 1. Embedded font stream (FontFile2) — full TTF data
+    const fontStreamHeader = new PdfDictionary();
+    fontStreamHeader.set("Length1", new PdfNumber(parsed.rawData.length));
+    const fontStreamObj = new PdfIndirectObject({
+      content: new PdfStream({ header: fontStreamHeader, binary: parsed.rawData }),
+    });
+    doc.add(fontStreamObj);
+
+    // 2. FontDescriptor
+    const fdDict = new PdfDictionary();
+    fdDict.set("Type", new PdfName("FontDescriptor"));
+    fdDict.set("FontName", new PdfName(psName));
+    fdDict.set("Flags", new PdfNumber(parsed.flags));
+    fdDict.set("FontBBox", new PdfArray(parsed.bbox.map(n => new PdfNumber(Math.round(n * scale)))));
+    fdDict.set("ItalicAngle", new PdfNumber(parsed.italicAngle));
+    fdDict.set("Ascent", new PdfNumber(Math.round(parsed.ascent * scale)));
+    fdDict.set("Descent", new PdfNumber(Math.round(parsed.descent * scale)));
+    fdDict.set("CapHeight", new PdfNumber(Math.round(parsed.ascent * scale * 0.8)));
+    fdDict.set("StemV", new PdfNumber(80));
+    fdDict.set("FontFile2", fontStreamObj.reference);
+    const fdObj = new PdfIndirectObject({ content: fdDict });
+    doc.add(fdObj);
+
+    // 3. Build width array /W for used glyphs
+    //    Format: [gid [width] gid [width] ...]
+    const wItems: { serialize(): string }[] = [];
+    const usedGlyphs = new Map<number, number>(); // glyphId → width in 1/1000 units
+    for (const charCode of usedChars) {
+      const gid = parsed.cmap.get(charCode) ?? 0;
+      if (gid === 0) continue;
+      const rawWidth = parsed.glyphWidths.get(gid) ?? 0;
+      usedGlyphs.set(gid, Math.round(rawWidth * scale));
+    }
+    // Sort glyph IDs for deterministic output
+    const sortedGids = Array.from(usedGlyphs.keys()).sort((a, b) => a - b);
+    for (const gid of sortedGids) {
+      wItems.push(new PdfNumber(gid));
+      wItems.push(new PdfArray([new PdfNumber(usedGlyphs.get(gid)!)]));
+    }
+
+    // 4. CIDFont (CIDFontType2)
+    const cidDict = new PdfDictionary();
+    cidDict.set("Type", new PdfName("Font"));
+    cidDict.set("Subtype", new PdfName("CIDFontType2"));
+    cidDict.set("BaseFont", new PdfName(psName));
+    const cidSysInfo = new PdfDictionary();
+    cidSysInfo.set("Registry", { serialize: () => "(Adobe)" } as any);
+    cidSysInfo.set("Ordering", { serialize: () => "(Identity)" } as any);
+    cidSysInfo.set("Supplement", new PdfNumber(0));
+    cidDict.set("CIDSystemInfo", cidSysInfo);
+    cidDict.set("FontDescriptor", fdObj.reference);
+    cidDict.set("DW", new PdfNumber(1000));
+    if (wItems.length > 0) cidDict.set("W", new PdfArray(wItems));
+    cidDict.set("CIDToGIDMap", new PdfName("Identity"));
+    const cidObj = new PdfIndirectObject({ content: cidDict });
+    doc.add(cidObj);
+
+    // 5. ToUnicode CMap (enables copy-paste of text from PDF)
+    const toUnicodeCMap = this.buildToUnicodeCMap(parsed, usedChars);
+    const toUnicodeHeader = new PdfDictionary();
+    const toUnicodeObj = new PdfIndirectObject({
+      content: new PdfStream({ header: toUnicodeHeader, original: toUnicodeCMap }),
+    });
+    doc.add(toUnicodeObj);
+
+    // 6. Type0 composite font (top-level)
+    const type0Dict = new PdfDictionary();
+    type0Dict.set("Type", new PdfName("Font"));
+    type0Dict.set("Subtype", new PdfName("Type0"));
+    type0Dict.set("BaseFont", new PdfName(psName));
+    type0Dict.set("Encoding", new PdfName("Identity-H"));
+    type0Dict.set("DescendantFonts", new PdfArray([cidObj.reference]));
+    type0Dict.set("ToUnicode", toUnicodeObj.reference);
+    const type0Obj = new PdfIndirectObject({ content: type0Dict });
+    doc.add(type0Obj);
+
+    return type0Obj.reference;
+  }
+
+  /**
+   * Build a ToUnicode CMap stream for a CID font.
+   * Maps glyph IDs back to Unicode code points for text extraction/copy.
+   */
+  private buildToUnicodeCMap(parsed: ParsedTTF, usedChars: Set<number>): string {
+    // Build glyph ID → Unicode mapping for used characters
+    const gidToUnicode = new Map<number, number>();
+    for (const charCode of usedChars) {
+      const gid = parsed.cmap.get(charCode) ?? 0;
+      if (gid !== 0) gidToUnicode.set(gid, charCode);
+    }
+
+    const sortedGids = Array.from(gidToUnicode.keys()).sort((a, b) => a - b);
+
+    // Split into chunks of 100 (PDF limit per beginbfchar block)
+    const lines: string[] = [];
+    lines.push("/CIDInit /ProcSet findresource begin");
+    lines.push("12 dict begin");
+    lines.push("begincmap");
+    lines.push("/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def");
+    lines.push("/CMapName /Adobe-Identity-UCS def");
+    lines.push("/CMapType 2 def");
+    lines.push("1 begincodespacerange");
+    lines.push("<0000> <FFFF>");
+    lines.push("endcodespacerange");
+
+    for (let i = 0; i < sortedGids.length; i += 100) {
+      const chunk = sortedGids.slice(i, i + 100);
+      lines.push(`${chunk.length} beginbfchar`);
+      for (const gid of chunk) {
+        const uni = gidToUnicode.get(gid)!;
+        lines.push(`<${gid.toString(16).padStart(4, "0").toUpperCase()}> <${uni.toString(16).padStart(4, "0").toUpperCase()}>`);
+      }
+      lines.push("endbfchar");
+    }
+
+    lines.push("endcmap");
+    lines.push("CMapName currentdict /CMap defineresource pop");
+    lines.push("end");
+    lines.push("end");
+    return lines.join("\n");
   }
 
   // ── Gradient drawing ────────────────────────────────────────────

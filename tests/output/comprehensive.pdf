@@ -19,7 +19,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R>> /Shading <</SH1 4 0 R /SH2 5 0 R>>>>
 endobj
 7 0 obj
-<</Length 7285>>
+<</Length 7294>>
 stream
 q
 Q
@@ -52,7 +52,7 @@ q
 BT
 1 1 1 rg
 /F1 13.5 Tf
-15.75 582.8645 Td
+15.75 585.9215 Td
 (Feature Overview) Tj
 ET
 Q
@@ -64,7 +64,7 @@ q
 BT
 0.3333 0.3333 0.3333 rg
 /F2 10.5 Tf
-15.75 543.8645 Td
+15.75 544.4505 Td
 (This card combines gradients, borders,) Tj
 ET
 Q
@@ -72,7 +72,7 @@ q
 BT
 0.3333 0.3333 0.3333 rg
 /F2 10.5 Tf
-15.75 527.0715 Td
+15.75 529.2005 Td
 (border-radius, box-shadow, and typography) Tj
 ET
 Q
@@ -80,7 +80,7 @@ q
 BT
 0.3333 0.3333 0.3333 rg
 /F2 10.5 Tf
-15.75 510.2786 Td
+15.75 513.9505 Td
 (in a realistic component layout.) Tj
 ET
 Q
@@ -115,7 +115,7 @@ q
 BT
 1 1 1 rg
 /F2 9.75 Tf
-27.75 458.3645 Td
+27.75 460.364 Td
 (Accept) Tj
 ET
 Q
@@ -138,7 +138,7 @@ q
 BT
 0.1176 0.5333 0.898 rg
 /F2 9.75 Tf
-93 458.3645 Td
+93 460.364 Td
 (Cancel) Tj
 ET
 Q
@@ -166,7 +166,7 @@ q
 BT
 0.102 0.1373 0.4941 rg
 /F1 21 Tf
-39.4805 390.8645 Td
+39.75 392.2865 Td
 (1,284) Tj
 ET
 Q
@@ -176,7 +176,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 9 Tf
-53.6133 369.8645 Td
+53.25 371.6525 Td
 (USERS) Tj
 ET
 Q
@@ -202,7 +202,7 @@ q
 BT
 0.102 0.1373 0.4941 rg
 /F1 21 Tf
-196.7344 390.8645 Td
+197.25 392.2865 Td
 ($34k) Tj
 ET
 Q
@@ -212,7 +212,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 9 Tf
-200.3672 369.8645 Td
+200.25 371.6525 Td
 (REVENUE) Tj
 ET
 Q
@@ -238,7 +238,7 @@ q
 BT
 0.102 0.1373 0.4941 rg
 /F1 21 Tf
-344.2383 390.8645 Td
+344.25 392.2865 Td
 (98.6%) Tj
 ET
 Q
@@ -248,7 +248,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 9 Tf
-359.9883 369.8645 Td
+360 371.6525 Td
 (UPTIME) Tj
 ET
 Q
@@ -361,7 +361,7 @@ q
 BT
 0 0 0 rg
 /F2 7.5 Tf
-96.4043 237.8645 Td
+96.4043 239.6045 Td
 (Monthly Data) Tj
 ET
 Q
@@ -387,7 +387,7 @@ q
 BT
 1 1 1 rg
 /F1 9 Tf
-10.5 193.6145 Td
+10.5 195.4025 Td
 (Active) Tj
 ET
 Q
@@ -406,7 +406,7 @@ q
 BT
 1 1 1 rg
 /F1 9 Tf
-67.2496 191.5791 Td
+0.9986 0.0523 -0.0523 0.9986 67.627 194.476 Tm
 (Pending) Tj
 ET
 Q
@@ -430,7 +430,7 @@ q
 BT
 1 1 1 rg
 /F1 9 Tf
-131.2242 194.1395 Td
+131.2242 195.4025 Td
 (Critical) Tj
 ET
 Q
@@ -449,7 +449,7 @@ q
 BT
 1 1 1 rg
 /F1 9 Tf
-194.7467 193.6145 Td
+193.9593 195.3824 Td
 (Info) Tj
 ET
 Q
@@ -488,7 +488,7 @@ q
 BT
 0.2706 0.1529 0.6275 rg
 /F1 12 Tf
-1.5 159.1145 Td
+1.5 162.1235 Td
 (Shadow DOM Widget) Tj
 ET
 Q
@@ -498,7 +498,7 @@ q
 BT
 0.3686 0.2078 0.6941 rg
 /F2 9.75 Tf
-1.5 140.3645 Td
+1.5 142.364 Td
 (This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.) Tj
 ET
 Q
@@ -576,11 +576,11 @@ xref
 0000000509 00000 n 
 0000000742 00000 n 
 0000000852 00000 n 
-0000008187 00000 n 
-0000008302 00000 n 
-0000008357 00000 n 
+0000008196 00000 n 
+0000008311 00000 n 
+0000008366 00000 n 
 trailer
 <</Root 10 0 R /Size 11>>
 startxref
-8405
+8414
 %%EOF
