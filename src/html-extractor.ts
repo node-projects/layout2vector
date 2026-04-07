@@ -77,13 +77,17 @@ function extractTextNode(
   const textQuad = getTextNodeQuad(textNode);
   if (!textQuad) return results;
 
+  // For overflow:hidden containers, treat as a single line (the text is clipped)
+  const isOverflowHidden = parentStyle.overflow === "hidden";
+  const effectiveLineCount = isOverflowHidden ? 1 : rects.length;
+
   // Split text into per-line segments
   const lineTexts =
-    rects.length === 1
+    effectiveLineCount === 1
       ? [fullText]
       : splitTextByLines(textNode, rects.length);
 
-  if (rects.length === 1) {
+  if (effectiveLineCount === 1) {
     // Single line: use the span quad directly
     let text = lineTexts[0].trim();
     if (!text) return results;
@@ -98,9 +102,18 @@ function extractTextNode(
       }
     }
 
+    // Handle text overflow clipping
+    let finalQuad = textQuad;
+    if (parentStyle.overflow === "hidden") {
+      const clipped = clipTextToParent(textNode, text, parentEl, textQuad, parentStyle);
+      if (!clipped) return results;
+      text = clipped.text;
+      finalQuad = clipped.quad;
+    }
+
     results.push({
       type: "text",
-      quad: textQuad,
+      quad: finalQuad,
       text,
       style: parentStyle,
       zIndex: globalIndex,
@@ -180,6 +193,86 @@ function getTextNodeQuad(textNode: Text): Quad | null {
   parent.removeChild(span);
 
   return quad;
+}
+
+/**
+ * Clip text to the parent element's visible bounds when overflow:hidden.
+ * If text-overflow:ellipsis is set, truncate and append "…".
+ *
+ * When overflow:hidden is active, the browser clips the text visually but
+ * the text node still contains the full string.  getBoxQuads on the wrapper
+ * span may return the already-clipped rect, so we cannot rely on comparing
+ * the text quad to the parent rect.  Instead we measure the full text width
+ * via a temporary off-clip span and compare to the parent's available width.
+ */
+function clipTextToParent(
+  textNode: Text,
+  text: string,
+  parentEl: Element,
+  textQuad: Quad,
+  parentStyle: Style,
+): { text: string; quad: Quad } | null {
+  // Measure parent's inner content width (available space for text)
+  const parentRect = parentEl.getBoundingClientRect();
+  const cs = getComputedStyle(parentEl);
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const availableWidth = parentRect.width - padL - padR;
+  if (availableWidth <= 0) return null;
+
+  // Measure the full text width using a hidden measuring span
+  const measSpan = document.createElement("span");
+  measSpan.style.cssText = "visibility:hidden;position:absolute;white-space:nowrap;overflow:visible;pointer-events:none";
+  // Copy font styles
+  measSpan.style.fontSize = cs.fontSize;
+  measSpan.style.fontFamily = cs.fontFamily;
+  measSpan.style.fontWeight = cs.fontWeight;
+  measSpan.style.fontStyle = cs.fontStyle;
+  measSpan.style.letterSpacing = cs.letterSpacing;
+  measSpan.textContent = text;
+  document.body.appendChild(measSpan);
+  const fullTextWidth = measSpan.getBoundingClientRect().width;
+
+  if (fullTextWidth <= availableWidth) {
+    // Text fits — no clipping needed
+    document.body.removeChild(measSpan);
+    return { text, quad: textQuad };
+  }
+
+  // Text overflows — find how many characters fit
+  const addEllipsis = parentStyle.textOverflow === "ellipsis";
+  let fitChars = text.length;
+  for (let i = text.length - 1; i >= 0; i--) {
+    const candidate = addEllipsis ? text.substring(0, i).trimEnd() + "…" : text.substring(0, i);
+    measSpan.textContent = candidate;
+    if (measSpan.getBoundingClientRect().width <= availableWidth) {
+      fitChars = i;
+      break;
+    }
+  }
+  document.body.removeChild(measSpan);
+
+  if (fitChars <= 0 && !addEllipsis) return null;
+
+  let clippedText: string;
+  if (addEllipsis) {
+    clippedText = fitChars > 0
+      ? text.substring(0, fitChars).trimEnd() + "…"
+      : "…";
+  } else {
+    clippedText = text.substring(0, fitChars);
+  }
+
+  // Adjust the quad width proportionally
+  const fraction = Math.min(1, availableWidth / fullTextWidth);
+  const clippedQuad: Quad = [
+    textQuad[0],
+    lerpPt(textQuad[0], textQuad[1], fraction),
+    lerpPt(textQuad[3], textQuad[2], fraction),
+    textQuad[3],
+  ];
+
+  return { text: clippedText, quad: clippedQuad };
 }
 
 /** Linear interpolation between two points. */

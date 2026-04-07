@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 4058>>
+<</Length 4009>>
 stream
 q
 Q
@@ -186,7 +186,7 @@ BT
 0 0 0 rg
 /F2 12 Tf
 6 282.8057 Td
-(This is a very long text that should be truncated with an ellipsis at the end) Tj
+(This is a very long text\205) Tj
 ET
 Q
 q
@@ -432,11 +432,11 @@ xref
 0000000214 00000 n 
 0000000307 00000 n 
 0000000366 00000 n 
-0000004474 00000 n 
-0000004589 00000 n 
-0000004644 00000 n 
+0000004425 00000 n 
+0000004540 00000 n 
+0000004595 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-4691
+4642
 %%EOF

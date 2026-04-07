@@ -76,6 +76,8 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     backgroundImage: cs.backgroundImage || undefined,
     boxShadow: cs.boxShadow || undefined,
     transform: cs.transform || undefined,
+    overflow: cs.overflowX || undefined,
+    textOverflow: cs.textOverflow || undefined,
   };
 }
 

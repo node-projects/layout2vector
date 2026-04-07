@@ -141,6 +141,12 @@ for (const demoFile of demoFiles) {
 
     expect(ir.length).toBeGreaterThan(0);
 
+    // Dump IR for specific demos
+    if (name === "comprehensive") {
+      const irPath = path.join(outputDir, `${name}-ir.json`);
+      fs.writeFileSync(irPath, JSON.stringify(ir, null, 2), "utf-8");
+    }
+
     // Compute bounding box of all IR nodes to determine output dimensions.
     // Coordinates are root-relative, so the extent of the content defines the viewport.
     let maxX = 0, maxY = 0;

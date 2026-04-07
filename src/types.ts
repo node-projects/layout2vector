@@ -46,6 +46,8 @@ export type Style = {
   backgroundImage?: string;
   boxShadow?: string;
   transform?: string;
+  overflow?: string;
+  textOverflow?: string;
 };
 
 /** Intermediate representation node. */

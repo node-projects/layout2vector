@@ -1385,7 +1385,7 @@ AcDbText
 40
 16.999969482421875
 1
-This is a very long text that should be truncated with an ellipsis at the end
+This is a very long text…
 7
 Arial
 100
