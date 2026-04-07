@@ -10,7 +10,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>>>>
 endobj
 4 0 obj
-<</Length 2119>>
+<</Length 2191>>
 stream
 q
 Q
@@ -39,7 +39,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-34.5 423.1015 Td
+32.25 425.3515 Td
 (Solid border) Tj
 ET
 Q
@@ -58,7 +58,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-201 423.8515 Td
+199.8398 425.3515 Td
 (Dashed border) Tj
 ET
 Q
@@ -77,7 +77,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-369.75 423.8515 Td
+368.1797 425.3515 Td
 (Dotted border) Tj
 ET
 Q
@@ -96,7 +96,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-536.25 422.3515 Td
+535.7695 425.3515 Td
 (Mixed borders) Tj
 ET
 Q
@@ -120,7 +120,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-706.5 423.8515 Td
+704.8594 425.3515 Td
 (Rounded corners) Tj
 ET
 Q
@@ -179,8 +179,16 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-220.5 329.3515 Td
-(Thick border + padding) Tj
+213.3398 336.8515 Td
+(Thick border ) Tj
+ET
+Q
+q
+BT
+0 0 0 rg
+/F2 12 Tf
+213.3398 323.3515 Td
+(+ padding) Tj
 ET
 Q
 endstream
@@ -201,11 +209,11 @@ xref
 0000000119 00000 n 
 0000000214 00000 n 
 0000000263 00000 n 
-0000002432 00000 n 
-0000002546 00000 n 
-0000002601 00000 n 
+0000002504 00000 n 
+0000002618 00000 n 
+0000002673 00000 n 
 trailer
 <</Root 7 0 R /Size 8>>
 startxref
-2648
+2720
 %%EOF

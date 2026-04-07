@@ -82,39 +82,47 @@ function domQuadToQuad(dq: DOMQuad): Quad {
   ];
 }
 
-/** Extract text node geometry using getBoxQuads (transform-aware). */
+/**
+ * Extract text node geometry using Range.getClientRects() for per-line splitting.
+ * Range.getClientRects() returns one rect per visual line, which lets us correctly
+ * assign text substrings to each line. getBoxQuads() on text nodes may return a single
+ * bounding quad for the entire text, which loses line-break information.
+ */
 function extractTextNode(
   textNode: Text,
   parentStyle: Style,
   globalIndex: number
 ): IRNode[] {
   const results: IRNode[] = [];
+  const fullText = textNode.textContent ?? "";
+  if (!fullText.trim()) return results;
 
-  // Prefer getBoxQuads (transform-aware) over Range.getClientRects
-  let quads: Quad[];
-  if ("getBoxQuads" in textNode && typeof (textNode as any).getBoxQuads === "function") {
-    const rawQuads: DOMQuad[] = (textNode as any).getBoxQuads({ box: "border" });
-    quads = rawQuads.map(domQuadToQuad);
-  } else {
-    // Fallback: Range.getClientRects (axis-aligned only)
-    const range = document.createRange();
-    range.selectNodeContents(textNode);
-    const rects = range.getClientRects();
-    quads = [];
-    for (const rect of Array.from(rects)) {
-      if (rect.width === 0 && rect.height === 0) continue;
-      quads.push([
-        { x: rect.left, y: rect.top },
-        { x: rect.right, y: rect.top },
-        { x: rect.right, y: rect.bottom },
-        { x: rect.left, y: rect.bottom },
-      ]);
-    }
+  // Use Range.getClientRects() which reliably returns one rect per visual line
+  const range = document.createRange();
+  range.selectNodeContents(textNode);
+  const rects = range.getClientRects();
+  const quads: Quad[] = [];
+  for (const rect of Array.from(rects)) {
+    if (rect.width === 0 && rect.height === 0) continue;
+    quads.push([
+      { x: rect.left, y: rect.top },
+      { x: rect.right, y: rect.top },
+      { x: rect.right, y: rect.bottom },
+      { x: rect.left, y: rect.bottom },
+    ]);
   }
 
-  for (const quad of quads) {
+  if (quads.length === 0) return results;
 
-    let text = textNode.textContent ?? "";
+  // Split text into per-line segments using character-level Range API
+  const lineTexts = quads.length === 1
+    ? [fullText]
+    : splitTextByLines(textNode, quads.length);
+
+  for (let i = 0; i < quads.length; i++) {
+    let text = i < lineTexts.length ? lineTexts[i] : "";
+    if (!text.trim()) continue;
+
     if (parentStyle.textTransform) {
       switch (parentStyle.textTransform) {
         case "uppercase": text = text.toUpperCase(); break;
@@ -127,7 +135,7 @@ function extractTextNode(
 
     results.push({
       type: "text",
-      quad,
+      quad: quads[i],
       text,
       style: parentStyle,
       zIndex: globalIndex,
@@ -135,4 +143,42 @@ function extractTextNode(
   }
 
   return results;
+}
+
+/**
+ * Split a text node's content into per-line strings by detecting
+ * line breaks via character-level Range.getClientRects().
+ * Returns one string per visual line.
+ */
+function splitTextByLines(textNode: Text, expectedLines: number): string[] {
+  const text = textNode.textContent ?? "";
+  if (!text) return [];
+
+  const range = document.createRange();
+  const lines: string[] = [];
+  let lineStart = 0;
+  let prevTop: number | null = null;
+  let prevHeight = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    range.setStart(textNode, i);
+    range.setEnd(textNode, i + 1);
+    const rects = range.getClientRects();
+    if (rects.length === 0) continue;
+    const r = rects[0];
+    if (r.width === 0 && r.height === 0) continue;
+
+    if (prevTop !== null && Math.abs(r.top - prevTop) > prevHeight * 0.5) {
+      // Line break detected — save previous line
+      lines.push(text.substring(lineStart, i));
+      lineStart = i;
+    }
+    prevTop = r.top;
+    prevHeight = r.height;
+  }
+
+  // Push last line
+  lines.push(text.substring(lineStart));
+
+  return lines;
 }

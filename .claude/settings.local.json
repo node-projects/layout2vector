@@ -8,7 +8,9 @@
       "Bash(npm run:*)",
       "Bash(npx playwright:*)",
       "Bash(xxd tests/output/bg-image-transform.pdf)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(find /c/Data/Git/node-projects/htmlConverter/tests -name \"*.ts\" -exec grep -l \"text\\\\|Text\" {} \\\\;)",
+      "Bash(node_modules/.bin/tsc:*)"
     ]
   }
 }
