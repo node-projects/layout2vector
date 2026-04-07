@@ -4,6 +4,7 @@
 import type { Point, Quad, Style, IRNode, Options } from "./types.js";
 import type { StackingNode } from "./traversal.js";
 import { isSVGElement } from "./traversal.js";
+import { getElementQuads, getElementQuad } from "./geometry.js";
 
 /**
  * Extract geometry from an HTML element using getBoxQuads.
@@ -20,9 +21,9 @@ export function extractHTMLGeometry(
   // Skip SVG elements — they're handled separately
   if (isSVGElement(el)) return results;
 
-  // Extract element box quads
+  // Extract element box quads (always via getBoxQuads for consistency)
   const boxType = options.boxType ?? "border";
-  const quads = getElementQuads(el, boxType);
+  const quads = getElementQuads(el, boxType) as Quad[];
 
   for (const quad of quads) {
     results.push({
@@ -36,58 +37,12 @@ export function extractHTMLGeometry(
   // Extract text node geometry
   if (options.includeText !== false) {
     for (const textNode of node.textNodes) {
-      const textIR = extractTextNode(textNode, node.extractedStyle, globalIndex);
+      const textIR = extractTextNode(textNode, el, node.extractedStyle, globalIndex);
       results.push(...textIR);
     }
   }
 
   return results;
-}
-
-/**
- * Get quads for an element using getBoxQuads (with getBoundingClientRect fallback).
- */
-function getElementQuads(el: Element, boxType: "border" | "content"): Quad[] {
-  // Try getBoxQuads first (modern API)
-  if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
-    try {
-      const rawQuads: any[] = (el as any).getBoxQuads({ box: boxType });
-      return rawQuads.map(domQuadToQuad).filter(hasArea);
-    } catch {
-      // Fall through to fallback
-    }
-  }
-
-  // Fallback: use getBoundingClientRect
-  const rect = el.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) return [];
-
-  const quad: Quad = [
-    { x: rect.left, y: rect.top },
-    { x: rect.right, y: rect.top },
-    { x: rect.right, y: rect.bottom },
-    { x: rect.left, y: rect.bottom },
-  ];
-
-  return [quad];
-}
-
-/** Check if a quad has non-zero area (skip degenerate collapsed elements). */
-function hasArea(q: Quad): boolean {
-  // Cross product of two edges: (p2-p1) × (p4-p1)
-  const ax = q[1].x - q[0].x, ay = q[1].y - q[0].y;
-  const bx = q[3].x - q[0].x, by = q[3].y - q[0].y;
-  return Math.abs(ax * by - ay * bx) > 0.01;
-}
-
-/** Convert a DOMQuad to our Quad type. */
-function domQuadToQuad(dq: DOMQuad): Quad {
-  return [
-    { x: dq.p1.x, y: dq.p1.y },
-    { x: dq.p2.x, y: dq.p2.y },
-    { x: dq.p3.x, y: dq.p3.y },
-    { x: dq.p4.x, y: dq.p4.y },
-  ];
 }
 
 /**
@@ -98,12 +53,24 @@ function domQuadToQuad(dq: DOMQuad): Quad {
  */
 function extractTextNode(
   textNode: Text,
+  parentEl: Element,
   parentStyle: Style,
   globalIndex: number
 ): IRNode[] {
   const results: IRNode[] = [];
   const fullText = textNode.textContent ?? "";
   if (!fullText.trim()) return results;
+
+  // Compute delta between parent's getBoundingClientRect and getBoxQuads.
+  // Range.getClientRects() returns coordinates in the same space as getBoundingClientRect,
+  // so we shift them to align with the getBoxQuads coordinate system.
+  let dx = 0, dy = 0;
+  const parentQuad = getElementQuad(parentEl);
+  if (parentQuad) {
+    const parentRect = parentEl.getBoundingClientRect();
+    dx = parentQuad[0].x - parentRect.left;
+    dy = parentQuad[0].y - parentRect.top;
+  }
 
   // Use Range.getClientRects() which reliably returns one rect per visual line
   const range = document.createRange();
@@ -113,10 +80,10 @@ function extractTextNode(
   for (const rect of Array.from(rects)) {
     if (rect.width === 0 && rect.height === 0) continue;
     quads.push([
-      { x: rect.left, y: rect.top },
-      { x: rect.right, y: rect.top },
-      { x: rect.right, y: rect.bottom },
-      { x: rect.left, y: rect.bottom },
+      { x: rect.left + dx, y: rect.top + dy },
+      { x: rect.right + dx, y: rect.top + dy },
+      { x: rect.right + dx, y: rect.bottom + dy },
+      { x: rect.left + dx, y: rect.bottom + dy },
     ]);
   }
 

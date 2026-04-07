@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 4036>>
+<</Length 4030>>
 stream
 q
 Q
@@ -81,7 +81,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 512.6992 Td
+0 512.3711 Td
 (Font Sizes & Weights) Tj
 ET
 Q
@@ -91,7 +91,7 @@ q
 BT
 0.102 0.1373 0.4941 rg
 /F1 24 Tf
-0 480.4492 Td
+0 480.1211 Td
 (Large Bold Title) Tj
 ET
 Q
@@ -101,7 +101,7 @@ q
 BT
 0.2902 0.0784 0.549 rg
 /F2 12 Tf
-0 452.6992 Td
+0 452.3711 Td
 (Italic text content) Tj
 ET
 Q
@@ -111,7 +111,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 426.4492 Td
+0 426.1211 Td
 (Text Decorations) Tj
 ET
 Q
@@ -121,7 +121,7 @@ q
 BT
 0.7176 0.1098 0.1098 rg
 /F2 12 Tf
-0 406.1992 Td
+0 405.8711 Td
 (Underlined text) Tj
 ET
 Q
@@ -131,7 +131,7 @@ q
 BT
 0.4588 0.4588 0.4588 rg
 /F2 12 Tf
-0 386.6992 Td
+0 386.3711 Td
 (Strikethrough text) Tj
 ET
 Q
@@ -141,7 +141,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 360.4492 Td
+0 360.1211 Td
 (Text Shadow) Tj
 ET
 Q
@@ -151,7 +151,7 @@ q
 BT
 0.1176 0.5333 0.898 rg
 /F1 21 Tf
-0 331.1992 Td
+0 330.8711 Td
 (Shadow Text) Tj
 ET
 Q
@@ -161,7 +161,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 303.4492 Td
+0 303.1211 Td
 (Text Overflow) Tj
 ET
 Q
@@ -185,7 +185,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-6 277.1992 Td
+6 276.8711 Td
 (This is a very long text that should be truncated with an ellipsis at the end) Tj
 ET
 Q
@@ -195,7 +195,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 244.9492 Td
+0 244.6211 Td
 (Text Alignment) Tj
 ET
 Q
@@ -216,7 +216,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-155.4492 214.9492 Td
+155.4492 214.6211 Td
 (Right aligned) Tj
 ET
 Q
@@ -226,7 +226,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-78.3516 199.9492 Td
+78.3516 199.6211 Td
 (Center aligned) Tj
 ET
 Q
@@ -236,7 +236,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-8.25 184.9492 Td
+8.25 184.6211 Td
 (Justified text that spans across the full width of) Tj
 ET
 Q
@@ -244,7 +244,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-8.25 172.9492 Td
+8.25 172.6211 Td
 (the container element here.) Tj
 ET
 Q
@@ -254,7 +254,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 135.4492 Td
+0 135.1211 Td
 (Multi-column Text) Tj
 ET
 Q
@@ -273,7 +273,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-8.25 106.9492 Td
+8.25 106.6211 Td
 (Lorem ipsum dolor sit amet,) Tj
 ET
 Q
@@ -281,7 +281,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-8.25 93.4492 Td
+8.25 93.1211 Td
 (consectetur adipiscing elit. Nulla) Tj
 ET
 Q
@@ -289,7 +289,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-8.25 79.9492 Td
+8.25 79.6211 Td
 (facilisi. Duis aute irure dolor in) Tj
 ET
 Q
@@ -297,7 +297,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-8.25 66.4492 Td
+8.25 66.1211 Td
 (reprehenderit in voluptate velit) Tj
 ET
 Q
@@ -305,7 +305,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-157.5 106.9492 Td
+157.5 106.6211 Td
 (esse cillum dolore eu fugiat nulla) Tj
 ET
 Q
@@ -313,7 +313,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-157.5 93.4492 Td
+157.5 93.1211 Td
 (pariatur. Excepteur sint occaecat) Tj
 ET
 Q
@@ -321,7 +321,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-157.5 79.9492 Td
+157.5 79.6211 Td
 (cupidatat non proident.) Tj
 ET
 Q
@@ -331,7 +331,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 30.4492 Td
+0 30.1211 Td
 (Inline Formatting) Tj
 ET
 Q
@@ -341,7 +341,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-0 5.6992 Td
+0 5.3711 Td
 (This has) Tj
 ET
 Q
@@ -349,7 +349,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-119.4258 5.6992 Td
+119.4258 5.3711 Td
 (and) Tj
 ET
 Q
@@ -357,7 +357,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-191.332 5.6992 Td
+191.332 5.3711 Td
 (and) Tj
 ET
 Q
@@ -365,7 +365,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-284.332 5.6992 Td
+284.332 5.3711 Td
 (mixed together in a single paragraph.) Tj
 ET
 Q
@@ -375,7 +375,7 @@ q
 BT
 0.8275 0.1843 0.1843 rg
 /F2 11.25 Tf
-45.6445 5.6992 Td
+45.75 5.3711 Td
 (italic emphasis) Tj
 ET
 Q
@@ -385,7 +385,7 @@ q
 BT
 0.0824 0.3961 0.7529 rg
 /F1 11.25 Tf
-144.457 5.6992 Td
+144.75 5.3711 Td
 (bold text) Tj
 ET
 Q
@@ -409,7 +409,7 @@ q
 BT
 0.502 0.7961 0.7686 rg
 /F3 9.75 Tf
-220.8633 5.6992 Td
+220.5 5.3711 Td
 (inline code) Tj
 ET
 Q
@@ -432,11 +432,11 @@ xref
 0000000214 00000 n 
 0000000307 00000 n 
 0000000366 00000 n 
-0000004452 00000 n 
-0000004567 00000 n 
-0000004622 00000 n 
+0000004446 00000 n 
+0000004561 00000 n 
+0000004616 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-4669
+4663
 %%EOF

@@ -20,7 +20,7 @@ q
 BT
 0 0 0 rg
 /F1 12 Tf
-0 510.0981 Td
+6 510.0993 Td
 (Alte Not-Halt Mobile Panel Steckplatz) Tj
 ET
 Q
@@ -28,7 +28,7 @@ q
 BT
 0 0 0 rg
 /F1 12 Tf
-0 483.0981 Td
+6 483.0993 Td
 (und F\366rdererstich AE11/AE12.) Tj
 ET
 Q
@@ -36,7 +36,7 @@ q
 BT
 0 0 0 rg
 /F1 12 Tf
-0 456.0981 Td
+6 456.0993 Td
 (Am Pnoz gebr\374ckt. Im Programm nur noch f\374r) Tj
 ET
 Q
@@ -44,17 +44,17 @@ q
 BT
 0 0 0 rg
 /F1 12 Tf
-0 429.0981 Td
+6 429.0993 Td
 (Diagnose, falls sie mal ausgel\366st werden!) Tj
 ET
 Q
 q
 0 0 0 RG
 0.75 w
-573.75 297.8481 m
-759 297.8481 l
-759 212.3481 l
-573.75 212.3481 l
+579.75 297.8493 m
+765 297.8493 l
+765 212.3493 l
+579.75 212.3493 l
 h
 S
 Q
@@ -64,7 +64,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-574.5 288.0981 Td
+580.5 288.0993 Td
 (Alte Not-Halt Mobile Panel Steckplatz) Tj
 ET
 Q
@@ -72,7 +72,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-574.5 264.0981 Td
+580.5 264.0993 Td
 (und F\366rdererstich AE11/AE12.) Tj
 ET
 Q
@@ -80,7 +80,7 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-574.5 240.0981 Td
+580.5 240.0993 Td
 (Am Pnoz gebr\374ckt. Im Programm nur noch f\374r) Tj
 ET
 Q
@@ -88,14 +88,14 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-574.5 216.0981 Td
+580.5 216.0993 Td
 (Diagnose, falls sie mal ausgel\366st werden!) Tj
 ET
 Q
 endstream
 endobj
 5 0 obj
-<</Type /Page /Parent 6 0 R /MediaBox [0 0 948.178224 522.098136] /Resources 3 0 R /Contents 4 0 R>>
+<</Type /Page /Parent 6 0 R /MediaBox [0 0 954.179352 528.099264] /Resources 3 0 R /Contents 4 0 R>>
 endobj
 6 0 obj
 <</Type /Pages /Kids [5 0 R] /Count 1>>

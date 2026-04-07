@@ -4,6 +4,7 @@
  */
 import type { Point, Quad, Style, IRNode, Options } from "./types.js";
 import { extractStyle } from "./traversal.js";
+import { getSvgScreenCtm } from "./geometry.js";
 
 /** Number of sample points for path/circle/ellipse approximation. */
 const PATH_SAMPLE_COUNT = 64;
@@ -141,16 +142,9 @@ function applyCtm(point: Point, ctm: DOMMatrix): Point {
   };
 }
 
-/** Get the screen CTM for an SVG element (maps to page coordinates), falling back to identity. */
+/** Get the screen CTM for an SVG element, adjusted to align with getBoxQuads. */
 function getCtm(el: SVGGraphicsElement): DOMMatrix {
-  try {
-    // getScreenCTM maps from element coords to page/screen coords
-    const ctm = el.getScreenCTM();
-    if (ctm) return ctm;
-  } catch {
-    // Fallback
-  }
-  return new DOMMatrix();
+  return getSvgScreenCtm(el);
 }
 
 /** Transform an array of points using CTM. */

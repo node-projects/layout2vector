@@ -23,6 +23,9 @@ export {
   type StackingNode,
 } from "./traversal.js";
 
+// Geometry utilities
+export { getElementQuad, getElementQuads, getElementOrigin, quadSize, getSvgScreenCtm } from "./geometry.js";
+
 // Extractors (advanced usage)
 export { extractHTMLGeometry } from "./html-extractor.js";
 export { extractSVGSubtree } from "./svg-extractor.js";

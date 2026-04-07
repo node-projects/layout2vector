@@ -73,7 +73,7 @@ test.describe("UI Rendering Tests", () => {
     const texts = ir.filter((n: any) => n.type === "text");
     expect(texts.length).toBeGreaterThanOrEqual(1);
     // The text content should be captured
-    const allText = texts.map((t: any) => t.text).join("");
+    const allText = texts.map((t: any) => t.text).join(" ");
     expect(allText).toContain("This is a long text");
   });
 

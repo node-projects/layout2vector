@@ -10,7 +10,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>>>>
 endobj
 4 0 obj
-<</Length 390401>>
+<</Length 390345>>
 stream
 q
 Q
@@ -6350,7 +6350,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-114.9375 607.6382 Td
+114.75 607.6382 Td
 (OpticalDataCouplers) Tj
 ET
 Q
@@ -7537,7 +7537,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-227.0625 607.6382 Td
+227.25 607.6382 Td
 (OpticalSsiEncoder) Tj
 ET
 Q
@@ -7932,7 +7932,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-21.1172 489.1382 Td
+21 489.1382 Td
 (PhotoelectricProximitySensor) Tj
 ET
 Q
@@ -8036,7 +8036,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-174.9023 489.1382 Td
+174.75 489.1382 Td
 (PhotoelectricProximitySensorUpward) Tj
 ET
 Q
@@ -8417,7 +8417,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-345.8789 489.1382 Td
+345.75 489.1382 Td
 (PhotoelectricRetroReflectiveSensor) Tj
 ET
 Q
@@ -9018,7 +9018,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-513.1875 489.1382 Td
+513 489.1382 Td
 (ThroughBeamPhotoelectricSensorE) Tj
 ET
 Q
@@ -9619,7 +9619,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-681.1875 489.1382 Td
+681 489.1382 Td
 (ThroughBeamPhotoelectricSensorS) Tj
 ET
 Q
@@ -10220,7 +10220,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-6.4336 397.6382 Td
+6.75 397.6382 Td
 (ThroughBeamPhotoelectricSensorSE) Tj
 ET
 Q
@@ -10493,7 +10493,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-208.3828 397.6382 Td
+208.5 397.6382 Td
 (Move \(has marker\)) Tj
 ET
 Q
@@ -16823,7 +16823,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-114.9375 279.1382 Td
+114.75 279.1382 Td
 (OpticalDataCouplers) Tj
 ET
 Q
@@ -18010,7 +18010,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-227.0625 279.1382 Td
+227.25 279.1382 Td
 (OpticalSsiEncoder) Tj
 ET
 Q
@@ -18405,7 +18405,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-21.1172 160.6382 Td
+21 160.6382 Td
 (PhotoelectricProximitySensor) Tj
 ET
 Q
@@ -18509,7 +18509,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-174.9023 160.6382 Td
+174.75 160.6382 Td
 (PhotoelectricProximitySensorUpward) Tj
 ET
 Q
@@ -18890,7 +18890,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-345.8789 160.6382 Td
+345.75 160.6382 Td
 (PhotoelectricRetroReflectiveSensor) Tj
 ET
 Q
@@ -19491,7 +19491,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-513.1875 160.6382 Td
+513 160.6382 Td
 (ThroughBeamPhotoelectricSensorE) Tj
 ET
 Q
@@ -20092,7 +20092,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-681.1875 160.6382 Td
+681 160.6382 Td
 (ThroughBeamPhotoelectricSensorS) Tj
 ET
 Q
@@ -20693,7 +20693,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-6.4336 69.1382 Td
+6.75 69.1382 Td
 (ThroughBeamPhotoelectricSensorSE) Tj
 ET
 Q
@@ -20966,7 +20966,7 @@ q
 BT
 0.5333 0.5333 0.5333 rg
 /F2 8.25 Tf
-208.3828 69.1382 Td
+208.5 69.1382 Td
 (Move \(has marker\)) Tj
 ET
 Q
@@ -20988,11 +20988,11 @@ xref
 0000000119 00000 n 
 0000000214 00000 n 
 0000000263 00000 n 
-0000390716 00000 n 
-0000390829 00000 n 
-0000390884 00000 n 
+0000390660 00000 n 
+0000390773 00000 n 
+0000390828 00000 n 
 trailer
 <</Root 7 0 R /Size 8>>
 startxref
-390931
+390875
 %%EOF

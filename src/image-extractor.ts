@@ -5,6 +5,7 @@
  */
 import type { Quad, IRNode, Options, Style } from "./types.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
+import { getElementQuad } from "./geometry.js";
 
 /** Check if an element is an <img> element. */
 export function isImageElement(el: Element): el is HTMLImageElement {
@@ -70,15 +71,13 @@ export function extractBackgroundImage(
                    bg.match(/url\s*\(\s*([^)]+)\s*\)/);
   if (!urlMatch) return [];
 
-  const rect = el.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) return [];
+  const quad = getElementQuad(el);
+  if (!quad) return [];
 
-  // Use the actual screen quad (respects CSS transforms) for positioning
-  const quad = getElementScreenQuad(el);
   // Use untransformed dimensions for the image's natural size
   const htmlEl = el as HTMLElement;
-  const w = htmlEl.offsetWidth || rect.width;
-  const h = htmlEl.offsetHeight || rect.height;
+  const w = htmlEl.offsetWidth || Math.abs(quad[1].x - quad[0].x);
+  const h = htmlEl.offsetHeight || Math.abs(quad[3].y - quad[0].y);
 
   const url = urlMatch[1];
 
@@ -88,7 +87,7 @@ export function extractBackgroundImage(
     if (url.startsWith("data:image/svg+xml")) {
       const svgContent = decodeBgSvgDataUrl(url);
       if (svgContent) {
-        const svgNodes = convertBgSvgToGeometry(svgContent, el, rect, globalIndex, _options);
+        const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
         if (svgNodes.length > 0) return svgNodes;
       }
     }
@@ -110,14 +109,14 @@ export function extractBackgroundImage(
   if (isSvgSource(url)) {
     const svgContent = extractSvgContent(url);
     if (svgContent) {
-      const svgNodes = convertBgSvgToGeometry(svgContent, el, rect, globalIndex, _options);
+      const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
       if (svgNodes.length > 0) return svgNodes;
     }
     // Fallback: rasterize below
   }
 
   // For external URLs, rasterize via canvas using a temporary img element
-  const dataUrl = rasterizeBackgroundImage(el, rect);
+  const dataUrl = rasterizeBackgroundImage(el, w, h);
   if (!dataUrl) return [];
 
   return [{
@@ -188,33 +187,6 @@ function decodeBgSvgDataUrl(dataUrl: string): string | null {
   return null;
 }
 
-/**
- * Get the element's rendered quad (4 corners) in screen coordinates.
- * Uses getBoxQuads if available, otherwise falls back to bounding rect.
- */
-function getElementScreenQuad(el: Element): Quad {
-  if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
-    try {
-      const quads: DOMQuad[] = (el as any).getBoxQuads({ box: "border" });
-      if (quads.length > 0) {
-        const q = quads[0];
-        return [
-          { x: q.p1.x, y: q.p1.y },
-          { x: q.p2.x, y: q.p2.y },
-          { x: q.p3.x, y: q.p3.y },
-          { x: q.p4.x, y: q.p4.y },
-        ];
-      }
-    } catch { /* fall through */ }
-  }
-  const r = el.getBoundingClientRect();
-  return [
-    { x: r.left, y: r.top },
-    { x: r.right, y: r.top },
-    { x: r.right, y: r.bottom },
-    { x: r.left, y: r.bottom },
-  ];
-}
 
 /**
  * Remap points extracted from a temp SVG at (0,0,w,h) into the actual
@@ -264,7 +236,7 @@ function stripXmlPreamble(svg: string): string {
 function convertBgSvgToGeometry(
   svgContent: string,
   el: Element,
-  elRect: DOMRect,
+  targetQuad: Quad,
   globalIndex: number,
   options: Options
 ): IRNode[] {
@@ -286,14 +258,11 @@ function convertBgSvgToGeometry(
     }
   }
 
-  // Get the element's actual screen quad (includes CSS transforms)
-  const targetQuad = getElementScreenQuad(el);
-
   // Place temp SVG at (0,0) with the element's untransformed dimensions.
   // No CSS transform — we'll remap the extracted points to the target quad afterwards.
   const htmlEl = el as HTMLElement;
-  const w = htmlEl.offsetWidth || elRect.width;
-  const h = htmlEl.offsetHeight || elRect.height;
+  const w = htmlEl.offsetWidth || Math.abs(targetQuad[1].x - targetQuad[0].x);
+  const h = htmlEl.offsetHeight || Math.abs(targetQuad[3].y - targetQuad[0].y);
 
   tempSvg.style.position = "fixed";
   tempSvg.style.left = "0px";
@@ -319,11 +288,11 @@ function convertBgSvgToGeometry(
  * Rasterize an element's background image by drawing it onto a canvas.
  * Uses a temporary Image element loaded synchronously via XHR.
  */
-function rasterizeBackgroundImage(el: Element, rect: DOMRect): string | null {
+function rasterizeBackgroundImage(el: Element, elWidth: number, elHeight: number): string | null {
   try {
     const canvas = document.createElement("canvas");
-    const w = Math.round(rect.width) || 1;
-    const h = Math.round(rect.height) || 1;
+    const w = Math.round(elWidth) || 1;
+    const h = Math.round(elHeight) || 1;
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
@@ -399,21 +368,14 @@ export function extractImageGeometry(
   // Skip images that haven't loaded or are broken
   if (!el.complete || el.naturalWidth === 0) return [];
 
-  const rect = el.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) return [];
-
-  const quad: Quad = [
-    { x: rect.left, y: rect.top },
-    { x: rect.right, y: rect.top },
-    { x: rect.right, y: rect.bottom },
-    { x: rect.left, y: rect.bottom },
-  ];
+  const quad = getElementQuad(el);
+  if (!quad) return [];
 
   // Try converting SVG images to vector geometry
   if (isSvgSource(src)) {
     const svgContent = extractSvgContent(src);
     if (svgContent) {
-      const svgNodes = convertSvgToGeometry(svgContent, el, rect, globalIndex, options);
+      const svgNodes = convertSvgToGeometry(svgContent, el, quad, globalIndex, options);
       if (svgNodes.length > 0) return svgNodes;
     }
     // Fallback: rasterize SVG via canvas (below)
@@ -491,7 +453,7 @@ function decodeSvgDataUrl(dataUrl: string): string | null {
 function convertSvgToGeometry(
   svgContent: string,
   imgEl: HTMLImageElement,
-  imgRect: DOMRect,
+  targetQuad: Quad,
   globalIndex: number,
   options: Options
 ): IRNode[] {
@@ -517,12 +479,9 @@ function convertSvgToGeometry(
     }
   }
 
-  // Get the actual screen quad of the <img> element (includes CSS transforms)
-  const targetQuad = getElementScreenQuad(imgEl);
-
   // Place temp SVG at (0,0) with the <img>'s untransformed dimensions
-  const w = imgEl.offsetWidth || imgRect.width;
-  const h = imgEl.offsetHeight || imgRect.height;
+  const w = imgEl.offsetWidth || Math.abs(targetQuad[1].x - targetQuad[0].x);
+  const h = imgEl.offsetHeight || Math.abs(targetQuad[3].y - targetQuad[0].y);
 
   tempSvg.style.position = "fixed";
   tempSvg.style.left = "0px";

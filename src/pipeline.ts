@@ -13,6 +13,7 @@ import {
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
 import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage } from "./image-extractor.js";
+import { getElementOrigin } from "./geometry.js";
 
 /**
  * Extract the full IR from a root DOM element.
@@ -72,8 +73,8 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
   }
 
   // 4. Offset coordinates so they are relative to the root element's top-left
-  const rootRect = root.getBoundingClientRect();
-  offsetIRNodes(irNodes, rootRect.left, rootRect.top);
+  const rootOrigin = getElementOrigin(root);
+  offsetIRNodes(irNodes, rootOrigin.x, rootOrigin.y);
 
   return irNodes;
 }

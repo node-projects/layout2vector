@@ -22,7 +22,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>> /Shading <</SH1 3 0 R /SH2 4 0 R /SH3 5 0 R /SH4 6 0 R>>>>
 endobj
 8 0 obj
-<</Length 2192>>
+<</Length 2185>>
 stream
 q
 Q
@@ -101,7 +101,7 @@ q
 BT
 1 1 1 rg
 /F2 12 Tf
-482.5195 190.5644 Td
+482.25 190.5644 Td
 (Repeating stripes) Tj
 ET
 Q
@@ -128,7 +128,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-689.1094 190.5644 Td
+689.25 190.5644 Td
 (Multiple backgrounds) Tj
 ET
 Q
@@ -186,7 +186,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-205.8398 55.5644 Td
+205.5 55.5644 Td
 (Inset shadow) Tj
 ET
 Q
@@ -212,11 +212,11 @@ xref
 0000001415 00000 n 
 0000001619 00000 n 
 0000001725 00000 n 
-0000003967 00000 n 
-0000004083 00000 n 
-0000004139 00000 n 
+0000003960 00000 n 
+0000004076 00000 n 
+0000004132 00000 n 
 trailer
 <</Root 11 0 R /Size 12>>
 startxref
-4188
+4181
 %%EOF
