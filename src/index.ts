@@ -26,7 +26,7 @@ export {
 // Extractors (advanced usage)
 export { extractHTMLGeometry } from "./html-extractor.js";
 export { extractSVGSubtree } from "./svg-extractor.js";
-export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgroundImage } from "./image-extractor.js";
+export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgroundImage, preloadImages } from "./image-extractor.js";
 
 // Writers
 export { DXFWriter } from "./dxf-writer.js";

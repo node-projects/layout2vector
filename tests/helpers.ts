@@ -105,6 +105,7 @@ window.__HC = {
   isImageElement,
   hasBackgroundImage,
   extractBackgroundImage,
+  preloadImages,
 };
 })();`;
   } else {

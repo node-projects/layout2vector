@@ -30661,7 +30661,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image1.png
+images/image1.jpg
 10
 2
 20
@@ -30773,7 +30773,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image3.png
+images/image3.jpg
 10
 4
 20
@@ -30941,7 +30941,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image6.png
+images/image6.jpg
 10
 4
 20

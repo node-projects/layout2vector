@@ -59,6 +59,54 @@ for (const demoFile of demoFiles) {
     await injectBoxQuadsPolyfill(page);
     await injectLibrary(page);
 
+    // Pre-convert file:// URLs to data URLs (file:// taints canvas and blocks XHR in Chromium)
+    // Collect all image src and background-image URLs from the page
+    const fileUrls: string[] = await page.evaluate(() => {
+      const urls: string[] = [];
+      for (const img of Array.from(document.querySelectorAll("img"))) {
+        if (img.src && !img.src.startsWith("data:")) urls.push(img.src);
+      }
+      for (const el of Array.from(document.querySelectorAll("*"))) {
+        const bg = getComputedStyle(el).backgroundImage;
+        if (bg && bg !== "none") {
+          const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
+          if (m && m[1] && !m[1].startsWith("data:")) urls.push(m[1]);
+        }
+      }
+      return [...new Set(urls)];
+    });
+    const dataUrlMap: Record<string, string> = {};
+    for (const src of fileUrls) {
+      try {
+        const filePath = src.startsWith("file:///") ? fileURLToPath(src) : src;
+        if (fs.existsSync(filePath)) {
+          const buf = fs.readFileSync(filePath);
+          const ext = path.extname(filePath).toLowerCase();
+          const mime = ext === ".svg" ? "image/svg+xml"
+            : ext === ".jpg" || ext === ".jpeg" ? "image/jpeg"
+            : ext === ".gif" ? "image/gif" : "image/png";
+          dataUrlMap[src] = `data:${mime};base64,${buf.toString("base64")}`;
+        }
+      } catch { /* skip */ }
+    }
+    if (Object.keys(dataUrlMap).length > 0) {
+      await page.evaluate((map) => {
+        // Replace <img> src attributes
+        for (const img of Array.from(document.querySelectorAll("img"))) {
+          if (map[img.src]) img.src = map[img.src];
+        }
+        // Replace CSS background-image url() values
+        for (const el of Array.from(document.querySelectorAll("*"))) {
+          const bg = getComputedStyle(el).backgroundImage;
+          if (!bg || bg === "none") continue;
+          const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
+          if (m && m[1] && map[m[1]]) {
+            (el as HTMLElement).style.backgroundImage = `url("${map[m[1]]}")`;
+          }
+        }
+      }, dataUrlMap);
+    }
+
     // Extract IR in the browser
     const ir: IRNode[] = await page.evaluate(() => {
       const root = document.getElementById("root") ?? document.body;

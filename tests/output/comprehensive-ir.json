@@ -338,7 +338,7 @@
         "y": 129
       }
     ],
-    "text": "This card combines gradients, borders, ",
+    "text": "This card combines gradients, borders,",
     "style": {
       "fill": "rgba(0, 0, 0, 0)",
       "stroke": "rgb(85, 85, 85)",
@@ -392,7 +392,7 @@
         "y": 151.390625
       }
     ],
-    "text": "border-radius, box-shadow, and typography ",
+    "text": "border-radius, box-shadow, and typography",
     "style": {
       "fill": "rgba(0, 0, 0, 0)",
       "stroke": "rgb(85, 85, 85)",

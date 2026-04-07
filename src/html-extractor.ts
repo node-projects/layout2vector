@@ -52,7 +52,7 @@ function getElementQuads(el: Element, boxType: "border" | "content"): Quad[] {
   if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
     try {
       const rawQuads: any[] = (el as any).getBoxQuads({ box: boxType });
-      return rawQuads.map(domQuadToQuad);
+      return rawQuads.map(domQuadToQuad).filter(hasArea);
     } catch {
       // Fall through to fallback
     }
@@ -60,7 +60,7 @@ function getElementQuads(el: Element, boxType: "border" | "content"): Quad[] {
 
   // Fallback: use getBoundingClientRect
   const rect = el.getBoundingClientRect();
-  if (rect.width === 0 && rect.height === 0) return [];
+  if (rect.width === 0 || rect.height === 0) return [];
 
   const quad: Quad = [
     { x: rect.left, y: rect.top },
@@ -70,6 +70,14 @@ function getElementQuads(el: Element, boxType: "border" | "content"): Quad[] {
   ];
 
   return [quad];
+}
+
+/** Check if a quad has non-zero area (skip degenerate collapsed elements). */
+function hasArea(q: Quad): boolean {
+  // Cross product of two edges: (p2-p1) × (p4-p1)
+  const ax = q[1].x - q[0].x, ay = q[1].y - q[0].y;
+  const bx = q[3].x - q[0].x, by = q[3].y - q[0].y;
+  return Math.abs(ax * by - ay * bx) > 0.01;
 }
 
 /** Convert a DOMQuad to our Quad type. */

@@ -50,7 +50,8 @@ function extractSVGElement(
   options: Options
 ): IRNode[] {
   const cs = getComputedStyle(el);
-  const style = extractSVGStyle(cs, el);
+  const ctm = getCtm(el);
+  const style = extractSVGStyle(cs, el, ctm);
 
   const tag = el.tagName.toLowerCase();
 
@@ -79,13 +80,27 @@ function extractSVGElement(
   }
 }
 
-/** Extract SVG-specific styles. */
-function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement): Style {
+/** Extract SVG-specific styles, scaling stroke width by the CTM. */
+function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: DOMMatrix): Style {
   const base = extractStyle(cs);
   // SVG uses fill/stroke attributes directly
   let fill = cs.fill || el.getAttribute("fill") || undefined;
   const stroke = cs.stroke || el.getAttribute("stroke") || undefined;
-  const strokeWidth = cs.strokeWidth || el.getAttribute("stroke-width") || undefined;
+  let strokeWidth = cs.strokeWidth || el.getAttribute("stroke-width") || undefined;
+
+  // Scale stroke width by the CTM's average scale factor.
+  // The CSS/attribute strokeWidth is in the element's local coordinate space,
+  // but extracted points are in screen coordinates after CTM transformation.
+  if (strokeWidth) {
+    const sw = parseFloat(strokeWidth);
+    if (!isNaN(sw) && sw > 0) {
+      // Geometric mean of the CTM's x and y scale factors
+      const sx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
+      const sy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
+      const scale = Math.sqrt(sx * sy);
+      strokeWidth = `${sw * scale}px`;
+    }
+  }
 
   // Resolve url(#id) gradient references to a solid color
   if (fill && fill.startsWith("url(")) {

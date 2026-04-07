@@ -1,0 +1,72 @@
+<style>
+    #my {
+        position: absolute;
+        width: 80px;
+        top: 140px;
+        left: 80px;
+        height: 120px;
+        border: 1px solid black;
+        display: grid;
+        overflow: hidden;
+        grid-template:
+            ". . . . . ." 1%
+            ". . . group group ." 7%
+            ". objectPlaceName objectPlaceName objectPlaceName objectPlaceName ." 10%
+            ". msgPointName msgPointName msgPointName msgPointName ." 7%
+            ". . . . . ." 1%
+            ". . . . . ." 1%
+            ". . . . dataBlockNumber ." 13%
+            ". . . . . ." 5%
+            ". symbols symbols symbols symbols ." 15%
+            ". . . . . ." 5%
+            ". telegrams telegrams telegrams telegrams ." 15%
+            ". . . . . ." 5%
+            "aisle1 aisle1 aisle1 aisle3 aisle3 aisle3" 15% / 1% 24% 25% 25% 24% 1%;
+    }
+
+    img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+
+    svg {
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+        overflow: visible;
+        position: absolute;
+        stroke: black;
+        stroke-width: 2px;
+        fill: none;
+    }
+</style>
+<div id="root">
+    <div id="my">
+        <div class="topLayer" style="grid-column: 1 / 3; grid-row: 1 / 6;">
+            <img src="./data.png">
+        </div>
+    </div>
+    <div style="position: absolute; top:140px; left: 150px; width: 29px; height: 11px;">
+        <div id="container"
+            style="background-image: url('./svgs/PhotoelectricRetroReflectiveSensor.svg'); width: 100%; height: 100%;">
+        </div>
+    </div>
+
+    <div style="position: absolute; top:0; left: 0; width: 100%; height: 100%;">
+        <svg id="svg" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            xml:space="preserve" xmlns:serif="http://www.serif.com/">
+            <defs>
+                <marker id="arrowhead" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6"
+                    orient="auto">
+                    <path d="M0,-5L10,0L0,5" fill="black" style="pointer-events: visiblePainted;"></path>
+                </marker>
+            </defs>
+            <path class="clicklayer" d="M 145 215 Q  178.65863007684118 212.47638463222697, 234 220"></path>
+            <path d="M 145 215 Q  178.65863007684118 212.47638463222697, 234 220" marker-end="url(#arrowhead)"></path>
+        </svg>
+    </div>
+</div>

@@ -11,6 +11,38 @@ export function isImageElement(el: Element): el is HTMLImageElement {
   return el.tagName.toLowerCase() === "img";
 }
 
+/**
+ * Pre-convert all <img> elements under a root to inline data URLs.
+ * This is necessary when images are loaded from file:// or cross-origin URLs,
+ * because canvas.toDataURL() will fail with a tainted canvas error.
+ * Must be called (and awaited) before extractIR().
+ */
+export async function preloadImages(root: Element): Promise<void> {
+  const imgs = root.querySelectorAll("img");
+  for (const img of Array.from(imgs)) {
+    const src = img.currentSrc || img.src;
+    if (!src || src.startsWith("data:")) continue;
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) continue;
+      const blob = await resp.blob();
+      const dataUrl = await blobToDataUrl(blob);
+      img.src = dataUrl;
+    } catch {
+      // Network error — leave as-is
+    }
+  }
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 /** Check if an element has a CSS background-image with a url(). */
 export function hasBackgroundImage(style: Style): boolean {
   const bg = style.backgroundImage;
@@ -518,12 +550,10 @@ function convertSvgToGeometry(
  */
 function getImageDataUrl(img: HTMLImageElement): string | null {
   const src = img.currentSrc || img.src;
+  if (!src) return null;
 
-  // If already a raster data URL, use it directly
-  if (src.startsWith("data:image/") && !src.startsWith("data:image/svg")) {
-    return src;
-  }
-
+  // Always render through canvas to get a JPEG data URL,
+  // which is what the PDF writer (DCTDecode) expects.
   try {
     const canvas = document.createElement("canvas");
     const w = img.naturalWidth || img.width || 1;
@@ -538,7 +568,42 @@ function getImageDataUrl(img: HTMLImageElement): string | null {
     ctx.drawImage(img, 0, 0);
     return canvas.toDataURL("image/jpeg", 0.92);
   } catch {
-    // Cross-origin tainted canvas — return original src as fallback
-    return src;
+    // Cross-origin tainted canvas (e.g. file:// URLs) —
+    // if the source is already a data URL, return it as-is
+    if (src.startsWith("data:image/") && !src.startsWith("data:image/svg")) {
+      return src;
+    }
+    return fetchImageAsDataUrl(src);
   }
+}
+
+/**
+ * Fetch an image URL synchronously and return it as a data URL.
+ * Used as fallback when canvas.toDataURL fails due to cross-origin tainting.
+ */
+function fetchImageAsDataUrl(url: string): string | null {
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, false);
+    // Synchronous XHR doesn't support responseType="arraybuffer",
+    // so override the charset to get raw binary data as a string
+    xhr.overrideMimeType("text/plain; charset=x-user-defined");
+    xhr.send();
+    if (xhr.status === 200 || xhr.status === 0) {
+      const raw = xhr.responseText;
+      // Detect MIME type from magic bytes
+      let mime = "image/png";
+      if (raw.charCodeAt(0) === 0xFF && raw.charCodeAt(1) === 0xD8) mime = "image/jpeg";
+      else if (raw.charCodeAt(0) === 0x47 && raw.charCodeAt(1) === 0x49) mime = "image/gif";
+      // Convert raw binary string to base64
+      let binary = "";
+      for (let i = 0; i < raw.length; i++) {
+        binary += String.fromCharCode(raw.charCodeAt(i) & 0xFF);
+      }
+      return `data:${mime};base64,${btoa(binary)}`;
+    }
+  } catch {
+    // Network error
+  }
+  return null;
 }
