@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1272" height="704" viewBox="0 0 1272 704">
-<path d="M0,0 L1264,0 L1264,704 L0,704 Z" fill="none"/>
-<path d="M8,8 L1272,8 L1272,134 L8,134 Z" fill="none"/>
-<text x="8" y="25" fill="rgb(0, 0, 0)" font-size="16px" font-family="Times New Roman">Alte Not-Halt Mobile Panel Steckplatz</text>
-<text x="8" y="61" fill="rgb(0, 0, 0)" font-size="16px" font-family="Times New Roman">und Fördererstich AE11/AE12.</text>
-<text x="8" y="97" fill="rgb(0, 0, 0)" font-size="16px" font-family="Times New Roman">Am Pnoz gebrückt. Im Programm nur noch für</text>
-<text x="8" y="133" fill="rgb(0, 0, 0)" font-size="16px" font-family="Times New Roman">Diagnose, falls sie mal ausgelöst werden!</text>
-<path d="M773,307 L1020,307 L1020,421 L773,421 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
-<path d="M774,308 L1019,308 L1019,420 L774,420 Z" fill="none"/>
-<text x="774" y="324" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text>
-<text x="774" y="356" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">und Fördererstich AE11/AE12.</text>
-<text x="774" y="388" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Am Pnoz gebrückt. Im Programm nur noch für</text>
-<text x="774" y="420" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgelöst werden!</text>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="413" viewBox="0 0 1264 413">
+<path d="M0,0 L1264,0 L1264,162 L0,162 Z" fill="none"/>
+<path d="M0,0 L1264,0 L1264,126 L0,126 Z" fill="none"/>
+<text x="0" y="17.5" fill="rgb(0, 0, 0)" font-size="16px" font-family="serif">Alte Not-Halt Mobile Panel Steckplatz</text>
+<text x="0" y="53.5" fill="rgb(0, 0, 0)" font-size="16px" font-family="serif">und Fördererstich AE11/AE12.</text>
+<text x="0" y="89.5" fill="rgb(0, 0, 0)" font-size="16px" font-family="serif">Am Pnoz gebrückt. Im Programm nur noch für</text>
+<text x="0" y="125.5" fill="rgb(0, 0, 0)" font-size="16px" font-family="serif">Diagnose, falls sie mal ausgelöst werden!</text>
+<path d="M765,299 L1011.58,299 L1011.58,413 L765,413 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<path d="M766,300 L1010.58,300 L1010.58,412 L766,412 Z" fill="none"/>
+<text x="766" y="316" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text>
+<text x="766" y="348" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">und Fördererstich AE11/AE12.</text>
+<text x="766" y="380" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Am Pnoz gebrückt. Im Programm nur noch für</text>
+<text x="766" y="412" fill="rgb(0, 0, 0)" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgelöst werden!</text>
 </svg>
