@@ -335,7 +335,7 @@ function extractLine(el: SVGLineElement, style: Style, zIndex: number): IRNode[]
 
   const transformed = transformPoints([p1, p2], el);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
-  results.push(...extractMarkers(el, transformed, style, zIndex));
+  results.push(...extractMarkers(el, transformed, style, zIndex, false));
   return results;
 }
 
@@ -357,7 +357,7 @@ function extractPolyline(
 
   const transformed = transformPoints(points, el);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
-  results.push(...extractMarkers(el, transformed, style, zIndex));
+  results.push(...extractMarkers(el, transformed, style, zIndex, closed));
   return results;
 }
 
@@ -410,7 +410,7 @@ function extractPathBySampling(
 
   const transformed = transformPoints(points, el);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
-  results.push(...extractMarkers(el, transformed, style, zIndex));
+  results.push(...extractMarkers(el, transformed, style, zIndex, closed));
   return results;
 }
 
@@ -422,7 +422,8 @@ function extractMarkers(
   el: SVGGraphicsElement,
   points: Point[],
   style: Style,
-  zIndex: number
+  zIndex: number,
+  closed = false
 ): IRNode[] {
   if (points.length < 2) return [];
 
@@ -531,6 +532,49 @@ function extractMarkers(
         const childFill = childCs.fill || child.getAttribute("fill") || undefined;
         const markerStyle: Style = { ...style, fill: childFill !== "none" ? childFill : undefined };
         results.push({ type: "polyline", points: transformed, closed: child instanceof SVGPolygonElement, style: markerStyle, zIndex });
+      } else if (child instanceof SVGCircleElement || child instanceof SVGEllipseElement) {
+        const cx0 = child instanceof SVGCircleElement ? child.cx.baseVal.value : (child as SVGEllipseElement).cx.baseVal.value;
+        const cy0 = child instanceof SVGCircleElement ? child.cy.baseVal.value : (child as SVGEllipseElement).cy.baseVal.value;
+        const rx0 = child instanceof SVGCircleElement ? child.r.baseVal.value : (child as SVGEllipseElement).rx.baseVal.value;
+        const ry0 = child instanceof SVGCircleElement ? child.r.baseVal.value : (child as SVGEllipseElement).ry.baseVal.value;
+        const circPts: Point[] = [];
+        for (let ci = 0; ci < CIRCLE_SEGMENTS; ci++) {
+          const a = (2 * Math.PI * ci) / CIRCLE_SEGMENTS;
+          circPts.push({ x: cx0 + rx0 * Math.cos(a), y: cy0 + ry0 * Math.sin(a) });
+        }
+        const transformed = circPts.map(p => {
+          const lx = (p.x - refX) * scaleX * s;
+          const ly = (p.y - refY) * scaleY * s;
+          return {
+            x: pos.x + lx * cosA - ly * sinA,
+            y: pos.y + lx * sinA + ly * cosA,
+          };
+        });
+        const childCs = getComputedStyle(child);
+        const childFill = childCs.fill || child.getAttribute("fill") || undefined;
+        const markerStyle: Style = { ...style, fill: childFill !== "none" ? childFill : undefined };
+        results.push({ type: "polyline", points: transformed, closed: true, style: markerStyle, zIndex });
+      } else if (child instanceof SVGRectElement) {
+        const rx = child.x.baseVal.value;
+        const ry = child.y.baseVal.value;
+        const rw = child.width.baseVal.value;
+        const rh = child.height.baseVal.value;
+        const rawPts: Point[] = [
+          { x: rx, y: ry }, { x: rx + rw, y: ry },
+          { x: rx + rw, y: ry + rh }, { x: rx, y: ry + rh },
+        ];
+        const transformed = rawPts.map(p => {
+          const lx = (p.x - refX) * scaleX * s;
+          const ly = (p.y - refY) * scaleY * s;
+          return {
+            x: pos.x + lx * cosA - ly * sinA,
+            y: pos.y + lx * sinA + ly * cosA,
+          };
+        });
+        const childCs = getComputedStyle(child);
+        const childFill = childCs.fill || child.getAttribute("fill") || undefined;
+        const markerStyle: Style = { ...style, fill: childFill !== "none" ? childFill : undefined };
+        results.push({ type: "polygon", points: transformed as Quad, style: markerStyle, zIndex });
       }
     }
   }
@@ -551,10 +595,15 @@ function extractMarkers(
   }
 
   // marker-mid: place at all middle points
+  // For closed shapes (polygon), the last vertex also gets a mid-marker
+  // because the path continues back to the start vertex.
   const midMarker = resolveMarker(markerMid);
   if (midMarker) {
-    for (let i = 1; i < points.length - 1; i++) {
-      const angle = Math.atan2(points[i + 1].y - points[i - 1].y, points[i + 1].x - points[i - 1].x);
+    const lastMid = closed ? points.length : points.length - 1;
+    for (let i = 1; i < lastMid; i++) {
+      const prev = points[i - 1];
+      const next = points[(i + 1) % points.length];
+      const angle = Math.atan2(next.y - prev.y, next.x - prev.x);
       placeMarker(midMarker, points[i], angle);
     }
   }
