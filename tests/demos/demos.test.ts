@@ -60,19 +60,25 @@ for (const demoFile of demoFiles) {
     await injectLibrary(page);
 
     // Pre-convert file:// URLs to data URLs (file:// taints canvas and blocks XHR in Chromium)
-    // Collect all image src and background-image URLs from the page
+    // Collect all image src and background-image URLs from the page (including shadow DOM)
     const fileUrls: string[] = await page.evaluate(() => {
       const urls: string[] = [];
-      for (const img of Array.from(document.querySelectorAll("img"))) {
-        if (img.src && !img.src.startsWith("data:")) urls.push(img.src);
-      }
-      for (const el of Array.from(document.querySelectorAll("*"))) {
-        const bg = getComputedStyle(el).backgroundImage;
-        if (bg && bg !== "none") {
-          const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
-          if (m && m[1] && !m[1].startsWith("data:")) urls.push(m[1]);
+      function walk(root: Document | ShadowRoot | Element) {
+        const els = root.querySelectorAll("*");
+        for (const el of Array.from(els)) {
+          if (el.tagName === "IMG") {
+            const src = (el as HTMLImageElement).src;
+            if (src && !src.startsWith("data:")) urls.push(src);
+          }
+          const bg = getComputedStyle(el).backgroundImage;
+          if (bg && bg !== "none") {
+            const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
+            if (m && m[1] && !m[1].startsWith("data:")) urls.push(m[1]);
+          }
+          if (el.shadowRoot) walk(el.shadowRoot);
         }
       }
+      walk(document);
       return [...new Set(urls)];
     });
     const dataUrlMap: Record<string, string> = {};
@@ -91,19 +97,23 @@ for (const demoFile of demoFiles) {
     }
     if (Object.keys(dataUrlMap).length > 0) {
       await page.evaluate((map) => {
-        // Replace <img> src attributes
-        for (const img of Array.from(document.querySelectorAll("img"))) {
-          if (map[img.src]) img.src = map[img.src];
-        }
-        // Replace CSS background-image url() values
-        for (const el of Array.from(document.querySelectorAll("*"))) {
-          const bg = getComputedStyle(el).backgroundImage;
-          if (!bg || bg === "none") continue;
-          const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
-          if (m && m[1] && map[m[1]]) {
-            (el as HTMLElement).style.backgroundImage = `url("${map[m[1]]}")`;
+        function walk(root: Document | ShadowRoot | Element) {
+          for (const el of Array.from(root.querySelectorAll("*"))) {
+            if (el.tagName === "IMG") {
+              const img = el as HTMLImageElement;
+              if (map[img.src]) img.src = map[img.src];
+            }
+            const bg = getComputedStyle(el).backgroundImage;
+            if (bg && bg !== "none") {
+              const m = bg.match(/url\(["']?([^"')]+)["']?\)/);
+              if (m && m[1] && map[m[1]]) {
+                (el as HTMLElement).style.backgroundImage = `url("${map[m[1]]}")`;
+              }
+            }
+            if (el.shadowRoot) walk(el.shadowRoot);
           }
         }
+        walk(document);
       }, dataUrlMap);
     }
 
