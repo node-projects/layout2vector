@@ -152,6 +152,9 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     }
   }
 
+  // In SVG, fill determines text color — override CSS color with fill
+  const svgColor = (fill && fill !== "none" && !fill.startsWith("url(")) ? fill : undefined;
+
   return {
     ...base,
     fill: fill !== "none" ? fill : undefined,
@@ -159,6 +162,7 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     strokeWidth,
     strokeDasharray,
     backgroundImage: backgroundImage ?? base.backgroundImage,
+    ...(svgColor ? { color: svgColor } : {}),
   };
 }
 
@@ -201,7 +205,12 @@ function resolveGradient(urlRef: string, el: SVGGraphicsElement): { cssGradient:
     const color = stop.getAttribute("stop-color")
       ?? getComputedStyle(stop).getPropertyValue("stop-color")
       ?? getComputedStyle(stop).stopColor;
-    const offset = stop.getAttribute("offset") ?? "0%";
+    let offset = stop.getAttribute("offset") ?? "0%";
+    // Normalize SVG fraction offset (0..1) to CSS percentage
+    if (!offset.endsWith("%")) {
+      const val = parseFloat(offset);
+      if (!isNaN(val)) offset = `${val * 100}%`;
+    }
     if (i === 0) fallbackColor = color;
     colorStops.push(`${color} ${offset}`);
   }
@@ -265,6 +274,19 @@ function extractRect(el: SVGRectElement, style: Style, zIndex: number): IRNode[]
   const h = el.height.baseVal.value;
 
   if (w === 0 || h === 0) return [];
+
+  // Handle rx/ry rounded corners (e.g. pill shapes)
+  let rx = el.rx.baseVal.value;
+  let ry = el.ry.baseVal.value;
+  if (rx && !ry) ry = rx;
+  if (ry && !rx) rx = ry;
+  if (rx > 0 || ry > 0) {
+    const ctm = getCtm(el);
+    const sx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
+    const sy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
+    const scaledR = Math.min(rx * sx, ry * sy);
+    style = { ...style, borderRadius: `${scaledR}px` };
+  }
 
   const rawQuad = rectToQuad(x, y, w, h);
   const transformed = transformPoints(rawQuad, el) as Quad;

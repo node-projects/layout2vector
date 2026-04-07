@@ -747,15 +747,17 @@ export class PNGWriter implements Writer<PNGResult> {
       return null;
     }
 
+    let validStops = 0;
     for (const stop of stops) {
       try {
         canvasGrad.addColorStop(Math.max(0, Math.min(1, stop.offset)), stop.color);
+        validStops++;
       } catch {
         // skip invalid color stops
       }
     }
 
-    return canvasGrad;
+    return validStops >= 2 ? canvasGrad : null;
   }
 
   /** Convert px-based stops to fractional [0..1] stops, given the total gradient length in px. */
