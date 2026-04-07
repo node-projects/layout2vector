@@ -32,6 +32,15 @@ function walkSVGTree(
   nextIndex: () => number,
   options: Options
 ): void {
+  // Skip non-rendering container elements — their children are referenced
+  // indirectly (e.g. via <use>, marker-end, clip-path) and should not be
+  // painted during the normal tree walk.
+  const tag = el.tagName.toLowerCase();
+  if (tag === "defs" || tag === "symbol" || tag === "clippath" ||
+      tag === "mask" || tag === "pattern") {
+    return;
+  }
+
   // Process this element if it's a renderable SVG shape
   if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement) {
     const nodes = extractSVGElement(el, nextIndex(), options);
@@ -314,6 +323,15 @@ function extractMarkers(
   const ownerSvg = (el as any).ownerSVGElement as SVGSVGElement | null;
   if (!ownerSvg) return [];
 
+  // Compute CTM scale factor — marker shapes are defined in local SVG units
+  // but points[] are already in screen coordinates after CTM transformation.
+  // Without this, markers are too large when viewBox > viewport (CTM < 1)
+  // and too small when viewBox < viewport (CTM > 1).
+  const ctm = getCtm(el);
+  const ctmSx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
+  const ctmSy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
+  const ctmScale = Math.sqrt(ctmSx * ctmSy);
+
   function resolveMarker(ref: string): SVGMarkerElement | null {
     if (!ref || ref === "none") return null;
     const m = ref.match(/url\(["']?#([^"')]+)["']?\)/);
@@ -335,13 +353,18 @@ function extractMarkers(
     const scaleX = mw / vbW;
     const scaleY = mh / vbH;
 
-    // Get stroke width for markerUnits="strokeWidth" (default)
-    const sw = parseFloat(cs.strokeWidth) || 1;
+    // Determine scale multiplier based on markerUnits attribute.
+    // "strokeWidth" (default): marker is scaled by the referencing element's stroke width.
+    // "userSpaceOnUse": marker uses the referencing element's user coordinate system directly.
+    // In both cases, multiply by ctmScale to convert from SVG user units to screen pixels.
+    const markerUnitsAttr = marker.getAttribute("markerUnits");
+    const sw = markerUnitsAttr === "userSpaceOnUse"
+      ? 1
+      : (parseFloat(cs.strokeWidth) || 1);
 
-    // Build transform: translate to position, rotate, scale by strokeWidth and viewBox ratio
     const cosA = Math.cos(angle);
     const sinA = Math.sin(angle);
-    const s = sw; // markerUnits="strokeWidth" multiplier
+    const s = sw * ctmScale;
 
     // Extract shapes from marker children
     for (const child of Array.from(marker.children)) {
