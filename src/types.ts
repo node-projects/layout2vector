@@ -23,6 +23,7 @@ export type Style = {
   textDecoration?: string;
   textAlign?: string;
   textTransform?: string;
+  textShadow?: string;
   lineHeight?: string;
 
   opacity?: number;

@@ -32,10 +32,20 @@ function hasVisibleStroke(style: Style): { color: string; width: number } | null
   return { color, width };
 }
 
-function parseBorderRadius(borderRadius: string | undefined): number {
-  if (!borderRadius || borderRadius === "0px") return 0;
-  const parts = borderRadius.split(/\s+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
-  return parts.length > 0 ? parts[0] : 0;
+function parseBorderRadius(borderRadius: string | undefined, w?: number, h?: number): number {
+  if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return 0;
+  const raw = borderRadius.split(/\s+/)[0];
+  if (!raw) return 0;
+  if (raw.endsWith("%")) {
+    const pct = parseFloat(raw);
+    if (isNaN(pct) || pct <= 0) return 0;
+    // CSS border-radius %: resolved against the corresponding dimension
+    // For a single value, use the smaller of width/height
+    const ref = (w !== undefined && h !== undefined) ? Math.min(w, h) : 0;
+    return (pct / 100) * ref;
+  }
+  const val = parseFloat(raw);
+  return !isNaN(val) && val > 0 ? val : 0;
 }
 
 function isAxisAlignedRect(points: Quad): boolean {
@@ -140,6 +150,29 @@ function extractFirstGradient(bgImage: string): string | null {
     else if (bgImage[i] === ")") { depth--; if (depth === 0) return bgImage.slice(start, i + 1); }
   }
   return null;
+}
+
+/** Extract ALL gradient strings from a backgroundImage value (CSS layer order: first = top). */
+function extractAllGradients(bgImage: string): string[] {
+  const gradients: string[] = [];
+  const re = /(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(bgImage)) !== null) {
+    let depth = 0;
+    const start = m.index;
+    for (let i = start; i < bgImage.length; i++) {
+      if (bgImage[i] === "(") depth++;
+      else if (bgImage[i] === ")") {
+        depth--;
+        if (depth === 0) {
+          gradients.push(bgImage.slice(start, i + 1));
+          re.lastIndex = i + 1;
+          break;
+        }
+      }
+    }
+  }
+  return gradients;
 }
 
 function parseGradient(bgImage: string | undefined): ParsedGradient | null {
@@ -406,13 +439,17 @@ export class PNGWriter implements Writer<PNGResult> {
     ctx.save();
     this.applyOpacity(ctx, style);
 
-    // Draw box shadows before the shape
-    this.drawBoxShadows(ctx, points, style);
+    // Draw outer (drop) shadows before the shape
+    this.drawBoxShadows(ctx, points, style, false);
 
     // Border-radius for axis-aligned rectangles
-    const radius = parseBorderRadius(style.borderRadius);
+    const w = Math.abs(points[1].x - points[0].x);
+    const h = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, w, h);
     if (radius > 0 && isAxisAlignedRect(points)) {
       this.drawRoundedRect(points, radius, fill, stroke, style);
+      // Draw inset shadows after fill
+      this.drawBoxShadows(ctx, points, style, true);
       ctx.restore();
       return;
     }
@@ -425,6 +462,8 @@ export class PNGWriter implements Writer<PNGResult> {
     ctx.closePath();
 
     this.fillAndStroke(ctx, points, fill, stroke, style);
+    // Draw inset shadows after fill
+    this.drawBoxShadows(ctx, points, style, true);
     ctx.restore();
   }
 
@@ -499,16 +538,28 @@ export class PNGWriter implements Writer<PNGResult> {
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
     const angle = Math.atan2(dy, dx);
+    const topEdge = Math.sqrt(dx * dx + dy * dy);
 
     // Position: baseline at bottom-left of quad
     ctx.textBaseline = "alphabetic";
+
+    // Apply text shadow before drawing text
+    this.applyTextShadow(ctx, style);
 
     if (Math.abs(angle) > 0.01) {
       ctx.translate(quad[3].x, quad[3].y);
       ctx.rotate(angle);
       ctx.fillText(sanitized, 0, 0);
+
+      // Draw text decorations (underline / line-through)
+      ctx.shadowColor = "transparent"; // don't shadow the decoration lines
+      this.drawTextDecoration(ctx, style, 0, 0, topEdge, fontSize, textColor);
     } else {
       ctx.fillText(sanitized, quad[3].x, quad[3].y);
+
+      // Draw text decorations (underline / line-through)
+      ctx.shadowColor = "transparent";
+      this.drawTextDecoration(ctx, style, quad[3].x, quad[3].y, topEdge, fontSize, textColor);
     }
 
     ctx.restore();
@@ -538,9 +589,21 @@ export class PNGWriter implements Writer<PNGResult> {
     style: Style,
   ): void {
     if (fill) {
-      const grad = points ? this.createGradient(ctx, points, style.backgroundImage) : null;
-      ctx.fillStyle = grad ?? fill;
-      ctx.fill();
+      // Render multiple background layers (CSS order: first = top, last = bottom)
+      const allGrads = points ? this.createAllGradients(ctx, points, style.backgroundImage) : [];
+      if (allGrads.length > 0) {
+        // First draw solid fill as base
+        ctx.fillStyle = fill;
+        ctx.fill();
+        // Then draw gradients bottom-to-top (reverse of CSS order)
+        for (let i = allGrads.length - 1; i >= 0; i--) {
+          ctx.fillStyle = allGrads[i];
+          ctx.fill();
+        }
+      } else {
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
     }
     if (stroke) {
       ctx.strokeStyle = stroke.color;
@@ -593,6 +656,31 @@ export class PNGWriter implements Writer<PNGResult> {
     const h = Math.abs(points[3].y - points[0].y) || 1;
 
     return this.buildCanvasGradient(ctx, gradient, x, y, w, h);
+  }
+
+  /** Create canvas gradients for ALL background layers. */
+  private createAllGradients(
+    ctx: CanvasRenderingContext2D,
+    points: Quad,
+    backgroundImage: string | undefined,
+  ): CanvasGradient[] {
+    if (!backgroundImage || backgroundImage === "none") return [];
+    const gradStrs = extractAllGradients(backgroundImage);
+    if (gradStrs.length === 0) return [];
+
+    const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
+    const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
+    const w = Math.abs(points[1].x - points[0].x) || 1;
+    const h = Math.abs(points[3].y - points[0].y) || 1;
+
+    const result: CanvasGradient[] = [];
+    for (const gs of gradStrs) {
+      const parsed = parseGradient(gs);
+      if (!parsed) continue;
+      const cg = this.buildCanvasGradient(ctx, parsed, x, y, w, h);
+      if (cg) result.push(cg);
+    }
+    return result;
   }
 
   private createGradientFromBBox(
@@ -734,19 +822,21 @@ export class PNGWriter implements Writer<PNGResult> {
     }
   }
 
-  private drawBoxShadows(ctx: CanvasRenderingContext2D, points: Quad, style: Style): void {
+  private drawBoxShadows(ctx: CanvasRenderingContext2D, points: Quad, style: Style, insetOnly: boolean): void {
     const shadows = parseBoxShadow(style.boxShadow);
     if (shadows.length === 0) return;
 
-    const radius = parseBorderRadius(style.borderRadius);
     const isAARect = isAxisAlignedRect(points);
     const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
     const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, w, h);
     const r = isAARect ? Math.min(radius, w / 2, h / 2) : 0;
 
     for (const shadow of shadows) {
+      // Skip shadows that don't match the requested phase
+      if (shadow.inset !== insetOnly) continue;
       if (shadow.inset) {
         // Inset shadow: draw inside the shape using clipping
         ctx.save();
@@ -768,17 +858,19 @@ export class PNGWriter implements Writer<PNGResult> {
         ctx.shadowBlur = shadow.blur;
         ctx.shadowOffsetX = shadow.offsetX;
         ctx.shadowOffsetY = shadow.offsetY;
-        ctx.fillStyle = shadow.color;
+        // Use fully opaque fill so canvas shadow is generated at full intensity
+        ctx.fillStyle = "rgba(0,0,0,1)";
 
         // Draw a frame around the shape (the shadow renders inward from it)
-        const pad = Math.max(shadow.blur, 50) + Math.abs(shadow.spread);
+        const pad = Math.max(shadow.blur, 50) + Math.abs(shadow.spread) + 100;
         ctx.beginPath();
         ctx.rect(x - pad, y - pad, w + 2 * pad, h + 2 * pad);
-        // Cut out the center (the shape) so only the shadow-casting frame remains
+        // Cut out a smaller rect (shadow emanates inward from these edges)
+        // For inset: positive spread → shadow larger → inner cutout smaller
         if (r > 0) {
-          this.traceRoundedRect(ctx, x - shadow.spread, y - shadow.spread, w + 2 * shadow.spread, h + 2 * shadow.spread, r);
+          this.traceRoundedRect(ctx, x + shadow.spread, y + shadow.spread, w - 2 * shadow.spread, h - 2 * shadow.spread, r);
         } else {
-          ctx.rect(x - shadow.spread, y - shadow.spread, w + 2 * shadow.spread, h + 2 * shadow.spread);
+          ctx.rect(x + shadow.spread, y + shadow.spread, w - 2 * shadow.spread, h - 2 * shadow.spread);
         }
         ctx.fill("evenodd");
 
@@ -809,6 +901,77 @@ export class PNGWriter implements Writer<PNGResult> {
 
         ctx.restore();
       }
+    }
+  }
+
+  private applyTextShadow(ctx: CanvasRenderingContext2D, style: Style): void {
+    if (!style.textShadow || style.textShadow === "none") return;
+    // Parse text-shadow: offsetX offsetY blur color
+    const ts = style.textShadow;
+    // Extract color first (rgba/rgb or hex)
+    let color = "rgba(0,0,0,0.3)";
+    let numericPart = ts;
+    const rgbaMatch = ts.match(/rgba?\([^)]+\)/);
+    if (rgbaMatch) {
+      color = rgbaMatch[0];
+      numericPart = ts.replace(rgbaMatch[0], "").trim();
+    } else {
+      const hexMatch = ts.match(/#[0-9a-fA-F]{3,8}/);
+      if (hexMatch) {
+        color = hexMatch[0];
+        numericPart = ts.replace(hexMatch[0], "").trim();
+      }
+    }
+    const nums = numericPart.match(/-?[\d.]+px/g)?.map(s => parseFloat(s)) ?? [];
+    if (nums.length >= 2) {
+      ctx.shadowOffsetX = nums[0];
+      ctx.shadowOffsetY = nums[1];
+      ctx.shadowBlur = nums[2] ?? 0;
+      ctx.shadowColor = color;
+    }
+  }
+
+  private drawTextDecoration(
+    ctx: CanvasRenderingContext2D,
+    style: Style,
+    textX: number,
+    baselineY: number,
+    textWidth: number,
+    fontSize: number,
+    color: string,
+  ): void {
+    const dec = style.textDecoration;
+    if (!dec || dec === "none") return;
+
+    // Measure actual text width for accurate line placement
+    const measuredWidth = Math.min(textWidth, ctx.measureText("").width || textWidth);
+    const lineWidth = Math.max(1, fontSize / 14);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.setLineDash([]);  // solid line
+
+    if (dec.includes("underline")) {
+      const y = baselineY + fontSize * 0.15;
+      ctx.beginPath();
+      ctx.moveTo(textX, y);
+      ctx.lineTo(textX + textWidth, y);
+      ctx.stroke();
+    }
+    if (dec.includes("line-through")) {
+      // Line-through at ~40% above baseline (middle of x-height)
+      const y = baselineY - fontSize * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(textX, y);
+      ctx.lineTo(textX + textWidth, y);
+      ctx.stroke();
+    }
+    if (dec.includes("overline")) {
+      const y = baselineY - fontSize * 0.85;
+      ctx.beginPath();
+      ctx.moveTo(textX, y);
+      ctx.lineTo(textX + textWidth, y);
+      ctx.stroke();
     }
   }
 
