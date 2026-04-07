@@ -13,6 +13,7 @@ export type Style = {
   fill?: string;
   stroke?: string;
   strokeWidth?: string;
+  strokeDasharray?: string;
 
   fontSize?: string;
   fontFamily?: string;

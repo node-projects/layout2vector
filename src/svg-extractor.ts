@@ -126,9 +126,30 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     }
   }
 
-  // Resolve url(#id) gradient references to a solid color
+  // Extract stroke-dasharray and scale by CTM
+  let strokeDasharray = cs.strokeDasharray || el.getAttribute("stroke-dasharray") || undefined;
+  if (strokeDasharray && strokeDasharray !== "none") {
+    const sx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
+    const sy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
+    const scale = Math.sqrt(sx * sy);
+    strokeDasharray = strokeDasharray.split(/[\s,]+/).map(v => {
+      const n = parseFloat(v);
+      return isNaN(n) ? v : String(n * scale);
+    }).join(",");
+  } else {
+    strokeDasharray = undefined;
+  }
+
+  // Resolve url(#id) gradient references to CSS gradient strings
+  let backgroundImage: string | undefined;
   if (fill && fill.startsWith("url(")) {
-    fill = resolveGradientColor(fill, el) ?? fill;
+    const resolved = resolveGradient(fill, el);
+    if (resolved) {
+      backgroundImage = resolved.cssGradient;
+      fill = resolved.fallbackColor;
+    } else {
+      fill = resolveGradientColor(fill, el) ?? fill;
+    }
   }
 
   return {
@@ -136,6 +157,8 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     fill: fill !== "none" ? fill : undefined,
     stroke: stroke !== "none" ? stroke : undefined,
     strokeWidth,
+    strokeDasharray,
+    backgroundImage: backgroundImage ?? base.backgroundImage,
   };
 }
 
@@ -155,6 +178,55 @@ function resolveGradientColor(urlRef: string, el: SVGGraphicsElement): string | 
   const stopColor = (stops[0] as SVGStopElement).getAttribute("stop-color")
     ?? getComputedStyle(stops[0]).stopColor;
   return stopColor || undefined;
+}
+
+/** Resolve a url(#id) gradient reference to a CSS gradient string for the PNG writer. */
+function resolveGradient(urlRef: string, el: SVGGraphicsElement): { cssGradient: string; fallbackColor: string } | undefined {
+  const match = urlRef.match(/url\(["']?#([^"')]+)["']?\)/);
+  if (!match) return undefined;
+  const id = match[1];
+  const ownerSvg = el.ownerSVGElement;
+  if (!ownerSvg) return undefined;
+  const gradEl = ownerSvg.querySelector(`#${id}`);
+  if (!gradEl) return undefined;
+
+  const stops = gradEl.querySelectorAll("stop");
+  if (stops.length === 0) return undefined;
+
+  // Extract stop colors and offsets
+  const colorStops: string[] = [];
+  let fallbackColor = "";
+  for (let i = 0; i < stops.length; i++) {
+    const stop = stops[i] as SVGStopElement;
+    const color = stop.getAttribute("stop-color")
+      ?? getComputedStyle(stop).getPropertyValue("stop-color")
+      ?? getComputedStyle(stop).stopColor;
+    const offset = stop.getAttribute("offset") ?? "0%";
+    if (i === 0) fallbackColor = color;
+    colorStops.push(`${color} ${offset}`);
+  }
+
+  const tag = gradEl.tagName.toLowerCase();
+  if (tag === "lineargradient") {
+    const lg = gradEl as SVGLinearGradientElement;
+    const x1 = parseFloat(lg.getAttribute("x1") ?? "0");
+    const y1 = parseFloat(lg.getAttribute("y1") ?? "0");
+    const x2 = parseFloat(lg.getAttribute("x2") ?? "100");
+    const y2 = parseFloat(lg.getAttribute("y2") ?? "0");
+    // Convert SVG gradient vector to CSS angle
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const angleDeg = Math.round(Math.atan2(dx, -dy) * (180 / Math.PI));
+    const cssGradient = `linear-gradient(${angleDeg}deg, ${colorStops.join(", ")})`;
+    return { cssGradient, fallbackColor };
+  }
+
+  if (tag === "radialgradient") {
+    const cssGradient = `radial-gradient(circle, ${colorStops.join(", ")})`;
+    return { cssGradient, fallbackColor };
+  }
+
+  return undefined;
 }
 
 /** Apply the CTM (current transformation matrix) to a point. */
