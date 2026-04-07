@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(1.12219,0,0,1.22143,-47.7923,-35.068)">
+        <path d="M399.295,34.564L399.295,32.804C446.017,32.804 483.951,67.655 483.951,110.582C483.951,153.509 446.017,188.36 399.295,188.36L399.295,186.6C444.92,186.6 481.962,152.537 481.962,110.582C481.962,68.627 444.92,34.564 399.295,34.564Z" style="fill:none;stroke:black;stroke-width:7.11px;"/>
+    </g>
+    <g transform="matrix(1.00402,0,0,29.925,-1.22639,-2929.44)">
+        <path d="M141.053,101.399L141.053,104.409L5.82,101.235L141.053,98.06L141.053,101.07L305.291,101.07L305.291,101.399L141.053,101.399Z"/>
+    </g>
+    <g transform="matrix(0.850027,0,0,0.850027,91.4724,19.228)">
+        <g transform="matrix(111.721,0,0,111.721,400.972,135.009)">
+        </g>
+        <text x="326.455px" y="135.009px" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:111.721px;">S</text>
+    </g>
+</svg>

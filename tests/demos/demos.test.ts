@@ -6,7 +6,7 @@
 import { test, expect } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { setupPage } from "../helpers.js";
 import { DXFWriter } from "../../src/dxf-writer.js";
 import { PDFWriter } from "../../src/pdflite-writer.js";
@@ -40,10 +40,17 @@ for (const demoFile of demoFiles) {
       "utf-8"
     );
 
-    await page.setContent(htmlContent, { waitUntil: "load" });
+    // Use goto with file URL so relative paths (e.g. img src) resolve correctly
+    const fileUrl = pathToFileURL(path.join(demosDir, demoFile)).href;
+    await page.goto(fileUrl, { waitUntil: "load" });
 
-    // Copy HTML to output dir
+    // Copy HTML to output dir (and any referenced subdirectories)
     fs.writeFileSync(path.join(outputDir, demoFile), htmlContent, "utf-8");
+    const svgsDir = path.join(demosDir, "svgs");
+    const svgsOutDir = path.join(outputDir, "svgs");
+    if (fs.existsSync(svgsDir) && !fs.existsSync(svgsOutDir)) {
+      fs.cpSync(svgsDir, svgsOutDir, { recursive: true });
+    }
 
     // Inject polyfill + library via helpers
     const { injectBoxQuadsPolyfill, injectLibrary } = await import(

@@ -208,7 +208,9 @@ function extractLine(el: SVGLineElement, style: Style, zIndex: number): IRNode[]
   const p2: Point = { x: el.x2.baseVal.value, y: el.y2.baseVal.value };
 
   const transformed = transformPoints([p1, p2], el);
-  return [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
+  const results: IRNode[] = [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
+  results.push(...extractMarkers(el, transformed, style, zIndex));
+  return results;
 }
 
 function extractPolyline(
@@ -228,7 +230,9 @@ function extractPolyline(
   if (points.length === 0) return [];
 
   const transformed = transformPoints(points, el);
-  return [{ type: "polyline", points: transformed, closed, style, zIndex }];
+  const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
+  results.push(...extractMarkers(el, transformed, style, zIndex));
+  return results;
 }
 
 function extractPath(el: SVGPathElement, style: Style, zIndex: number): IRNode[] {
@@ -275,7 +279,143 @@ function extractPathBySampling(
   }
 
   const transformed = transformPoints(points, el);
-  return [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
+  const results: IRNode[] = [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
+  results.push(...extractMarkers(el, transformed, style, zIndex));
+  return results;
+}
+
+/**
+ * Extract SVG marker geometry and place it at the appropriate position/rotation.
+ * Handles marker-start, marker-mid, and marker-end.
+ */
+function extractMarkers(
+  el: SVGGraphicsElement,
+  points: Point[],
+  style: Style,
+  zIndex: number
+): IRNode[] {
+  if (points.length < 2) return [];
+
+  const cs = getComputedStyle(el);
+  const markerStart = cs.getPropertyValue("marker-start").trim() || el.getAttribute("marker-start") || "";
+  const markerMid = cs.getPropertyValue("marker-mid").trim() || el.getAttribute("marker-mid") || "";
+  const markerEnd = cs.getPropertyValue("marker-end").trim() || el.getAttribute("marker-end") || "";
+
+  const results: IRNode[] = [];
+  const ownerSvg = (el as any).ownerSVGElement as SVGSVGElement | null;
+  if (!ownerSvg) return [];
+
+  function resolveMarker(ref: string): SVGMarkerElement | null {
+    if (!ref || ref === "none") return null;
+    const m = ref.match(/url\(["']?#([^"')]+)["']?\)/);
+    if (!m) return null;
+    return ownerSvg!.querySelector(`#${m[1]}`) as SVGMarkerElement | null;
+  }
+
+  function placeMarker(marker: SVGMarkerElement, pos: Point, angle: number): void {
+    // Parse marker attributes
+    const vb = marker.viewBox.baseVal;
+    const mw = marker.markerWidth.baseVal.value || 3;
+    const mh = marker.markerHeight.baseVal.value || 3;
+    const refX = marker.refX.baseVal.value;
+    const refY = marker.refY.baseVal.value;
+
+    // Compute scale from viewBox to marker size
+    const vbW = vb?.width || mw;
+    const vbH = vb?.height || mh;
+    const scaleX = mw / vbW;
+    const scaleY = mh / vbH;
+
+    // Get stroke width for markerUnits="strokeWidth" (default)
+    const sw = parseFloat(cs.strokeWidth) || 1;
+
+    // Build transform: translate to position, rotate, scale by strokeWidth and viewBox ratio
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+    const s = sw; // markerUnits="strokeWidth" multiplier
+
+    // Extract shapes from marker children
+    for (const child of Array.from(marker.children)) {
+      if (child instanceof SVGPathElement) {
+        let totalLength: number;
+        try { totalLength = child.getTotalLength(); } catch { continue; }
+        if (totalLength === 0) continue;
+
+        const rawPts: Point[] = [];
+        const sampleCount = Math.max(32, Math.ceil(totalLength / 2));
+        for (let i = 0; i <= sampleCount; i++) {
+          const pt = child.getPointAtLength((totalLength * i) / sampleCount);
+          rawPts.push({ x: pt.x, y: pt.y });
+        }
+
+        // Transform: shift by -refX/-refY, scale, rotate, translate to position
+        const transformed = rawPts.map(p => {
+          const lx = (p.x - refX) * scaleX * s;
+          const ly = (p.y - refY) * scaleY * s;
+          return {
+            x: pos.x + lx * cosA - ly * sinA,
+            y: pos.y + lx * sinA + ly * cosA,
+          };
+        });
+
+        // Get marker shape's fill
+        const childCs = getComputedStyle(child);
+        const childFill = childCs.fill || child.getAttribute("fill") || undefined;
+        const childStroke = childCs.stroke || child.getAttribute("stroke") || undefined;
+        const markerStyle: Style = {
+          ...style,
+          fill: childFill !== "none" ? childFill : undefined,
+          stroke: childStroke !== "none" ? childStroke : undefined,
+        };
+
+        results.push({ type: "polyline", points: transformed, closed: true, style: markerStyle, zIndex });
+      } else if (child instanceof SVGPolygonElement || child instanceof SVGPolylineElement) {
+        const rawPts: Point[] = [];
+        for (let i = 0; i < child.points.numberOfItems; i++) {
+          const pt = child.points.getItem(i);
+          rawPts.push({ x: pt.x, y: pt.y });
+        }
+        const transformed = rawPts.map(p => {
+          const lx = (p.x - refX) * scaleX * s;
+          const ly = (p.y - refY) * scaleY * s;
+          return {
+            x: pos.x + lx * cosA - ly * sinA,
+            y: pos.y + lx * sinA + ly * cosA,
+          };
+        });
+        const childCs = getComputedStyle(child);
+        const childFill = childCs.fill || child.getAttribute("fill") || undefined;
+        const markerStyle: Style = { ...style, fill: childFill !== "none" ? childFill : undefined };
+        results.push({ type: "polyline", points: transformed, closed: child instanceof SVGPolygonElement, style: markerStyle, zIndex });
+      }
+    }
+  }
+
+  // marker-start: place at first point, angle from first segment
+  const startMarker = resolveMarker(markerStart);
+  if (startMarker) {
+    const angle = Math.atan2(points[1].y - points[0].y, points[1].x - points[0].x);
+    placeMarker(startMarker, points[0], angle);
+  }
+
+  // marker-end: place at last point, angle from last segment
+  const endMarker = resolveMarker(markerEnd);
+  if (endMarker && points.length >= 2) {
+    const n = points.length;
+    const angle = Math.atan2(points[n - 1].y - points[n - 2].y, points[n - 1].x - points[n - 2].x);
+    placeMarker(endMarker, points[n - 1], angle);
+  }
+
+  // marker-mid: place at all middle points
+  const midMarker = resolveMarker(markerMid);
+  if (midMarker) {
+    for (let i = 1; i < points.length - 1; i++) {
+      const angle = Math.atan2(points[i + 1].y - points[i - 1].y, points[i + 1].x - points[i - 1].x);
+      placeMarker(midMarker, points[i], angle);
+    }
+  }
+
+  return results;
 }
 
 function extractText(el: SVGTextElement, style: Style, zIndex: number): IRNode[] {

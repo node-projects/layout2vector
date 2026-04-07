@@ -32,7 +32,10 @@ export function extractBackgroundImage(
   if (!bg || bg === "none") return [];
 
   // Extract the URL from url("...") or url('...') or url(...)
-  const urlMatch = bg.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
+  // Use separate patterns: quoted (allows parens inside) vs unquoted
+  const urlMatch = bg.match(/url\s*\(\s*"([^"]+)"\s*\)/) ||
+                   bg.match(/url\s*\(\s*'([^']+)'\s*\)/) ||
+                   bg.match(/url\s*\(\s*([^)]+)\s*\)/);
   if (!urlMatch) return [];
 
   const rect = el.getBoundingClientRect();
@@ -220,6 +223,11 @@ function remapIRNodes(nodes: IRNode[], w: number, h: number, targetQuad: Quad): 
   }
 }
 
+/** Strip XML declaration and DOCTYPE which cause DOMParser errors. */
+function stripXmlPreamble(svg: string): string {
+  return svg.replace(/<\?xml[^?]*\?>\s*/g, "").replace(/<!DOCTYPE[^>]*>\s*/g, "");
+}
+
 /** Convert background SVG to vector geometry. */
 function convertBgSvgToGeometry(
   svgContent: string,
@@ -229,7 +237,7 @@ function convertBgSvgToGeometry(
   options: Options
 ): IRNode[] {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(svgContent, "image/svg+xml");
+  const doc = parser.parseFromString(stripXmlPreamble(svgContent), "image/svg+xml");
   const parsedSvg = doc.documentElement;
 
   if (parsedSvg.tagName.toLowerCase() !== "svg") return [];
@@ -455,9 +463,9 @@ function convertSvgToGeometry(
   globalIndex: number,
   options: Options
 ): IRNode[] {
-  // Parse SVG in a safe document context
+  // Parse SVG in a safe document context (strip XML preamble that causes parse errors)
   const parser = new DOMParser();
-  const doc = parser.parseFromString(svgContent, "image/svg+xml");
+  const doc = parser.parseFromString(stripXmlPreamble(svgContent), "image/svg+xml");
   const parsedSvg = doc.documentElement;
 
   if (parsedSvg.tagName.toLowerCase() !== "svg") return [];
