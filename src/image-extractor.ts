@@ -371,11 +371,14 @@ export function extractImageGeometry(
   const quad = getElementQuad(el);
   if (!quad) return [];
 
+  // Adjust quad for object-fit: contain/cover
+  const adjustedQuad = adjustQuadForObjectFit(el, quad);
+
   // Try converting SVG images to vector geometry
   if (isSvgSource(src)) {
     const svgContent = extractSvgContent(src);
     if (svgContent) {
-      const svgNodes = convertSvgToGeometry(svgContent, el, quad, globalIndex, options);
+      const svgNodes = convertSvgToGeometry(svgContent, el, adjustedQuad, globalIndex, options);
       if (svgNodes.length > 0) return svgNodes;
     }
     // Fallback: rasterize SVG via canvas (below)
@@ -387,13 +390,70 @@ export function extractImageGeometry(
 
   return [{
     type: "image",
-    quad,
+    quad: adjustedQuad,
     dataUrl,
     width: el.naturalWidth || el.width,
     height: el.naturalHeight || el.height,
     style,
     zIndex: globalIndex,
   }];
+}
+
+/**
+ * Adjust a quad for CSS object-fit: contain.
+ * When object-fit: contain is set, the image is scaled to fit within the
+ * element box while maintaining aspect ratio, centered in the box.
+ */
+function adjustQuadForObjectFit(el: HTMLImageElement, quad: Quad): Quad {
+  const objectFit = getComputedStyle(el).objectFit;
+  if (objectFit !== "contain" && objectFit !== "scale-down") return quad;
+
+  const natW = el.naturalWidth;
+  const natH = el.naturalHeight;
+  if (!natW || !natH) return quad;
+
+  // Compute the element box dimensions from the quad edges
+  const boxW = Math.sqrt((quad[1].x - quad[0].x) ** 2 + (quad[1].y - quad[0].y) ** 2);
+  const boxH = Math.sqrt((quad[3].x - quad[0].x) ** 2 + (quad[3].y - quad[0].y) ** 2);
+  if (boxW === 0 || boxH === 0) return quad;
+
+  const imgAspect = natW / natH;
+  const boxAspect = boxW / boxH;
+
+  // If aspect ratios match closely, no adjustment needed
+  if (Math.abs(imgAspect - boxAspect) < 0.01) return quad;
+
+  // Compute the fitted image size
+  let fitW: number, fitH: number;
+  if (imgAspect > boxAspect) {
+    // Image is wider than box: fit width, shrink height
+    fitW = boxW;
+    fitH = boxW / imgAspect;
+  } else {
+    // Image is taller than box: fit height, shrink width
+    fitH = boxH;
+    fitW = boxH * imgAspect;
+  }
+
+  // Compute centering offsets as fractions
+  const offsetU = (boxW - fitW) / (2 * boxW); // fraction along top edge
+  const offsetV = (boxH - fitH) / (2 * boxH); // fraction along left edge
+  const endU = 1 - offsetU;
+  const endV = 1 - offsetV;
+
+  // Interpolate quad corners to get the fitted sub-quad
+  // quad: [topLeft, topRight, bottomRight, bottomLeft]
+  const lerp = (a: { x: number; y: number }, b: { x: number; y: number }, t: number) => ({
+    x: a.x + (b.x - a.x) * t,
+    y: a.y + (b.y - a.y) * t,
+  });
+
+  const tl = lerp(lerp(quad[0], quad[1], offsetU), lerp(quad[3], quad[2], offsetU), offsetV);
+  const tr = lerp(lerp(quad[0], quad[1], endU), lerp(quad[3], quad[2], endU), offsetV);
+  const br = lerp(lerp(quad[0], quad[1], endU), lerp(quad[3], quad[2], endU), endV);
+  const bl = lerp(lerp(quad[0], quad[1], offsetU), lerp(quad[3], quad[2], offsetU), endV);
+
+  return [tl, tr, br, bl] as Quad;
 }
 
 /** Check if a source URL points to an SVG. */

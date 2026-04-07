@@ -81,22 +81,26 @@ export function getSvgScreenCtm(el: SVGGraphicsElement): DOMMatrix {
     const screenCtm = el.getScreenCTM();
     if (!screenCtm) return new DOMMatrix();
 
-    // Get the SVG root's position via getScreenCTM (maps SVG (0,0) to screen)
+    // Get the SVG root element
     const svgRoot = el.ownerSVGElement;
     if (!svgRoot) return screenCtm;
 
-    const rootScreenCtm = svgRoot.getScreenCTM();
-    if (!rootScreenCtm) return screenCtm;
-
-    // Where getScreenCTM places the SVG root's origin
-    const screenOrigin = { x: rootScreenCtm.e, y: rootScreenCtm.f };
-
-    // Where getBoxQuads places the SVG root's origin
+    // Compare the SVG root's position from getBoundingClientRect (screen coords)
+    // with getBoxQuads (which may come from a polyfill and differ).
+    // We use BCR — not rootScreenCtm.e/f — because the root's getScreenCTM()
+    // includes viewBox/preserveAspectRatio offsets which are NOT the element's
+    // visual top-left corner.
+    const bcr = svgRoot.getBoundingClientRect();
     const boxOrigin = getElementOrigin(svgRoot);
 
-    // Compute the offset between the two coordinate systems
-    const dx = boxOrigin.x - screenOrigin.x;
-    const dy = boxOrigin.y - screenOrigin.y;
+    // Only apply adjustment if boxQuads and BCR agree (polyfill is reliable).
+    // If they disagree (polyfill bug, e.g. body margin offset), trust screenCtm.
+    if (Math.abs(boxOrigin.x - bcr.left) > 1 || Math.abs(boxOrigin.y - bcr.top) > 1) {
+      return screenCtm;
+    }
+
+    const dx = boxOrigin.x - bcr.left;
+    const dy = boxOrigin.y - bcr.top;
 
     // If there's no difference, skip the adjustment
     if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) return screenCtm;
