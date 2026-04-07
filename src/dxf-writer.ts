@@ -119,6 +119,7 @@ export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriter;
   private maxY: number;
   private imageCounter = 0;
+  private fontStyles = new Map<string, string>();
 
   /**
    * Image files referenced by the DXF output.
@@ -139,6 +140,23 @@ export class DXFWriter implements Writer<string> {
     this.dxf = new DxfWriter();
     this.imageCounter = 0;
     this.imageFiles.clear();
+    this.fontStyles.clear();
+  }
+
+  /** Get or create a DXF text style for a given font family. Returns the style name. */
+  private getTextStyle(fontFamily: string | undefined): string | undefined {
+    if (!fontFamily) return undefined;
+    // Extract the first font name from the CSS font-family list
+    const name = fontFamily.split(",")[0]?.trim().replace(/['"]/g, "");
+    if (!name || name === "serif" || name === "sans-serif" || name === "monospace") return undefined;
+
+    if (this.fontStyles.has(name)) return this.fontStyles.get(name)!;
+
+    // Create a DXF text style referencing this TrueType font
+    const style = this.dxf.tables.addStyle(name);
+    style.fontFileName = name + ".ttf";
+    this.fontStyles.set(name, name);
+    return name;
   }
 
   /** Add a HATCH entity with SOLID fill for the given vertices. */
@@ -254,23 +272,39 @@ export class DXFWriter implements Writer<string> {
     const sanitized = text.replace(/\s+/g, " ").trim();
     if (!sanitized) return;
 
+    // Compute rotation angle from quad top edge (topLeft → topRight)
+    const dx = quad[1].x - quad[0].x;
+    const dy = quad[1].y - quad[0].y;
+    const angleRad = Math.atan2(dy, dx);
+    // DXF Y-up vs browser Y-down — negate the angle
+    const angleDeg = -angleRad * (180 / Math.PI);
+
+    // Compute text height from left edge of quad
+    const ldx = quad[3].x - quad[0].x;
+    const ldy = quad[3].y - quad[0].y;
+    const height = Math.sqrt(ldx * ldx + ldy * ldy) || 12;
+
     // Position text at the bottom-left of the quad (DXF convention)
     const bottomLeft = quad[3];
-    const topLeft = quad[0];
-
-    // Estimate text height from the quad
-    const height = Math.abs(topLeft.y - bottomLeft.y) || 12;
 
     // Text color: prefer style.color (CSS color), then style.fill
     const trueColor = getTrueColor(style.color) ?? getTrueColor(style.fill);
-    const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
+    const opts: Record<string, any> = {};
+    if (trueColor !== undefined) opts.trueColor = String(trueColor);
+    if (Math.abs(angleDeg) > 0.1) opts.rotation = angleDeg;
 
-    this.dxf.addText(
+    const textEntity = this.dxf.addText(
       point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
       height,
       sanitized,
-      opts
+      Object.keys(opts).length > 0 ? opts : undefined
     );
+
+    // Assign font-specific text style if needed
+    const textStyleName = this.getTextStyle(style.fontFamily);
+    if (textStyleName) {
+      textEntity.textStyle = textStyleName;
+    }
   }
 
   drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): void {

@@ -22,7 +22,11 @@ export function extractSVGSubtree(
   const results: IRNode[] = [];
   let orderIndex = baseZIndex;
 
-  walkSVGTree(svgRoot, results, () => orderIndex++, options);
+  // Get the SVG root's own opacity as the starting parent opacity
+  const rootCs = getComputedStyle(svgRoot);
+  const rootOpacity = rootCs.opacity ? parseFloat(rootCs.opacity) : 1;
+
+  walkSVGTree(svgRoot, results, () => orderIndex++, options, rootOpacity);
   return results;
 }
 
@@ -30,7 +34,8 @@ function walkSVGTree(
   el: Element,
   results: IRNode[],
   nextIndex: () => number,
-  options: Options
+  options: Options,
+  parentOpacity: number
 ): void {
   // Skip non-rendering container elements — their children are referenced
   // indirectly (e.g. via <use>, marker-end, clip-path) and should not be
@@ -41,15 +46,20 @@ function walkSVGTree(
     return;
   }
 
+  // Compute this element's effective opacity
+  const cs = getComputedStyle(el);
+  const ownOpacity = cs.opacity ? parseFloat(cs.opacity) : 1;
+  const effectiveOpacity = parentOpacity * ownOpacity;
+
   // Process this element if it's a renderable SVG shape
   if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement) {
-    const nodes = extractSVGElement(el, nextIndex(), options);
+    const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity);
     results.push(...nodes);
   }
 
   // Walk children (DOM order = paint order in SVG)
   for (const child of Array.from(el.children)) {
-    walkSVGTree(child, results, nextIndex, options);
+    walkSVGTree(child, results, nextIndex, options, effectiveOpacity);
   }
 }
 
@@ -57,11 +67,15 @@ function walkSVGTree(
 function extractSVGElement(
   el: SVGGraphicsElement,
   zIndex: number,
-  options: Options
+  options: Options,
+  effectiveOpacity: number
 ): IRNode[] {
   const cs = getComputedStyle(el);
   const ctm = getCtm(el);
   const style = extractSVGStyle(cs, el, ctm);
+
+  // Override opacity with the effective (inherited) opacity
+  style.opacity = effectiveOpacity;
 
   const tag = el.tagName.toLowerCase();
 
@@ -287,6 +301,10 @@ function extractPathBySampling(
 
   if (totalLength === 0) return [];
 
+  // Detect if the path is closed by checking for Z/z command in path data
+  const pathData = el.getAttribute("d") ?? "";
+  const closed = /[Zz]\s*$/.test(pathData.trim()) || /[Zz]/.test(pathData);
+
   const points: Point[] = [];
   const sampleCount = Math.max(PATH_SAMPLE_COUNT, Math.ceil(totalLength / 2));
 
@@ -297,7 +315,7 @@ function extractPathBySampling(
   }
 
   const transformed = transformPoints(points, el);
-  const results: IRNode[] = [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
+  const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
   results.push(...extractMarkers(el, transformed, style, zIndex));
   return results;
 }

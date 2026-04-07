@@ -187,4 +187,73 @@ test.describe("SVG Geometry Extraction", () => {
     expect(rect.points[0].x).toBeCloseTo(50, 0);
     expect(rect.points[0].y).toBeCloseTo(50, 0);
   });
+
+  test("propagates parent opacity to SVG text", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <g opacity="0.5">
+            <text x="10" y="50" font-size="20">Half opacity</text>
+          </g>
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, { includeText: true });
+    });
+
+    const texts = ir.filter((n: any) => n.type === "text");
+    expect(texts.length).toBeGreaterThanOrEqual(1);
+    expect(texts[0].text).toContain("Half opacity");
+    // Opacity should be 0.5 (inherited from parent <g>)
+    expect(texts[0].style.opacity).toBeCloseTo(0.5, 1);
+  });
+
+  test("multiplies nested parent opacities in SVG", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <g opacity="0.5">
+            <g opacity="0.4">
+              <rect x="10" y="10" width="50" height="50" fill="red" />
+            </g>
+          </g>
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polygons = ir.filter((n: any) => n.type === "polygon");
+    expect(polygons.length).toBeGreaterThanOrEqual(1);
+    // Effective opacity: 0.5 * 0.4 = 0.2
+    expect(polygons[0].style.opacity).toBeCloseTo(0.2, 1);
+  });
+
+  test("detects closed SVG paths", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 10 10 L 100 10 L 100 100 Z" fill="green" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
+    expect(polylines[0].closed).toBe(true);
+  });
 });

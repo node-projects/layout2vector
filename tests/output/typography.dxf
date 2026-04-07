@@ -13,7 +13,7 @@ $LASTSAVEDBY
 9
 $HANDSEED
 5
-43
+44
 9
 $INSUNITS
 70
@@ -305,7 +305,7 @@ STYLE
 100
 AcDbSymbolTable
 70
-1
+2
 0
 STYLE
 5
@@ -332,6 +332,34 @@ Standard
 1
 3
 txt
+4
+
+0
+STYLE
+5
+1B
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+2
+Arial
+70
+0
+40
+0
+41
+1
+50
+0
+71
+0
+42
+1
+3
+Arial.ttf
 4
 
 0
@@ -583,13 +611,13 @@ AcDbText
 1
 Text Wrapping
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 LWPOLYLINE
 5
-1B
+1C
 330
 C
 100
@@ -781,7 +809,7 @@ AcDbPolyline
 0
 TEXT
 5
-1C
+1D
 330
 C
 100
@@ -803,13 +831,13 @@ AcDbText
 1
 Lorem ipsum dolor sit amet,
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-1D
+1E
 330
 C
 100
@@ -831,13 +859,13 @@ AcDbText
 1
 consectetur adipiscing elit. Sed do
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-1E
+1F
 330
 C
 100
@@ -859,13 +887,13 @@ AcDbText
 1
 eiusmod tempor incididunt ut labore
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-1F
+20
 330
 C
 100
@@ -887,13 +915,13 @@ AcDbText
 1
 et dolore magna aliqua.
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-20
+21
 330
 C
 100
@@ -915,13 +943,13 @@ AcDbText
 1
 Font Sizes & Weights
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-21
+22
 330
 C
 100
@@ -943,13 +971,13 @@ AcDbText
 1
 Large Bold Title
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-22
+23
 330
 C
 100
@@ -971,13 +999,13 @@ AcDbText
 1
 Italic text content
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-23
+24
 330
 C
 100
@@ -999,13 +1027,13 @@ AcDbText
 1
 Text Decorations
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-24
+25
 330
 C
 100
@@ -1027,13 +1055,13 @@ AcDbText
 1
 Underlined text
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-25
+26
 330
 C
 100
@@ -1055,13 +1083,13 @@ AcDbText
 1
 Strikethrough text
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-26
+27
 330
 C
 100
@@ -1083,13 +1111,13 @@ AcDbText
 1
 Text Shadow
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-27
+28
 330
 C
 100
@@ -1111,13 +1139,13 @@ AcDbText
 1
 Shadow Text
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-28
+29
 330
 C
 100
@@ -1139,13 +1167,13 @@ AcDbText
 1
 Text Overflow
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 LWPOLYLINE
 5
-29
+2A
 330
 C
 100
@@ -1337,7 +1365,7 @@ AcDbPolyline
 0
 TEXT
 5
-2A
+2B
 330
 C
 100
@@ -1359,13 +1387,13 @@ AcDbText
 1
 This is a very long text that should be truncated with an ellipsis at the end
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-2B
+2C
 330
 C
 100
@@ -1387,13 +1415,13 @@ AcDbText
 1
 Text Alignment
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 LWPOLYLINE
 5
-2C
+2D
 330
 C
 100
@@ -1437,7 +1465,7 @@ AcDbPolyline
 0
 TEXT
 5
-2D
+2E
 330
 C
 100
@@ -1459,13 +1487,13 @@ AcDbText
 1
 Right aligned
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-2E
+2F
 330
 C
 100
@@ -1487,13 +1515,13 @@ AcDbText
 1
 Center aligned
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-2F
+30
 330
 C
 100
@@ -1515,13 +1543,13 @@ AcDbText
 1
 Justified text that spans across the full width of
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-30
+31
 330
 C
 100
@@ -1543,13 +1571,13 @@ AcDbText
 1
 the container element here.
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-31
+32
 330
 C
 100
@@ -1571,13 +1599,13 @@ AcDbText
 1
 Multi-column Text
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 LWPOLYLINE
 5
-32
+33
 330
 C
 100
@@ -1621,7 +1649,7 @@ AcDbPolyline
 0
 TEXT
 5
-33
+34
 330
 C
 100
@@ -1643,13 +1671,13 @@ AcDbText
 1
 Lorem ipsum dolor sit amet,
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-34
+35
 330
 C
 100
@@ -1671,13 +1699,13 @@ AcDbText
 1
 consectetur adipiscing elit. Nulla
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-35
+36
 330
 C
 100
@@ -1699,13 +1727,13 @@ AcDbText
 1
 facilisi. Duis aute irure dolor in
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-36
+37
 330
 C
 100
@@ -1727,13 +1755,13 @@ AcDbText
 1
 reprehenderit in voluptate velit
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-37
+38
 330
 C
 100
@@ -1755,13 +1783,13 @@ AcDbText
 1
 esse cillum dolore eu fugiat nulla
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-38
+39
 330
 C
 100
@@ -1783,13 +1811,13 @@ AcDbText
 1
 pariatur. Excepteur sint occaecat
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-39
+3A
 330
 C
 100
@@ -1811,13 +1839,13 @@ AcDbText
 1
 cupidatat non proident.
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3A
+3B
 330
 C
 100
@@ -1839,13 +1867,13 @@ AcDbText
 1
 Inline Formatting
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3B
+3C
 330
 C
 100
@@ -1867,13 +1895,13 @@ AcDbText
 1
 This has
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3C
+3D
 330
 C
 100
@@ -1895,13 +1923,13 @@ AcDbText
 1
 and
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3D
+3E
 330
 C
 100
@@ -1923,13 +1951,13 @@ AcDbText
 1
 and
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3E
+3F
 330
 C
 100
@@ -1951,13 +1979,13 @@ AcDbText
 1
 mixed together in a single paragraph.
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-3F
+40
 330
 C
 100
@@ -1979,13 +2007,13 @@ AcDbText
 1
 italic emphasis
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 TEXT
 5
-40
+41
 330
 C
 100
@@ -2007,13 +2035,13 @@ AcDbText
 1
 bold text
 7
-STANDARD
+Arial
 100
 AcDbText
 0
 LWPOLYLINE
 5
-41
+42
 330
 C
 100
@@ -2205,7 +2233,7 @@ AcDbPolyline
 0
 TEXT
 5
-42
+43
 330
 C
 100
