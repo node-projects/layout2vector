@@ -16,6 +16,8 @@ import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgr
 
 /**
  * Extract the full IR from a root DOM element.
+ * All coordinates in the returned IR are relative to the root element's
+ * top-left corner (border box), not the page origin.
  * This is the main pipeline entry point.
  */
 export function extractIR(root: Element, options: Options = {}): IRNode[] {
@@ -25,7 +27,7 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
   // 2. Flatten to paint order
   const ordered = flattenStackingOrder(stackingTree);
 
-  // 3. Extract geometry from each node
+  // 3. Extract geometry from each node (in absolute page coordinates)
   const irNodes: IRNode[] = [];
   let globalIndex = 0;
 
@@ -69,7 +71,35 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
     }
   }
 
+  // 4. Offset coordinates so they are relative to the root element's top-left
+  const rootRect = root.getBoundingClientRect();
+  offsetIRNodes(irNodes, rootRect.left, rootRect.top);
+
   return irNodes;
+}
+
+/**
+ * Subtract (ox, oy) from every coordinate in the IR node list,
+ * converting from absolute page coordinates to root-relative coordinates.
+ */
+function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
+  if (ox === 0 && oy === 0) return;
+  for (const node of nodes) {
+    switch (node.type) {
+      case "polygon":
+        for (const p of node.points) { p.x -= ox; p.y -= oy; }
+        break;
+      case "polyline":
+        for (const p of node.points) { p.x -= ox; p.y -= oy; }
+        break;
+      case "text":
+        for (const p of node.quad) { p.x -= ox; p.y -= oy; }
+        break;
+      case "image":
+        for (const p of node.quad) { p.x -= ox; p.y -= oy; }
+        break;
+    }
+  }
 }
 
 /**

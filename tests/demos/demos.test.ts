@@ -119,11 +119,20 @@ for (const demoFile of demoFiles) {
 
     expect(ir.length).toBeGreaterThan(0);
 
-    // Get page dimensions for DXF Y-flip
-    const viewport = await page.evaluate(() => ({
-      width: document.documentElement.scrollWidth,
-      height: document.documentElement.scrollHeight,
-    }));
+    // Compute bounding box of all IR nodes to determine output dimensions.
+    // Coordinates are root-relative, so the extent of the content defines the viewport.
+    let maxX = 0, maxY = 0;
+    for (const node of ir) {
+      const pts: Array<{ x: number; y: number }> =
+        node.type === "polygon" || node.type === "polyline" ? node.points
+        : node.type === "text" || node.type === "image" ? node.quad
+        : [];
+      for (const p of pts) {
+        if (p.x > maxX) maxX = p.x;
+        if (p.y > maxY) maxY = p.y;
+      }
+    }
+    const viewport = { width: Math.ceil(maxX) || 1, height: Math.ceil(maxY) || 1 };
 
     // --- DXF output ---
     const dxfWriter = new DXFWriter(viewport.height);
