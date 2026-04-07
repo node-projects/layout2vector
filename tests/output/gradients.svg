@@ -3,7 +3,7 @@
 <defs>
 <linearGradient id="lg1" x1="52.5" y1="134.5" x2="217.5" y2="299.5" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(102, 126, 234)"/><stop offset="100%" stop-color="rgb(118, 75, 162)"/></linearGradient>
 <radialGradient id="rg2" cx="359" cy="116" r="75" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(255, 154, 158)"/><stop offset="50%" stop-color="rgb(254, 207, 239)"/><stop offset="100%" stop-color="rgb(253, 252, 251)"/></radialGradient>
-<linearGradient id="lg3" x1="675.5" y1="299.5" x2="840.5" y2="134.5" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(96, 109, 188)"/><stop offset="33.33%" stop-color="rgb(96, 109, 188) 10px"/><stop offset="66.67%" stop-color="rgb(70, 82, 152) 10px"/><stop offset="100%" stop-color="rgb(70, 82, 152) 20px"/></linearGradient>
+<linearGradient id="lg3" x1="675.5" y1="299.5" x2="689.64" y2="285.36" gradientUnits="userSpaceOnUse" spreadMethod="repeat"><stop offset="0%" stop-color="rgb(96, 109, 188)"/><stop offset="50%" stop-color="rgb(96, 109, 188)"/><stop offset="50%" stop-color="rgb(70, 82, 152)"/><stop offset="100%" stop-color="rgb(70, 82, 152)"/></linearGradient>
 <linearGradient id="lg4" x1="908" y1="226" x2="1208" y2="226" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(255, 0, 0, 0.5)"/><stop offset="100%" stop-color="rgba(0, 0, 0, 0)"/></linearGradient>
 <filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="5" dy="5" stdDeviation="7.5" flood-color="rgba(0, 0, 0, 0.3)" result="s0"/><feDropShadow dx="-2" dy="-2" stdDeviation="4" flood-color="rgba(0, 0, 0, 0.1)" result="s1"/></filter>
 <clipPath id="ic6"><rect x="264" y="357" width="200" height="80" rx="8" ry="8"/></clipPath>

@@ -496,7 +496,7 @@ export class PNGWriter implements Writer<PNGResult> {
     if (stroke) {
       ctx.strokeStyle = stroke.color;
       ctx.lineWidth = stroke.width;
-      this.applyDashArray(ctx, style);
+      this.applyDashArray(ctx, style, stroke.width);
       ctx.stroke();
     }
 
@@ -605,10 +605,12 @@ export class PNGWriter implements Writer<PNGResult> {
         ctx.fill();
       }
     }
-    if (stroke) {
+    if (points && this.hasMixedBorders(style)) {
+      this.drawPerSideBorders(ctx, points, style);
+    } else if (stroke) {
       ctx.strokeStyle = stroke.color;
       ctx.lineWidth = stroke.width;
-      this.applyDashArray(ctx, style);
+      this.applyDashArray(ctx, style, stroke.width);
       ctx.stroke();
     }
   }
@@ -815,12 +817,22 @@ export class PNGWriter implements Writer<PNGResult> {
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
 
-  private applyDashArray(ctx: CanvasRenderingContext2D, style: Style): void {
+  private applyDashArray(ctx: CanvasRenderingContext2D, style: Style, strokeWidth?: number): void {
     if (style.strokeDasharray && style.strokeDasharray !== "none") {
       const dashes = style.strokeDasharray.split(/[\s,]+/).map(Number).filter(n => !isNaN(n) && n >= 0);
       if (dashes.length > 0) {
         ctx.setLineDash(dashes);
+        return;
       }
+    }
+    // CSS border-style: dashed/dotted
+    const w = strokeWidth ?? 1;
+    const bs = style.borderTopStyle;
+    if (bs === "dashed") {
+      ctx.setLineDash([w * 3, w * 3]);
+    } else if (bs === "dotted") {
+      ctx.setLineDash([w, w]);
+      ctx.lineCap = "round";
     }
   }
 
@@ -974,6 +986,86 @@ export class PNGWriter implements Writer<PNGResult> {
       ctx.moveTo(textX, y);
       ctx.lineTo(textX + textWidth, y);
       ctx.stroke();
+    }
+  }
+
+  /** Check if borders have different colors/widths/styles per side, requiring per-side drawing. */
+  private hasMixedBorders(style: Style): boolean {
+    // Don't use per-side drawing for rounded rects (corners need arcs)
+    if (style.borderRadius && style.borderRadius !== "0px" && style.borderRadius !== "0%") return false;
+
+    const sides = [
+      { c: style.borderTopColor, w: style.borderTopWidth, s: style.borderTopStyle },
+      { c: style.borderRightColor, w: style.borderRightWidth, s: style.borderRightStyle },
+      { c: style.borderBottomColor, w: style.borderBottomWidth, s: style.borderBottomStyle },
+      { c: style.borderLeftColor, w: style.borderLeftWidth, s: style.borderLeftStyle },
+    ];
+
+    if (!sides[0].s) return false;
+    if (sides.some(s => s.s === "double")) return true;
+
+    const ref = sides[0];
+    return sides.some(s => s.c !== ref.c || s.w !== ref.w || s.s !== ref.s);
+  }
+
+  /** Draw each border side independently with its own color, width, and style. */
+  private drawPerSideBorders(ctx: CanvasRenderingContext2D, points: Quad, style: Style): void {
+    const sides: Array<{
+      from: Point; to: Point;
+      color?: string; width?: string; borderStyle?: string;
+    }> = [
+      { from: points[0], to: points[1], color: style.borderTopColor, width: style.borderTopWidth, borderStyle: style.borderTopStyle },
+      { from: points[1], to: points[2], color: style.borderRightColor, width: style.borderRightWidth, borderStyle: style.borderRightStyle },
+      { from: points[2], to: points[3], color: style.borderBottomColor, width: style.borderBottomWidth, borderStyle: style.borderBottomStyle },
+      { from: points[3], to: points[0], color: style.borderLeftColor, width: style.borderLeftWidth, borderStyle: style.borderLeftStyle },
+    ];
+
+    for (const side of sides) {
+      const color = parseColor(side.color);
+      const w = side.width ? parseFloat(side.width) : 0;
+      if (!color || w <= 0 || !side.borderStyle || side.borderStyle === "none" || side.borderStyle === "hidden") continue;
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = w;
+      ctx.setLineDash([]);
+
+      if (side.borderStyle === "dashed") {
+        ctx.setLineDash([w * 3, w * 3]);
+      } else if (side.borderStyle === "dotted") {
+        ctx.setLineDash([w, w]);
+        ctx.lineCap = "round";
+      } else if (side.borderStyle === "double" && w >= 3) {
+        const lineW = Math.max(1, w / 3);
+        ctx.lineWidth = lineW;
+        const dx = side.to.x - side.from.x;
+        const dy = side.to.y - side.from.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len > 0) {
+          // Inward normal for clockwise winding
+          const nx = -dy / len;
+          const ny = dx / len;
+          const off = w / 3;
+          // Outer line
+          ctx.beginPath();
+          ctx.moveTo(side.from.x - nx * off, side.from.y - ny * off);
+          ctx.lineTo(side.to.x - nx * off, side.to.y - ny * off);
+          ctx.stroke();
+          // Inner line
+          ctx.beginPath();
+          ctx.moveTo(side.from.x + nx * off, side.from.y + ny * off);
+          ctx.lineTo(side.to.x + nx * off, side.to.y + ny * off);
+          ctx.stroke();
+        }
+        ctx.restore();
+        continue;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(side.from.x, side.from.y);
+      ctx.lineTo(side.to.x, side.to.y);
+      ctx.stroke();
+      ctx.restore();
     }
   }
 

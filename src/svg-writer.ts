@@ -63,8 +63,8 @@ function n(v: number): string {
 // ── Gradient parsing (subset of png-writer logic) ───────────────────
 
 interface GradientStop { offset: number; color: string; }
-interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; }
-interface RadialGradient { type: "radial"; stops: GradientStop[]; }
+interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; repeating: boolean; }
+interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
 interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
@@ -97,13 +97,25 @@ function parseColorStops(argsStr: string): GradientStop[] {
 
   for (const part of parts) {
     const percentMatch = part.match(/([\d.]+)%\s*$/);
-    const colorStr = percentMatch ? part.slice(0, percentMatch.index).trim() : part.trim();
+    const pxMatch = !percentMatch ? part.match(/([\d.]+)px\s*$/) : null;
+    const colorStr = (percentMatch || pxMatch)
+      ? part.slice(0, (percentMatch || pxMatch)!.index).trim()
+      : part.trim();
     if (!colorStr) continue;
-    const offset = percentMatch ? parseFloat(percentMatch[1]) / 100 : -1;
+    let offset = -1;
+    if (percentMatch) offset = parseFloat(percentMatch[1]) / 100;
+    else if (pxMatch) offset = parseFloat(pxMatch[1]); // raw px value
     stops.push({ offset, color: colorStr });
   }
 
   if (stops.length > 0) {
+    // Check for px-based stops (raw values > 1)
+    const hasPxStops = stops.some(s => s.offset > 1);
+    if (hasPxStops) {
+      if (stops[0].offset < 0) stops[0].offset = 0;
+      return stops; // px normalization happens in addGradientDef
+    }
+
     if (stops[0].offset < 0) stops[0].offset = 0;
     if (stops[stops.length - 1].offset < 0) stops[stops.length - 1].offset = 1;
     let lastKnown = 0;
@@ -136,9 +148,10 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   const gradientStr = extractFirstGradient(bgImage);
   if (!gradientStr) return null;
 
-  const linearMatch = gradientStr.match(/^(?:repeating-)?linear-gradient\((.+)\)$/);
+  const linearMatch = gradientStr.match(/^(repeating-)?linear-gradient\((.+)\)$/);
   if (linearMatch) {
-    const inner = linearMatch[1];
+    const repeating = !!linearMatch[1];
+    const inner = linearMatch[2];
     let depth = 0, splitIdx = -1;
     for (let i = 0; i < inner.length; i++) {
       if (inner[i] === "(") depth++; else if (inner[i] === ")") depth--;
@@ -154,12 +167,13 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
-    return { type: "linear", angleDeg, stops };
+    return { type: "linear", angleDeg, stops, repeating };
   }
 
-  const radialMatch = gradientStr.match(/^(?:repeating-)?radial-gradient\((.+)\)$/);
+  const radialMatch = gradientStr.match(/^(repeating-)?radial-gradient\((.+)\)$/);
   if (radialMatch) {
-    let inner = radialMatch[1];
+    const repeating = !!radialMatch[1];
+    let inner = radialMatch[2];
     // Strip optional shape/size prefix (e.g. "circle", "ellipse", "closest-side", "farthest-corner at center")
     let depth = 0, splitIdx = -1;
     for (let i = 0; i < inner.length; i++) {
@@ -174,7 +188,7 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(inner);
     if (stops.length < 2) return null;
-    return { type: "radial", stops };
+    return { type: "radial", stops, repeating };
   }
 
   const conicMatch = gradientStr.match(/^conic-gradient\((.+)\)$/);
@@ -514,33 +528,68 @@ export class SVGWriter implements Writer<string> {
       const angleRad = ((gradient.angleDeg - 90) * Math.PI) / 180;
       const cos = Math.cos(angleRad);
       const sin = Math.sin(angleRad);
-      // Compute gradient line endpoints in the bounding box
       const halfDiag = Math.abs(w * cos) / 2 + Math.abs(h * sin) / 2;
-      const x1 = cx - cos * halfDiag;
-      const y1 = cy - sin * halfDiag;
-      const x2 = cx + cos * halfDiag;
-      const y2 = cy + sin * halfDiag;
+      const totalLength = halfDiag * 2;
 
-      const stops = gradient.stops.map(s =>
-        `<stop offset="${n(s.offset * 100)}%" stop-color="${escXml(s.color)}"/>`
+      let stops = gradient.stops;
+      const maxOffset = Math.max(...stops.map(s => s.offset));
+      let gx1: number, gy1: number, gx2: number, gy2: number;
+      let spreadAttr = "";
+
+      if (gradient.repeating && maxOffset > 1 && totalLength > 0) {
+        // Repeating gradient with px stops: scale to one period and repeat
+        const patternLength = maxOffset;
+        stops = stops.map(s => ({ color: s.color, offset: patternLength > 0 ? s.offset / patternLength : s.offset }));
+        gx1 = cx - cos * halfDiag;
+        gy1 = cy - sin * halfDiag;
+        gx2 = gx1 + cos * patternLength;
+        gy2 = gy1 + sin * patternLength;
+        spreadAttr = ` spreadMethod="repeat"`;
+      } else if (maxOffset > 1 && totalLength > 0) {
+        // Non-repeating with px stops: normalize to total gradient length
+        stops = stops.map(s => ({ color: s.color, offset: Math.min(1, s.offset / totalLength) }));
+        gx1 = cx - cos * halfDiag;
+        gy1 = cy - sin * halfDiag;
+        gx2 = cx + cos * halfDiag;
+        gy2 = cy + sin * halfDiag;
+      } else {
+        gx1 = cx - cos * halfDiag;
+        gy1 = cy - sin * halfDiag;
+        gx2 = cx + cos * halfDiag;
+        gy2 = cy + sin * halfDiag;
+      }
+
+      const stopsStr = stops.map(s =>
+        `<stop offset="${n(Math.max(0, Math.min(1, s.offset)) * 100)}%" stop-color="${escXml(s.color)}"/>`
       ).join("");
-      this.defs.push(`<linearGradient id="${id}" x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" gradientUnits="userSpaceOnUse">${stops}</linearGradient>`);
+      this.defs.push(`<linearGradient id="${id}" x1="${n(gx1)}" y1="${n(gy1)}" x2="${n(gx2)}" y2="${n(gy2)}" gradientUnits="userSpaceOnUse"${spreadAttr}>${stopsStr}</linearGradient>`);
       return id;
     }
 
     if (gradient.type === "radial") {
       const id = this.nextId("rg");
       const r = Math.max(w, h) / 2;
-      const stops = gradient.stops.map(s =>
-        `<stop offset="${n(s.offset * 100)}%" stop-color="${escXml(s.color)}"/>`
+
+      let stops = gradient.stops;
+      const maxOffset = Math.max(...stops.map(s => s.offset));
+      let spreadAttr = "";
+
+      if (gradient.repeating && maxOffset > 1 && r > 0) {
+        const patternR = maxOffset;
+        stops = stops.map(s => ({ color: s.color, offset: patternR > 0 ? s.offset / patternR : s.offset }));
+        spreadAttr = ` spreadMethod="repeat"`;
+      } else if (maxOffset > 1 && r > 0) {
+        stops = stops.map(s => ({ color: s.color, offset: Math.min(1, s.offset / r) }));
+      }
+
+      const stopsStr = stops.map(s =>
+        `<stop offset="${n(Math.max(0, Math.min(1, s.offset)) * 100)}%" stop-color="${escXml(s.color)}"/>`
       ).join("");
-      this.defs.push(`<radialGradient id="${id}" cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" gradientUnits="userSpaceOnUse">${stops}</radialGradient>`);
+      this.defs.push(`<radialGradient id="${id}" cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" gradientUnits="userSpaceOnUse"${spreadAttr}>${stopsStr}</radialGradient>`);
       return id;
     }
 
-    // Conic gradients: approximate with multiple radial slices
-    // SVG doesn't natively support conic gradients, so we skip for now
-    // (the fill color will be used as fallback)
+    // Conic gradients: SVG doesn't natively support them (fill color used as fallback)
     return undefined;
   }
 
