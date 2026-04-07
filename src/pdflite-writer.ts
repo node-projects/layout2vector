@@ -232,7 +232,7 @@ interface ImageDef {
   data: Uint8Array;
   width: number;
   height: number;
-  filter: string;        // "DCTDecode" for JPEG
+  filter: string | null; // "DCTDecode" for JPEG, null for raw RGB
 }
 
 // ── PDF-Lite Writer ─────────────────────────────────────────────────
@@ -513,30 +513,45 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("Q");
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): void {
-    // Decode the data URL to raw bytes
-    const decoded = decodeDataUrl(dataUrl);
-    if (!decoded) return;
-
-    // Register the image for embedding in end()
+  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style, rgbData?: number[]): void {
     const imgName = `Im${++this.imageCounter}`;
-    this.images.push({
-      name: imgName,
-      data: decoded.data,
-      width,
-      height,
-      filter: decoded.mimeType === "image/jpeg" ? "DCTDecode" : "DCTDecode",
-    });
 
-    // Compute placement in PDF coordinates
-    const x = this.ptX(quad[0].x);
-    const yBottom = this.ptY(quad[3].y);
-    const w = pxToPt(Math.abs(quad[1].x - quad[0].x));
-    const h = pxToPt(Math.abs(quad[3].y - quad[0].y));
+    if (rgbData) {
+      // Use raw RGB pixel data (lossless, no compression artifacts)
+      this.images.push({
+        name: imgName,
+        data: new Uint8Array(rgbData),
+        width,
+        height,
+        filter: null,
+      });
+    } else {
+      // Decode the data URL to raw bytes (JPEG)
+      const decoded = decodeDataUrl(dataUrl);
+      if (!decoded) return;
+      this.images.push({
+        name: imgName,
+        data: decoded.data,
+        width,
+        height,
+        filter: "DCTDecode",
+      });
+    }
 
-    // Image XObjects render in a 1×1 unit square; use cm to scale and position
+    // Compute affine transform from unit square to PDF quad coordinates.
+    // Image XObject renders in unit square (0,0)-(1,0)-(1,1)-(0,1).
+    // Map: (0,0)→bottomLeft, (1,0)→bottomRight, (0,1)→topLeft
+    // quad: [topLeft, topRight, bottomRight, bottomLeft]
+    const tl = { x: this.ptX(quad[0].x), y: this.ptY(quad[0].y) };
+    const tr = { x: this.ptX(quad[1].x), y: this.ptY(quad[1].y) };
+    const br = { x: this.ptX(quad[2].x), y: this.ptY(quad[2].y) };
+    const bl = { x: this.ptX(quad[3].x), y: this.ptY(quad[3].y) };
+    const a = br.x - bl.x, b = br.y - bl.y; // (1,0) - (0,0)
+    const c = tl.x - bl.x, d = tl.y - bl.y; // (0,1) - (0,0)
+    const e = bl.x, f = bl.y;                // (0,0) origin
+
     this.ops.push("q");
-    this.ops.push(`${pn(w)} 0 0 ${pn(h)} ${pn(x)} ${pn(yBottom)} cm`);
+    this.ops.push(`${pn(a)} ${pn(b)} ${pn(c)} ${pn(d)} ${pn(e)} ${pn(f)} cm`);
     this.ops.push(`/${imgName} Do`);
     this.ops.push("Q");
   }
@@ -596,7 +611,7 @@ export class PDFWriter implements Writer<PdfDocument> {
         imgDict.set("Height", new PdfNumber(img.height));
         imgDict.set("ColorSpace", new PdfName("DeviceRGB"));
         imgDict.set("BitsPerComponent", new PdfNumber(8));
-        imgDict.set("Filter", new PdfName(img.filter));
+        if (img.filter) imgDict.set("Filter", new PdfName(img.filter));
 
         const imgObj = new PdfIndirectObject({
           content: new PdfStream({ header: imgDict, binary: img.data }),

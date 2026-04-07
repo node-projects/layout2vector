@@ -92,7 +92,7 @@ export function renderIR<T>(nodes: IRNode[], writer: Writer<T>): T {
         break;
       case "image":
         if (writer.drawImage) {
-          writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style);
+          writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style, node.rgbData);
         }
         break;
     }

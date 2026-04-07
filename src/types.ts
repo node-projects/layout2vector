@@ -74,6 +74,8 @@ export type IRNode =
       dataUrl: string;
       width: number;
       height: number;
+      /** Raw RGB pixel data (3 bytes per pixel, row-major) for lossless PDF embedding. */
+      rgbData?: number[];
       style: Style;
       zIndex: number;
     };
@@ -93,6 +95,6 @@ export interface Writer<TOutput> {
   drawPolygon(points: Quad, style: Style): void;
   drawPolyline(points: Point[], closed: boolean, style: Style): void;
   drawText(quad: Quad, text: string, style: Style): void;
-  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void;
+  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): void;
   end(): TOutput;
 }

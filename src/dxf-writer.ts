@@ -282,12 +282,23 @@ export class DXFWriter implements Writer<string> {
     // Store the image data for external saving
     this.imageFiles.set(fileName, dataUrl);
 
-    // Compute placement in DXF coordinates
+    // Compute rotation angle from the top edge of the quad (topLeft → topRight)
+    const dx = quad[1].x - quad[0].x;
+    const dy = quad[1].y - quad[0].y;
+    const angleRad = Math.atan2(dy, dx);
+    // Browser Y is down, DXF Y is up — negate the angle
+    const angleDeg = -angleRad * (180 / Math.PI);
+
+    // Compute display size from edge lengths (works for rotated quads)
+    const displayWidth = Math.sqrt(dx * dx + dy * dy);
+    // The scale parameter is the display size in DXF units (not a multiplier)
+    const scale = displayWidth || 1;
+
+    // Insertion point is bottom-left in DXF coords.
+    // For DXF IMAGE, the insertion point is the top-left corner before rotation,
+    // but in DXF Y-up coords that's quad[0] with flipped Y.
     const x = quad[0].x;
-    const y = this.flipY(quad[3].y);
-    const displayWidth = Math.abs(quad[1].x - quad[0].x);
-    const displayHeight = Math.abs(quad[3].y - quad[0].y);
-    const scale = Math.max(displayWidth / width, displayHeight / height) || 1;
+    const y = this.flipY(quad[0].y);
 
     this.dxf.addImage(
       fileName,
@@ -296,7 +307,7 @@ export class DXFWriter implements Writer<string> {
       width,
       height,
       scale,
-      0
+      angleDeg
     );
   }
 

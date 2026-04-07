@@ -38,12 +38,12 @@ export function extractBackgroundImage(
   const rect = el.getBoundingClientRect();
   if (rect.width === 0 || rect.height === 0) return [];
 
-  const quad: Quad = [
-    { x: rect.left, y: rect.top },
-    { x: rect.right, y: rect.top },
-    { x: rect.right, y: rect.bottom },
-    { x: rect.left, y: rect.bottom },
-  ];
+  // Use the actual screen quad (respects CSS transforms) for positioning
+  const quad = getElementScreenQuad(el);
+  // Use untransformed dimensions for the image's natural size
+  const htmlEl = el as HTMLElement;
+  const w = htmlEl.offsetWidth || rect.width;
+  const h = htmlEl.offsetHeight || rect.height;
 
   const url = urlMatch[1];
 
@@ -57,13 +57,15 @@ export function extractBackgroundImage(
         if (svgNodes.length > 0) return svgNodes;
       }
     }
-    // Raster data URL — use directly
+    // Raster data URL — re-render at target size with nearest-neighbor scaling
+    const rendered = rasterToRendered(url, Math.round(w), Math.round(h));
     return [{
       type: "image",
       quad,
-      dataUrl: url,
-      width: Math.round(rect.width),
-      height: Math.round(rect.height),
+      dataUrl: rendered?.dataUrl ?? url,
+      width: Math.round(w),
+      height: Math.round(h),
+      rgbData: rendered?.rgbData,
       style,
       zIndex: globalIndex,
     }];
@@ -87,11 +89,51 @@ export function extractBackgroundImage(
     type: "image",
     quad,
     dataUrl,
-    width: Math.round(rect.width),
-    height: Math.round(rect.height),
+    width: Math.round(w),
+    height: Math.round(h),
     style,
     zIndex: globalIndex,
   }];
+}
+
+/**
+ * Render a raster data URL onto a canvas (with nearest-neighbor scaling).
+ * Returns a PNG data URL and optional raw RGB pixel data for lossless PDF embedding.
+ */
+function rasterToRendered(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
+  if (dataUrl.startsWith("data:image/jpeg")) return { dataUrl };
+  try {
+    const img = new Image();
+    img.src = dataUrl;
+    if (!img.complete || img.naturalWidth === 0) return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = w || img.naturalWidth || 1;
+    canvas.height = h || img.naturalHeight || 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const pngUrl = canvas.toDataURL("image/png");
+
+    // Extract raw RGB for lossless PDF embedding (small images only)
+    const pixels = canvas.width * canvas.height;
+    if (pixels <= 250000) {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const rgba = imageData.data;
+      const rgb: number[] = new Array(pixels * 3);
+      for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
+        rgb[j] = rgba[i];
+        rgb[j + 1] = rgba[i + 1];
+        rgb[j + 2] = rgba[i + 2];
+      }
+      return { dataUrl: pngUrl, rgbData: rgb };
+    }
+    return { dataUrl: pngUrl };
+  } catch {
+    return null;
+  }
 }
 
 /** Decode SVG content from a background-image data URL. */

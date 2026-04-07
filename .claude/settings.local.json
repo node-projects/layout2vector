@@ -6,7 +6,9 @@
       "Bash(node ./node_modules/typescript/bin/tsc --noEmit)",
       "Bash(echo \"EXIT: $?\")",
       "Bash(npm run:*)",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(xxd tests/output/bg-image-transform.pdf)",
+      "Bash(node:*)"
     ]
   }
 }
