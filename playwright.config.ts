@@ -1,11 +1,13 @@
 import { defineConfig } from "@playwright/test";
 
+const browser = (process.env.BROWSER as "chromium" | "firefox") || "chromium";
+
 export default defineConfig({
   testDir: "./tests",
   timeout: 30000,
   retries: 0,
   use: {
-    browserName: "chromium",
+    browserName: browser,
     headless: true,
   },
   projects: [
@@ -24,6 +26,55 @@ export default defineConfig({
     {
       name: "demos",
       testMatch: "demos/**/*.test.ts",
+    },
+    // Firefox projects — use native getBoxQuads (no polyfill needed)
+    {
+      name: "firefox-unit",
+      testMatch: "unit/**/*.test.ts",
+      use: {
+        browserName: "firefox",
+        launchOptions: {
+          firefoxUserPrefs: {
+            "layout.css.getBoxQuads.enabled": true,
+          },
+        },
+      },
+    },
+    {
+      name: "firefox-integration",
+      testMatch: "integration/**/*.test.ts",
+      use: {
+        browserName: "firefox",
+        launchOptions: {
+          firefoxUserPrefs: {
+            "layout.css.getBoxQuads.enabled": true,
+          },
+        },
+      },
+    },
+    {
+      name: "firefox-ui",
+      testMatch: "ui/**/*.test.ts",
+      use: {
+        browserName: "firefox",
+        launchOptions: {
+          firefoxUserPrefs: {
+            "layout.css.getBoxQuads.enabled": true,
+          },
+        },
+      },
+    },
+    {
+      name: "firefox-demos",
+      testMatch: "demos/**/*.test.ts",
+      use: {
+        browserName: "firefox",
+        launchOptions: {
+          firefoxUserPrefs: {
+            "layout.css.getBoxQuads.enabled": true,
+          },
+        },
+      },
     },
   ],
 });

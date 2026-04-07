@@ -19,10 +19,10 @@
   "scripts": {
     "build": "tsc",
     "test": "npx playwright test",
-    "test:unit": "npx playwright test tests/unit",
-    "test:integration": "npx playwright test tests/integration",
-    "test:ui": "npx playwright test tests/ui",
-    "test:demos": "npx playwright test tests/demos"
+    "test:unit": "npx playwright test --project=unit",
+    "test:integration": "npx playwright test --project=integration",
+    "test:ui": "npx playwright test --project=ui",
+    "test:demos": "npx playwright test --project=demos"
   },
   "dependencies": {
     "@tarikjabiri/dxf": "^2.8.9"

@@ -152,9 +152,9 @@ test.describe("Root-relative coordinates", () => {
   });
 
   test("image coordinates are root-relative", async ({ page }) => {
-    // Use a 1x1 red pixel data URL to avoid file:// issues
+    // Use a 1x1 red pixel data URL to avoid file:// issues (canvas-generated for Firefox compatibility)
     const redPixel =
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==";
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4z8DwHwAFAAH/F1FwBgAAAABJRU5ErkJggg==";
 
     const ir = await extractWithOffset(
       page,
