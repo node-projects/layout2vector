@@ -31,3 +31,4 @@ export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgr
 // Writers
 export { DXFWriter } from "./dxf-writer.js";
 export { PDFWriter } from "./pdflite-writer.js";
+export { PNGWriter, PNGResult } from "./png-writer.js";

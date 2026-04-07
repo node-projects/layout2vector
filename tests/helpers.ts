@@ -73,6 +73,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "svg-extractor.js",
       "image-extractor.js",
       "pipeline.js",
+      "png-writer.js",
     ];
 
     const modules: string[] = [];
@@ -106,6 +107,8 @@ window.__HC = {
   hasBackgroundImage,
   extractBackgroundImage,
   preloadImages,
+  PNGWriter,
+  PNGResult,
 };
 })();`;
   } else {

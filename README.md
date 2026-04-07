@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF** or **PDF**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, or **PNG**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`) and PDF (custom lightweight PDF generator). Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), and PNG (via Canvas 2D API). Implement the `Writer<T>` interface to add your own.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, PDFWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -45,6 +45,13 @@ const pdfWriter = new PDFWriter(); // defaults to A4
 const pdfDoc = renderIR(ir, pdfWriter); // returns a PdfDocument
 await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes(); // Uint8Array
+
+// 4. Render to PNG (requires Canvas-capable environment)
+const pngWriter = new PNGWriter(800, 600); // width, height in px
+const pngResult = renderIR(ir, pngWriter);
+await pngResult.finalize(); // loads and draws raster images
+const pngDataUrl = pngResult.toDataURL(); // data:image/png;base64,...
+const pngBytes = pngResult.toBytes(); // Uint8Array
 ```
 
 ## API Reference
@@ -88,6 +95,27 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - Transparent elements (rgba alpha=0, `transparent`) are skipped
 - SVG images in `<img>` tags → converted to native DXF vector entities
 - Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
+
+#### `PNGWriter`
+
+```ts
+new PNGWriter(width: number, height: number, scale?: number)
+```
+
+Produces a `PNGResult` via the Canvas 2D API. Width and height are in CSS pixels. The optional `scale` parameter (default 1) acts as a device pixel ratio multiplier for higher resolution output (e.g. `scale: 2` produces a 2× image).
+
+Requires a Canvas-capable environment (browser `document.createElement('canvas')`). When using Playwright or Puppeteer, run the writer inside `page.evaluate()`.
+
+- Polygons → Canvas filled/stroked paths
+- Polylines → Canvas path operations (open or closed)
+- Rounded rectangles → Canvas `arcTo` paths
+- Gradients → Canvas `createLinearGradient` / `createRadialGradient`
+- Text → Canvas `fillText` with CSS font string
+- Opacity → Canvas `globalAlpha`
+- Transparent elements are skipped
+- Raster images → drawn via async `finalize()` step using `Image` element loading
+
+After `renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
 
 #### `PDFWriter`
 
@@ -263,7 +291,7 @@ npm run test:demos
 
 ### Demo Conversion
 
-The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes both `.dxf` and `.pdf` files to `tests/output/`.
+The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, and `.png` files to `tests/output/`.
 
 For GitHub-friendly browsing of the generated HTML, PDF, and preview screenshots, see [tests/output/README.md](./tests/output/README.md).
 
@@ -279,7 +307,10 @@ Demo files cover: borders, gradients, transforms, SVG shapes, declarative shadow
 │  HTML + SVG  │     │ polygon  │────>│  PDFWriter │──> .pdf
 │  + Shadow DOM│     │ polyline │     └────────────┘
 │  + Transforms│     │ text     │     ┌────────────┐
-└──────────────┘     └──────────┘────>│  Custom    │──> ...
+└──────────────┘     │ image    │────>│  PNGWriter │──> .png
+                     └──────────┘     └────────────┘
+                                      ┌────────────┐
+                                 ────>│  Custom    │──> ...
                                       └────────────┘
 ```
 

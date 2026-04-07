@@ -154,14 +154,43 @@ for (const demoFile of demoFiles) {
     const pdfPath = path.join(outputDir, `${name}.pdf`);
     fs.writeFileSync(pdfPath, pdfBuffer);
 
+    // --- PNG output ---
+    // PNG writer needs Canvas API so it runs in the browser
+    const pngDataUrl: string = await page.evaluate(async (irNodes) => {
+      let maxX = 0, maxY = 0;
+      for (const node of irNodes) {
+        const pts: Array<{ x: number; y: number }> =
+          node.type === "polygon" || node.type === "polyline" ? node.points
+          : node.type === "text" || node.type === "image" ? node.quad
+          : [];
+        for (const p of pts) {
+          if (p.x > maxX) maxX = p.x;
+          if (p.y > maxY) maxY = p.y;
+        }
+      }
+      const vp = { width: Math.ceil(maxX) || 1, height: Math.ceil(maxY) || 1 };
+      const writer = new (window as any).__HC.PNGWriter(vp.width, vp.height);
+      const pngResult = (window as any).__HC.renderIR(irNodes, writer);
+      await pngResult.finalize();
+      return pngResult.toDataURL();
+    }, ir);
+
+    expect(pngDataUrl).toMatch(/^data:image\/png;base64,/);
+    const pngBase64 = pngDataUrl.split(",")[1];
+    const pngBuffer = Buffer.from(pngBase64, "base64");
+    const pngPath = path.join(outputDir, `${name}.png`);
+    fs.writeFileSync(pngPath, pngBuffer);
+
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
     const pdfStat = fs.statSync(pdfPath);
+    const pngStat = fs.statSync(pngPath);
     expect(dxfStat.size).toBeGreaterThan(0);
     expect(pdfStat.size).toBeGreaterThan(0);
+    expect(pngStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  ✓ ${name}: ${ir.length} IR nodes → DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes)`
+      `  ✓ ${name}: ${ir.length} IR nodes → DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat.size} bytes)`
     );
   });
 }
