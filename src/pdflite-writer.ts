@@ -467,7 +467,14 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
     }
 
-    const fontSize = parseFontSize(style.fontSize);
+    // Derive font size: use quad height as the authoritative rendered size,
+    // since style.fontSize may reflect an unscaled coordinate system (e.g. SVG in <img>).
+    const quadHeight = Math.sqrt(
+      (quad[3].x - quad[0].x) ** 2 + (quad[3].y - quad[0].y) ** 2
+    );
+    const styleFontSize = parseFontSize(style.fontSize);
+    const quadFontSize = quadHeight > 0 ? pxToPt(quadHeight) : styleFontSize;
+    const fontSize = Math.min(styleFontSize, quadFontSize);
     const fontWeight = mapFontWeight(style.fontWeight);
     const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "Helvetica";
     const pdfFontName = this.mapToPdfFont(fontFamily, fontWeight);

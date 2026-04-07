@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Background Image with Transforms</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    h2 { margin-bottom: 16px; font-size: 18px; }
+    h3 { margin: 24px 0 12px; font-size: 14px; color: #555; }
+    .section { margin-bottom: 32px; }
+    .row { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; }
+    .label { font-size: 11px; color: #888; margin-top: 6px; text-align: center; }
+    .item { display: flex; flex-direction: column; align-items: center; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Background Image + CSS Transform Demo</h2>
+
+    <!-- Section 1: SVG background-image with rotation -->
+    <div class="section">
+      <h3>SVG background-image with CSS rotation</h3>
+      <div class="row">
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%234CAF50%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27white%27/%3E%3C/svg%3E');
+            background-size: cover;
+          "></div>
+          <span class="label">No rotation (reference)</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%234CAF50%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27white%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(45deg);
+          "></div>
+          <span class="label">rotate(45deg)</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%234CAF50%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27white%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(90deg);
+          "></div>
+          <span class="label">rotate(90deg)</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 fill=%27%234CAF50%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2730%27 fill=%27white%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(180deg);
+          "></div>
+          <span class="label">rotate(180deg)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Different SVG shapes with rotation -->
+    <div class="section">
+      <h3>Various SVG shapes rotated</h3>
+      <div class="row">
+        <div class="item">
+          <div style="
+            width: 120px; height: 80px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 80%27%3E%3Crect width=%27120%27 height=%2780%27 fill=%27%232196F3%27 rx=%2710%27/%3E%3Ctext x=%2760%27 y=%2745%27 text-anchor=%27middle%27 fill=%27white%27 font-size=%2716%27%3EHello%3C/text%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(30deg);
+          "></div>
+          <span class="label">Rect+text at 30deg</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Cpolygon points=%2750,5 95,40 80,95 20,95 5,40%27 fill=%27%23FF9800%27 stroke=%27%23E65100%27 stroke-width=%272%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(-45deg);
+          "></div>
+          <span class="label">Pentagon at -45deg</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 100px; height: 100px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Cellipse cx=%2750%27 cy=%2750%27 rx=%2745%27 ry=%2725%27 fill=%27%239C27B0%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: rotate(60deg);
+          "></div>
+          <span class="label">Ellipse at 60deg</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Combined transforms -->
+    <div class="section">
+      <h3>Combined transforms (scale + rotate)</h3>
+      <div class="row">
+        <div class="item">
+          <div style="
+            width: 80px; height: 80px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 80 80%27%3E%3Crect width=%2780%27 height=%2780%27 fill=%27%23F44336%27/%3E%3Crect x=%2720%27 y=%2720%27 width=%2740%27 height=%2740%27 fill=%27white%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: scale(1.5) rotate(15deg);
+          "></div>
+          <span class="label">scale(1.5) rotate(15deg)</span>
+        </div>
+        <div class="item">
+          <div style="
+            width: 80px; height: 80px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 80 80%27%3E%3Crect width=%2780%27 height=%2780%27 fill=%27%23009688%27/%3E%3Ccircle cx=%2740%27 cy=%2740%27 r=%2725%27 fill=%27%23B2DFDB%27/%3E%3C/svg%3E');
+            background-size: cover;
+            transform: skewX(15deg) rotate(20deg);
+          "></div>
+          <span class="label">skewX(15deg) rotate(20deg)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Raster background-image with rotation -->
+    <div class="section">
+      <h3>Raster background-image with rotation (for comparison)</h3>
+      <div class="row">
+        <div class="item">
+          <div style="
+            width: 80px; height: 80px;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAALUlEQVQIW2NkYPj/n4EBCBgZGUGMf//+MTAxAAUYGBj+MzIyMIBEmBjAEgwMAHPpCAtXDLvmAAAAAElFTkSuQmCC');
+            background-size: cover;
+            image-rendering: pixelated;
+            transform: rotate(45deg);
+          "></div>
+          <span class="label">Raster at 45deg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "1.6.0",
+  "version": "1.8.0",
   "description": "DOM → Geometry → DXF/PDF library",
   "license": "MIT",
   "author": "Jochen Kühner <jochen.kuehner@gmx.de>",

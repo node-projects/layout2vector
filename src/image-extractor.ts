@@ -69,6 +69,16 @@ export function extractBackgroundImage(
     }];
   }
 
+  // For external SVG URLs, try vector conversion first
+  if (isSvgSource(url)) {
+    const svgContent = extractSvgContent(url);
+    if (svgContent) {
+      const svgNodes = convertBgSvgToGeometry(svgContent, el, rect, globalIndex, _options);
+      if (svgNodes.length > 0) return svgNodes;
+    }
+    // Fallback: rasterize below
+  }
+
   // For external URLs, rasterize via canvas using a temporary img element
   const dataUrl = rasterizeBackgroundImage(el, rect);
   if (!dataUrl) return [];
@@ -101,7 +111,74 @@ function decodeBgSvgDataUrl(dataUrl: string): string | null {
   return null;
 }
 
-/** Convert background SVG to vector geometry (reuses the same approach as img SVG). */
+/**
+ * Get the element's rendered quad (4 corners) in screen coordinates.
+ * Uses getBoxQuads if available, otherwise falls back to bounding rect.
+ */
+function getElementScreenQuad(el: Element): Quad {
+  if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
+    try {
+      const quads: DOMQuad[] = (el as any).getBoxQuads({ box: "border" });
+      if (quads.length > 0) {
+        const q = quads[0];
+        return [
+          { x: q.p1.x, y: q.p1.y },
+          { x: q.p2.x, y: q.p2.y },
+          { x: q.p3.x, y: q.p3.y },
+          { x: q.p4.x, y: q.p4.y },
+        ];
+      }
+    } catch { /* fall through */ }
+  }
+  const r = el.getBoundingClientRect();
+  return [
+    { x: r.left, y: r.top },
+    { x: r.right, y: r.top },
+    { x: r.right, y: r.bottom },
+    { x: r.left, y: r.bottom },
+  ];
+}
+
+/**
+ * Remap points extracted from a temp SVG at (0,0,w,h) into the actual
+ * element's screen quad using an affine transform.
+ */
+function remapIRNodes(nodes: IRNode[], w: number, h: number, targetQuad: Quad): void {
+  // Affine mapping: normalized (u,v) in [0..1] → target quad
+  // x' = tl.x + u * (tr.x - tl.x) + v * (bl.x - tl.x)
+  // y' = tl.y + u * (tr.y - tl.y) + v * (bl.y - tl.y)
+  const [tl, tr, _br, bl] = targetQuad;
+  const dxU = tr.x - tl.x, dyU = tr.y - tl.y;
+  const dxV = bl.x - tl.x, dyV = bl.y - tl.y;
+
+  function remap(p: { x: number; y: number }): { x: number; y: number } {
+    const u = w > 0 ? p.x / w : 0;
+    const v = h > 0 ? p.y / h : 0;
+    return {
+      x: tl.x + u * dxU + v * dxV,
+      y: tl.y + u * dyU + v * dyV,
+    };
+  }
+
+  for (const node of nodes) {
+    switch (node.type) {
+      case "polygon":
+        node.points = node.points.map(remap) as Quad;
+        break;
+      case "polyline":
+        node.points = node.points.map(remap);
+        break;
+      case "text":
+        node.quad = node.quad.map(remap) as Quad;
+        break;
+      case "image":
+        node.quad = node.quad.map(remap) as Quad;
+        break;
+    }
+  }
+}
+
+/** Convert background SVG to vector geometry. */
 function convertBgSvgToGeometry(
   svgContent: string,
   el: Element,
@@ -127,18 +204,30 @@ function convertBgSvgToGeometry(
     }
   }
 
+  // Get the element's actual screen quad (includes CSS transforms)
+  const targetQuad = getElementScreenQuad(el);
+
+  // Place temp SVG at (0,0) with the element's untransformed dimensions.
+  // No CSS transform — we'll remap the extracted points to the target quad afterwards.
+  const htmlEl = el as HTMLElement;
+  const w = htmlEl.offsetWidth || elRect.width;
+  const h = htmlEl.offsetHeight || elRect.height;
+
   tempSvg.style.position = "fixed";
-  tempSvg.style.left = `${elRect.left}px`;
-  tempSvg.style.top = `${elRect.top}px`;
-  tempSvg.style.width = `${elRect.width}px`;
-  tempSvg.style.height = `${elRect.height}px`;
+  tempSvg.style.left = "0px";
+  tempSvg.style.top = "0px";
+  tempSvg.style.width = `${w}px`;
+  tempSvg.style.height = `${h}px`;
   tempSvg.style.margin = "0";
   tempSvg.style.padding = "0";
 
   document.body.appendChild(tempSvg);
 
   try {
-    return extractSVGSubtree(tempSvg, globalIndex, options);
+    const svgNodes = extractSVGSubtree(tempSvg, globalIndex, options);
+    // Remap from temp SVG coord space (0,0,w,h) to the actual element's screen quad
+    remapIRNodes(svgNodes, w, h, targetQuad);
+    return svgNodes;
   } finally {
     document.body.removeChild(tempSvg);
   }
@@ -315,7 +404,7 @@ function decodeSvgDataUrl(dataUrl: string): string | null {
 
 /**
  * Convert SVG content to vector geometry by creating a temporary SVG element
- * positioned at the <img> element's location.
+ * and remapping extracted points to the <img> element's actual screen quad.
  */
 function convertSvgToGeometry(
   svgContent: string,
@@ -346,19 +435,28 @@ function convertSvgToGeometry(
     }
   }
 
-  // Position at the same location as the <img>
+  // Get the actual screen quad of the <img> element (includes CSS transforms)
+  const targetQuad = getElementScreenQuad(imgEl);
+
+  // Place temp SVG at (0,0) with the <img>'s untransformed dimensions
+  const w = imgEl.offsetWidth || imgRect.width;
+  const h = imgEl.offsetHeight || imgRect.height;
+
   tempSvg.style.position = "fixed";
-  tempSvg.style.left = `${imgRect.left}px`;
-  tempSvg.style.top = `${imgRect.top}px`;
-  tempSvg.style.width = `${imgRect.width}px`;
-  tempSvg.style.height = `${imgRect.height}px`;
+  tempSvg.style.left = "0px";
+  tempSvg.style.top = "0px";
+  tempSvg.style.width = `${w}px`;
+  tempSvg.style.height = `${h}px`;
   tempSvg.style.margin = "0";
   tempSvg.style.padding = "0";
 
   document.body.appendChild(tempSvg);
 
   try {
-    return extractSVGSubtree(tempSvg, globalIndex, options);
+    const svgNodes = extractSVGSubtree(tempSvg, globalIndex, options);
+    // Remap from temp SVG coord space (0,0,w,h) to the actual element's screen quad
+    remapIRNodes(svgNodes, w, h, targetQuad);
+    return svgNodes;
   } finally {
     document.body.removeChild(tempSvg);
   }

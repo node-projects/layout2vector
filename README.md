@@ -9,8 +9,8 @@ A TypeScript (ESM) library that extracts rendered layout geometry from a live DO
 layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
-2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`) and PDF (via `jspdf`). Implement the `Writer<T>` interface to add your own.
+2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`) and PDF (custom lightweight PDF generator). Implement the `Writer<T>` interface to add your own.
 
 ## Installation
 
@@ -42,8 +42,9 @@ const dxfString = renderIR(ir, dxfWriter);
 
 // 3. Render to PDF
 const pdfWriter = new PDFWriter(); // defaults to A4
-const pdfDoc = renderIR(ir, pdfWriter); // returns a jsPDF instance
-const pdfBuffer = pdfDoc.output("arraybuffer");
+const pdfDoc = renderIR(ir, pdfWriter); // returns a PdfDocument
+await pdfDoc.finalize();
+const pdfBytes = pdfDoc.toBytes(); // Uint8Array
 ```
 
 ## API Reference
@@ -80,6 +81,7 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 
 - Polygons → closed `LWPOLYLINE` entities
 - Polylines → `LWPOLYLINE` entities (open or closed)
+- Filled SVG shapes → `HATCH` entities with `SOLID` pattern (closed polylines with fill color)
 - Text → `TEXT` entities
 - Rounded rectangles → `LWPOLYLINE` with arc-approximated corners
 - Colors → `trueColor` from CSS `backgroundColor` / `color` / SVG fill/stroke
@@ -93,14 +95,16 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 new PDFWriter(pageWidth?: number, pageHeight?: number)
 ```
 
-Produces a `jsPDF` document. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75).
+Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75). Call `await doc.finalize()` then `doc.toBytes()` to get the final PDF as a `Uint8Array`.
 
-- Polygons → closed paths via `doc.lines()` or `doc.roundedRect()` (when `borderRadius` is set)
-- Polylines → paths via `doc.lines()`
-- Text → `doc.text()` with font family/size/weight mapping
+- Polygons → closed paths with fill/stroke operators (`f`, `S`, `B`)
+- Polylines → paths with fill/stroke operators
+- Rounded rectangles → Bézier-approximated rounded rect paths
+- Gradients → PDF shading objects (axial for `linear-gradient`, radial for `radial-gradient`)
+- Text → PDF text operators with standard font mapping (Helvetica, Times, Courier families)
 - Fill/stroke mode automatically determined from style (fill only, stroke only, or both)
+- Opacity → PDF ExtGState transparency
 - Transparent elements are skipped
-- Font fallback: tries the CSS font family, falls back to `helvetica`
 - SVG images in `<img>` tags → converted to native PDF vector paths
 - Raster images → embedded as JPEG XObject images via DCTDecode
 
@@ -159,7 +163,7 @@ A subset of CSS computed styles relevant to rendering:
 | `borderRadius` | `string?` | CSS border-radius |
 | `borderTopColor`, etc. | `string?` | Individual border colors |
 | `borderTopWidth`, etc. | `string?` | Individual border widths |
-| `backgroundImage` | `string?` | CSS background-image (gradients) |
+| `backgroundImage` | `string?` | CSS background-image (gradients and `url()`) |
 | `boxShadow` | `string?` | CSS box-shadow |
 | `transform` | `string?` | CSS transform |
 
@@ -176,8 +180,10 @@ import {
   createsStackingContext, // Check if element creates stacking context
   isSVGElement,        // Check SVG namespace
   isSVGRoot,           // Check if <svg> root
-  isImageElement,      // Check if <img> element
-  extractImageGeometry, // Extract image data from <img>
+  isImageElement,        // Check if <img> element
+  extractImageGeometry,  // Extract image data from <img>
+  hasBackgroundImage,    // Check if style has background-image url()
+  extractBackgroundImage, // Extract background-image as IR nodes
 } from "@node-projects/layout2vector";
 ```
 
@@ -206,13 +212,14 @@ import {
 
 ### Image Handling
 
-Enable with `includeImages: true`. Supports `<img>` elements with any `src`:
+Enable with `includeImages: true`. Supports `<img>` elements and CSS `background-image: url()`:
 
 - **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization
 - **Raster images** (PNG, JPEG, GIF, WebP, data URLs, remote URLs): extracted as `image` IR nodes with embedded data URL
+- **CSS `background-image: url()`**: SVG URLs are vector-converted; raster URLs are extracted as image nodes
 - **Data URLs**: all `data:` schemes are supported (`base64`, URL-encoded, UTF-8)
 - **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`
-- **DXF output**: images are rendered as bounding-rectangle placeholders (DXF has limited raster support)
+- **DXF output**: raster images as `IMAGE` entities referencing external files; SVG shapes as native DXF entities with `HATCH` solid fills
 - **PDF output**: JPEG images are embedded natively via DCTDecode; other formats are converted to JPEG automatically
 
 ### Color Handling
