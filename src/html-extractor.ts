@@ -119,7 +119,8 @@ function extractTextNode(
       zIndex: globalIndex,
     });
   } else {
-    // Multi-line: subdivide the full quad proportionally per line
+    // Multi-line: use the actual per-line rects from getClientRects()
+    // instead of subdividing the textQuad (which may only cover the first fragment).
     const N = rects.length;
     for (let i = 0; i < N; i++) {
       let text = (i < lineTexts.length ? lineTexts[i] : "").trim();
@@ -135,13 +136,12 @@ function extractTextNode(
         }
       }
 
-      const fTop = i / N;
-      const fBot = (i + 1) / N;
+      const r = rects[i];
       const lineQuad: Quad = [
-        lerpPt(textQuad[0], textQuad[3], fTop),
-        lerpPt(textQuad[1], textQuad[2], fTop),
-        lerpPt(textQuad[1], textQuad[2], fBot),
-        lerpPt(textQuad[0], textQuad[3], fBot),
+        { x: r.left, y: r.top },
+        { x: r.right, y: r.top },
+        { x: r.right, y: r.bottom },
+        { x: r.left, y: r.bottom },
       ];
 
       results.push({
