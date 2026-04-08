@@ -34,7 +34,7 @@ export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./mathml-e
 
 // Writers
 export { DXFWriter } from "./dxf-writer.js";
-export { PDFWriter } from "./pdflite-writer.js";
+export { PDFWriter } from "./pdf-writer.js";
 export { PNGWriter, PNGResult } from "./png-writer.js";
 export { SVGWriter } from "./svg-writer.js";
 export { HTMLWriter } from "./html-writer.js";
