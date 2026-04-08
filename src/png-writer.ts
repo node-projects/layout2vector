@@ -373,14 +373,22 @@ export class PNGResult {
     ctx.restore();
   }
 
-  /** Get the PNG as a data URL string. */
-  toDataURL(): string {
-    return this.canvas.toDataURL("image/png");
+  /**
+   * Get the image as a data URL string.
+   * @param mimeType  Output format: "image/png" (default), "image/jpeg", or "image/webp".
+   * @param quality   Quality for lossy formats (0–1). Only applies to "image/jpeg" and "image/webp".
+   */
+  toDataURL(mimeType = "image/png", quality?: number): string {
+    return this.canvas.toDataURL(mimeType, quality);
   }
 
-  /** Get the PNG as a Uint8Array of raw PNG bytes. */
-  toBytes(): Uint8Array {
-    const dataUrl = this.toDataURL();
+  /**
+   * Get the image as a Uint8Array of raw bytes.
+   * @param mimeType  Output format: "image/png" (default), "image/jpeg", or "image/webp".
+   * @param quality   Quality for lossy formats (0–1). Only applies to "image/jpeg" and "image/webp".
+   */
+  toBytes(mimeType = "image/png", quality?: number): Uint8Array {
+    const dataUrl = this.toDataURL(mimeType, quality);
     const base64 = dataUrl.split(",")[1];
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);

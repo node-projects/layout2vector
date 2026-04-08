@@ -122,12 +122,12 @@ const unicodeToWinAnsi: Record<number, number> = {
  * Escape a text string for use in a PDF content stream `( )`.
  * Encodes non-ASCII characters as WinAnsiEncoding octal escapes
  * so they survive UTF-8 serialization and match the font encoding.
+ * Iterates by full Unicode code points to correctly handle surrogate pairs.
  */
 function escapePdfText(text: string): string {
   let out = "";
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const code = text.charCodeAt(i);
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
     if (ch === "\\") { out += "\\\\"; }
     else if (ch === "(") { out += "\\("; }
     else if (ch === ")") { out += "\\)"; }
@@ -155,10 +155,11 @@ function escapePdfText(text: string): string {
 /**
  * Check whether a text string contains characters outside WinAnsiEncoding.
  * Returns true if the text needs a Unicode-capable font (CID/Type0).
+ * Iterates by full Unicode code points to correctly handle surrogate pairs.
  */
 function needsUnicodeFont(text: string): boolean {
-  for (let i = 0; i < text.length; i++) {
-    const code = text.charCodeAt(i);
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
     if (code < 0x80) continue; // ASCII is fine
     if (unicodeToWinAnsi[code] !== undefined) continue; // mapped
     if (code >= 0xA0 && code <= 0xFF) continue; // Latin-1 supplement
@@ -170,12 +171,12 @@ function needsUnicodeFont(text: string): boolean {
 /**
  * Escape text for symbolic fonts (ZapfDingbats, Symbol).
  * These fonts use their own encoding — emit raw byte values as octal escapes.
+ * Iterates by full Unicode code points to correctly handle surrogate pairs.
  */
 function escapePdfSymbolic(text: string): string {
   let out = "";
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const code = text.charCodeAt(i);
+  for (const ch of text) {
+    const code = ch.codePointAt(0)!;
     if (ch === "\\") { out += "\\\\"; }
     else if (ch === "(") { out += "\\("; }
     else if (ch === ")") { out += "\\)"; }
@@ -436,10 +437,11 @@ export class PDFWriter implements Writer<PdfDocument> {
     return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
   }
 
-  /** Check whether a parsed font has glyphs for all characters in the text. */
+  /** Check whether a parsed font has glyphs for all characters in the text.
+   *  Iterates by full Unicode code points to correctly handle surrogate pairs (emoji etc.). */
   private fontHasAllChars(parsed: ParsedTTF, text: string): boolean {
-    for (let i = 0; i < text.length; i++) {
-      const code = text.charCodeAt(i);
+    for (const ch of text) {
+      const code = ch.codePointAt(0)!;
       if (code < 0x80) continue; // ASCII always available
       const gid = parsed.cmap.get(code);
       if (gid === undefined || gid === 0) return false;
@@ -553,8 +555,8 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (parsed.isSymbolFont) {
       // Symbol font: single-byte encoding, use raw byte values
       let out = "";
-      for (let i = 0; i < text.length; i++) {
-        const charCode = text.charCodeAt(i);
+      for (const ch of text) {
+        const charCode = ch.codePointAt(0)!;
         usedChars.add(charCode);
         const byte = charCode & 0xFF;
         if (byte === 0x28 || byte === 0x29 || byte === 0x5C) {
@@ -568,10 +570,10 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
       return out;
     } else {
-      // CID font: encode as hex glyph IDs
+      // CID font: encode as hex glyph IDs (iterate by code points for surrogate pair support)
       let hex = "";
-      for (let i = 0; i < text.length; i++) {
-        const charCode = text.charCodeAt(i);
+      for (const ch of text) {
+        const charCode = ch.codePointAt(0)!;
         usedChars.add(charCode);
         const glyphId = parsed.cmap.get(charCode) ?? 0;
         hex += glyphId.toString(16).padStart(4, "0").toUpperCase();
@@ -737,7 +739,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       switch (style.textTransform) {
         case "uppercase": text = text.toUpperCase(); break;
         case "lowercase": text = text.toLowerCase(); break;
-        case "capitalize": text = text.replace(/\b\w/g, c => c.toUpperCase()); break;
+        case "capitalize": text = text.replace(/(^|\s)\S/g, c => c.toUpperCase()); break;
       }
     }
 

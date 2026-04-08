@@ -17,77 +17,89 @@ import { isMathMLRoot, extractMathMLFeatures } from "./mathml-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
 /**
- * Extract the full IR from a root DOM element.
- * All coordinates in the returned IR are relative to the root element's
+ * Extract the full IR from one or more root DOM elements.
+ * All coordinates in the returned IR are relative to the coordinate root's
  * top-left corner (border box), not the page origin.
+ *
+ * When an array of elements is passed, each element is traversed and extracted
+ * independently, then results are merged in array order. Use `options.coordinateRoot`
+ * to specify which element's origin to use for coordinates (defaults to the
+ * first element).
+ *
  * This is the main pipeline entry point.
  */
-export function extractIR(root: Element, options: Options = {}): IRNode[] {
-  // 1. Traverse DOM and build stacking context tree
-  const stackingTree = traverseDOM(root, options.includeInvisible ?? false);
+export function extractIR(root: Element | Element[], options: Options = {}): IRNode[] {
+  const roots = Array.isArray(root) ? root : [root];
+  if (roots.length === 0) return [];
 
-  // 2. Flatten to paint order
-  const ordered = flattenStackingOrder(stackingTree);
-
-  // 3. Extract geometry from each node (in absolute page coordinates)
   const irNodes: IRNode[] = [];
   let globalIndex = 0;
 
-  for (const node of ordered) {
-    const el = node.element;
+  for (const rootEl of roots) {
+    // 1. Traverse DOM and build stacking context tree
+    const stackingTree = traverseDOM(rootEl, options.includeInvisible ?? false);
 
-    // SVG root elements: extract HTML box first (background, borders),
-    // then the SVG subtree on top. The HTML box must come first so
-    // the SVG content paints over it (correct paint order).
-    if (isSVGRoot(el)) {
+    // 2. Flatten to paint order
+    const ordered = flattenStackingOrder(stackingTree);
+
+    // 3. Extract geometry from each node (in absolute page coordinates)
+    for (const node of ordered) {
+      const el = node.element;
+
+      // SVG root elements: extract HTML box first (background, borders),
+      // then the SVG subtree on top. The HTML box must come first so
+      // the SVG content paints over it (correct paint order).
+      if (isSVGRoot(el)) {
+        const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+        irNodes.push(...htmlNodes);
+        globalIndex += htmlNodes.length || 1;
+
+        const svgNodes = extractSVGSubtree(
+          el as SVGSVGElement,
+          globalIndex,
+          options
+        );
+        irNodes.push(...svgNodes);
+        globalIndex += svgNodes.length || 1;
+        continue;
+      }
+
+      // Skip non-root SVG children (already handled by SVG subtree extraction)
+      if (isSVGElement(el)) {
+        continue;
+      }
+
+      // MathML root: extract decorations (fraction bars, radical overlines)
+      if (isMathMLRoot(el)) {
+        const mathNodes = extractMathMLFeatures(el, node.extractedStyle, globalIndex, options);
+        irNodes.push(...mathNodes);
+        globalIndex += mathNodes.length;
+      }
+
+      // HTML element extraction
       const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
       irNodes.push(...htmlNodes);
       globalIndex += htmlNodes.length || 1;
 
-      const svgNodes = extractSVGSubtree(
-        el as SVGSVGElement,
-        globalIndex,
-        options
-      );
-      irNodes.push(...svgNodes);
-      globalIndex += svgNodes.length || 1;
-      continue;
-    }
+      // Image element extraction (on top of HTML geometry)
+      if (options.includeImages && isImageElement(el)) {
+        const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
+        irNodes.push(...imageNodes);
+        globalIndex += imageNodes.length || 1;
+      }
 
-    // Skip non-root SVG children (already handled by SVG subtree extraction)
-    if (isSVGElement(el)) {
-      continue;
-    }
-
-    // MathML root: extract decorations (fraction bars, radical overlines)
-    if (isMathMLRoot(el)) {
-      const mathNodes = extractMathMLFeatures(el, node.extractedStyle, globalIndex, options);
-      irNodes.push(...mathNodes);
-      globalIndex += mathNodes.length;
-    }
-
-    // HTML element extraction
-    const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
-    irNodes.push(...htmlNodes);
-    globalIndex += htmlNodes.length || 1;
-
-    // Image element extraction (on top of HTML geometry)
-    if (options.includeImages && isImageElement(el)) {
-      const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
-      irNodes.push(...imageNodes);
-      globalIndex += imageNodes.length || 1;
-    }
-
-    // CSS background-image url() extraction
-    if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
-      const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
-      irNodes.push(...bgNodes);
-      globalIndex += bgNodes.length || 1;
+      // CSS background-image url() extraction
+      if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
+        const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
+        irNodes.push(...bgNodes);
+        globalIndex += bgNodes.length || 1;
+      }
     }
   }
 
-  // 4. Offset coordinates so they are relative to the root element's top-left
-  const rootOrigin = getElementOrigin(root);
+  // 4. Offset coordinates so they are relative to the coordinate root's top-left
+  const coordRoot = options.coordinateRoot ?? roots[0];
+  const rootOrigin = getElementOrigin(coordRoot);
   offsetIRNodes(irNodes, rootOrigin.x, rootOrigin.y);
 
   return irNodes;

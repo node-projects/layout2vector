@@ -90,7 +90,12 @@ export type Options = {
   includeText?: boolean;
   includeImages?: boolean;
   includeInvisible?: boolean;
-  flattenTransforms?: boolean;
+  /**
+   * When extracting from multiple elements (passing an array to extractIR),
+   * specifies which element's top-left corner to use as the coordinate origin.
+   * Defaults to the first element in the array.
+   */
+  coordinateRoot?: Element;
 };
 
 /** Writer interface for output generation. */

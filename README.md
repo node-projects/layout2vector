@@ -80,7 +80,6 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
-| `flattenTransforms` | `boolean` | — | Reserved for future use |
 
 #### `renderIR<T>(nodes: IRNode[], writer: Writer<T>): T`
 

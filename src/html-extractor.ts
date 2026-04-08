@@ -98,7 +98,7 @@ function extractTextNode(
         case "uppercase": text = text.toUpperCase(); break;
         case "lowercase": text = text.toLowerCase(); break;
         case "capitalize":
-          text = text.replace(/\b\w/g, (c) => c.toUpperCase());
+          text = text.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
           break;
       }
     }
@@ -132,7 +132,7 @@ function extractTextNode(
           case "uppercase": text = text.toUpperCase(); break;
           case "lowercase": text = text.toLowerCase(); break;
           case "capitalize":
-            text = text.replace(/\b\w/g, (c) => c.toUpperCase());
+            text = text.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
             break;
         }
       }

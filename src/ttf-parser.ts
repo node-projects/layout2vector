@@ -193,7 +193,7 @@ function parseCmap(dv: DataView, table: TableEntry): { cmap: Map<number, number>
   const numSubtables = u16(dv, off + 2);
   const cmap = new Map<number, number>();
 
-  // Rank subtables by preference: Windows UCS-2 > Windows Symbol > Unicode > Mac Roman
+  // Rank subtables by preference: UCS-4 (full Unicode) > UCS-2 > Symbol > Mac Roman
   let bestOffset = -1;
   let bestPriority = 0;
   let isSymbolEncoding = false;
@@ -205,8 +205,10 @@ function parseCmap(dv: DataView, table: TableEntry): { cmap: Map<number, number>
     const subtableOffset = off + u32(dv, subOff + 4);
 
     let priority = 0;
-    if (platformID === 3 && encodingID === 1) priority = 4; // Windows UCS-2 (best)
-    else if (platformID === 0 && encodingID <= 4) priority = 3; // Unicode BMP
+    if (platformID === 3 && encodingID === 10) priority = 6; // Windows UCS-4 (best, supports emoji/SMP)
+    else if (platformID === 0 && encodingID === 4) priority = 5; // Unicode full repertoire
+    else if (platformID === 3 && encodingID === 1) priority = 4; // Windows UCS-2
+    else if (platformID === 0 && encodingID <= 3) priority = 3; // Unicode BMP
     else if (platformID === 3 && encodingID === 0) priority = 2; // Windows Symbol
     else if (platformID === 1 && encodingID === 0) priority = 1; // Mac Roman
 
@@ -214,7 +216,7 @@ function parseCmap(dv: DataView, table: TableEntry): { cmap: Map<number, number>
       bestPriority = priority;
       bestOffset = subtableOffset;
       isSymbolEncoding = (platformID === 3 && encodingID === 0);
-      if (priority === 4) break; // can't do better
+      if (priority === 6) break; // can't do better
     }
   }
 
