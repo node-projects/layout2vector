@@ -18,8 +18,9 @@ export function extractHTMLGeometry(
   const el = node.element;
   const results: IRNode[] = [];
 
-  // Skip SVG elements — they're handled separately
-  if (isSVGElement(el)) return results;
+  // Skip non-root SVG elements — they're handled by SVG subtree extraction.
+  // SVG roots are kept because they participate in HTML layout (background, borders).
+  if (isSVGElement(el) && el.tagName.toLowerCase() !== 'svg') return results;
 
   // Extract element box quads (always via getBoxQuads for consistency)
   const boxType = options.boxType ?? "border";
@@ -89,7 +90,7 @@ function extractTextNode(
 
   if (effectiveLineCount === 1) {
     // Single line: use the span quad directly
-    let text = lineTexts[0].trim();
+    let text = lineTexts[0].replace(/\s+/g, ' ').trim();
     if (!text) return results;
 
     if (parentStyle.textTransform) {
@@ -123,7 +124,7 @@ function extractTextNode(
     // instead of subdividing the textQuad (which may only cover the first fragment).
     const N = rects.length;
     for (let i = 0; i < N; i++) {
-      let text = (i < lineTexts.length ? lineTexts[i] : "").trim();
+      let text = (i < lineTexts.length ? lineTexts[i] : "").replace(/\s+/g, ' ').trim();
       if (!text) continue;
 
       if (parentStyle.textTransform) {

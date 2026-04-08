@@ -36,7 +36,9 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
   for (const node of ordered) {
     const el = node.element;
 
-    // SVG root elements get their entire subtree extracted separately
+    // SVG root elements get their entire subtree extracted separately,
+    // but we also fall through to extract the SVG element's own HTML box
+    // (background-color, borders, etc.) since it participates in HTML layout.
     if (isSVGRoot(el)) {
       const svgNodes = extractSVGSubtree(
         el as SVGSVGElement,
@@ -45,11 +47,10 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
       );
       irNodes.push(...svgNodes);
       globalIndex += svgNodes.length || 1;
-      continue;
     }
 
     // Skip non-root SVG children (already handled by SVG subtree extraction)
-    if (isSVGElement(el)) {
+    if (isSVGElement(el) && !isSVGRoot(el)) {
       continue;
     }
 

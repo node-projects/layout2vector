@@ -143,8 +143,10 @@ function escapePdfText(text: string): string {
       }
       if (winByte !== undefined) {
         out += "\\" + winByte.toString(8).padStart(3, "0");
+      } else {
+        // Characters not in WinAnsiEncoding → substitute with '?'
+        out += "?";
       }
-      // Characters not in WinAnsiEncoding are dropped
     }
   }
   return out;

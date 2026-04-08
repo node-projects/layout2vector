@@ -268,10 +268,23 @@ function rectToQuad(x: number, y: number, w: number, h: number): Quad {
 }
 
 function extractRect(el: SVGRectElement, style: Style, zIndex: number): IRNode[] {
-  const x = el.x.baseVal.value;
-  const y = el.y.baseVal.value;
-  const w = el.width.baseVal.value;
-  const h = el.height.baseVal.value;
+  let x = el.x.baseVal.value;
+  let y = el.y.baseVal.value;
+  let w = el.width.baseVal.value;
+  let h = el.height.baseVal.value;
+
+  // Fallback to getBBox() when SVG attributes are missing but CSS defines geometry (SVG2)
+  if (w === 0 || h === 0) {
+    try {
+      const bbox = el.getBBox();
+      if (bbox.width > 0 || bbox.height > 0) {
+        x = bbox.x;
+        y = bbox.y;
+        w = bbox.width;
+        h = bbox.height;
+      }
+    } catch { /* getBBox may throw if element is not rendered */ }
+  }
 
   if (w === 0 || h === 0) return [];
 
