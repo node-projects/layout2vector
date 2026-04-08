@@ -11,6 +11,7 @@ import { setupPage } from "../helpers.js";
 import { DXFWriter } from "../../src/dxf-writer.js";
 import { PDFWriter } from "../../src/pdflite-writer.js";
 import { SVGWriter } from "../../src/svg-writer.js";
+import { HTMLWriter } from "../../src/html-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
@@ -142,7 +143,7 @@ for (const demoFile of demoFiles) {
     expect(ir.length).toBeGreaterThan(0);
 
     // Dump IR for specific demos
-    if (name === "comprehensive") {
+    if (name === "comprehensive" || name === "images" || name === "test4") {
       const irPath = path.join(outputDir, `${name}-ir.json`);
       fs.writeFileSync(irPath, JSON.stringify(ir, null, 2), "utf-8");
     }
@@ -185,7 +186,21 @@ for (const demoFile of demoFiles) {
         if (!fs.existsSync(dest)) fs.copyFileSync(path.join(demosDir, file), dest);
       }
     }
-    const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646, customFonts.size > 0 ? customFonts : undefined);
+    // Load a default Unicode-capable font for full character support in PDF
+    let defaultFont: Uint8Array | undefined;
+    const defaultFontPaths = [
+      "C:\\Windows\\Fonts\\segoeui.ttf",
+      "C:\\Windows\\Fonts\\arial.ttf",
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+      "/System/Library/Fonts/Helvetica.ttc",
+    ];
+    for (const fp of defaultFontPaths) {
+      if (fs.existsSync(fp)) {
+        defaultFont = new Uint8Array(fs.readFileSync(fp));
+        break;
+      }
+    }
+    const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646, customFonts.size > 0 ? customFonts : undefined, defaultFont);
     const pdfDoc = renderIR(ir, pdfWriter);
     expect(pdfDoc).toBeTruthy();
 
@@ -230,18 +245,29 @@ for (const demoFile of demoFiles) {
     const svgPath = path.join(outputDir, `${name}.svg`);
     fs.writeFileSync(svgPath, svgContent, "utf-8");
 
+    // --- HTML output ---
+    const htmlWriter = new HTMLWriter(viewport.width, viewport.height);
+    const htmlContent2 = renderIR(ir, htmlWriter);
+    expect(htmlContent2).toBeTruthy();
+    expect(htmlContent2.length).toBeGreaterThan(100);
+
+    const htmlOutPath = path.join(outputDir, `${name}-ir.html`);
+    fs.writeFileSync(htmlOutPath, htmlContent2, "utf-8");
+
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
     const pdfStat = fs.statSync(pdfPath);
     const pngStat = fs.statSync(pngPath);
     const svgStat = fs.statSync(svgPath);
+    const htmlStat = fs.statSync(htmlOutPath);
     expect(dxfStat.size).toBeGreaterThan(0);
     expect(pdfStat.size).toBeGreaterThan(0);
     expect(pngStat.size).toBeGreaterThan(0);
     expect(svgStat.size).toBeGreaterThan(0);
+    expect(htmlStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat.size} bytes), SVG (${svgStat.size} bytes)`
+      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat.size} bytes), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes)`
     );
   });
 }

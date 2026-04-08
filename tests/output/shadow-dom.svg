@@ -12,10 +12,10 @@
 <path d="M0,31 L280,31 L280,84 L0,84 Z" fill="url(#lg2)"/>
 <text x="16" y="67.5" fill="rgb(255, 255, 255)" font-weight="700" font-size="18px" font-family="Arial">Shadow Card Title</text>
 <path d="M0,84 L280,84 L280,200 L0,200 Z" fill="none"/>
-<text x="16" y="106.5" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">This content is inside a declarative</text>
-<text x="16" y="110.5" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">shadow DOM. It demonstrates</text>
-<text x="16" y="114.5" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">encapsulated styling and layout</text>
-<text x="16" y="118.5" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">extraction.</text>
+<text x="16" y="118.5" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">This content is inside a declarative</text>
+<text x="16" y="139.5" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">shadow DOM. It demonstrates</text>
+<text x="16" y="160.5" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">encapsulated styling and layout</text>
+<text x="16" y="181.5" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">extraction.</text>
 <path d="M0,200 L280,200 L280,240 L0,240 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(136, 136, 136) rgb(136, 136, 136)" stroke-width="1"/>
 <text x="16" y="227.5" fill="rgb(136, 136, 136)" font-size="12px" font-family="Arial">Footer text</text>
 <path d="M0,263.5 L156.02,263.5 L156.02,300.5 L0,300.5 Z" fill="none"/>

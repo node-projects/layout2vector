@@ -153,6 +153,21 @@ function escapePdfText(text: string): string {
 }
 
 /**
+ * Check whether a text string contains characters outside WinAnsiEncoding.
+ * Returns true if the text needs a Unicode-capable font (CID/Type0).
+ */
+function needsUnicodeFont(text: string): boolean {
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code < 0x80) continue; // ASCII is fine
+    if (unicodeToWinAnsi[code] !== undefined) continue; // mapped
+    if (code >= 0xA0 && code <= 0xFF) continue; // Latin-1 supplement
+    return true; // not encodable in WinAnsi
+  }
+  return false;
+}
+
+/**
  * Escape text for symbolic fonts (ZapfDingbats, Symbol).
  * These fonts use their own encoding — emit raw byte values as octal escapes.
  */
@@ -349,19 +364,27 @@ export class PDFWriter implements Writer<PdfDocument> {
   private customFonts = new Map<string, ParsedTTF>();
   // Track which characters (Unicode code points) are used per custom font (PostScript name)
   private customFontUsedChars = new Map<string, Set<number>>();
+  // Default font for Unicode text that can't be encoded in WinAnsi
+  private defaultFont: ParsedTTF | null = null;
 
   /**
    * @param pageWidth Page width in mm (default A4 = 210)
    * @param pageHeight Page height in mm (default A4 = 297)
    * @param customFonts Optional map of CSS font-family name → TTF file bytes
+   * @param defaultFont Optional TTF file bytes for a default Unicode-capable font.
+   *   When provided, any text containing characters outside WinAnsiEncoding will
+   *   use this font automatically (CID/Type0 embedding with full Unicode support).
    */
-  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>) {
+  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array) {
     this.pageWidthPt = pageWidth * 2.835;    // mm → pt
     this.pageHeightPt = pageHeight * 2.835;
     if (customFonts) {
       for (const [family, data] of customFonts) {
         this.customFonts.set(family.toLowerCase(), parseTTF(data));
       }
+    }
+    if (defaultFont) {
+      this.defaultFont = parseTTF(defaultFont);
     }
   }
 
@@ -413,6 +436,22 @@ export class PDFWriter implements Writer<PdfDocument> {
     return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
   }
 
+  /**
+   * Resolve the font to use for a given text string.
+   * If the text needs Unicode and a default font is available, use it.
+   * Otherwise return the standard mapped font.
+   */
+  private resolveFont(family: string, weight: "bold" | "normal", text: string): string {
+    const mapped = this.mapToPdfFont(family, weight);
+    // If it's already a custom font, use it (it has full Unicode via CID path)
+    if (this.isCustomFont(mapped)) return mapped;
+    // If there's a default font and the text needs Unicode, use the default font
+    if (this.defaultFont && needsUnicodeFont(text)) {
+      return `custom:${this.defaultFont.postScriptName}`;
+    }
+    return mapped;
+  }
+
   /** Check if a PDF font name is a symbolic font (no WinAnsi encoding). */
   private isSymbolicFont(pdfFontName: string): boolean {
     return pdfFontName === "ZapfDingbats" || pdfFontName === "Symbol";
@@ -450,6 +489,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     const psName = pdfFontName.slice(7); // strip "custom:"
     for (const parsed of this.customFonts.values()) {
       if (parsed.postScriptName === psName) return parsed;
+    }
+    // Check the default font
+    if (this.defaultFont && this.defaultFont.postScriptName === psName) {
+      return this.defaultFont;
     }
     return null;
   }
@@ -682,7 +725,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const fontSize = Math.min(styleFontSize, quadFontSize);
     const fontWeight = mapFontWeight(style.fontWeight);
     const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "Helvetica";
-    const pdfFontName = this.mapToPdfFont(fontFamily, fontWeight);
+    const pdfFontName = this.resolveFont(fontFamily, fontWeight, text);
     const fontRes = this.getFontResName(pdfFontName);
 
     const textColor = parseVisibleColor(style.color) ?? parseVisibleColor(style.fill);

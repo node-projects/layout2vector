@@ -36,10 +36,14 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
   for (const node of ordered) {
     const el = node.element;
 
-    // SVG root elements get their entire subtree extracted separately,
-    // but we also fall through to extract the SVG element's own HTML box
-    // (background-color, borders, etc.) since it participates in HTML layout.
+    // SVG root elements: extract HTML box first (background, borders),
+    // then the SVG subtree on top. The HTML box must come first so
+    // the SVG content paints over it (correct paint order).
     if (isSVGRoot(el)) {
+      const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+      irNodes.push(...htmlNodes);
+      globalIndex += htmlNodes.length || 1;
+
       const svgNodes = extractSVGSubtree(
         el as SVGSVGElement,
         globalIndex,
@@ -47,10 +51,11 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
       );
       irNodes.push(...svgNodes);
       globalIndex += svgNodes.length || 1;
+      continue;
     }
 
     // Skip non-root SVG children (already handled by SVG subtree extraction)
-    if (isSVGElement(el) && !isSVGRoot(el)) {
+    if (isSVGElement(el)) {
       continue;
     }
 

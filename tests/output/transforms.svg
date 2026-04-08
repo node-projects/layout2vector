@@ -11,8 +11,8 @@
 <path d="M186,127 L276,127 L276,217 L186,217 Z" fill="rgb(30, 136, 229)"/>
 <path d="M340.08,138.5 L420.08,145.5 L441.92,205.5 L361.92,198.5 Z" fill="rgb(67, 160, 71)"/>
 <path d="M87.88,59.74 L184.47,85.62 L174.12,124.26 L77.53,98.38 Z" fill="rgb(255, 152, 0)"/>
-<text x="98.85" y="83.39" fill="rgb(255, 255, 255)" font-size="7px" font-family="Arial" transform="rotate(15,98.85,83.39)">Translated +</text>
-<text x="97.04" y="90.15" fill="rgb(255, 255, 255)" font-size="7px" font-family="Arial" transform="rotate(15,97.04,90.15)">Rotated</text>
+<text x="97.03" y="107.37" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Translated +</text>
+<text x="98.55" y="142.83" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Rotated</text>
 <path d="M53.26,237.56 L158.24,245.64 L158.24,318.36 L53.26,326.44 Z" fill="rgb(123, 31, 162)"/>
 <text x="63.76" y="265.09" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial" transform="rotate(3.25,63.76,265.09)">3D perspective</text>
 <path d="M260.44,234.08 L358.92,251.44 L341.56,349.92 L243.08,332.56 Z" fill="rgba(0, 150, 136, 0.3)" stroke="rgb(0, 150, 136)" stroke-width="2"/>

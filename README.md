@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, **PNG**, or **SVG**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, **PNG**, **SVG**, or **HTML**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), and SVG. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter, SVGWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -57,6 +57,11 @@ const pngBytes = pngResult.toBytes(); // Uint8Array
 const svgWriter = new SVGWriter(800, 600); // width, height in px
 const svgString = renderIR(ir, svgWriter);
 // svgString is a complete standalone SVG document
+
+// 6. Render to HTML
+const htmlWriter = new HTMLWriter(800, 600); // width, height in px
+const htmlString = renderIR(ir, htmlWriter);
+// htmlString is a complete standalone HTML document
 ```
 
 ## API Reference
@@ -144,13 +149,35 @@ Produces a standalone SVG document string. Width and height define the viewport 
 
 The output is a self-contained SVG with all gradients, filters, and images embedded inline.
 
+#### `HTMLWriter`
+
+```ts
+new HTMLWriter(width: number, height: number)
+```
+
+Produces a standalone HTML document string. Width and height define the container dimensions in CSS pixels.
+
+- Axis-aligned polygons → absolutely positioned `<div>` elements with CSS backgrounds, borders, and border-radius
+- Non-axis-aligned polygons → inline SVG `<path>` elements
+- Polylines → inline SVG `<path>` elements
+- Text → `<span>` elements (axis-aligned) or SVG `<text>` elements (rotated)
+- Gradients → CSS `background-image` on `<div>` elements
+- Box shadow → CSS `box-shadow`
+- Opacity → CSS `opacity`
+- Images → `<img>` elements with data URL src
+- Transparent elements are skipped
+
+The output is a self-contained HTML document with all elements absolutely positioned to match the original layout.
+
 #### `PDFWriter`
 
 ```ts
-new PDFWriter(pageWidth?: number, pageHeight?: number, customFonts?: Map<string, Uint8Array>)
+new PDFWriter(pageWidth?: number, pageHeight?: number, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array)
 ```
 
 Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75). Call `await doc.finalize()` then `doc.toBytes()` to get the final PDF as a `Uint8Array`.
+
+The optional `defaultFont` parameter accepts a TTF file as `Uint8Array`. When provided, any text containing characters outside the standard WinAnsiEncoding range (e.g. emoji, CJK, math symbols like ⚖) will automatically use this font with full Unicode support via CID/Type0 embedding.
 
 - Polygons → closed paths with fill/stroke operators (`f`, `S`, `B`)
 - Polylines → paths with fill/stroke operators
@@ -341,7 +368,7 @@ npm run test:demos
 
 ### Demo Conversion
 
-The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, and `.png` files to `tests/output/`.
+The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, `.png`, `.svg`, and `.html` files to `tests/output/`.
 
 For GitHub-friendly browsing of the generated HTML, PDF, and preview screenshots, see [tests/output/README.md](./tests/output/README.md).
 
@@ -359,6 +386,12 @@ Demo files cover: borders, gradients, transforms, SVG shapes, declarative shadow
 │  + Transforms│     │ text     │     ┌────────────┐
 └──────────────┘     │ image    │────>│  PNGWriter │──> .png
                      └──────────┘     └────────────┘
+                                      ┌────────────┐
+                                 ────>│  SVGWriter │──> .svg
+                                      └────────────┘
+                                      ┌────────────┐
+                                 ────>│ HTMLWriter │──> .html
+                                      └────────────┘
                                       ┌────────────┐
                                  ────>│  Custom    │──> ...
                                       └────────────┘

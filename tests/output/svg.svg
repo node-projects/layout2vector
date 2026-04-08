@@ -26,4 +26,5 @@
 <path d="M351,332 L451,332 L451,412 L351,412 Z" fill="rgba(33, 150, 243, 0.5)" stroke="rgb(21, 101, 192)" stroke-width="1"/>
 <path d="M381,352 L481,352 L481,432 L381,432 Z" fill="rgba(244, 67, 54, 0.5)" stroke="rgb(198, 40, 40)" stroke-width="1"/>
 <path d="M351,452 L471,452 L471,502 L351,502 Z" fill="none" stroke="rgb(121, 85, 72)" stroke-width="2" stroke-dasharray="8,4"/>
+<path d="M0,31 L600,31 L600,531 L0,531 Z" fill="none" stroke="rgb(204, 204, 204)" stroke-width="1"/>
 </svg>

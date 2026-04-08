@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="863" viewBox="0 0 1240 863">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="1147" viewBox="0 0 1240 1147">
 <defs>
 <filter id="ts1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="rgba(0, 0, 0, 0.3)"/></filter>
 </defs>
-<path d="M0,0 L1240,0 L1240,862.6 L0,862.6 Z" fill="none"/>
+<path d="M0,0 L1240,0 L1240,1002.6 L0,1002.6 Z" fill="none"/>
 <path d="M0,0 L1240,0 L1240,21 L0,21 Z" fill="none"/>
 <text x="0" y="20.5" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Text Wrapping</text>
 <rect x="0" y="31" width="250" height="111.6" rx="6" ry="6" fill="rgb(255, 243, 224)" stroke="rgb(255, 204, 128)" stroke-width="1"/>
-<text x="11" y="49.2" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
-<text x="11" y="53.2" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">consectetur adipiscing elit. Sed do</text>
-<text x="11" y="57.2" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">eiusmod tempor incididunt ut labore</text>
-<text x="11" y="61.2" fill="rgb(51, 51, 51)" font-size="4px" font-family="Arial">et dolore magna aliqua.</text>
+<text x="11" y="61.2" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="83.6" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">consectetur adipiscing elit. Sed do</text>
+<text x="11" y="106" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">eiusmod tempor incididunt ut labore</text>
+<text x="11" y="128.4" fill="rgb(51, 51, 51)" font-size="14px" font-family="Arial">et dolore magna aliqua.</text>
 <path d="M0,157.6 L1240,157.6 L1240,178.6 L0,178.6 Z" fill="none"/>
 <text x="0" y="178.1" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Font Sizes &amp; Weights</text>
 <path d="M0,186.6 L1240,186.6 L1240,231.6 L0,231.6 Z" fill="none"/>
@@ -39,18 +39,18 @@
 <path d="M11,579.6 L289,579.6 L289,596.6 L11,596.6 Z" fill="none"/>
 <text x="104.47" y="596.1" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">Center aligned</text>
 <path d="M11,600.6 L311,600.6 L311,634.6 L11,634.6 Z" fill="none"/>
-<text x="11" y="609.1" fill="rgb(0, 0, 0)" font-size="8px" font-family="Arial">Justified text that spans across the full width of</text>
-<text x="11" y="617.1" fill="rgb(0, 0, 0)" font-size="8px" font-family="Arial">the container element here.</text>
+<text x="11" y="617.1" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">Justified text that spans across the full width of</text>
+<text x="11" y="634.1" fill="rgb(0, 0, 0)" font-size="14px" font-family="Arial">the container element here.</text>
 <path d="M0,664.6 L1240,664.6 L1240,685.6 L0,685.6 Z" fill="none"/>
 <text x="0" y="685.1" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text</text>
 <path d="M0,695.6 L400,695.6 L400,789.6 L0,789.6 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
-<text x="11" y="710.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
-<text x="11" y="712.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">consectetur adipiscing elit. Nulla</text>
-<text x="11" y="714.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">facilisi. Duis aute irure dolor in</text>
-<text x="11" y="716.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">reprehenderit in voluptate velit</text>
-<text x="11" y="718.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">esse cillum dolore eu fugiat nulla</text>
-<text x="11" y="720.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">pariatur. Excepteur sint occaecat</text>
-<text x="11" y="722.6" fill="rgb(0, 0, 0)" font-size="2px" font-family="Arial">cupidatat non proident.</text>
+<text x="11" y="722.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="740.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">consectetur adipiscing elit. Nulla</text>
+<text x="11" y="758.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">facilisi. Duis aute irure dolor in</text>
+<text x="11" y="776.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">reprehenderit in voluptate velit</text>
+<text x="210" y="722.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">esse cillum dolore eu fugiat nulla</text>
+<text x="210" y="740.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">pariatur. Excepteur sint occaecat</text>
+<text x="210" y="758.6" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">cupidatat non proident.</text>
 <path d="M0,804.6 L1240,804.6 L1240,825.6 L0,825.6 Z" fill="none"/>
 <text x="0" y="825.1" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Inline Formatting</text>
 <path d="M0,835.6 L1240,835.6 L1240,862.6 L0,862.6 Z" fill="none"/>
@@ -64,4 +64,14 @@
 <text x="192.68" y="857.6" fill="rgb(21, 101, 192)" font-weight="700" font-size="15px" font-family="Arial">bold text</text>
 <rect x="288.6" y="840.6" width="90.65" height="19" rx="3" ry="3" fill="rgb(38, 50, 56)"/>
 <text x="294.6" y="857.6" fill="rgb(128, 203, 196)" font-size="13px" font-family="monospace">inline code</text>
+<path d="M0,877.6 L1240,877.6 L1240,898.6 L0,898.6 Z" fill="none"/>
+<text x="0" y="898.1" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text 2</text>
+<path d="M3.29,1064.9 L349.71,864.9 L396.71,946.3 L50.29,1146.3 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
+<text x="19.32" y="1082.77" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="28.32" y="1098.37" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">consectetur adipiscing elit. Nulla</text>
+<text x="37.32" y="1113.95" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">facilisi. Duis aute irure dolor in</text>
+<text x="46.32" y="1129.53" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">reprehenderit in voluptate velit</text>
+<text x="191.67" y="983.27" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">esse cillum dolore eu fugiat nulla</text>
+<text x="200.67" y="998.87" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">pariatur. Excepteur sint occaecat</text>
+<text x="209.67" y="1014.45" fill="rgb(0, 0, 0)" font-size="12px" font-family="Arial">cupidatat non proident.</text>
 </svg>

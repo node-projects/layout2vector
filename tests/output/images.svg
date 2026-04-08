@@ -129,6 +129,7 @@
 <rect x="175.27" y="971" width="139.98" height="141.5" rx="8" ry="8" fill="rgb(255, 243, 224)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <rect x="188.27" y="984" width="80" height="40" rx="8" ry="8" fill="rgb(255, 111, 0)"/>
 <text x="213.93" y="1012" fill="rgb(255, 255, 255)" font-size="12px" font-family="Arial">Inline</text>
+<path d="M188.27,984 L268.27,984 L268.27,1024 L188.27,1024 Z" fill="none"/>
 <path d="M188.27,1035.5 L268.27,1035.5 L268.27,1075.5 L188.27,1075.5 Z" fill="none"/>
 <path d="M188.27,1086 L302.25,1086 L302.25,1098 L188.27,1098 Z" fill="none"/>
 <text x="188.27" y="1098" fill="rgb(136, 136, 136)" font-size="11px" font-family="Arial">Inline SVG + raster img</text>
