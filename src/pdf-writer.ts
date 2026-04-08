@@ -436,19 +436,45 @@ export class PDFWriter implements Writer<PdfDocument> {
     return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
   }
 
+  /** Check whether a parsed font has glyphs for all characters in the text. */
+  private fontHasAllChars(parsed: ParsedTTF, text: string): boolean {
+    for (let i = 0; i < text.length; i++) {
+      const code = text.charCodeAt(i);
+      if (code < 0x80) continue; // ASCII always available
+      const gid = parsed.cmap.get(code);
+      if (gid === undefined || gid === 0) return false;
+    }
+    return true;
+  }
+
   /**
    * Resolve the font to use for a given text string.
    * If the text needs Unicode and a default font is available, use it.
-   * Otherwise return the standard mapped font.
+   * Falls back through all available custom fonts if the primary choice
+   * doesn't have the needed glyphs.
    */
   private resolveFont(family: string, weight: "bold" | "normal", text: string): string {
     const mapped = this.mapToPdfFont(family, weight);
-    // If it's already a custom font, use it (it has full Unicode via CID path)
-    if (this.isCustomFont(mapped)) return mapped;
-    // If there's a default font and the text needs Unicode, use the default font
-    if (this.defaultFont && needsUnicodeFont(text)) {
+    // If it's already a custom font, check it has the glyphs
+    if (this.isCustomFont(mapped)) {
+      const data = this.getCustomFontData(mapped);
+      if (data && this.fontHasAllChars(data, text)) return mapped;
+      // Fall through to find a font with the needed glyphs
+    }
+    // If text can be encoded in WinAnsi, use the mapped standard font
+    if (!needsUnicodeFont(text)) return mapped;
+    // Try the default font first
+    if (this.defaultFont && this.fontHasAllChars(this.defaultFont, text)) {
       return `custom:${this.defaultFont.postScriptName}`;
     }
+    // Search all custom fonts for one that has the needed glyphs
+    for (const [, parsed] of this.customFonts) {
+      if (this.fontHasAllChars(parsed, text)) {
+        return `custom:${parsed.postScriptName}`;
+      }
+    }
+    // Last resort: use default font even if incomplete, or mapped standard font
+    if (this.defaultFont) return `custom:${this.defaultFont.postScriptName}`;
     return mapped;
   }
 

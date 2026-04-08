@@ -631,6 +631,27 @@ function extractText(el: SVGTextElement, style: Style, zIndex: number): IRNode[]
   const rawQuad = rectToQuad(bbox.x, bbox.y, bbox.width, bbox.height);
   const transformed = transformPoints(rawQuad, el) as Quad;
 
+  // Clip text quad to the SVG viewport (SVGs default to overflow:hidden).
+  // This prevents text with text-anchor="middle" near edges from producing
+  // negative coordinates that fall outside all output viewports.
+  const svgRoot = el.ownerSVGElement;
+  if (svgRoot) {
+    const svgCs = getComputedStyle(svgRoot);
+    if (svgCs.overflow !== "visible") {
+      const svgRect = svgRoot.getBoundingClientRect();
+      for (const p of transformed) {
+        p.x = Math.max(p.x, svgRect.left);
+        p.y = Math.max(p.y, svgRect.top);
+        p.x = Math.min(p.x, svgRect.right);
+        p.y = Math.min(p.y, svgRect.bottom);
+      }
+      // If the quad collapsed to zero size, the text is fully clipped
+      const w = Math.abs(transformed[1].x - transformed[0].x) + Math.abs(transformed[2].x - transformed[3].x);
+      const h = Math.abs(transformed[3].y - transformed[0].y) + Math.abs(transformed[2].y - transformed[1].y);
+      if (w < 0.5 && h < 0.5) return [];
+    }
+  }
+
   const text = el.textContent ?? "";
 
   return [{ type: "text", quad: transformed, text, style, zIndex }];
