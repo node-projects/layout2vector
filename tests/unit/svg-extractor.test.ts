@@ -234,7 +234,10 @@ test.describe("SVG Geometry Extraction", () => {
     const polygons = ir.filter((n: any) => n.type === "polygon");
     expect(polygons.length).toBeGreaterThanOrEqual(1);
     // Effective opacity: 0.5 * 0.4 = 0.2
-    expect(polygons[0].style.opacity).toBeCloseTo(0.2, 1);
+    // Find the red rect (skip the SVG root's HTML box which has transparent fill)
+    const redRect = polygons.find((p: any) => p.style.fill && p.style.fill !== "rgba(0, 0, 0, 0)" && p.style.fill !== "transparent");
+    expect(redRect).toBeTruthy();
+    expect(redRect!.style.opacity).toBeCloseTo(0.2, 1);
   });
 
   test("detects closed SVG paths", async ({ page }) => {
