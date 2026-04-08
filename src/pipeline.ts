@@ -13,6 +13,7 @@ import {
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
 import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage } from "./image-extractor.js";
+import { isMathMLRoot, extractMathMLFeatures } from "./mathml-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
 /**
@@ -50,6 +51,13 @@ export function extractIR(root: Element, options: Options = {}): IRNode[] {
     // Skip non-root SVG children (already handled by SVG subtree extraction)
     if (isSVGElement(el)) {
       continue;
+    }
+
+    // MathML root: extract decorations (fraction bars, radical overlines)
+    if (isMathMLRoot(el)) {
+      const mathNodes = extractMathMLFeatures(el, node.extractedStyle, globalIndex, options);
+      irNodes.push(...mathNodes);
+      globalIndex += mathNodes.length;
     }
 
     // HTML element extraction

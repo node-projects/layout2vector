@@ -73,6 +73,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "html-extractor.js",
       "svg-extractor.js",
       "image-extractor.js",
+      "mathml-extractor.js",
       "pipeline.js",
       "png-writer.js",
     ];
@@ -108,6 +109,9 @@ window.__HC = {
   hasBackgroundImage,
   extractBackgroundImage,
   preloadImages,
+  isMathMLRoot,
+  isMathMLElement,
+  extractMathMLFeatures,
   PNGWriter,
   PNGResult,
 };
