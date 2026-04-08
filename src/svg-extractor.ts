@@ -152,6 +152,20 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     }
   }
 
+  // Scale fontSize by the CTM so it matches the screen-coordinate quad.
+  // Same principle as strokeWidth: CSS fontSize is in local SVG coordinates,
+  // but extracted text quads are in screen coordinates after CTM transformation.
+  let { fontSize } = base;
+  if (fontSize) {
+    const fs = parseFloat(fontSize);
+    if (!isNaN(fs) && fs > 0) {
+      const sx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
+      const sy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
+      const scale = Math.sqrt(sx * sy);
+      fontSize = `${fs * scale}px`;
+    }
+  }
+
   // In SVG, fill determines text color — override CSS color with fill
   const svgColor = (fill && fill !== "none" && !fill.startsWith("url(")) ? fill : undefined;
 
@@ -161,6 +175,7 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     stroke: stroke !== "none" ? stroke : undefined,
     strokeWidth,
     strokeDasharray,
+    fontSize,
     backgroundImage: backgroundImage ?? base.backgroundImage,
     ...(svgColor ? { color: svgColor } : {}),
   };
