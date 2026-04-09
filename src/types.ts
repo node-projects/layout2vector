@@ -48,6 +48,7 @@ export type Style = {
   transform?: string;
   overflow?: string;
   textOverflow?: string;
+  imageRendering?: string;
   /** Clip boundary from an ancestor with overflow:hidden + border-radius (absolute page coords). */
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 };
@@ -98,6 +99,13 @@ export type Options = {
    * Defaults to the first element in the array.
    */
   coordinateRoot?: Element;
+  /**
+   * Scale factor applied to all extracted coordinates during IR generation.
+   * Useful when the source DOM is rendered at a different zoom level.
+   * For example, `zoom: 2` doubles all coordinates and sizes.
+   * Defaults to 1 (no scaling).
+   */
+  zoom?: number;
 };
 
 /** Writer interface for output generation. */

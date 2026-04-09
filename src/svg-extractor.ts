@@ -45,8 +45,11 @@ function walkSVGTree(
     return;
   }
 
-  // Compute this element's effective opacity
+  // Skip hidden SVG elements (display:none or visibility:hidden)
   const cs = getComputedStyle(el);
+  if (cs.display === "none" || cs.visibility === "hidden") return;
+
+  // Compute this element's effective opacity
   const ownOpacity = cs.opacity ? parseFloat(cs.opacity) : 1;
   const effectiveOpacity = parentOpacity * ownOpacity;
 
@@ -54,6 +57,15 @@ function walkSVGTree(
   if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement) {
     const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity);
     results.push(...nodes);
+  }
+
+  // <use> elements render referenced content via a shadow DOM.
+  // Walk the <use> shadow root's children to extract the cloned geometry.
+  if (tag === "use" && el.shadowRoot) {
+    for (const child of Array.from(el.shadowRoot.children)) {
+      walkSVGTree(child, results, nextIndex, options, effectiveOpacity);
+    }
+    return;
   }
 
   // Walk children (DOM order = paint order in SVG)

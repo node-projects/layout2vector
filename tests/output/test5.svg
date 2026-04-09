@@ -2,25 +2,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="1324" viewBox="0 0 1264 1324">
 <defs>
 <clipPath id="clip1"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip2"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip3"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip4"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip5"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip6"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip7"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip8"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip9"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip10"><rect x="72" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip11"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip12"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip13"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip14"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip15"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip16"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip17"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip18"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip19"><rect x="255" y="136" width="88" height="130"/></clipPath>
-<clipPath id="clip20"><rect x="255" y="136" width="88" height="130"/></clipPath>
+<symbol id="imgSym2" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="http://127.0.0.1/node_modules/technology-scheme-editor-core/assets/images/catalog/data.png" width="1" height="1" preserveAspectRatio="none"/></symbol>
+<clipPath id="clip3"><rect x="255" y="136" width="88" height="130"/></clipPath>
 </defs>
 <path d="M0,0 L1264,0 L1264,704 L0,704 Z" fill="none"/>
 <path d="M0,0 L1264,0 L1264,704 L0,704 Z" fill="none"/>
@@ -34,29 +17,29 @@
 <path d="M71,135 L161,135 L161,267 L71,267 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <path d="M72,136 L160,136 L160,266 L72,266 Z" fill="none"/>
 <g clip-path="url(#clip1)"><path d="M72,136 L159.97,136 L159.97,169.8 L72,169.8 Z" fill="none"/></g>
-<g clip-path="url(#clip2)"><path d="M115.98,137.3 L159.1,137.3 L159.1,146.4 L115.98,146.4 Z" fill="none"/></g>
-<g clip-path="url(#clip3)"><path d="M72.87,146.4 L159.1,146.4 L159.1,159.4 L72.87,159.4 Z" fill="none"/></g>
-<g clip-path="url(#clip4)"><path d="M72.87,159.4 L159.1,159.4 L159.1,168.5 L72.87,168.5 Z" fill="none"/></g>
-<g clip-path="url(#clip5)"><path d="M137.98,171.1 L159.1,171.1 L159.1,187.98 L137.98,187.98 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M115.98,137.3 L159.1,137.3 L159.1,146.4 L115.98,146.4 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M72.87,146.4 L159.1,146.4 L159.1,159.4 L72.87,159.4 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M72.87,159.4 L159.1,159.4 L159.1,168.5 L72.87,168.5 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M137.98,171.1 L159.1,171.1 L159.1,187.98 L137.98,187.98 Z" fill="none"/></g>
 <text x="154.03" y="170.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">0</text>
-<g clip-path="url(#clip6)"><path d="M72.87,194.48 L159.1,194.48 L159.1,213.98 L72.87,213.98 Z" fill="none"/></g>
-<g clip-path="url(#clip7)"><path d="M72.87,220.48 L159.1,220.48 L159.1,239.98 L72.87,239.98 Z" fill="none"/></g>
-<g clip-path="url(#clip8)"><path d="M72,136 L93.98,136 L93.98,169.8 L72,169.8 Z" fill="none" opacity="0.3"/></g>
-<g clip-path="url(#clip9)"><path d="M72,136 L93.98,136 L93.98,169.8 L72,169.8 Z" fill="none" opacity="0.3"/></g>
-<g clip-path="url(#clip10)"><image x="72" y="141.91" width="21.98" height="21.98" href="http://127.0.0.1/node_modules/technology-scheme-editor-core/assets/images/catalog/data.png" preserveAspectRatio="none" opacity="0.3"/></g>
+<g clip-path="url(#clip1)"><path d="M72.87,194.48 L159.1,194.48 L159.1,213.98 L72.87,213.98 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M72.87,220.48 L159.1,220.48 L159.1,239.98 L72.87,239.98 Z" fill="none"/></g>
+<g clip-path="url(#clip1)"><path d="M72,136 L93.98,136 L93.98,169.8 L72,169.8 Z" fill="none" opacity="0.3"/></g>
+<g clip-path="url(#clip1)"><path d="M72,136 L93.98,136 L93.98,169.8 L72,169.8 Z" fill="none" opacity="0.3"/></g>
+<g clip-path="url(#clip1)"><use href="#imgSym2" x="72" y="141.91" width="21.98" height="21.98" opacity="0.3"/></g>
 <path d="M254,135 L344,135 L344,267 L254,267 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <path d="M255,136 L343,136 L343,266 L255,266 Z" fill="none"/>
-<g clip-path="url(#clip11)"><path d="M255,136 L342.97,136 L342.97,169.8 L255,169.8 Z" fill="none"/></g>
-<g clip-path="url(#clip12)"><path d="M298.98,137.3 L342.1,137.3 L342.1,146.4 L298.98,146.4 Z" fill="none"/></g>
-<g clip-path="url(#clip13)"><path d="M255.87,146.4 L342.1,146.4 L342.1,159.4 L255.87,159.4 Z" fill="none"/></g>
-<g clip-path="url(#clip14)"><path d="M255.87,159.4 L342.1,159.4 L342.1,168.5 L255.87,168.5 Z" fill="none"/></g>
-<g clip-path="url(#clip15)"><path d="M320.98,171.1 L342.1,171.1 L342.1,187.98 L320.98,187.98 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M255,136 L342.97,136 L342.97,169.8 L255,169.8 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M298.98,137.3 L342.1,137.3 L342.1,146.4 L298.98,146.4 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M255.87,146.4 L342.1,146.4 L342.1,159.4 L255.87,159.4 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M255.87,159.4 L342.1,159.4 L342.1,168.5 L255.87,168.5 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M320.98,171.1 L342.1,171.1 L342.1,187.98 L320.98,187.98 Z" fill="none"/></g>
 <text x="337.03" y="170.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">0</text>
-<g clip-path="url(#clip16)"><path d="M255.87,194.48 L342.1,194.48 L342.1,213.98 L255.87,213.98 Z" fill="none"/></g>
-<g clip-path="url(#clip17)"><path d="M255.87,220.48 L342.1,220.48 L342.1,239.98 L255.87,239.98 Z" fill="none"/></g>
-<g clip-path="url(#clip18)"><path d="M255,136 L276.98,136 L276.98,169.8 L255,169.8 Z" fill="none" opacity="0.3"/></g>
-<g clip-path="url(#clip19)"><path d="M255,136 L276.98,136 L276.98,169.8 L255,169.8 Z" fill="none" opacity="0.3"/></g>
-<g clip-path="url(#clip20)"><image x="255" y="141.91" width="21.98" height="21.98" href="http://127.0.0.1/node_modules/technology-scheme-editor-core/assets/images/catalog/data.png" preserveAspectRatio="none" opacity="0.3"/></g>
+<g clip-path="url(#clip3)"><path d="M255.87,194.48 L342.1,194.48 L342.1,213.98 L255.87,213.98 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M255.87,220.48 L342.1,220.48 L342.1,239.98 L255.87,239.98 Z" fill="none"/></g>
+<g clip-path="url(#clip3)"><path d="M255,136 L276.98,136 L276.98,169.8 L255,169.8 Z" fill="none" opacity="0.3"/></g>
+<g clip-path="url(#clip3)"><path d="M255,136 L276.98,136 L276.98,169.8 L255,169.8 Z" fill="none" opacity="0.3"/></g>
+<g clip-path="url(#clip3)"><use href="#imgSym2" x="255" y="141.91" width="21.98" height="21.98" opacity="0.3"/></g>
 <path d="M0,60 L1264,60 L1264,704 L0,704 Z" fill="none"/>
 <path d="M0,60 L1264,60 L1264,704 L0,704 Z" fill="none"/>
 <path d="M144,200 L145.92,200.45 L147.84,200.89 L149.77,201.32 L151.69,201.73 L153.62,202.13 L155.56,202.52 L157.49,202.89 L159.43,203.25 L161.38,203.59 L163.32,203.92 L165.27,204.24 L167.21,204.54 L169.16,204.82 L171.12,205.1 L173.07,205.35 L175.03,205.6 L176.99,205.83 L178.95,206.04 L180.91,206.24 L182.87,206.43 L184.84,206.6 L186.8,206.75 L188.77,206.9 L190.74,207.02 L192.7,207.13 L194.67,207.23 L196.64,207.31 L198.61,207.38 L200.59,207.43 L202.56,207.47 L204.53,207.49 L206.5,207.5 L208.47,207.49 L210.44,207.47 L212.41,207.43 L214.39,207.38 L216.36,207.31 L218.33,207.23 L220.3,207.13 L222.26,207.02 L224.23,206.9 L226.2,206.75 L228.16,206.6 L230.13,206.43 L232.09,206.24 L234.05,206.04 L236.01,205.83 L237.97,205.6 L239.93,205.35 L241.88,205.1 L243.84,204.82 L245.79,204.54 L247.73,204.24 L249.68,203.92 L251.62,203.59 L253.57,203.25 L255.51,202.89 L257.44,202.52 L259.38,202.13 L261.31,201.73 L263.23,201.32 L265.16,200.89 L267.08,200.45 L269,200" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/>

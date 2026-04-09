@@ -376,10 +376,11 @@ export class PDFWriter implements Writer<PdfDocument> {
    * @param defaultFont Optional TTF file bytes for a default Unicode-capable font.
    *   When provided, any text containing characters outside WinAnsiEncoding will
    *   use this font automatically (CID/Type0 embedding with full Unicode support).
+   * @param zoom Scale factor applied to page dimensions (default 1).
    */
-  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array) {
-    this.pageWidthPt = pageWidth * 2.835;    // mm → pt
-    this.pageHeightPt = pageHeight * 2.835;
+  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array, zoom = 1) {
+    this.pageWidthPt = pageWidth * zoom * 2.835;    // mm → pt
+    this.pageHeightPt = pageHeight * zoom * 2.835;
     if (customFonts) {
       for (const [family, data] of customFonts) {
         this.customFonts.set(family.toLowerCase(), parseTTF(data));

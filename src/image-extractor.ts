@@ -7,6 +7,22 @@ import type { Quad, IRNode, Options, Style } from "./types.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
 import { getElementQuad } from "./geometry.js";
 
+/**
+ * Cache for image rasterization results, keyed by source URL + dimensions.
+ * Avoids re-rasterizing the same image when multiple elements reference it.
+ * Cleared at the start of each extractIR() run.
+ */
+const imageDataCache = new Map<string, { dataUrl: string; rgbData?: number[] } | null>();
+
+/** Cache for SVG content strings, keyed by source URL. Avoids repeated sync XHR or base64 decoding. */
+const svgContentCache = new Map<string, string | null>();
+
+/** Clear the image rasterization cache. Called at the start of each extraction run. */
+export function clearImageCache(): void {
+  imageDataCache.clear();
+  svgContentCache.clear();
+}
+
 /** Check if an element is an <img> element. */
 export function isImageElement(el: Element): el is HTMLImageElement {
   return el.tagName.toLowerCase() === "img";
@@ -19,8 +35,23 @@ export function isImageElement(el: Element): el is HTMLImageElement {
  * Must be called (and awaited) before extractIR().
  */
 export async function preloadImages(root: Element): Promise<void> {
-  const imgs = root.querySelectorAll("img");
-  for (const img of Array.from(imgs)) {
+  // Collect all elements including those inside shadow DOM
+  const allElements: Element[] = [];
+  function walkDOM(node: Element | ShadowRoot | Document) {
+    const els = node.querySelectorAll("*");
+    for (const el of Array.from(els)) {
+      allElements.push(el);
+      if (el.shadowRoot) walkDOM(el.shadowRoot);
+    }
+  }
+  walkDOM(root.shadowRoot ?? root);
+  // Include root itself
+  allElements.unshift(root);
+
+  // Pre-convert <img> elements with external URLs to data URLs
+  for (const el of allElements) {
+    if (el.tagName !== "IMG") continue;
+    const img = el as HTMLImageElement;
     const src = img.currentSrc || img.src;
     if (!src) continue;
     if (src.startsWith("data:")) {
@@ -83,16 +114,29 @@ export async function preloadImages(root: Element): Promise<void> {
     }
   }
 
-  // Pre-decode raster data-URL background images so rasterToRendered can draw
-  // them synchronously during extraction. Replace with JPEG for PDF compat
-  // (skip very small images where JPEG compression introduces artifacts).
-  const allElements = root.querySelectorAll("*");
-  for (const el of Array.from(allElements)) {
+  // Pre-convert background-image URLs (including inside shadow DOM):
+  // - External URLs (http, file, relative) → fetch and convert to data URLs
+  // - Data URL PNGs/WebPs → convert to JPEG for PDF compatibility (skip tiny images)
+  for (const el of allElements) {
     const bg = getComputedStyle(el).backgroundImage;
     if (!bg || bg === "none") continue;
     const urlMatch = bg.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
     if (!urlMatch) continue;
     const url = urlMatch[1];
+
+    // External URL (not a data URL) — fetch and convert to inline data URL
+    if (!url.startsWith("data:")) {
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) continue;
+        const blob = await resp.blob();
+        const dataUrl = await blobToDataUrl(blob);
+        (el as HTMLElement).style.backgroundImage = `url("${dataUrl}")`;
+      } catch { /* network error — leave as-is */ }
+      continue;
+    }
+
+    // Data URL PNG/WebP — pre-decode and convert to JPEG for PDF compat
     if (!url.startsWith("data:image/png") && !url.startsWith("data:image/webp")) continue;
     try {
       const img = new Image();
@@ -215,6 +259,15 @@ export function extractBackgroundImage(
  * Returns a PNG data URL and optional raw RGB pixel data for lossless PDF embedding.
  */
 function rasterToRendered(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
+  const cacheKey = `raster|${dataUrl.length}|${w}|${h}|${dataUrl.slice(0, 100)}`;
+  const cached = imageDataCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+  const result = rasterToRenderedUncached(dataUrl, w, h);
+  imageDataCache.set(cacheKey, result);
+  return result;
+}
+
+function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
   try {
     const img = new Image();
     img.src = dataUrl;
@@ -394,38 +447,31 @@ function convertBgSvgToGeometry(
  * Uses a temporary Image element loaded synchronously via XHR.
  */
 function rasterizeBackgroundImage(el: Element, elWidth: number, elHeight: number): string | null {
+  const w = Math.round(elWidth) || 1;
+  const h = Math.round(elHeight) || 1;
+  const cs = getComputedStyle(el);
+  const bgImage = cs.backgroundImage;
+  const urlMatch = bgImage.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
+  if (!urlMatch) return null;
+  const url = urlMatch[1];
+
+  const cacheKey = `bgRaster|${url.length}|${w}|${h}|${url.slice(0, 100)}`;
+  if (imageDataCache.has(cacheKey)) {
+    return imageDataCache.get(cacheKey)?.dataUrl ?? null;
+  }
+
+  const result = rasterizeBackgroundImageUncached(url, w, h);
+  imageDataCache.set(cacheKey, result ? { dataUrl: result } : null);
+  return result;
+}
+
+function rasterizeBackgroundImageUncached(url: string, w: number, h: number): string | null {
   try {
     const canvas = document.createElement("canvas");
-    const w = Math.round(elWidth) || 1;
-    const h = Math.round(elHeight) || 1;
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-
-    // Use html2canvas-style approach: draw the element's computed background
-    // We rely on the browser having already loaded the image
-    // Create a temp element with the same background and draw to canvas
-    const cs = getComputedStyle(el);
-    const tempDiv = document.createElement("div");
-    tempDiv.style.position = "fixed";
-    tempDiv.style.left = "-9999px";
-    tempDiv.style.top = "-9999px";
-    tempDiv.style.width = `${w}px`;
-    tempDiv.style.height = `${h}px`;
-    tempDiv.style.backgroundImage = cs.backgroundImage;
-    tempDiv.style.backgroundSize = cs.backgroundSize || "cover";
-    tempDiv.style.backgroundPosition = cs.backgroundPosition || "center";
-    tempDiv.style.backgroundRepeat = cs.backgroundRepeat || "no-repeat";
-    document.body.appendChild(tempDiv);
-
-    // Extract URL and try to draw via Image
-    const bgImage = cs.backgroundImage;
-    const urlMatch = bgImage.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
-    document.body.removeChild(tempDiv);
-
-    if (!urlMatch) return null;
-    const url = urlMatch[1];
 
     // Synchronous fetch for same-origin images
     try {
@@ -501,6 +547,23 @@ export function extractImageGeometry(
   let dataUrl: string | null = null;
   let rgbData: number[] | undefined;
 
+  // Check cache for previously rasterized result of the same source at same dimensions
+  const imgCacheKey = `img|${src.length}|${renderW}|${renderH}|${src.slice(0, 100)}`;
+  const cachedImg = imageDataCache.get(imgCacheKey);
+  if (cachedImg !== undefined) {
+    if (cachedImg === null) return []; // previously determined to be transparent/empty
+    return [{
+      type: "image",
+      quad: adjustedQuad,
+      dataUrl: cachedImg.dataUrl,
+      width: renderW,
+      height: renderH,
+      rgbData: cachedImg.rgbData,
+      style,
+      zIndex: globalIndex,
+    }];
+  }
+
   // Determine if we should use nearest-neighbor (pixelated) scaling
   const imageRendering = getComputedStyle(el).imageRendering || "";
   const isPixelated = imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges";
@@ -529,6 +592,7 @@ export function extractImageGeometry(
         }
         if (!hasVisibleContent) {
           // Image is fully transparent — skip it
+          imageDataCache.set(imgCacheKey, null);
           return [];
         }
       }
@@ -578,7 +642,10 @@ export function extractImageGeometry(
       for (let i = 3; i < decoded.rgba.length; i += 4) {
         if (decoded.rgba[i] > 0) { hasAlpha = true; break; }
       }
-      if (!hasAlpha) return []; // fully transparent image
+      if (!hasAlpha) {
+        imageDataCache.set(imgCacheKey, null);
+        return []; // fully transparent image
+      }
       // Put the decoded pixels into a canvas at rendered size to generate a JPEG data URL
       try {
         const canvas = document.createElement("canvas");
@@ -623,12 +690,19 @@ export function extractImageGeometry(
   // If the browser couldn't decode this image (naturalWidth===0) and our manual
   // decoder also failed, the image is unrenderable — skip it.
   if (!dataUrl) {
-    if (isDataUrl && natW === 0 && natH === 0) return [];
+    if (isDataUrl && natW === 0 && natH === 0) {
+      imageDataCache.set(imgCacheKey, null);
+      return [];
+    }
     dataUrl = getImageDataUrl(el);
     if (!dataUrl) dataUrl = src;
-    if (!dataUrl) return [];
+    if (!dataUrl) {
+      imageDataCache.set(imgCacheKey, null);
+      return [];
+    }
   }
 
+  imageDataCache.set(imgCacheKey, { dataUrl, rgbData });
   return [{
     type: "image",
     quad: adjustedQuad,
@@ -709,25 +783,30 @@ function isSvgSource(src: string): boolean {
   }
 }
 
-/** Extract SVG markup from a data URL or fetch it synchronously. */
+/** Extract SVG markup from a data URL or fetch it synchronously. Results are cached. */
 function extractSvgContent(src: string): string | null {
+  const cached = svgContentCache.get(src);
+  if (cached !== undefined) return cached;
+
+  let result: string | null = null;
   if (src.startsWith("data:image/svg+xml")) {
-    return decodeSvgDataUrl(src);
-  }
-
-  // Try synchronous XHR for same-origin SVG URLs
-  try {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", src, false);
-    xhr.send();
-    if (xhr.status === 200 && xhr.responseText.includes("<svg")) {
-      return xhr.responseText;
+    result = decodeSvgDataUrl(src);
+  } else {
+    // Try synchronous XHR for same-origin SVG URLs
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", src, false);
+      xhr.send();
+      if (xhr.status === 200 && xhr.responseText.includes("<svg")) {
+        result = xhr.responseText;
+      }
+    } catch {
+      // Cross-origin or network error — fall through to rasterize
     }
-  } catch {
-    // Cross-origin or network error — fall through to rasterize
   }
 
-  return null;
+  svgContentCache.set(src, result);
+  return result;
 }
 
 /** Decode SVG content from a data URL. */

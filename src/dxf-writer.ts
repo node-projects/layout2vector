@@ -132,9 +132,10 @@ export class DXFWriter implements Writer<string> {
   /**
    * @param maxY The maximum Y coordinate (viewport height) for Y-axis flipping.
    *             DXF uses Y-up; browser uses Y-down.
+   * @param zoom Scale factor applied to the maxY coordinate.
    */
-  constructor(maxY = 1000) {
-    this.maxY = maxY;
+  constructor(maxY = 1000, zoom = 1) {
+    this.maxY = maxY * zoom;
   }
 
   begin(): void {

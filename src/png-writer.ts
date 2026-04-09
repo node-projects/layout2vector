@@ -383,6 +383,10 @@ export class PNGResult {
     const leftEdge = Math.sqrt(ldx * ldx + ldy * ldy);
 
     if (topEdge > 0 && leftEdge > 0) {
+      const ir = img.style.imageRendering;
+      if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
+        ctx.imageSmoothingEnabled = false;
+      }
       const angle = Math.atan2(dy, dx);
       if (Math.abs(angle) > 0.01) {
         ctx.translate(q[0].x, q[0].y);
@@ -434,10 +438,11 @@ export class PNGWriter implements Writer<PNGResult> {
    * @param width  Canvas width in CSS pixels.
    * @param height Canvas height in CSS pixels.
    * @param scale  Device pixel ratio / resolution multiplier (default 1).
+   * @param zoom   Scale factor applied to width and height (default 1).
    */
-  constructor(width: number, height: number, scale = 1) {
-    this.width = width;
-    this.height = height;
+  constructor(width: number, height: number, scale = 1, zoom = 1) {
+    this.width = width * zoom;
+    this.height = height * zoom;
     this.scale = scale;
   }
 

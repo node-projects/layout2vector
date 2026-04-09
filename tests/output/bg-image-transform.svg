@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="693" viewBox="0 0 1200 693">
+<defs>
+<symbol id="imgSym1" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAALUlEQVQIW2NkYPj/n4EBCBgZGUGMf//+MTAxAAUYGBj+MzIyMIBEmBjAEgwMAHPpCAtXDLvmAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></symbol>
+</defs>
 <path d="M0,0 L1200,0 L1200,693 L0,693 Z" fill="none"/>
 <path d="M0,0 L1200,0 L1200,21 L0,21 Z" fill="none"/>
 <text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Background Image + CSS Transform Demo</text>
@@ -73,7 +76,7 @@
 <path d="M0,594 L1200,594 L1200,693 L0,693 Z" fill="none"/>
 <path d="M0,594 L80,594 L80,693 L0,693 Z" fill="none"/>
 <path d="M40,577.43 L96.57,634 L40,690.57 L-16.57,634 Z" fill="none"/>
-<image transform="translate(40,577.43) rotate(45)" x="0" y="0" width="80" height="80" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAALUlEQVQIW2NkYPj/n4EBCBgZGUGMf//+MTAxAAUYGBj+MzIyMIBEmBjAEgwMAHPpCAtXDLvmAAAAAElFTkSuQmCC" preserveAspectRatio="none"/>
+<use href="#imgSym1" transform="translate(40,577.43) rotate(45)" x="0" y="0" width="80" height="80" image-rendering="pixelated"/>
 <path d="M0.87,680 L79.12,680 L79.12,693 L0.87,693 Z" fill="none"/>
 <text x="0.87" y="681" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Raster at 45deg</text>
 </svg>

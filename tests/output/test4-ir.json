@@ -51,7 +51,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 0
   },
@@ -107,7 +108,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 1
   },
@@ -163,7 +165,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 2
   },
@@ -219,7 +222,8 @@
       "boxShadow": "none",
       "transform": "matrix(1, 0, 0, 1, 0, 10)",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -275,7 +279,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -332,7 +337,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -389,7 +395,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -446,7 +453,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -503,7 +511,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 4
   },
@@ -559,7 +568,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 17
   },
@@ -615,7 +625,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 19
   },
@@ -671,7 +682,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 19
   },
@@ -727,7 +739,8 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "hidden",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 20
   },
@@ -783,7 +796,8 @@
       "boxShadow": "none",
       "transform": "matrix(1, 0, 0, 1, 0, 5)",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "imageRendering": "auto"
     },
     "zIndex": 22
   }

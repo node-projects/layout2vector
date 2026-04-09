@@ -50,10 +50,35 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
-/** Escape text for use inside XML/SVG elements. */
+/** Escape text for use inside XML/SVG elements.
+ *  Encodes XML special characters and non-BMP Unicode characters as numeric
+ *  character references so the output is safe for any XML parser.
+ */
 function escXml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  let out = "";
+  for (const ch of s) {
+    const code = ch.codePointAt(0)!;
+    switch (ch) {
+      case "&": out += "&amp;"; break;
+      case "<": out += "&lt;"; break;
+      case ">": out += "&gt;"; break;
+      case '"': out += "&quot;"; break;
+      case "'": out += "&#39;"; break;
+      default:
+        // XML 1.0 allows #x9, #xA, #xD, #x20-#xD7FF, #xE000-#xFFFD, #x10000-#x10FFFF.
+        // Encode control characters (except tab/newline/cr) and non-BMP as numeric refs.
+        if (code < 0x20 && code !== 0x9 && code !== 0xA && code !== 0xD) {
+          // Invalid XML control character — skip
+        } else if (code > 0xFFFF) {
+          // Non-BMP character (e.g. emoji) — encode as numeric reference
+          out += `&#x${code.toString(16).toUpperCase()};`;
+        } else {
+          out += ch;
+        }
+        break;
+    }
+  }
+  return out;
 }
 
 /** Format a number, trimming trailing zeros. */
@@ -268,9 +293,14 @@ export class SVGWriter implements Writer<string> {
   private clipCache = new Map<string, string>(); // clipKey → clip-path attribute string
   private imageCache = new Map<string, string>(); // dataUrl → symbol def id
 
-  constructor(width: number, height: number) {
-    this.width = width;
-    this.height = height;
+  /**
+   * @param width Viewport width in pixels.
+   * @param height Viewport height in pixels.
+   * @param zoom Scale factor applied to width and height.
+   */
+  constructor(width: number, height: number, zoom = 1) {
+    this.width = width * zoom;
+    this.height = height * zoom;
   }
 
   begin(): void {
@@ -502,6 +532,10 @@ export class SVGWriter implements Writer<string> {
     }
     attrs.push(`width="${n(topEdge)}" height="${n(leftEdge)}"`);
     if (opacity !== undefined) attrs.push(`opacity="${n(opacity)}"`);
+    const ir = style.imageRendering;
+    if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
+      attrs.push(`image-rendering="pixelated"`);
+    }
 
     this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style);
   }

@@ -12,7 +12,7 @@ import {
 } from "./traversal.js";
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
-import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage } from "./image-extractor.js";
+import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache } from "./image-extractor.js";
 import { isMathMLRoot, extractMathMLFeatures } from "./mathml-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
@@ -31,6 +31,9 @@ import { getElementOrigin } from "./geometry.js";
 export function extractIR(root: Element | Element[], options: Options = {}): IRNode[] {
   const roots = Array.isArray(root) ? root : [root];
   if (roots.length === 0) return [];
+
+  // Clear image rasterization cache from previous runs
+  clearImageCache();
 
   const irNodes: IRNode[] = [];
   let globalIndex = 0;
@@ -110,6 +113,12 @@ export function extractIR(root: Element | Element[], options: Options = {}): IRN
   const rootOrigin = getElementOrigin(coordRoot);
   offsetIRNodes(irNodes, rootOrigin.x, rootOrigin.y);
 
+  // 5. Apply zoom factor if specified
+  const zoom = options.zoom ?? 1;
+  if (zoom !== 1) {
+    scaleIRNodes(irNodes, zoom);
+  }
+
   return irNodes;
 }
 
@@ -142,6 +151,54 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
       node.style.clipBounds.x -= ox;
       node.style.clipBounds.y -= oy;
       offsetClips.add(node.style.clipBounds);
+    }
+  }
+}
+
+/**
+ * Scale all coordinates in the IR node list by the given factor.
+ * Also scales font sizes, stroke widths, border widths, and clip bounds.
+ */
+function scaleIRNodes(nodes: IRNode[], zoom: number): void {
+  const scaledClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
+  for (const node of nodes) {
+    switch (node.type) {
+      case "polygon":
+        for (const p of node.points) { p.x *= zoom; p.y *= zoom; }
+        break;
+      case "polyline":
+        for (const p of node.points) { p.x *= zoom; p.y *= zoom; }
+        break;
+      case "text":
+        for (const p of node.quad) { p.x *= zoom; p.y *= zoom; }
+        break;
+      case "image":
+        for (const p of node.quad) { p.x *= zoom; p.y *= zoom; }
+        node.width = Math.round(node.width * zoom);
+        node.height = Math.round(node.height * zoom);
+        break;
+    }
+    // Scale style properties that carry dimensional values
+    const s = node.style;
+    if (s.fontSize) { const v = parseFloat(s.fontSize); if (!isNaN(v)) s.fontSize = `${v * zoom}px`; }
+    if (s.strokeWidth) { const v = parseFloat(s.strokeWidth); if (!isNaN(v)) s.strokeWidth = `${v * zoom}px`; }
+    if (s.borderTopWidth) { const v = parseFloat(s.borderTopWidth); if (!isNaN(v)) s.borderTopWidth = `${v * zoom}px`; }
+    if (s.borderRightWidth) { const v = parseFloat(s.borderRightWidth); if (!isNaN(v)) s.borderRightWidth = `${v * zoom}px`; }
+    if (s.borderBottomWidth) { const v = parseFloat(s.borderBottomWidth); if (!isNaN(v)) s.borderBottomWidth = `${v * zoom}px`; }
+    if (s.borderLeftWidth) { const v = parseFloat(s.borderLeftWidth); if (!isNaN(v)) s.borderLeftWidth = `${v * zoom}px`; }
+    if (s.borderRadius) {
+      s.borderRadius = s.borderRadius.split(/\s+/).map(v => {
+        const n = parseFloat(v);
+        return isNaN(n) ? v : `${n * zoom}px`;
+      }).join(" ");
+    }
+    if (s.clipBounds && !scaledClips.has(s.clipBounds)) {
+      s.clipBounds.x *= zoom;
+      s.clipBounds.y *= zoom;
+      s.clipBounds.w *= zoom;
+      s.clipBounds.h *= zoom;
+      s.clipBounds.radius *= zoom;
+      scaledClips.add(s.clipBounds);
     }
   }
 }

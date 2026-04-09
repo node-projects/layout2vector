@@ -99,40 +99,50 @@ function dataUrlToExtension(dataUrl: string): string {
 
 // ── HTML Writer ─────────────────────────────────────────────────────
 
+/** Image handling mode for the HTML writer. */
+export type HTMLImageMode =
+  | { type: "inline" }
+  | { type: "external"; basePath: string }
+  | { type: "css" };
+
 export class HTMLWriter implements Writer<string> {
   private width: number;
   private height: number;
   private elements: string[] = [];
-  private imageBasePath: string | undefined;
+  private imageMode: HTMLImageMode;
   private imageCounter = 0;
   private imageDedup = new Map<string, string>(); // dataUrl → filename
-  private cssImages: boolean;
   private cssImageClasses = new Map<string, string>(); // dataUrl → CSS class name
 
   /**
    * Image files referenced by the HTML output.
    * Maps relative file paths to data URL strings.
    * After calling `end()`, save these files alongside the HTML to display images.
-   * Only populated when `imageBasePath` is provided in the constructor.
+   * Only populated when `imageMode` is `{ type: "external" }`.
    */
   imageFiles = new Map<string, string>();
 
   /**
    * @param width Viewport width in pixels.
    * @param height Viewport height in pixels.
-   * @param imageBasePath When set, images are extracted to external files
-   *   instead of being embedded as data URLs. This path is prepended to
-   *   image filenames in the HTML `src` attributes. The extracted images
-   *   are collected in the `imageFiles` map.
-   * @param cssImages When true, identical images are deduplicated via shared
-   *   CSS classes using `background-image`. Each unique image gets a CSS class
-   *   and elements use `<div>` with that class instead of `<img>` tags.
+   * @param imageMode How images are embedded in the HTML output:
+   *   - `{ type: "inline" }` (default): images are embedded as data URL `<img>` tags.
+   *   - `{ type: "external", basePath: string }`: images are extracted to external
+   *     files. `basePath` is prepended to filenames in `src` attributes.
+   *     Extracted images are collected in the `imageFiles` map.
+   *   - `{ type: "css" }`: identical images are deduplicated via shared CSS classes
+   *     using `background-image` on `<div>` elements.
    */
-  constructor(width: number, height: number, imageBasePath?: string, cssImages = false) {
-    this.width = width;
-    this.height = height;
-    this.imageBasePath = imageBasePath;
-    this.cssImages = cssImages;
+  /**
+   * @param width Viewport width in pixels.
+   * @param height Viewport height in pixels.
+   * @param imageMode How images are embedded in the HTML output.
+   * @param zoom Scale factor applied to width and height.
+   */
+  constructor(width: number, height: number, imageMode?: HTMLImageMode, zoom = 1) {
+    this.width = width * zoom;
+    this.height = height * zoom;
+    this.imageMode = imageMode ?? { type: "inline" };
   }
 
   begin(): void {
@@ -160,7 +170,8 @@ export class HTMLWriter implements Writer<string> {
     const ext = dataUrlToExtension(dataUrl);
     const idx = ++this.imageCounter;
     const filename = `image${idx}.${ext}`;
-    const relativePath = this.imageBasePath ? `${this.imageBasePath}/${filename}` : filename;
+    const basePath = this.imageMode.type === "external" ? this.imageMode.basePath : "";
+    const relativePath = basePath ? `${basePath}/${filename}` : filename;
     this.imageDedup.set(dataUrl, relativePath);
     this.imageFiles.set(relativePath, dataUrl);
     return relativePath;
@@ -359,12 +370,16 @@ export class HTMLWriter implements Writer<string> {
       css.push("transform-origin:top left");
     }
     if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
+    const ir = style.imageRendering;
+    if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
+      css.push("image-rendering:pixelated");
+    }
 
-    if (this.cssImages) {
+    if (this.imageMode.type === "css") {
       const className = this.getCssImageClass(dataUrl);
       this.elements.push(this.applyClip(`<div class="${className}" style="${css.join(";")}"></div>`, style));
     } else {
-      const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
+      const src = this.imageMode.type === "external" ? this.getImageFilename(dataUrl) : dataUrl;
       this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style));
     }
   }
@@ -372,10 +387,10 @@ export class HTMLWriter implements Writer<string> {
   end(): string {
     const content = this.elements.join("\n");
     let cssImageRules = "";
-    if (this.cssImages && this.cssImageClasses.size > 0) {
+    if (this.imageMode.type === "css" && this.cssImageClasses.size > 0) {
       const rules: string[] = [];
       for (const [dataUrl, className] of this.cssImageClasses) {
-        const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
+        const src = dataUrl;
         rules.push(`  .${className} { background-image: url("${escHtml(src)}"); background-size: 100% 100%; }`);
       }
       cssImageRules = "\n" + rules.join("\n");

@@ -80,6 +80,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
+| `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 
 #### `renderIR<T>(nodes: IRNode[], writer: Writer<T>): T`
 
@@ -148,13 +149,27 @@ Produces a standalone SVG document string. Width and height define the viewport 
 
 The output is a self-contained SVG with all gradients, filters, and images embedded inline.
 
+Duplicate `<clipPath>` definitions are deduplicated (shared by reference). Duplicate raster images are embedded once as a `<symbol>` and referenced via `<use>` elements to reduce output size.
+
+
 #### `HTMLWriter`
 
 ```ts
-new HTMLWriter(width: number, height: number)
+type HTMLImageMode =
+  | { type: "inline" }
+  | { type: "external"; basePath: string }
+  | { type: "css" };
+
+new HTMLWriter(width: number, height: number, imageMode?: HTMLImageMode, zoom?: number)
 ```
 
-Produces a standalone HTML document string. Width and height define the container dimensions in CSS pixels.
+Produces a standalone HTML document string. Width and height define the container dimensions in CSS pixels. The `imageMode` parameter controls how images are rendered:
+
+- `{ type: "inline" }` (default): Images are rendered as `<img src="data:...">` elements (each image in-place)
+- `{ type: "external", basePath }`: Images are rendered as `<img src="[basePath]/imageN.png">` with external file references (see `htmlWriter.imageFiles` after `end()`)
+- `{ type: "css" }`: Images are rendered as CSS `background-image` on `<div>` elements, deduplicated into shared CSS classes
+
+The optional `zoom` parameter (default 1) multiplies all coordinates and dimensions (useful for high-DPI output or scaling).
 
 - Axis-aligned polygons → absolutely positioned `<div>` elements with CSS backgrounds, borders, and border-radius
 - Non-axis-aligned polygons → inline SVG `<path>` elements
@@ -163,10 +178,10 @@ Produces a standalone HTML document string. Width and height define the containe
 - Gradients → CSS `background-image` on `<div>` elements
 - Box shadow → CSS `box-shadow`
 - Opacity → CSS `opacity`
-- Images → `<img>` elements with data URL src
+- Images → as above, depending on `imageMode`
 - Transparent elements are skipped
 
-The output is a self-contained HTML document with all elements absolutely positioned to match the original layout.
+The output is a self-contained HTML document with all elements absolutely positioned to match the original layout. When `imageMode.type === "css"`, duplicate images are deduplicated into shared CSS classes. When `imageMode.type === "external"`, call `htmlWriter.imageFiles` after `end()` to get a `Map<string, string>` of image file names to data URLs for saving alongside the HTML.
 
 #### `PDFWriter`
 
@@ -300,9 +315,11 @@ import {
 
 ### SVG Geometry
 - All shape types: `rect`, `circle`, `ellipse`, `line`, `polyline`, `polygon`, `path`, `text`
+- `<use>` elements: shadow DOM content is traversed for full vector extraction
 - Path sampling via `getTotalLength()` / `getPointAtLength()` (64 sample points)
 - Circle/ellipse approximation (32 segments)
 - Transform extraction via `getCTM()`
+- `display:none` and `visibility:hidden` SVG elements are correctly skipped
 
 ### CSS Support
 - Stacking contexts: `z-index`, `opacity`, `transform`, `filter`, `perspective`, `mix-blend-mode`, `will-change`, `contain:paint`, `isolation:isolate`
@@ -325,6 +342,7 @@ Enable with `includeImages: true`. Supports `<img>` elements and CSS `background
 - **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`
 - **DXF output**: raster images as `IMAGE` entities referencing external files; SVG shapes as native DXF entities with `HATCH` solid fills
 - **PDF output**: JPEG images are embedded natively via DCTDecode; other formats are converted to JPEG automatically
+- **Caching**: identical images (same source URL and dimensions) are rasterized only once per extraction run, improving performance when the same image appears on multiple elements
 
 ### Color Handling
 - Parses `rgb()`, `rgba()`, hex (`#rgb`, `#rrggbb`, `#rrggbbaa`)

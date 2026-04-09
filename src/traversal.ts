@@ -80,6 +80,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     transform: cs.transform || undefined,
     overflow: cs.overflowX || undefined,
     textOverflow: cs.textOverflow || undefined,
+    imageRendering: cs.imageRendering || undefined,
   };
 }
 
