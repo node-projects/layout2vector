@@ -38,30 +38,30 @@ const ir = await extractIR(root, {
 
 // 2. Render to DXF
 const dxfWriter = new DXFWriter({ maxY: document.documentElement.scrollHeight });
-const dxfString = renderIR(ir, dxfWriter);
+const dxfString = await renderIR(ir, dxfWriter);
 // dxfString is a complete .dxf file as a string
 
 // 3. Render to PDF
 const pdfWriter = new PDFWriter(); // defaults to A4
-const pdfDoc = renderIR(ir, pdfWriter); // returns a PdfDocument
+const pdfDoc = await renderIR(ir, pdfWriter); // returns a PdfDocument
 await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes(); // Uint8Array
 
 // 4. Render to PNG (requires Canvas-capable environment)
 const pngWriter = new PNGWriter({ width: 800, height: 600 });
-const pngResult = renderIR(ir, pngWriter);
+const pngResult = await renderIR(ir, pngWriter);
 await pngResult.finalize(); // loads and draws raster images
 const pngDataUrl = pngResult.toDataURL(); // data:image/png;base64,...
 const pngBytes = pngResult.toBytes(); // Uint8Array
 
 // 5. Render to SVG
 const svgWriter = new SVGWriter({ width: 800, height: 600 });
-const svgString = renderIR(ir, svgWriter);
+const svgString = await renderIR(ir, svgWriter);
 // svgString is a complete standalone SVG document
 
 // 6. Render to HTML
 const htmlWriter = new HTMLWriter({ width: 800, height: 600, customCss: ".my-class { color: red; }" });
-const htmlString = renderIR(ir, htmlWriter);
+const htmlString = await renderIR(ir, htmlWriter);
 // htmlString is a complete standalone HTML document
 ```
 
@@ -86,9 +86,9 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 
-#### `renderIR<T>(nodes: IRNode[], writer: Writer<T>): T`
+#### `async renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T>`
 
-Passes each IR node through the writer in paint order. Returns whatever the writer's `end()` method returns.
+Passes each IR node through the writer in paint order. Returns a Promise for the writer's `end()` result. You must `await` the result.
 
 ### Writers
 
@@ -141,7 +141,7 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 - Transparent elements are skipped
 - Raster images → drawn via async `finalize()` step using `Image` element loading
 
-After `renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
+After `await renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
 
 
 #### `SVGWriter`
@@ -259,7 +259,7 @@ customFonts.set("MyFont", new Uint8Array(fs.readFileSync("myfont.ttf")));
 
 // Create writer with custom fonts
 const pdfWriter = new PDFWriter(210, 297, customFonts);
-const pdfDoc = renderIR(ir, pdfWriter);
+const pdfDoc = await renderIR(ir, pdfWriter);
 await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes();
 ```

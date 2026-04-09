@@ -164,7 +164,7 @@ for (const demoFile of demoFiles) {
 
     // --- DXF output ---
     const dxfWriter = new DXFWriter(viewport.height);
-    const dxfContent = renderIR(ir, dxfWriter);
+    const dxfContent = await renderIR(ir, dxfWriter);
     expect(dxfContent).toBeTruthy();
     expect(dxfContent.length).toBeGreaterThan(100);
 
@@ -215,7 +215,7 @@ for (const demoFile of demoFiles) {
       }
     }
     const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646, customFonts.size > 0 ? customFonts : undefined, defaultFont);
-    const pdfDoc = renderIR(ir, pdfWriter);
+    const pdfDoc = await renderIR(ir, pdfWriter);
     expect(pdfDoc).toBeTruthy();
 
     await pdfDoc.finalize();
@@ -244,7 +244,7 @@ for (const demoFile of demoFiles) {
         }
         const vp = { width: Math.ceil(maxX) || 1, height: Math.ceil(maxY) || 1 };
         const writer = new (window as any).__HC.PNGWriter(vp.width, vp.height);
-        const pngResult = (window as any).__HC.renderIR(irNodes, writer);
+        const pngResult = await (window as any).__HC.renderIR(irNodes, writer);
         await pngResult.finalize();
         return pngResult.toDataURL();
       }, ir);
@@ -260,7 +260,7 @@ for (const demoFile of demoFiles) {
 
     // --- SVG output ---
     const svgWriter = new SVGWriter(viewport.width, viewport.height);
-    const svgContent = renderIR(ir, svgWriter);
+    const svgContent = await renderIR(ir, svgWriter);
     expect(svgContent).toBeTruthy();
     expect(svgContent.length).toBeGreaterThan(100);
 
@@ -269,7 +269,7 @@ for (const demoFile of demoFiles) {
 
     // --- HTML output ---
     const htmlWriter = new HTMLWriter(viewport.width, viewport.height);
-    const htmlContent2 = renderIR(ir, htmlWriter);
+    const htmlContent2 = await renderIR(ir, htmlWriter);
     expect(htmlContent2).toBeTruthy();
     expect(htmlContent2.length).toBeGreaterThan(100);
 

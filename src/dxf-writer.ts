@@ -2,15 +2,39 @@
  * DXF Writer using @tarikjabiri/dxf.
  * Maps IR nodes to DXF entities.
  */
-import {
-  DxfWriter,
-  point3d,
-  point2d,
-  HatchBoundaryPaths,
-  HatchPolylineBoundary,
-  HatchPredefinedPatterns,
-  pattern,
+
+// Type-only imports for DXF types
+import type {
+  DxfWriter as DxfWriterType,
+  point3d as point3dType,
+  point2d as point2dType,
+  HatchBoundaryPaths as HatchBoundaryPathsType,
+  HatchPolylineBoundary as HatchPolylineBoundaryType,
+  HatchPredefinedPatterns as HatchPredefinedPatternsType,
+  pattern as patternType
 } from "@tarikjabiri/dxf";
+
+// Lazy-loaded DXF dependencies (typed, possibly undefined)
+let DxfWriter: typeof DxfWriterType | undefined;
+let point3d: typeof point3dType | undefined;
+let point2d: typeof point2dType | undefined;
+let HatchBoundaryPaths: typeof HatchBoundaryPathsType | undefined;
+let HatchPolylineBoundary: typeof HatchPolylineBoundaryType | undefined;
+let HatchPredefinedPatterns: typeof HatchPredefinedPatternsType | undefined;
+let pattern: typeof patternType | undefined;
+
+async function ensureDxfLoaded() {
+  if (!DxfWriter) {
+    const dxf = await import("@tarikjabiri/dxf");
+    DxfWriter = dxf.DxfWriter;
+    point3d = dxf.point3d;
+    point2d = dxf.point2d;
+    HatchBoundaryPaths = dxf.HatchBoundaryPaths;
+    HatchPolylineBoundary = dxf.HatchPolylineBoundary;
+    HatchPredefinedPatterns = dxf.HatchPredefinedPatterns;
+    pattern = dxf.pattern;
+  }
+}
 import type { Point, Quad, Style, Writer } from "./types.js";
 import { roundedQuadPath } from "./geometry.js";
 
@@ -125,7 +149,7 @@ export type DXFWriterOptions = {
 };
 
 export class DXFWriter implements Writer<string> {
-  private dxf!: DxfWriter;
+  private dxf!: DxfWriterType;
   private maxY: number;
   private imageCounter = 0;
   private fontStyles = new Map<string, string>();
@@ -151,8 +175,9 @@ export class DXFWriter implements Writer<string> {
     }
   }
 
-  begin(): void {
-    this.dxf = new DxfWriter();
+  async begin(): Promise<void> {
+    await ensureDxfLoaded();
+    this.dxf = new DxfWriter!();
     this.imageCounter = 0;
     this.imageFiles.clear();
     this.fontStyles.clear();
@@ -160,6 +185,7 @@ export class DXFWriter implements Writer<string> {
 
   /** Get or create a DXF text style for a given font family. Returns the style name. */
   private getTextStyle(fontFamily: string | undefined): string | undefined {
+    // DXF dependencies are loaded in begin()
     if (!fontFamily) return undefined;
     // Extract the first font name from the CSS font-family list
     const name = fontFamily.split(",")[0]?.trim().replace(/['"]/g, "");
@@ -176,20 +202,24 @@ export class DXFWriter implements Writer<string> {
 
   /** Add a HATCH entity with SOLID fill for the given vertices. */
   private addSolidHatch(verts: { x: number; y: number }[], fillColor: number): void {
-    const boundary = new HatchBoundaryPaths();
-    const polyBoundary = new HatchPolylineBoundary();
+    const BoundaryPaths = HatchBoundaryPaths!;
+    const PolylineBoundary = HatchPolylineBoundary!;
+    const PredefinedPatterns = HatchPredefinedPatterns!;
+    const Pattern = pattern!;
+    const boundary = new BoundaryPaths();
+    const polyBoundary = new PolylineBoundary();
     for (const v of verts) {
       polyBoundary.add({ x: v.x, y: this.flipY(v.y) });
     }
     boundary.addPolylineBoundary(polyBoundary);
     this.dxf.addHatch(
       boundary,
-      pattern({ name: HatchPredefinedPatterns.SOLID }),
+      Pattern({ name: PredefinedPatterns.SOLID }),
       { trueColor: String(fillColor) },
     );
   }
 
-  drawPolygon(points: Quad, style: Style): void {
+  async drawPolygon(points: Quad, style: Style): Promise<void> {
     const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
     const fillVisible = cssColorToHex(style.fill) !== undefined;
     const strokeVisible = hasVisibleStroke(style);
@@ -230,10 +260,10 @@ export class DXFWriter implements Writer<string> {
       verts.push(...arcPoints(x + r, y + r, r, Math.PI, Math.PI * 1.5, ARC_SEGS));
 
       const vertices = verts.map((p) => ({
-        point: point2d(p.x, this.flipY(p.y)),
+        point: point2d!(p.x, this.flipY(p.y)),
       }));
       // Close
-      vertices.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+      vertices.push({ point: point2d!(verts[0].x, this.flipY(verts[0].y)) });
 
       this.dxf.addLWPolyline(vertices, opts);
       return;
@@ -264,25 +294,25 @@ export class DXFWriter implements Writer<string> {
         const fillColor2 = getTrueColor(style.fill);
         if (fillColor2 !== undefined) this.addSolidHatch(verts, fillColor2);
       }
-      const dxfVerts = verts.map(p => ({ point: point2d(p.x, this.flipY(p.y)) }));
-      dxfVerts.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+      const dxfVerts = verts.map(p => ({ point: point2d!(p.x, this.flipY(p.y)) }));
+      dxfVerts.push({ point: point2d!(verts[0].x, this.flipY(verts[0].y)) });
       this.dxf.addLWPolyline(dxfVerts, opts);
       return;
     }
 
     const vertices = points.map((p) => ({
-      point: point2d(p.x, this.flipY(p.y)),
+      point: point2d!(p.x, this.flipY(p.y)),
     }));
 
     // Close the polygon
     vertices.push({
-      point: point2d(points[0].x, this.flipY(points[0].y)),
+      point: point2d!(points[0].x, this.flipY(points[0].y)),
     });
 
     this.dxf.addLWPolyline(vertices, opts);
   }
 
-  drawPolyline(points: Point[], closed: boolean, style: Style): void {
+  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     const fillColor = getTrueColor(style.fill);
     const strokeColor = getTrueColor(style.stroke);
     const fillVisible = cssColorToHex(style.fill) !== undefined;
@@ -303,17 +333,17 @@ export class DXFWriter implements Writer<string> {
     const trueColor = strokeColor ?? fillColor;
     const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
     const vertices = points.map((p) => ({
-      point: point2d(p.x, this.flipY(p.y)),
+      point: point2d!(p.x, this.flipY(p.y)),
     }));
     if (closed && points.length > 0) {
       vertices.push({
-        point: point2d(points[0].x, this.flipY(points[0].y)),
+        point: point2d!(points[0].x, this.flipY(points[0].y)),
       });
     }
     this.dxf.addLWPolyline(vertices, opts);
   }
 
-  drawText(quad: Quad, text: string, style: Style): void {
+  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     // Sanitize text: collapse whitespace/newlines to single spaces (DXF is line-based)
     const sanitized = text.replace(/\s+/g, " ").trim();
     if (!sanitized) return;
@@ -349,8 +379,9 @@ export class DXFWriter implements Writer<string> {
     if (trueColor !== undefined) opts.trueColor = String(trueColor);
     if (Math.abs(angleDeg) > 0.1) opts.rotation = angleDeg;
 
+    const Point3d = point3d!;
     const textEntity = this.dxf.addText(
-      point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
+      Point3d(bottomLeft.x, this.flipY(bottomLeft.y)),
       height,
       sanitized,
       Object.keys(opts).length > 0 ? opts : undefined
@@ -363,7 +394,7 @@ export class DXFWriter implements Writer<string> {
     }
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): void {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): Promise<void> {
     // Determine file extension from data URL MIME type
     const ext = dataUrlToExtension(dataUrl);
     const idx = ++this.imageCounter;
@@ -390,10 +421,11 @@ export class DXFWriter implements Writer<string> {
     const x = quad[0].x;
     const y = this.flipY(quad[0].y);
 
+    const Point3d = point3d!;
     this.dxf.addImage(
       fileName,
       `image${idx}`,
-      point3d(x, y, 0),
+      Point3d(x, y, 0),
       width,
       height,
       scale,
@@ -401,7 +433,7 @@ export class DXFWriter implements Writer<string> {
     );
   }
 
-  end(): string {
+  async end(): Promise<string> {
     return this.dxf.stringify();
   }
 

@@ -110,10 +110,10 @@ export type Options = {
 
 /** Writer interface for output generation. */
 export interface Writer<TOutput> {
-  begin(): void;
-  drawPolygon(points: Quad, style: Style): void;
-  drawPolyline(points: Point[], closed: boolean, style: Style): void;
-  drawText(quad: Quad, text: string, style: Style): void;
-  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): void;
-  end(): TOutput;
+  begin(): Promise<void>;
+  drawPolygon(points: Quad, style: Style): Promise<void>;
+  drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void>;
+  drawText(quad: Quad, text: string, style: Style): Promise<void>;
+  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void>;
+  end(): Promise<TOutput>;
 }

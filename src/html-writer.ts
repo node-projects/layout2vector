@@ -177,7 +177,7 @@ export class HTMLWriter implements Writer<string> {
     }
   }
 
-  begin(): void {
+  async begin(): Promise<void> {
     this.elements = [];
     this.imageCounter = 0;
     this.imageDedup.clear();
@@ -225,7 +225,7 @@ export class HTMLWriter implements Writer<string> {
     return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px">${html}</div></div>`;
   }
 
-  drawPolygon(points: Quad, style: Style): void {
+  async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
     // Only output gradients in background-image; url() images are handled by drawImage
@@ -276,7 +276,7 @@ export class HTMLWriter implements Writer<string> {
     }
   }
 
-  drawPolyline(points: Point[], closed: boolean, style: Style): void {
+  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
@@ -294,7 +294,7 @@ export class HTMLWriter implements Writer<string> {
     this.elements.push(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`);
   }
 
-  drawText(quad: Quad, text: string, style: Style): void {
+  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     const sanitized = text.replace(/\s+/g, " ").trim();
     if (!sanitized) return;
 
@@ -379,7 +379,7 @@ export class HTMLWriter implements Writer<string> {
     }
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
     const topEdge = Math.sqrt(dx * dx + dy * dy);
@@ -419,7 +419,7 @@ export class HTMLWriter implements Writer<string> {
     }
   }
 
-  end(): string {
+  async end(): Promise<string> {
     const content = this.elements.join("\n");
     let cssImageRules = "";
     if (this.imageMode.type === "css" && this.cssImageClasses.size > 0) {

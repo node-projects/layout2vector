@@ -466,7 +466,7 @@ export class PNGWriter implements Writer<PNGResult> {
     }
   }
 
-  begin(): void {
+  async begin(): Promise<void> {
     const w = Math.ceil(this.width * this.scale);
     const h = Math.ceil(this.height * this.scale);
 
@@ -485,7 +485,7 @@ export class PNGWriter implements Writer<PNGResult> {
     this.ctx.fillRect(0, 0, this.width, this.height);
   }
 
-  drawPolygon(points: Quad, style: Style): void {
+  async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
 
@@ -547,7 +547,7 @@ export class PNGWriter implements Writer<PNGResult> {
     ctx.restore();
   }
 
-  drawPolyline(points: Point[], closed: boolean, style: Style): void {
+  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
 
     const fill = parseColor(style.fill);
@@ -583,7 +583,7 @@ export class PNGWriter implements Writer<PNGResult> {
     ctx.restore();
   }
 
-  drawText(quad: Quad, text: string, style: Style): void {
+  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     const sanitized = text.replace(/\s+/g, " ").trim();
     if (!sanitized) return;
 
@@ -650,11 +650,11 @@ export class PNGWriter implements Writer<PNGResult> {
     ctx.restore();
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
     this.pendingImages.push({ quad, dataUrl, width, height, style });
   }
 
-  end(): PNGResult {
+  async end(): Promise<PNGResult> {
     return new PNGResult(this.canvas, this.ctx, this.pendingImages);
   }
 

@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="315" viewBox="0 0 1240 315">
-<text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Borders &amp; Border Radius</text>
-<path d="M10,104 L210,104 L210,184 L10,184 Z" fill="rgb(255, 224, 178)" stroke="rgb(51, 51, 51)" stroke-width="3"/>
+<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Borders &amp; Border Radius</text>
+<path d="M10,103.5 L210,103.5 L210,183.5 L10,183.5 Z" fill="rgb(255, 224, 178)" stroke="rgb(51, 51, 51)" stroke-width="3"/>
 <text x="23" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Solid border</text>
-<path d="M234,105 L434,105 L434,185 L234,185 Z" fill="rgb(187, 222, 251)" stroke="rgb(21, 101, 192)" stroke-width="2"/>
-<text x="246" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dashed border</text>
-<path d="M459,105 L659,105 L659,185 L459,185 Z" fill="rgb(255, 205, 210)" stroke="rgb(198, 40, 40)" stroke-width="2"/>
-<text x="471" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dotted border</text>
-<path d="M683,103 L883,103 L883,183 L683,183 Z" fill="rgb(232, 245, 233)" stroke="rgb(255, 0, 0) rgb(0, 128, 0) rgb(0, 0, 255) rgb(255, 165, 0)" stroke-width="4"/>
-<text x="694" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Mixed borders</text>
-<rect x="908" y="105" width="200" height="80" rx="15" ry="15" fill="rgb(225, 190, 231)" stroke="rgb(106, 27, 154)" stroke-width="2"/>
-<text x="920" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Rounded corners</text>
-<rect x="1132" y="41" width="80" height="80" rx="40" ry="40" fill="rgb(239, 83, 80)"/>
+<path d="M234.45,104.5 L434.45,104.5 L434.45,184.5 L234.45,184.5 Z" fill="rgb(187, 222, 251)" stroke="rgb(21, 101, 192)" stroke-width="2"/>
+<text x="246.45" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dashed border</text>
+<path d="M458.9,104.5 L658.9,104.5 L658.9,184.5 L458.9,184.5 Z" fill="rgb(255, 205, 210)" stroke="rgb(198, 40, 40)" stroke-width="2"/>
+<text x="470.9" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dotted border</text>
+<path d="M683.35,102.5 L883.35,102.5 L883.35,182.5 L683.35,182.5 Z" fill="rgb(232, 245, 233)" stroke="rgb(255, 0, 0) rgb(0, 128, 0) rgb(0, 0, 255) rgb(255, 165, 0)" stroke-width="4"/>
+<text x="694.35" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Mixed borders</text>
+<rect x="907.8" y="104.5" width="200" height="80" rx="15" ry="15" fill="rgb(225, 190, 231)" stroke="rgb(106, 27, 154)" stroke-width="2"/>
+<text x="919.8" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Rounded corners</text>
+<rect x="1132.25" y="41" width="80" height="80" rx="40" ry="40" fill="rgb(239, 83, 80)"/>
 <rect x="10" y="242" width="200" height="40" rx="20" ry="20" fill="rgb(38, 166, 154)"/>
-<text x="78" y="255" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Pill Shape</text>
-<path d="M234,205 L384,205 L384,305 L234,305 Z" fill="rgb(255, 248, 225)" stroke="rgb(255, 111, 0)" stroke-width="10"/>
-<text x="264" y="244.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Thick border + padding</text>
+<text x="78.48" y="255" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Pill Shape</text>
+<path d="M234.45,204.5 L384.45,204.5 L384.45,304.5 L234.45,304.5 Z" fill="rgb(255, 248, 225)" stroke="rgb(255, 111, 0)" stroke-width="10"/>
+<text x="264.45" y="235.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Thick border</text>
+<text x="264.45" y="253.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">+ padding</text>
 </svg>

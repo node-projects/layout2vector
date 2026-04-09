@@ -421,7 +421,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
   }
 
-  begin(): void {
+  async begin(): Promise<void> {
     this.ops = [];
     this.fontMap.clear();
     this.fontCounter = 0;
@@ -719,7 +719,7 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   // ── Drawing methods ─────────────────────────────────────────────
 
-  drawPolygon(points: Quad, style: Style): void {
+  async drawPolygon(points: Quad, style: Style): Promise<void> {
     const gradient = parseGradient(style.backgroundImage);
     if (gradient) {
       this.drawGradientPolygon(points, gradient, style);
@@ -888,7 +888,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
   }
 
-  drawPolyline(points: Point[], closed: boolean, style: Style): void {
+  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
 
     this.ops.push("q");
@@ -907,7 +907,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("Q");
   }
 
-  drawText(quad: Quad, text: string, style: Style): void {
+  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     if (style.textTransform) {
       switch (style.textTransform) {
         case "uppercase": text = text.toUpperCase(); break;
@@ -1026,7 +1026,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): void {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void> {
     const imgName = `Im${++this.imageCounter}`;
 
     if (rgbData) {
@@ -1083,7 +1083,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("Q");
   }
 
-  end(): PdfDocument {
+  async end(): Promise<PdfDocument> {
     const doc = new PdfDocument();
 
     // ── Create font objects ────────────────────────────────────────

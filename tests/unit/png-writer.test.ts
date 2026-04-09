@@ -17,7 +17,7 @@ test.describe("PNG Writer Output", () => {
         includeText: false,
       });
       const writer = new (window as any).__HC.PNGWriter(100, 50);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return pngResult.toDataURL();
     });
@@ -45,7 +45,7 @@ test.describe("PNG Writer Output", () => {
         includeText: true,
       });
       const writer = new (window as any).__HC.PNGWriter(200, 100);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return {
         dataUrl: pngResult.toDataURL(),
@@ -80,7 +80,7 @@ test.describe("PNG Writer Output", () => {
         includeText: false,
       });
       const writer = new (window as any).__HC.PNGWriter(200, 200);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return {
         dataUrl: pngResult.toDataURL(),
@@ -104,7 +104,7 @@ test.describe("PNG Writer Output", () => {
       const el = document.getElementById("target")!;
       const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(150, 80);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return pngResult.toDataURL();
     });
@@ -124,7 +124,7 @@ test.describe("PNG Writer Output", () => {
       const el = document.getElementById("target")!;
       const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(200, 100);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return pngResult.toDataURL();
     });
@@ -146,13 +146,13 @@ test.describe("PNG Writer Output", () => {
 
       // 1x
       const writer1x = new (window as any).__HC.PNGWriter(100, 50, 1);
-      const result1x = (window as any).__HC.renderIR(ir, writer1x);
+      const result1x = await (window as any).__HC.renderIR(ir, writer1x);
       await result1x.finalize();
       const dataUrl1x = result1x.toDataURL();
 
       // 2x
       const writer2x = new (window as any).__HC.PNGWriter(100, 50, 2);
-      const result2x = (window as any).__HC.renderIR(ir, writer2x);
+      const result2x = await (window as any).__HC.renderIR(ir, writer2x);
       await result2x.finalize();
       const dataUrl2x = result2x.toDataURL();
 
@@ -178,7 +178,7 @@ test.describe("PNG Writer Output", () => {
       const el = document.getElementById("target")!;
       const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(50, 50);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       const bytes = pngResult.toBytes();
       // Check PNG magic number: 137 80 78 71 13 10 26 10
@@ -207,7 +207,7 @@ test.describe("PNG Writer Output", () => {
       const el = document.getElementById("target")!;
       const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(100, 100);
-      const pngResult = (window as any).__HC.renderIR(ir, writer);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
       return pngResult.toDataURL();
     });

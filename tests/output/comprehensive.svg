@@ -1,58 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="812" viewBox="0 0 1240 812">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="815" viewBox="0 0 1240 815">
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0, 0, 0, 0.1)" result="s0"/></filter>
 <linearGradient id="lg2" x1="67.25" y1="-65.25" x2="252.75" y2="120.25" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(26, 35, 126)"/><stop offset="100%" stop-color="rgb(57, 73, 171)"/></linearGradient>
-<clipPath id="clip3"><rect x="0" y="0" width="320" height="226.17" rx="12" ry="12"/></clipPath>
-<linearGradient id="lg4" x1="43" y1="456" x2="43" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg5" x1="83" y1="426" x2="83" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg6" x1="123" y1="406" x2="123" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg7" x1="163" y1="436" x2="163" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg8" x1="203" y1="396" x2="203" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg9" x1="243" y1="421" x2="243" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg10" x1="283" y1="386" x2="283" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
-<linearGradient id="lg11" x1="620" y1="582" x2="620" y2="632" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(237, 231, 246)"/><stop offset="100%" stop-color="rgb(209, 196, 233)"/></linearGradient>
+<clipPath id="clip3"><rect x="0" y="0" width="320" height="227.2" rx="12" ry="12"/></clipPath>
+<linearGradient id="lg4" x1="42" y1="457.2" x2="42" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg5" x1="82" y1="427.2" x2="82" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg6" x1="122" y1="407.2" x2="122" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg7" x1="162" y1="437.2" x2="162" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg8" x1="202" y1="397.2" x2="202" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg9" x1="242" y1="422.2" x2="242" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg10" x1="282" y1="387.2" x2="282" y2="497.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
+<linearGradient id="lg11" x1="620" y1="584.7" x2="620" y2="634.2" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(237, 231, 246)"/><stop offset="100%" stop-color="rgb(209, 196, 233)"/></linearGradient>
 </defs>
-<rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1" filter="url(#ds1)"/>
+<rect x="0" y="0" width="320" height="227.2" rx="12" ry="12" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1" filter="url(#ds1)"/>
 <g clip-path="url(#clip3)"><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/></g>
-<g clip-path="url(#clip3)"><text x="21" y="18" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text></g>
-<g clip-path="url(#clip3)"><text x="21" y="96.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders, border-radius, box-shadow, and typography in a realistic component layout.</text></g>
-<g clip-path="url(#clip3)"><path d="M1,165 L319,165 L319,225 L1,225 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(0, 0, 0) rgb(0, 0, 0)" stroke-width="1"/></g>
-<g clip-path="url(#clip3)"><rect x="21" y="178" width="75" height="35" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
-<g clip-path="url(#clip3)"><text x="37" y="189" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Accept</text></g>
-<g clip-path="url(#clip3)"><rect x="106" y="178" width="79" height="35" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/></g>
-<g clip-path="url(#clip3)"><text x="124" y="189" fill="rgb(30, 136, 229)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Cancel</text></g>
-<rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="53" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
-<text x="71" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">USERS</text>
-<rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="263" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
-<text x="267" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">REVENUE</text>
-<rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="459" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
-<text x="480" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">UPTIME</text>
-<rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="url(#lg4)"/>
-<rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="url(#lg5)"/>
-<rect x="108" y="406" width="30" height="90" rx="3" ry="3" fill="url(#lg6)"/>
-<rect x="148" y="436" width="30" height="60" rx="3" ry="3" fill="url(#lg7)"/>
-<rect x="188" y="396" width="30" height="100" rx="3" ry="3" fill="url(#lg8)"/>
-<rect x="228" y="421" width="30" height="75" rx="3" ry="3" fill="url(#lg9)"/>
-<rect x="268" y="386" width="30" height="110" rx="3" ry="3" fill="url(#lg10)"/>
-<path d="M43,446 L83,416 L123,396 L163,426 L203,386 L243,411 L283,381" fill="none" stroke="rgb(229, 57, 53)" stroke-width="2"/>
-<text x="128.54" y="485.5" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="10px" font-family="Arial">Monthly Data</text>
-<rect x="0" y="536" width="64" height="26" rx="13" ry="13" fill="rgb(67, 160, 71)"/>
-<text x="14" y="543" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Active</text>
-<path d="M76.05,550.97 Q75.37,537.99 88.35,537.31 L137.29,534.74 Q150.27,534.06 150.95,547.05 L150.95,547.05 Q151.63,560.03 138.65,560.71 L89.71,563.27 Q76.73,563.95 76.05,550.97 Z" fill="rgb(251, 140, 0)"/>
-<text x="89.72" y="544.25" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial" transform="rotate(-3,89.72,544.25)">Pending</text>
-<rect x="159.57" y="534.7" width="75.9" height="28.6" rx="14.3" ry="14.3" fill="rgb(229, 57, 53)"/>
-<text x="174.97" y="543" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Critical</text>
-<path d="M244,549 Q245.14,536 258.19,536 L282.09,536 Q295.14,536 294,549 L294,549 Q292.86,562 279.81,562 L255.91,562 Q242.86,562 244,549 Z" fill="rgb(30, 136, 229)"/>
-<text x="258.52" y="543.02" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Info</text>
-<rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="url(#lg11)" stroke="rgb(126, 87, 194)" stroke-width="2"/>
-<text x="2" y="584.5" fill="rgb(69, 39, 160)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Shadow DOM Widget</text>
-<text x="2" y="613" fill="rgb(94, 53, 177)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.</text>
-<rect x="0" y="652" width="100" height="100" rx="50" ry="50" fill="rgb(244, 67, 54)" opacity="0.7"/>
-<rect x="40" y="672" width="100" height="100" rx="50" ry="50" fill="rgb(76, 175, 80)" opacity="0.7"/>
-<rect x="80" y="692" width="100" height="100" rx="50" ry="50" fill="rgb(33, 150, 243)" opacity="0.7"/>
+<g clip-path="url(#clip3)"><text x="21" y="18.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="74.2" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders,</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="96.6" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">border-radius, box-shadow, and typography</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="119" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">in a realistic component layout.</text></g>
+<g clip-path="url(#clip3)"><path d="M1,165.2 L319,165.2 L319,226.2 L1,226.2 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(0, 0, 0) rgb(0, 0, 0)" stroke-width="1"/></g>
+<g clip-path="url(#clip3)"><rect x="21" y="178.2" width="75.9" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
+<g clip-path="url(#clip3)"><text x="37" y="189.7" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="MS Shell Dlg \32">Accept</text></g>
+<g clip-path="url(#clip3)"><rect x="106.9" y="178.2" width="79.27" height="36" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/></g>
+<g clip-path="url(#clip3)"><text x="124.9" y="189.7" fill="rgb(30, 136, 229)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="MS Shell Dlg \32">Cancel</text></g>
+<rect x="0" y="247.2" width="189.33" height="93" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<text x="52.63" y="270.2" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
+<text x="71.5" y="309.7" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">USERS</text>
+<rect x="205.33" y="247.2" width="189.33" height="93" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<text x="262.63" y="270.2" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
+<text x="267.5" y="309.7" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">REVENUE</text>
+<rect x="410.67" y="247.2" width="189.33" height="93" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<text x="458.65" y="270.2" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
+<text x="479.67" y="309.7" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">UPTIME</text>
+<rect x="0" y="360.2" width="1240" height="157.5" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<rect x="27" y="457.2" width="30" height="40" rx="3" ry="3" fill="url(#lg4)"/>
+<rect x="67" y="427.2" width="30" height="70" rx="3" ry="3" fill="url(#lg5)"/>
+<rect x="107" y="407.2" width="30" height="90" rx="3" ry="3" fill="url(#lg6)"/>
+<rect x="147" y="437.2" width="30" height="60" rx="3" ry="3" fill="url(#lg7)"/>
+<rect x="187" y="397.2" width="30" height="100" rx="3" ry="3" fill="url(#lg8)"/>
+<rect x="227" y="422.2" width="30" height="75" rx="3" ry="3" fill="url(#lg9)"/>
+<rect x="267" y="387.2" width="30" height="110" rx="3" ry="3" fill="url(#lg10)"/>
+<path d="M42,447.2 L82,417.2 L122,397.2 L162,427.2 L202,387.2 L242,412.2 L282,382.2" fill="none" stroke="rgb(229, 57, 53)" stroke-width="2"/>
+<text x="127.53" y="486.7" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="10px" font-family="Arial">Monthly Data</text>
+<rect x="0" y="537.7" width="64" height="27" rx="13.5" ry="13.5" fill="rgb(67, 160, 71)"/>
+<text x="14" y="545.2" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Active</text>
+<path d="M76.05,553.17 Q75.35,539.69 88.83,538.98 L137.09,536.45 Q150.58,535.75 151.28,549.23 L151.28,549.23 Q151.99,562.71 138.51,563.42 L90.24,565.95 Q76.76,566.65 76.05,553.17 Z" fill="rgb(251, 140, 0)"/>
+<text x="89.72" y="546.45" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial" transform="rotate(-3,89.72,546.45)">Pending</text>
+<rect x="159.9" y="536.35" width="75.53" height="29.7" rx="14.85" ry="14.85" fill="rgb(229, 57, 53)"/>
+<text x="175.3" y="545.2" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Critical</text>
+<path d="M244,551.2 Q245.18,537.7 258.73,537.7 L281.63,537.7 Q295.18,537.7 294,551.2 L294,551.2 Q292.82,564.7 279.27,564.7 L256.37,564.7 Q242.82,564.7 244,551.2 Z" fill="rgb(30, 136, 229)"/>
+<text x="258.52" y="545.22" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Info</text>
+<rect x="0" y="584.7" width="1240" height="49.5" rx="10" ry="10" fill="url(#lg11)" stroke="rgb(126, 87, 194)" stroke-width="2"/>
+<text x="2" y="587.7" fill="rgb(69, 39, 160)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Shadow DOM Widget</text>
+<text x="2" y="615.95" fill="rgb(94, 53, 177)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.</text>
+<rect x="0" y="654.2" width="100" height="100" rx="50" ry="50" fill="rgb(244, 67, 54)" opacity="0.7"/>
+<rect x="40" y="674.2" width="100" height="100" rx="50" ry="50" fill="rgb(76, 175, 80)" opacity="0.7"/>
+<rect x="80" y="694.2" width="100" height="100" rx="50" ry="50" fill="rgb(33, 150, 243)" opacity="0.7"/>
 </svg>

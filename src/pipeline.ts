@@ -259,28 +259,28 @@ function isVisibleNode(node: IRNode): boolean {
  * Processes nodes in order (already sorted by the pipeline).
  * Invisible nodes (empty polygons with no fill/stroke/shadow) are automatically skipped.
  */
-export function renderIR<T>(nodes: IRNode[], writer: Writer<T>): T {
-  writer.begin();
+export async function renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T> {
+  await writer.begin();
 
   for (const node of nodes) {
     if (!isVisibleNode(node)) continue;
     switch (node.type) {
       case "polygon":
-        writer.drawPolygon(node.points, node.style);
+        await writer.drawPolygon(node.points, node.style);
         break;
       case "text":
-        writer.drawText(node.quad, node.text, node.style);
+        await writer.drawText(node.quad, node.text, node.style);
         break;
       case "polyline":
-        writer.drawPolyline(node.points, node.closed, node.style);
+        await writer.drawPolyline(node.points, node.closed, node.style);
         break;
       case "image":
         if (writer.drawImage) {
-          writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style, node.rgbData);
+          await writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style, node.rgbData);
         }
         break;
     }
   }
 
-  return writer.end();
+  return await writer.end();
 }

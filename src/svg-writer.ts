@@ -318,7 +318,7 @@ export class SVGWriter implements Writer<string> {
     }
   }
 
-  begin(): void {
+  async begin(): Promise<void> {
     this.elements = [];
     this.defs = [];
     this.defIdCounter = 0;
@@ -355,7 +355,7 @@ export class SVGWriter implements Writer<string> {
     }
   }
 
-  drawPolygon(points: Quad, style: Style): void {
+  async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
     if (!fill && !stroke && !style.boxShadow) return;
@@ -419,7 +419,7 @@ export class SVGWriter implements Writer<string> {
     }
   }
 
-  drawPolyline(points: Point[], closed: boolean, style: Style): void {
+  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
@@ -442,7 +442,7 @@ export class SVGWriter implements Writer<string> {
     this.pushElement(`<path d="${d}"${attrs}/>`, style);
   }
 
-  drawText(quad: Quad, text: string, style: Style): void {
+  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     const sanitized = text.replace(/\s+/g, " ").trim();
     if (!sanitized) return;
 
@@ -517,7 +517,7 @@ export class SVGWriter implements Writer<string> {
     this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style);
   }
 
-  drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
     const topEdge = Math.sqrt(dx * dx + dy * dy);
@@ -555,7 +555,7 @@ export class SVGWriter implements Writer<string> {
     this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style);
   }
 
-  end(): string {
+  async end(): Promise<string> {
     const defsBlock = this.defs.length > 0 ? `<defs>\n${this.defs.join("\n")}\n</defs>\n` : "";
     return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${n(this.width)}" height="${n(this.height)}" viewBox="0 0 ${n(this.width)} ${n(this.height)}">\n${defsBlock}${this.elements.join("\n")}\n</svg>`;
   }
