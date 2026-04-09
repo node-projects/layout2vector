@@ -50,10 +50,27 @@ function parseBorderRadiusValue(borderRadius: string | undefined, w?: number, h?
   return !isNaN(val) && val > 0 ? val : 0;
 }
 
-/** Escape text for use inside HTML. */
+/** Escape text for use inside HTML. Non-ASCII chars are encoded as numeric entities for encoding safety. */
 function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  let out = "";
+  for (const ch of s) {
+    const code = ch.codePointAt(0)!;
+    switch (ch) {
+      case "&": out += "&amp;"; break;
+      case "<": out += "&lt;"; break;
+      case ">": out += "&gt;"; break;
+      case '"': out += "&quot;"; break;
+      case "'": out += "&#39;"; break;
+      default:
+        if (code > 0x7E) {
+          out += `&#x${code.toString(16).toUpperCase()};`;
+        } else {
+          out += ch;
+        }
+        break;
+    }
+  }
+  return out;
 }
 
 /** Format a number, trimming trailing zeros. */
@@ -196,8 +213,11 @@ export class HTMLWriter implements Writer<string> {
   drawPolygon(points: Quad, style: Style): void {
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
-    const hasBgImage = style.backgroundImage && style.backgroundImage !== "none";
-    if (!fill && !stroke && !style.boxShadow && !hasBgImage) return;
+    // Only output gradients in background-image; url() images are handled by drawImage
+    const bgImage = style.backgroundImage && style.backgroundImage !== "none"
+      ? style.backgroundImage : undefined;
+    const hasGradient = bgImage && !(/url\s*\(/.test(bgImage));
+    if (!fill && !stroke && !style.boxShadow && !hasGradient) return;
 
     const opacity = style.opacity;
 
@@ -217,7 +237,7 @@ export class HTMLWriter implements Writer<string> {
       ];
 
       if (fill) css.push(`background-color:${fill}`);
-      if (hasBgImage) css.push(`background-image:${style.backgroundImage}`);
+      if (hasGradient) css.push(`background-image:${bgImage}`);
       if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);

@@ -65,12 +65,10 @@ function escXml(s: string): string {
       case '"': out += "&quot;"; break;
       case "'": out += "&#39;"; break;
       default:
-        // XML 1.0 allows #x9, #xA, #xD, #x20-#xD7FF, #xE000-#xFFFD, #x10000-#x10FFFF.
-        // Encode control characters (except tab/newline/cr) and non-BMP as numeric refs.
         if (code < 0x20 && code !== 0x9 && code !== 0xA && code !== 0xD) {
           // Invalid XML control character — skip
-        } else if (code > 0xFFFF) {
-          // Non-BMP character (e.g. emoji) — encode as numeric reference
+        } else if (code > 0x7E) {
+          // Non-ASCII — encode as numeric reference for encoding safety
           out += `&#x${code.toString(16).toUpperCase()};`;
         } else {
           out += ch;

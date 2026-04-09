@@ -284,21 +284,21 @@ function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { data
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
     ctx.imageSmoothingEnabled = false;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Draw without white background to preserve transparency for SVG/HTML/PNG output
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const pngUrl = canvas.toDataURL("image/png");
 
-    // Extract raw RGB for lossless PDF embedding (small images only)
+    // Extract raw RGB for PDF embedding (alpha-blend onto white since PDF doesn't support alpha)
     const pixels = canvas.width * canvas.height;
     if (pixels <= 250000) {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const rgba = imageData.data;
       const rgb: number[] = new Array(pixels * 3);
       for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
-        rgb[j] = rgba[i];
-        rgb[j + 1] = rgba[i + 1];
-        rgb[j + 2] = rgba[i + 2];
+        const a = rgba[i + 3] / 255;
+        rgb[j] = Math.round(rgba[i] * a + 255 * (1 - a));
+        rgb[j + 1] = Math.round(rgba[i + 1] * a + 255 * (1 - a));
+        rgb[j + 2] = Math.round(rgba[i + 2] * a + 255 * (1 - a));
       }
       return { dataUrl: pngUrl, rgbData: rgb };
     }

@@ -1009,16 +1009,23 @@ export class PDFWriter implements Writer<PdfDocument> {
         filter: null,
       });
     } else {
-      // Decode the data URL to raw bytes (JPEG)
+      // Decode the data URL to raw bytes
       const decoded = decodeDataUrl(dataUrl);
       if (!decoded) return;
-      this.images.push({
-        name: imgName,
-        data: decoded.data,
-        width,
-        height,
-        filter: "DCTDecode",
-      });
+      if (decoded.mimeType === "image/jpeg") {
+        // JPEG — embed directly with DCTDecode
+        this.images.push({
+          name: imgName,
+          data: decoded.data,
+          width,
+          height,
+          filter: "DCTDecode",
+        });
+      } else {
+        // Non-JPEG (PNG, etc.) — cannot embed raw file bytes in PDF without matching filter.
+        // Skip this image; the extraction pipeline should provide rgbData for most cases.
+        return;
+      }
     }
 
     // Compute affine transform from unit square to PDF quad coordinates.
