@@ -8,6 +8,7 @@
  * Requires a Canvas-capable environment (browser with document.createElement).
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { roundedQuadPath } from "./geometry.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
 
@@ -346,6 +347,28 @@ export class PNGResult {
     const ctx = this.ctx;
     ctx.save();
 
+    // Apply clip bounds from ancestor with overflow:hidden
+    const clip = img.style.clipBounds;
+    if (clip) {
+      ctx.beginPath();
+      if (clip.radius > 0) {
+        const r = Math.min(clip.radius, clip.w / 2, clip.h / 2);
+        ctx.moveTo(clip.x + r, clip.y);
+        ctx.lineTo(clip.x + clip.w - r, clip.y);
+        ctx.arcTo(clip.x + clip.w, clip.y, clip.x + clip.w, clip.y + r, r);
+        ctx.lineTo(clip.x + clip.w, clip.y + clip.h - r);
+        ctx.arcTo(clip.x + clip.w, clip.y + clip.h, clip.x + clip.w - r, clip.y + clip.h, r);
+        ctx.lineTo(clip.x + r, clip.y + clip.h);
+        ctx.arcTo(clip.x, clip.y + clip.h, clip.x, clip.y + clip.h - r, r);
+        ctx.lineTo(clip.x, clip.y + r);
+        ctx.arcTo(clip.x, clip.y, clip.x + r, clip.y, r);
+        ctx.closePath();
+      } else {
+        ctx.rect(clip.x, clip.y, clip.w, clip.h);
+      }
+      ctx.clip();
+    }
+
     if (img.style.opacity !== undefined && img.style.opacity < 1) {
       ctx.globalAlpha = img.style.opacity;
     }
@@ -445,6 +468,7 @@ export class PNGWriter implements Writer<PNGResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipBounds(ctx, style);
     this.applyOpacity(ctx, style);
 
     // Draw outer (drop) shadows before the shape
@@ -460,6 +484,29 @@ export class PNGWriter implements Writer<PNGResult> {
       this.drawBoxShadows(ctx, points, style, true);
       ctx.restore();
       return;
+    }
+
+    // Non-axis-aligned quad with border-radius → rounded quad path
+    if (radius > 0) {
+      const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
+      const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
+      const r = parseBorderRadius(style.borderRadius, edgeW, edgeH);
+      if (r > 0) {
+        const segs = roundedQuadPath(points, r);
+        ctx.beginPath();
+        for (const s of segs) {
+          switch (s.type) {
+            case "M": ctx.moveTo(s.x, s.y); break;
+            case "L": ctx.lineTo(s.x, s.y); break;
+            case "Q": ctx.quadraticCurveTo(s.cx, s.cy, s.x, s.y); break;
+          }
+        }
+        ctx.closePath();
+        this.fillAndStroke(ctx, points, fill, stroke, style);
+        this.drawBoxShadows(ctx, points, style, true);
+        ctx.restore();
+        return;
+      }
     }
 
     ctx.beginPath();
@@ -517,6 +564,7 @@ export class PNGWriter implements Writer<PNGResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipBounds(ctx, style);
     this.applyOpacity(ctx, style);
 
     // Compute font size from quad height
@@ -548,14 +596,18 @@ export class PNGWriter implements Writer<PNGResult> {
     const angle = Math.atan2(dy, dx);
     const topEdge = Math.sqrt(dx * dx + dy * dy);
 
-    // Position: baseline at bottom-left of quad
-    ctx.textBaseline = "alphabetic";
+    // Position: em-square top (quad[0] offset by half-leading toward quad[3])
+    ctx.textBaseline = "top";
+    const halfLeading = Math.max(0, (quadHeight - fontSize) / 2);
+    const tHL = quadHeight > 0 ? halfLeading / quadHeight : 0;
+    const emTopX = quad[0].x + (quad[3].x - quad[0].x) * tHL;
+    const emTopY = quad[0].y + (quad[3].y - quad[0].y) * tHL;
 
     // Apply text shadow before drawing text
     this.applyTextShadow(ctx, style);
 
     if (Math.abs(angle) > 0.01) {
-      ctx.translate(quad[3].x, quad[3].y);
+      ctx.translate(emTopX, emTopY);
       ctx.rotate(angle);
       ctx.fillText(sanitized, 0, 0);
 
@@ -563,11 +615,11 @@ export class PNGWriter implements Writer<PNGResult> {
       ctx.shadowColor = "transparent"; // don't shadow the decoration lines
       this.drawTextDecoration(ctx, style, 0, 0, topEdge, fontSize, textColor);
     } else {
-      ctx.fillText(sanitized, quad[3].x, quad[3].y);
+      ctx.fillText(sanitized, emTopX, emTopY);
 
       // Draw text decorations (underline / line-through)
       ctx.shadowColor = "transparent";
-      this.drawTextDecoration(ctx, style, quad[3].x, quad[3].y, topEdge, fontSize, textColor);
+      this.drawTextDecoration(ctx, style, emTopX, emTopY, topEdge, fontSize, textColor);
     }
 
     ctx.restore();
@@ -587,6 +639,19 @@ export class PNGWriter implements Writer<PNGResult> {
     if (style.opacity !== undefined && style.opacity < 1) {
       ctx.globalAlpha = style.opacity;
     }
+  }
+
+  /** Apply clip bounds from an ancestor with overflow:hidden + border-radius. */
+  private applyClipBounds(ctx: CanvasRenderingContext2D, style: Style): void {
+    const clip = style.clipBounds;
+    if (!clip) return;
+    ctx.beginPath();
+    if (clip.radius > 0) {
+      this.traceRoundedRect(ctx, clip.x, clip.y, clip.w, clip.h, Math.min(clip.radius, clip.w / 2, clip.h / 2));
+    } else {
+      ctx.rect(clip.x, clip.y, clip.w, clip.h);
+    }
+    ctx.clip();
   }
 
   private fillAndStroke(

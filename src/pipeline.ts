@@ -46,6 +46,11 @@ export function extractIR(root: Element | Element[], options: Options = {}): IRN
     for (const node of ordered) {
       const el = node.element;
 
+      // Propagate clip bounds from the stacking tree into the extracted style
+      if (node.clipBounds) {
+        node.extractedStyle.clipBounds = node.clipBounds;
+      }
+
       // SVG root elements: extract HTML box first (background, borders),
       // then the SVG subtree on top. The HTML box must come first so
       // the SVG content paints over it (correct paint order).
@@ -57,7 +62,10 @@ export function extractIR(root: Element | Element[], options: Options = {}): IRN
         const svgNodes = extractSVGSubtree(
           el as SVGSVGElement,
           globalIndex,
-          options
+          options,
+          // Pass accumulated HTML parent opacity (excluding SVG root's own)
+          // so the SVG extractor can combine it with the SVG element tree opacity.
+          (node.extractedStyle.opacity ?? 1) / (parseFloat(getComputedStyle(el).opacity || '1') || 1)
         );
         irNodes.push(...svgNodes);
         globalIndex += svgNodes.length || 1;
@@ -111,6 +119,9 @@ export function extractIR(root: Element | Element[], options: Options = {}): IRN
  */
 function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
   if (ox === 0 && oy === 0) return;
+  // Track already-offset clipBounds objects to avoid double-offsetting
+  // (multiple IR nodes can share the same clipBounds reference).
+  const offsetClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
   for (const node of nodes) {
     switch (node.type) {
       case "polygon":
@@ -125,6 +136,12 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
       case "image":
         for (const p of node.quad) { p.x -= ox; p.y -= oy; }
         break;
+    }
+    // Also offset clipBounds if present (only once per unique object)
+    if (node.style.clipBounds && !offsetClips.has(node.style.clipBounds)) {
+      node.style.clipBounds.x -= ox;
+      node.style.clipBounds.y -= oy;
+      offsetClips.add(node.style.clipBounds);
     }
   }
 }

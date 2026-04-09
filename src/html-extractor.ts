@@ -4,7 +4,30 @@
 import type { Point, Quad, Style, IRNode, Options } from "./types.js";
 import type { StackingNode } from "./traversal.js";
 import { isSVGElement } from "./traversal.js";
-import { getElementQuads, getElementQuad } from "./geometry.js";
+import { getElementQuads } from "./geometry.js";
+
+/** Characters that MathML stretches vertically. */
+const STRETCHY_MO_CHARS = new Set([
+  "[", "]", "(", ")", "{", "}", "|", "‖",
+  "⟨", "⟩", "⌈", "⌉", "⌊", "⌋", "⟦", "⟧",
+]);
+
+/**
+ * Returns true when `el` is a MathML `<mo>` that the browser has visually
+ * stretched (its rendered height exceeds the expected font-size). These
+ * operators are already extracted by the MathML extractor at their
+ * correct stretched dimensions, so the HTML extractor should skip their text.
+ */
+function isStretchedMathOperator(el: Element): boolean {
+  if (el.tagName.toLowerCase() !== "mo") return false;
+  if (!el.closest?.("math")) return false;
+  const text = (el.textContent ?? "").trim();
+  if (!STRETCHY_MO_CHARS.has(text)) return false;
+  const rect = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  const fontSize = parseFloat(cs.fontSize) || 16;
+  return rect.height > fontSize * 1.5;
+}
 
 /**
  * Extract geometry from an HTML element using getBoxQuads.
@@ -38,6 +61,10 @@ export function extractHTMLGeometry(
   // Extract text node geometry
   if (options.includeText !== false) {
     for (const textNode of node.textNodes) {
+      // Skip text inside stretched MathML <mo> operators — these are already
+      // handled by the MathML extractor with correct stretched dimensions.
+      if (isStretchedMathOperator(el)) continue;
+
       const textIR = extractTextNode(textNode, el, node.extractedStyle, globalIndex);
       results.push(...textIR);
     }
@@ -66,30 +93,23 @@ function extractTextNode(
   const fullText = textNode.textContent ?? "";
   if (!fullText.trim()) return results;
 
-  // Detect line count using Range.getClientRects() (non-destructive)
-  const range = document.createRange();
-  range.selectNodeContents(textNode);
-  const rects = Array.from(range.getClientRects()).filter(
-    (r) => r.width > 0 || r.height > 0
-  );
-  if (rects.length === 0) return results;
-
-  // Get the text quad by wrapping in a temporary span and using getBoxQuads
-  const textQuad = getTextNodeQuad(textNode);
-  if (!textQuad) return results;
+  // Get all quads (one per line fragment) using getBoxQuads.
+  // This correctly handles CSS transforms — each quad is properly rotated.
+  const allQuads = getTextNodeQuads(textNode);
+  if (allQuads.length === 0) return results;
 
   // For overflow:hidden containers, treat as a single line (the text is clipped)
   const isOverflowHidden = parentStyle.overflow === "hidden";
-  const effectiveLineCount = isOverflowHidden ? 1 : rects.length;
+  const effectiveLineCount = isOverflowHidden ? 1 : allQuads.length;
 
   // Split text into per-line segments
   const lineTexts =
     effectiveLineCount === 1
       ? [fullText]
-      : splitTextByLines(textNode, rects.length);
+      : splitTextByLines(textNode, allQuads.length);
 
   if (effectiveLineCount === 1) {
-    // Single line: use the span quad directly
+    // Single line: use the first quad directly
     let text = lineTexts[0].replace(/\s+/g, ' ').trim();
     if (!text) return results;
 
@@ -104,9 +124,9 @@ function extractTextNode(
     }
 
     // Handle text overflow clipping
-    let finalQuad = textQuad;
+    let finalQuad = allQuads[0];
     if (parentStyle.overflow === "hidden") {
-      const clipped = clipTextToParent(textNode, text, parentEl, textQuad, parentStyle);
+      const clipped = clipTextToParent(textNode, text, parentEl, allQuads[0], parentStyle);
       if (!clipped) return results;
       text = clipped.text;
       finalQuad = clipped.quad;
@@ -120,9 +140,8 @@ function extractTextNode(
       zIndex: globalIndex,
     });
   } else {
-    // Multi-line: use the actual per-line rects from getClientRects()
-    // instead of subdividing the textQuad (which may only cover the first fragment).
-    const N = rects.length;
+    // Multi-line: use per-line quads from getBoxQuads (transform-aware)
+    const N = allQuads.length;
     for (let i = 0; i < N; i++) {
       let text = (i < lineTexts.length ? lineTexts[i] : "").replace(/\s+/g, ' ').trim();
       if (!text) continue;
@@ -137,17 +156,9 @@ function extractTextNode(
         }
       }
 
-      const r = rects[i];
-      const lineQuad: Quad = [
-        { x: r.left, y: r.top },
-        { x: r.right, y: r.top },
-        { x: r.right, y: r.bottom },
-        { x: r.left, y: r.bottom },
-      ];
-
       results.push({
         type: "text",
-        quad: lineQuad,
+        quad: allQuads[i],
         text,
         style: parentStyle,
         zIndex: globalIndex,
@@ -159,16 +170,14 @@ function extractTextNode(
 }
 
 /**
- * Get the quad for a text node by wrapping it in a temporary inline <span>
- * and calling getBoxQuads() on the span. This correctly handles CSS transforms.
+ * Get all quads for a text node by wrapping it in a temporary inline <span>
+ * and calling getBoxQuads() on the span. Returns one quad per line fragment.
+ * This correctly handles CSS transforms — each quad is properly rotated.
  */
-function getTextNodeQuad(textNode: Text): Quad | null {
+function getTextNodeQuads(textNode: Text): Quad[] {
   const parent = textNode.parentNode;
-  if (!parent) return null;
+  if (!parent) return [];
 
-  // Detect if text is slotted into shadow DOM.
-  // The getBoxQuads polyfill returns wrong positions for slotted content,
-  // so we fall back to getBoundingClientRect in that case.
   const parentEl = parent instanceof Element ? parent : null;
   const isSlottedInShadowDOM = parentEl?.shadowRoot != null;
 
@@ -176,24 +185,24 @@ function getTextNodeQuad(textNode: Text): Quad | null {
   parent.insertBefore(span, textNode);
   span.appendChild(textNode);
 
-  let quad: Quad | null;
+  let quads: Quad[];
   if (isSlottedInShadowDOM) {
     const r = span.getBoundingClientRect();
-    quad = (r.width === 0 && r.height === 0) ? null : [
+    quads = (r.width === 0 && r.height === 0) ? [] : [[
       { x: r.left, y: r.top },
       { x: r.right, y: r.top },
       { x: r.right, y: r.bottom },
       { x: r.left, y: r.bottom },
-    ];
+    ]];
   } else {
-    quad = getElementQuad(span);
+    quads = getElementQuads(span, "border");
   }
 
   // Restore original DOM structure
   parent.insertBefore(textNode, span);
   parent.removeChild(span);
 
-  return quad;
+  return quads;
 }
 
 /**

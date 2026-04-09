@@ -17,16 +17,15 @@ const CIRCLE_SEGMENTS = 32;
 export function extractSVGSubtree(
   svgRoot: SVGSVGElement,
   baseZIndex: number,
-  options: Options
+  options: Options,
+  htmlParentOpacity: number = 1
 ): IRNode[] {
   const results: IRNode[] = [];
   let orderIndex = baseZIndex;
 
-  // Get the SVG root's own opacity as the starting parent opacity
-  const rootCs = getComputedStyle(svgRoot);
-  const rootOpacity = rootCs.opacity ? parseFloat(rootCs.opacity) : 1;
-
-  walkSVGTree(svgRoot, results, () => orderIndex++, options, rootOpacity);
+  // Pass htmlParentOpacity as the initial parent opacity;
+  // walkSVGTree will read the SVG root's own opacity and multiply it in.
+  walkSVGTree(svgRoot, results, () => orderIndex++, options, htmlParentOpacity);
   return results;
 }
 
@@ -58,6 +57,23 @@ function walkSVGTree(
   }
 
   // Walk children (DOM order = paint order in SVG)
+  // Handle <switch>: only process the first child element that is actually
+  // rendered (the browser evaluates systemLanguage/requiredFeatures/etc.)
+  if (tag === "switch") {
+    for (const child of Array.from(el.children)) {
+      if (child instanceof SVGGraphicsElement) {
+        try {
+          const bbox = child.getBBox();
+          if (bbox.width > 0 || bbox.height > 0) {
+            walkSVGTree(child, results, nextIndex, options, effectiveOpacity);
+            return; // only the first matching child is rendered
+          }
+        } catch { /* getBBox can throw for non-rendered elements */ }
+      }
+    }
+    return;
+  }
+
   for (const child of Array.from(el.children)) {
     walkSVGTree(child, results, nextIndex, options, effectiveOpacity);
   }

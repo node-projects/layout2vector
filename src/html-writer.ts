@@ -3,6 +3,7 @@
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { roundedQuadPath } from "./geometry.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 
@@ -35,6 +36,20 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
+function parseBorderRadiusValue(borderRadius: string | undefined, w?: number, h?: number): number {
+  if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return 0;
+  const raw = borderRadius.split(/\s+/)[0];
+  if (!raw) return 0;
+  if (raw.endsWith("%")) {
+    const pct = parseFloat(raw);
+    if (isNaN(pct) || pct <= 0) return 0;
+    const ref = (w !== undefined && h !== undefined) ? Math.min(w, h) : 0;
+    return (pct / 100) * ref;
+  }
+  const val = parseFloat(raw);
+  return !isNaN(val) && val > 0 ? val : 0;
+}
+
 /** Escape text for use inside HTML. */
 function escHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -56,20 +71,98 @@ function pointsToSvgPath(points: Point[], closed: boolean): string {
   return points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
 }
 
+/** Build an SVG path from rounded quad path segments. */
+function roundedQuadToSvgPath(points: Quad, radius: number): string {
+  const segs = roundedQuadPath(points, radius);
+  return segs.map(s => {
+    switch (s.type) {
+      case "M": return `M${n(s.x)},${n(s.y)}`;
+      case "L": return `L${n(s.x)},${n(s.y)}`;
+      case "Q": return `Q${n(s.cx)},${n(s.cy)} ${n(s.x)},${n(s.y)}`;
+    }
+  }).join(" ") + " Z";
+}
+
+/** Determine file extension from a data URL MIME type. */
+function dataUrlToExtension(dataUrl: string): string {
+  const match = dataUrl.match(/^data:image\/([^;,]+)/);
+  if (match) {
+    const mime = match[1].toLowerCase();
+    if (mime === "jpeg" || mime === "jpg") return "jpg";
+    if (mime === "png") return "png";
+    if (mime === "gif") return "gif";
+    if (mime === "webp") return "webp";
+    if (mime === "bmp") return "bmp";
+  }
+  return "jpg";
+}
+
 // ── HTML Writer ─────────────────────────────────────────────────────
 
 export class HTMLWriter implements Writer<string> {
   private width: number;
   private height: number;
   private elements: string[] = [];
+  private imageBasePath: string | undefined;
+  private imageCounter = 0;
+  private imageDedup = new Map<string, string>(); // dataUrl → filename
 
-  constructor(width: number, height: number) {
+  /**
+   * Image files referenced by the HTML output.
+   * Maps relative file paths to data URL strings.
+   * After calling `end()`, save these files alongside the HTML to display images.
+   * Only populated when `imageBasePath` is provided in the constructor.
+   */
+  imageFiles = new Map<string, string>();
+
+  /**
+   * @param width Viewport width in pixels.
+   * @param height Viewport height in pixels.
+   * @param imageBasePath When set, images are extracted to external files
+   *   instead of being embedded as data URLs. This path is prepended to
+   *   image filenames in the HTML `src` attributes. The extracted images
+   *   are collected in the `imageFiles` map.
+   */
+  constructor(width: number, height: number, imageBasePath?: string) {
     this.width = width;
     this.height = height;
+    this.imageBasePath = imageBasePath;
   }
 
   begin(): void {
     this.elements = [];
+    this.imageCounter = 0;
+    this.imageDedup.clear();
+    this.imageFiles.clear();
+  }
+
+  /** Get or create an external filename for an image data URL, deduplicating identical images. */
+  private getImageFilename(dataUrl: string): string {
+    const existing = this.imageDedup.get(dataUrl);
+    if (existing) return existing;
+    const ext = dataUrlToExtension(dataUrl);
+    const idx = ++this.imageCounter;
+    const filename = `image${idx}.${ext}`;
+    const relativePath = this.imageBasePath ? `${this.imageBasePath}/${filename}` : filename;
+    this.imageDedup.set(dataUrl, relativePath);
+    this.imageFiles.set(relativePath, dataUrl);
+    return relativePath;
+  }
+
+  /** Wrap an HTML string in a clip container if clipBounds is set. */
+  private applyClip(html: string, style: Style): string {
+    const clip = style.clipBounds;
+    if (!clip) return html;
+    const css = [
+      "position:absolute",
+      `left:${n(clip.x)}px`,
+      `top:${n(clip.y)}px`,
+      `width:${n(clip.w)}px`,
+      `height:${n(clip.h)}px`,
+      "overflow:hidden",
+    ];
+    if (clip.radius > 0) css.push(`border-radius:${n(clip.radius)}px`);
+    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px">${html}</div></div>`;
   }
 
   drawPolygon(points: Quad, style: Style): void {
@@ -102,17 +195,21 @@ export class HTMLWriter implements Writer<string> {
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
 
-      this.elements.push(`<div style="${css.join(";")}"></div>`);
+      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style));
     } else {
       // Non-axis-aligned quad → use inline SVG
-      const d = quadToSvgPath(points);
+      // Calculate edge lengths for border-radius resolution
+      const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
+      const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
+      const radius = parseBorderRadiusValue(style.borderRadius, edgeW, edgeH);
+      const d = radius > 0 ? roundedQuadToSvgPath(points, radius) : quadToSvgPath(points);
       const svgAttrs: string[] = [];
       if (fill) svgAttrs.push(`fill="${escHtml(fill)}"`);
       else svgAttrs.push(`fill="none"`);
       if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);
       if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-      this.elements.push(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`);
+      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style));
     }
   }
 
@@ -152,6 +249,10 @@ export class HTMLWriter implements Writer<string> {
     const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "sans-serif";
     const textColor = parseColor(style.color) ?? parseColor(style.fill) ?? "black";
 
+    // Compute half-leading: the line box (quad) is taller than the em square by the leading.
+    // We offset by half the leading so text sits at the correct position.
+    const halfLeading = Math.max(0, (quadHeight - fontSize) / 2);
+
     // Compute rotation from the quad's top edge
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
@@ -160,12 +261,15 @@ export class HTMLWriter implements Writer<string> {
 
     if (Math.abs(angleDeg) > 0.5) {
       // Rotated text → use SVG text element for precise positioning
-      const x = quad[3].x;
-      const y = quad[3].y;
+      // Position at the em-square top (quad[0] offset by halfLeading toward quad[3])
+      const t = quadHeight > 0 ? halfLeading / quadHeight : 0;
+      const x = quad[0].x + (quad[3].x - quad[0].x) * t;
+      const y = quad[0].y + (quad[3].y - quad[0].y) * t;
 
       const attrs: string[] = [];
       attrs.push(`x="${n(x)}" y="${n(y)}"`);
       attrs.push(`fill="${escHtml(textColor)}"`);
+      attrs.push(`dominant-baseline="text-before-edge"`);
       if (fontStyle !== "normal") attrs.push(`font-style="${fontStyle}"`);
       if (fontWeight !== "normal" && fontWeight !== "400") attrs.push(`font-weight="${fontWeight}"`);
       attrs.push(`font-size="${n(fontSize)}px"`);
@@ -173,13 +277,13 @@ export class HTMLWriter implements Writer<string> {
       attrs.push(`transform="rotate(${n(angleDeg)},${n(x)},${n(y)})"`);
       if (opacity !== undefined && opacity < 1) attrs.push(`opacity="${n(opacity)}"`);
 
-      this.elements.push(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`);
+      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`, style));
     } else {
       // Axis-aligned text → use a positioned span
       const css: string[] = [
         "position:absolute",
         `left:${n(quad[0].x)}px`,
-        `top:${n(quad[0].y)}px`,
+        `top:${n(quad[0].y + halfLeading)}px`,
         `font-size:${n(fontSize)}px`,
         `font-family:${escHtml(fontFamily)}`,
         `color:${textColor}`,
@@ -198,7 +302,7 @@ export class HTMLWriter implements Writer<string> {
         css.push(`text-shadow:${style.textShadow}`);
       }
 
-      this.elements.push(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`);
+      this.elements.push(this.applyClip(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style));
     }
   }
 
@@ -229,7 +333,8 @@ export class HTMLWriter implements Writer<string> {
     }
     if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
 
-    this.elements.push(`<img src="${escHtml(dataUrl)}" style="${css.join(";")}" />`);
+    const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
+    this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style));
   }
 
   end(): string {

@@ -21,6 +21,7 @@ import {
 } from "./pdf-objects.js";
 import { parseTTF, type ParsedTTF } from "./ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { roundedQuadPath } from "./geometry.js";
 
 // ── Shared helpers ──────────────────────────────────────────────────
 
@@ -694,7 +695,30 @@ export class PDFWriter implements Writer<PdfDocument> {
       return;
     }
 
+    // Check if we need per-side border drawing (mixed colors/widths/styles)
+    const mixed = this.hasMixedBorders(style);
+
     this.ops.push("q");
+
+    if (mixed) {
+      // Draw fill only first (no stroke from applyStyleOps)
+      const fillColor = parseVisibleColor(style.fill);
+      if (fillColor) {
+        const opacity = style.opacity ?? 1;
+        if (opacity < 1) {
+          const gsName = this.getGStateResName(opacity, 1);
+          this.ops.push(`/${gsName} gs`);
+        }
+        this.setFill(fillColor);
+        this.emitQuadPath(points);
+        this.ops.push("f");
+      }
+      // Draw each border side independently
+      this.drawPerSideBorders(points, style);
+      this.ops.push("Q");
+      return;
+    }
+
     const paintOp = this.applyStyleOps(style);
     if (!paintOp) { this.ops.push("Q"); return; }
 
@@ -707,12 +731,130 @@ export class PDFWriter implements Writer<PdfDocument> {
       const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
       const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
       this.emitRoundedRectPath(left, top, w, h, rx, ry);
+    } else if (radius && !isAxisAlignedRect(points)) {
+      // Non-axis-aligned quad with border-radius: use rounded quad path
+      const r = Math.min(radius.rx, radius.ry);
+      const segs = roundedQuadPath(points, r);
+      for (const s of segs) {
+        switch (s.type) {
+          case "M":
+            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} m`);
+            break;
+          case "L":
+            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} l`);
+            break;
+          case "Q": {
+            // Convert quadratic bezier to cubic (PDF only supports cubic)
+            // Get previous endpoint from the last move/line/curve
+            const segsArr = segs;
+            const idx = segsArr.indexOf(s);
+            const prev = idx > 0 ? segsArr[idx - 1] : segs[0];
+            const px = this.ptX(prev.x);
+            const py = this.ptY(prev.y);
+            const cx = this.ptX(s.cx);
+            const cy = this.ptY(s.cy);
+            const ex = this.ptX(s.x);
+            const ey = this.ptY(s.y);
+            // Quadratic to cubic: cp1 = p0 + 2/3*(cp-p0), cp2 = end + 2/3*(cp-end)
+            const c1x = px + (2 / 3) * (cx - px);
+            const c1y = py + (2 / 3) * (cy - py);
+            const c2x = ex + (2 / 3) * (cx - ex);
+            const c2y = ey + (2 / 3) * (cy - ey);
+            this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
+            break;
+          }
+        }
+      }
+      this.ops.push("h");
     } else {
       this.emitQuadPath(points);
     }
 
     this.ops.push(paintOp);
     this.ops.push("Q");
+  }
+
+  /** Check if borders have different colors/widths/styles per side. */
+  private hasMixedBorders(style: Style): boolean {
+    if (style.borderRadius && style.borderRadius !== "0px" && style.borderRadius !== "0%") return false;
+    const sides = [
+      { c: style.borderTopColor, w: style.borderTopWidth, s: style.borderTopStyle },
+      { c: style.borderRightColor, w: style.borderRightWidth, s: style.borderRightStyle },
+      { c: style.borderBottomColor, w: style.borderBottomWidth, s: style.borderBottomStyle },
+      { c: style.borderLeftColor, w: style.borderLeftWidth, s: style.borderLeftStyle },
+    ];
+    if (!sides[0].s) return false;
+    if (sides.some(s => s.s === "double")) return true;
+    const ref = sides[0];
+    return sides.some(s => s.c !== ref.c || s.w !== ref.w || s.s !== ref.s);
+  }
+
+  /** Draw each border side independently in PDF. */
+  private drawPerSideBorders(points: Quad, style: Style): void {
+    const sides: Array<{
+      from: Point; to: Point;
+      color?: string; width?: string; borderStyle?: string;
+    }> = [
+      { from: points[0], to: points[1], color: style.borderTopColor, width: style.borderTopWidth, borderStyle: style.borderTopStyle },
+      { from: points[1], to: points[2], color: style.borderRightColor, width: style.borderRightWidth, borderStyle: style.borderRightStyle },
+      { from: points[2], to: points[3], color: style.borderBottomColor, width: style.borderBottomWidth, borderStyle: style.borderBottomStyle },
+      { from: points[3], to: points[0], color: style.borderLeftColor, width: style.borderLeftWidth, borderStyle: style.borderLeftStyle },
+    ];
+
+    const opacity = style.opacity ?? 1;
+
+    for (const side of sides) {
+      const color = parseVisibleColor(side.color);
+      const w = side.width ? parseFloat(side.width) : 0;
+      if (!color || w <= 0 || !side.borderStyle || side.borderStyle === "none" || side.borderStyle === "hidden") continue;
+
+      this.ops.push("q");
+      if (opacity < 1) {
+        const gsName = this.getGStateResName(1, opacity);
+        this.ops.push(`/${gsName} gs`);
+      }
+      this.setStroke(color);
+      this.setLineWidth(pxToPt(w));
+
+      // Dash pattern
+      if (side.borderStyle === "dashed") {
+        const d = pxToPt(w * 3);
+        this.ops.push(`[${pn(d)} ${pn(d)}] 0 d`);
+      } else if (side.borderStyle === "dotted") {
+        const d = pxToPt(w);
+        this.ops.push(`[${pn(d)} ${pn(d)}] 0 d`);
+        this.ops.push("1 J"); // round line cap
+      } else {
+        this.ops.push("[] 0 d"); // solid
+      }
+
+      if (side.borderStyle === "double" && w >= 3) {
+        const lineW = Math.max(1, w / 3);
+        this.setLineWidth(pxToPt(lineW));
+        const dx = side.to.x - side.from.x;
+        const dy = side.to.y - side.from.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len > 0) {
+          const nx = -dy / len;
+          const ny = dx / len;
+          const off = w / 3;
+          // Outer line
+          this.ops.push(`${pn(this.ptX(side.from.x - nx * off))} ${pn(this.ptY(side.from.y - ny * off))} m`);
+          this.ops.push(`${pn(this.ptX(side.to.x - nx * off))} ${pn(this.ptY(side.to.y - ny * off))} l`);
+          this.ops.push("S");
+          // Inner line
+          this.ops.push(`${pn(this.ptX(side.from.x + nx * off))} ${pn(this.ptY(side.from.y + ny * off))} m`);
+          this.ops.push(`${pn(this.ptX(side.to.x + nx * off))} ${pn(this.ptY(side.to.y + ny * off))} l`);
+          this.ops.push("S");
+        }
+      } else {
+        this.ops.push(`${pn(this.ptX(side.from.x))} ${pn(this.ptY(side.from.y))} m`);
+        this.ops.push(`${pn(this.ptX(side.to.x))} ${pn(this.ptY(side.to.y))} l`);
+        this.ops.push("S");
+      }
+
+      this.ops.push("Q");
+    }
   }
 
   drawPolyline(points: Point[], closed: boolean, style: Style): void {

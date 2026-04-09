@@ -12,6 +12,7 @@ import {
   pattern,
 } from "@tarikjabiri/dxf";
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { roundedQuadPath } from "./geometry.js";
 
 /** Determine file extension from a data URL MIME type. */
 function dataUrlToExtension(dataUrl: string): string {
@@ -224,6 +225,37 @@ export class DXFWriter implements Writer<string> {
       return;
     }
 
+    // Non-axis-aligned quad with border-radius: use rounded quad path as polyline approximation
+    if (radius > 0 && !isAxisAlignedRect(points)) {
+      const segs = roundedQuadPath(points, radius);
+      const verts: { x: number; y: number }[] = [];
+      for (const s of segs) {
+        if (s.type === "M" || s.type === "L") {
+          verts.push({ x: s.x, y: s.y });
+        } else if (s.type === "Q") {
+          // Approximate quadratic bezier with line segments
+          const prev = verts[verts.length - 1];
+          if (prev) {
+            for (let t = 0.25; t <= 1; t += 0.25) {
+              const u = 1 - t;
+              verts.push({
+                x: u * u * prev.x + 2 * u * t * s.cx + t * t * s.x,
+                y: u * u * prev.y + 2 * u * t * s.cy + t * t * s.y,
+              });
+            }
+          }
+        }
+      }
+      if (fillVisible) {
+        const fillColor2 = getTrueColor(style.fill);
+        if (fillColor2 !== undefined) this.addSolidHatch(verts, fillColor2);
+      }
+      const dxfVerts = verts.map(p => ({ point: point2d(p.x, this.flipY(p.y)) }));
+      dxfVerts.push({ point: point2d(verts[0].x, this.flipY(verts[0].y)) });
+      this.dxf.addLWPolyline(dxfVerts, opts);
+      return;
+    }
+
     const vertices = points.map((p) => ({
       point: point2d(p.x, this.flipY(p.y)),
     }));
@@ -282,10 +314,20 @@ export class DXFWriter implements Writer<string> {
     // Compute text height from left edge of quad
     const ldx = quad[3].x - quad[0].x;
     const ldy = quad[3].y - quad[0].y;
-    const height = Math.sqrt(ldx * ldx + ldy * ldy) || 12;
+    const quadHeight = Math.sqrt(ldx * ldx + ldy * ldy) || 12;
 
-    // Position text at the bottom-left of the quad (DXF convention)
-    const bottomLeft = quad[3];
+    // Use actual font size (em square) as DXF text height, not line-height
+    const styleFontSize = style.fontSize ? parseFloat(style.fontSize) : 12;
+    const height = quadHeight > 0 ? Math.min(styleFontSize, quadHeight) : styleFontSize;
+
+    // Position at baseline: offset from quad[0] by halfLeading + ascent
+    const halfLeading = Math.max(0, (quadHeight - height) / 2);
+    const ascentRatio = 0.75; // approximate for most Latin fonts
+    const baselineT = quadHeight > 0 ? (halfLeading + ascentRatio * height) / quadHeight : 1;
+    const bottomLeft = {
+      x: quad[0].x + (quad[3].x - quad[0].x) * baselineT,
+      y: quad[0].y + (quad[3].y - quad[0].y) * baselineT,
+    };
 
     // Text color: prefer style.color (CSS color), then style.fill
     const trueColor = getTrueColor(style.color) ?? getTrueColor(style.fill);

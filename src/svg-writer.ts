@@ -3,6 +3,7 @@
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { roundedQuadPath } from "./geometry.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 
@@ -276,6 +277,30 @@ export class SVGWriter implements Writer<string> {
     this.defIdCounter = 0;
   }
 
+  /** Create a clipPath def for clipBounds and return the attribute string. */
+  private getClipAttr(style: Style): string {
+    const clip = style.clipBounds;
+    if (!clip) return "";
+    const id = `clip${++this.defIdCounter}`;
+    if (clip.radius > 0) {
+      const r = Math.min(clip.radius, clip.w / 2, clip.h / 2);
+      this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}" rx="${n(r)}" ry="${n(r)}"/></clipPath>`);
+    } else {
+      this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}"/></clipPath>`);
+    }
+    return ` clip-path="url(#${id})"`;
+  }
+
+  /** Push an element, wrapping it in a <g> with clip-path if clipBounds is set. */
+  private pushElement(element: string, style: Style): void {
+    const clipAttr = this.getClipAttr(style);
+    if (clipAttr) {
+      this.elements.push(`<g${clipAttr}>${element}</g>`);
+    } else {
+      this.elements.push(element);
+    }
+  }
+
   drawPolygon(points: Quad, style: Style): void {
     const fill = parseColor(style.fill);
     const stroke = hasVisibleStroke(style);
@@ -302,7 +327,7 @@ export class SVGWriter implements Writer<string> {
 
       const gradId = this.addGradientDef(style.backgroundImage, x, y, w, h);
       const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-      this.elements.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>`);
+      this.pushElement(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>`, style);
 
       // Inset shadows as clipped overlays
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, r);
@@ -312,9 +337,28 @@ export class SVGWriter implements Writer<string> {
     const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + " Z";
     const x = Math.min(...points.map(p => p.x));
     const y = Math.min(...points.map(p => p.y));
+
+    // For non-axis-aligned quads with border-radius, use rounded path
+    const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
+    const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
+    const nonAlignedRadius = parseBorderRadius(style.borderRadius, edgeW, edgeH);
+    let pathD: string;
+    if (nonAlignedRadius > 0 && !isAxisAlignedRect(points)) {
+      const segs = roundedQuadPath(points, nonAlignedRadius);
+      pathD = segs.map(s => {
+        switch (s.type) {
+          case "M": return `M${n(s.x)},${n(s.y)}`;
+          case "L": return `L${n(s.x)},${n(s.y)}`;
+          case "Q": return `Q${n(s.cx)},${n(s.cy)} ${n(s.x)},${n(s.y)}`;
+        }
+      }).join(" ") + " Z";
+    } else {
+      pathD = d;
+    }
+
     const gradId = this.addGradientDef(style.backgroundImage, x, y, w || 1, h || 1);
     const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-    this.elements.push(`<path d="${d}"${attrs}/>`);
+    this.pushElement(`<path d="${pathD}"${attrs}/>`, style);
 
     if (isAxisAlignedRect(points)) {
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, 0);
@@ -341,7 +385,7 @@ export class SVGWriter implements Writer<string> {
 
     const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
     const attrs = this.buildPolylineAttrs(fill, stroke, style, gradId, opacity, closed);
-    this.elements.push(`<path d="${d}"${attrs}/>`);
+    this.pushElement(`<path d="${d}"${attrs}/>`, style);
   }
 
   drawText(quad: Quad, text: string, style: Style): void {
@@ -367,13 +411,16 @@ export class SVGWriter implements Writer<string> {
     const angle = Math.atan2(dy, dx);
     const angleDeg = angle * (180 / Math.PI);
 
-    // Text position: bottom-left of quad (baseline)
-    const x = quad[3].x;
-    const y = quad[3].y;
+    // Text position: em-square top (quad[0] offset by half-leading toward quad[3])
+    const halfLeading = Math.max(0, (quadHeight - fontSize) / 2);
+    const t = quadHeight > 0 ? halfLeading / quadHeight : 0;
+    const x = quad[0].x + (quad[3].x - quad[0].x) * t;
+    const y = quad[0].y + (quad[3].y - quad[0].y) * t;
 
     const attrs: string[] = [];
     attrs.push(`x="${n(x)}" y="${n(y)}"`);
     attrs.push(`fill="${escXml(textColor)}"`);
+    attrs.push(`dominant-baseline="text-before-edge"`);
 
     const fontParts: string[] = [];
     if (fontStyle !== "normal") fontParts.push(`font-style="${fontStyle}"`);
@@ -405,7 +452,7 @@ export class SVGWriter implements Writer<string> {
       if (decoration) attrs.push(`text-decoration="${decoration}"`);
     }
 
-    this.elements.push(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`);
+    this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style);
   }
 
   drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): void {
@@ -433,7 +480,7 @@ export class SVGWriter implements Writer<string> {
     attrs.push(`preserveAspectRatio="none"`);
     if (opacity !== undefined) attrs.push(`opacity="${n(opacity)}"`);
 
-    this.elements.push(`<image ${attrs.join(" ")}/>`);
+    this.pushElement(`<image ${attrs.join(" ")}/>`, style);
   }
 
   end(): string {

@@ -12,6 +12,8 @@ export interface StackingNode {
   children: StackingNode[];
   textNodes: Text[];
   zIndex: number;
+  /** Clip boundary from an ancestor with overflow:hidden + border-radius. */
+  clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 }
 
 /**
@@ -145,13 +147,14 @@ export function traverseDOM(
   root: Element,
   includeInvisible = false
 ): StackingNode {
-  return buildStackingNode(root, includeInvisible, 1);
+  return buildStackingNode(root, includeInvisible, 1, undefined);
 }
 
 function buildStackingNode(
   element: Element,
   includeInvisible: boolean,
-  parentOpacity: number
+  parentOpacity: number,
+  parentClipBounds: StackingNode["clipBounds"]
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
@@ -173,7 +176,25 @@ function buildStackingNode(
     children: [],
     textNodes: [],
     zIndex: zVal,
+    clipBounds: parentClipBounds,
   };
+
+  // Determine clip bounds for children: if this element has overflow:hidden
+  // (and optionally border-radius), children should be clipped to this boundary
+  let childClipBounds = parentClipBounds;
+  const overflow = cs.overflowX || cs.overflow;
+  if (overflow === "hidden" || overflow === "clip") {
+    const rect = element.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const br = cs.borderRadius;
+      let radius = 0;
+      if (br && br !== "0px") {
+        const val = parseFloat(br);
+        if (!isNaN(val) && val > 0) radius = val;
+      }
+      childClipBounds = { x: rect.left, y: rect.top, w: rect.width, h: rect.height, radius };
+    }
+  }
 
   // Determine which root to traverse children from
   const childRoot = (element.shadowRoot as ShadowRoot | null) ?? element;
@@ -201,7 +222,7 @@ function buildStackingNode(
         continue;
       }
 
-      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity));
+      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds));
     }
   }
 

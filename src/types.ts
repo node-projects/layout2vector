@@ -48,6 +48,8 @@ export type Style = {
   transform?: string;
   overflow?: string;
   textOverflow?: string;
+  /** Clip boundary from an ancestor with overflow:hidden + border-radius (absolute page coords). */
+  clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 };
 
 /** Intermediate representation node. */

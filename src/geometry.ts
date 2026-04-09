@@ -132,3 +132,58 @@ function domQuadToQuad(dq: DOMQuad): Quad {
     { x: dq.p4.x, y: dq.p4.y },
   ];
 }
+
+/**
+ * Compute rounded corner points for a quad polygon.
+ * Each corner is replaced by arc-approximation points (quadratic Bezier control points).
+ * Returns an array of {type, x, y} segments for building SVG/Canvas/PDF paths.
+ *
+ * Segment types: 'M' (moveTo), 'L' (lineTo), 'Q' (quadratic bezier: cx, cy, then endX, endY)
+ */
+export type PathSegment =
+  | { type: "M"; x: number; y: number }
+  | { type: "L"; x: number; y: number }
+  | { type: "Q"; cx: number; cy: number; x: number; y: number };
+
+export function roundedQuadPath(points: Quad, radius: number): PathSegment[] {
+  const N = 4;
+  const segments: PathSegment[] = [];
+
+  // Pre-compute clamped radius per corner (cannot exceed half of shortest adjacent edge)
+  const radii: number[] = [];
+  for (let i = 0; i < N; i++) {
+    const prev = points[(i + N - 1) % N];
+    const curr = points[i];
+    const next = points[(i + 1) % N];
+    const toPrevLen = Math.sqrt((prev.x - curr.x) ** 2 + (prev.y - curr.y) ** 2);
+    const toNextLen = Math.sqrt((next.x - curr.x) ** 2 + (next.y - curr.y) ** 2);
+    radii.push(Math.min(radius, toPrevLen / 2, toNextLen / 2));
+  }
+
+  for (let i = 0; i < N; i++) {
+    const prev = points[(i + N - 1) % N];
+    const curr = points[i];
+    const next = points[(i + 1) % N];
+    const r = radii[i];
+
+    const toPrevLen = Math.sqrt((prev.x - curr.x) ** 2 + (prev.y - curr.y) ** 2);
+    const toNextLen = Math.sqrt((next.x - curr.x) ** 2 + (next.y - curr.y) ** 2);
+
+    // Point where the arc starts (on the edge from prev to curr, near curr)
+    const arcStartX = curr.x + (prev.x - curr.x) / toPrevLen * r;
+    const arcStartY = curr.y + (prev.y - curr.y) / toPrevLen * r;
+    // Point where the arc ends (on the edge from curr to next, near curr)
+    const arcEndX = curr.x + (next.x - curr.x) / toNextLen * r;
+    const arcEndY = curr.y + (next.y - curr.y) / toNextLen * r;
+
+    if (i === 0) {
+      segments.push({ type: "M", x: arcStartX, y: arcStartY });
+    } else {
+      segments.push({ type: "L", x: arcStartX, y: arcStartY });
+    }
+    // Quadratic bezier through the original corner point
+    segments.push({ type: "Q", cx: curr.x, cy: curr.y, x: arcEndX, y: arcEndY });
+  }
+
+  return segments;
+}
