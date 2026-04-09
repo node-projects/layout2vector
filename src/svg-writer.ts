@@ -282,6 +282,16 @@ function parseBoxShadow(boxShadow: string | undefined): ParsedBoxShadow[] {
 
 // ── SVG Writer ──────────────────────────────────────────────────────
 
+/** Options for the SVG writer. */
+export type SVGWriterOptions = {
+  /** Viewport width in pixels. */
+  width: number;
+  /** Viewport height in pixels. */
+  height: number;
+  /** Scale factor applied to width and height. */
+  zoom?: number;
+};
+
 export class SVGWriter implements Writer<string> {
   private width: number;
   private height: number;
@@ -292,13 +302,20 @@ export class SVGWriter implements Writer<string> {
   private imageCache = new Map<string, string>(); // dataUrl → symbol def id
 
   /**
-   * @param width Viewport width in pixels.
-   * @param height Viewport height in pixels.
-   * @param zoom Scale factor applied to width and height.
+   * @param optionsOrWidth Options object, or viewport width in pixels (positional form).
+   * @param height Viewport height in pixels (positional form).
+   * @param zoom Scale factor applied to width and height (positional form).
    */
-  constructor(width: number, height: number, zoom = 1) {
-    this.width = width * zoom;
-    this.height = height * zoom;
+  constructor(optionsOrWidth: SVGWriterOptions | number, height?: number, zoom?: number) {
+    if (typeof optionsOrWidth === "object") {
+      const z = optionsOrWidth.zoom ?? 1;
+      this.width = optionsOrWidth.width * z;
+      this.height = optionsOrWidth.height * z;
+    } else {
+      const z = zoom ?? 1;
+      this.width = optionsOrWidth * z;
+      this.height = (height ?? 0) * z;
+    }
   }
 
   begin(): void {

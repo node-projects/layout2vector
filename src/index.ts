@@ -33,11 +33,11 @@ export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgr
 export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./mathml-extractor.js";
 
 // Writers
-export { DXFWriter } from "./dxf-writer.js";
-export { PDFWriter } from "./pdf-writer.js";
-export { PNGWriter, PNGResult } from "./png-writer.js";
-export { SVGWriter } from "./svg-writer.js";
-export { HTMLWriter, type HTMLImageMode } from "./html-writer.js";
+export { DXFWriter, type DXFWriterOptions } from "./dxf-writer.js";
+export { PDFWriter, type PDFWriterOptions } from "./pdf-writer.js";
+export { PNGWriter, PNGResult, type PNGWriterOptions } from "./png-writer.js";
+export { SVGWriter, type SVGWriterOptions } from "./svg-writer.js";
+export { HTMLWriter, type HTMLImageMode, type HTMLWriterOptions } from "./html-writer.js";
 
 // Font utilities
 export { parseTTF, type ParsedTTF } from "./ttf-parser.js";

@@ -116,6 +116,14 @@ function isAxisAlignedRect(points: [{ x: number; y: number }, { x: number; y: nu
   );
 }
 
+/** Options for the DXF writer. */
+export type DXFWriterOptions = {
+  /** The maximum Y coordinate (viewport height) for Y-axis flipping. */
+  maxY?: number;
+  /** Scale factor applied to the maxY coordinate. */
+  zoom?: number;
+};
+
 export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriter;
   private maxY: number;
@@ -130,12 +138,17 @@ export class DXFWriter implements Writer<string> {
   imageFiles = new Map<string, string>();
 
   /**
-   * @param maxY The maximum Y coordinate (viewport height) for Y-axis flipping.
-   *             DXF uses Y-up; browser uses Y-down.
-   * @param zoom Scale factor applied to the maxY coordinate.
+   * @param optionsOrMaxY Options object, or the maximum Y coordinate for Y-axis flipping (positional form).
+   * @param zoom Scale factor applied to the maxY coordinate (positional form).
    */
-  constructor(maxY = 1000, zoom = 1) {
-    this.maxY = maxY * zoom;
+  constructor(optionsOrMaxY?: DXFWriterOptions | number, zoom?: number) {
+    if (typeof optionsOrMaxY === "object") {
+      const z = optionsOrMaxY.zoom ?? 1;
+      this.maxY = (optionsOrMaxY.maxY ?? 1000) * z;
+    } else {
+      const z = zoom ?? 1;
+      this.maxY = (optionsOrMaxY ?? 1000) * z;
+    }
   }
 
   begin(): void {

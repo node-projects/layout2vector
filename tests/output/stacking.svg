@@ -1,51 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="1127" viewBox="0 0 1240 1127">
-<path d="M0,0 L1240,0 L1240,1127 L0,1127 Z" fill="none"/>
-<path d="M0,0 L1240,0 L1240,21 L0,21 Z" fill="none"/>
-<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Z-Index Stacking</text>
-<path d="M0,36 L300,36 L300,236 L0,236 Z" fill="none"/>
+<text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Z-Index Stacking</text>
 <path d="M0,36 L150,36 L150,186 L0,186 Z" fill="rgb(229, 57, 53)"/>
-<text x="0" y="37" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:1</text>
+<text x="0" y="36.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:1</text>
 <path d="M30,66 L180,66 L180,216 L30,216 Z" fill="rgb(67, 160, 71)"/>
-<text x="30" y="67" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:2</text>
+<text x="30" y="66.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:2</text>
 <path d="M60,96 L210,96 L210,246 L60,246 Z" fill="rgb(30, 136, 229)"/>
-<text x="60" y="97" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:3</text>
-<path d="M0,251 L1240,251 L1240,272 L0,272 Z" fill="none"/>
-<text x="0" y="252.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Opacity Levels</text>
-<path d="M0,287 L1240,287 L1240,367 L0,367 Z" fill="none"/>
+<text x="60" y="96.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:3</text>
+<text x="0" y="252" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Opacity Levels</text>
 <rect x="0" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/>
-<text x="30.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">1.0</text>
+<text x="30" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">1.0</text>
 <rect x="90" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.75"/>
-<text x="116.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.75">0.75</text>
+<text x="116" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.75">0.75</text>
 <rect x="180" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.5"/>
-<text x="210.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.5">0.5</text>
+<text x="210" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.5">0.5</text>
 <rect x="270" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.25"/>
-<text x="296.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.25">0.25</text>
+<text x="296" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.25">0.25</text>
 <rect x="360" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.1"/>
-<text x="390.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.1">0.1</text>
-<path d="M0,382 L1240,382 L1240,403 L0,403 Z" fill="none"/>
-<text x="0" y="383.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Isolation: Isolate</text>
+<text x="390" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.1">0.1</text>
+<text x="0" y="383" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Isolation: Isolate</text>
 <path d="M0,415 L200,415 L200,535 L0,535 Z" fill="rgb(255, 249, 196)" stroke="rgb(249, 168, 37)" stroke-width="2"/>
 <path d="M32,447 L112,447 L112,527 L32,527 Z" fill="rgb(66, 165, 245)"/>
-<text x="32" y="448" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">B (z:1)</text>
+<text x="32" y="447.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">B (z:1)</text>
 <path d="M12,427 L92,427 L92,507 L12,507 Z" fill="rgb(239, 83, 80)"/>
-<text x="12" y="428" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">A (z:2)</text>
-<path d="M0,550 L1240,550 L1240,571 L0,571 Z" fill="none"/>
-<text x="0" y="551.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Mix-Blend-Mode</text>
+<text x="12" y="427.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">A (z:2)</text>
+<text x="0" y="551" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Mix-Blend-Mode</text>
 <path d="M0,583 L200,583 L200,703 L0,703 Z" fill="rgb(255, 236, 179)"/>
 <path d="M20,603 L120,603 L120,683 L20,683 Z" fill="rgb(229, 57, 53)"/>
-<text x="20" y="604" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiply</text>
-<path d="M0,718 L1240,718 L1240,739 L0,739 Z" fill="none"/>
-<text x="0" y="719.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Will-Change</text>
+<text x="20" y="603.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiply</text>
+<text x="0" y="719" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Will-Change</text>
 <path d="M0,751 L100,751 L100,851 L0,851 Z" fill="rgb(0, 137, 123)"/>
-<text x="6.43" y="793" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">will-change</text>
-<path d="M0,866 L1240,866 L1240,887 L0,887 Z" fill="none"/>
-<text x="0" y="867.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Filter</text>
+<text x="6" y="793" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">will-change</text>
+<text x="0" y="867" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Filter</text>
 <rect x="0" y="899" width="120" height="80" rx="8" ry="8" fill="rgb(94, 53, 177)"/>
-<text x="33.32" y="931" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">filtered</text>
-<path d="M0,994 L1240,994 L1240,1015 L0,1015 Z" fill="none"/>
-<text x="0" y="995.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Contain: Paint</text>
+<text x="33" y="931" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">filtered</text>
+<text x="0" y="995" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Contain: Paint</text>
 <path d="M0,1027 L150,1027 L150,1127 L0,1127 Z" fill="rgb(2, 119, 189)"/>
-<text x="10" y="1038" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">contain:paint</text>
+<text x="10" y="1037.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">contain:paint</text>
 <path d="M-10,1017 L40,1017 L40,1067 L-10,1067 Z" fill="rgb(244, 67, 54)"/>
 </svg>

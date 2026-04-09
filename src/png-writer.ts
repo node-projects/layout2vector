@@ -426,6 +426,18 @@ export class PNGResult {
 
 // ── PNG Writer ──────────────────────────────────────────────────────
 
+/** Options for the PNG writer. */
+export type PNGWriterOptions = {
+  /** Canvas width in CSS pixels. */
+  width: number;
+  /** Canvas height in CSS pixels. */
+  height: number;
+  /** Device pixel ratio / resolution multiplier. */
+  scale?: number;
+  /** Scale factor applied to width and height. */
+  zoom?: number;
+};
+
 export class PNGWriter implements Writer<PNGResult> {
   private canvas!: HTMLCanvasElement;
   private ctx!: CanvasRenderingContext2D;
@@ -435,15 +447,23 @@ export class PNGWriter implements Writer<PNGResult> {
   private pendingImages: PendingImage[] = [];
 
   /**
-   * @param width  Canvas width in CSS pixels.
-   * @param height Canvas height in CSS pixels.
-   * @param scale  Device pixel ratio / resolution multiplier (default 1).
-   * @param zoom   Scale factor applied to width and height (default 1).
+   * @param optionsOrWidth Options object, or canvas width in CSS pixels (positional form).
+   * @param height Canvas height in CSS pixels (positional form).
+   * @param scale  Device pixel ratio / resolution multiplier (positional form).
+   * @param zoom   Scale factor applied to width and height (positional form).
    */
-  constructor(width: number, height: number, scale = 1, zoom = 1) {
-    this.width = width * zoom;
-    this.height = height * zoom;
-    this.scale = scale;
+  constructor(optionsOrWidth: PNGWriterOptions | number, height?: number, scale?: number, zoom?: number) {
+    if (typeof optionsOrWidth === "object") {
+      const z = optionsOrWidth.zoom ?? 1;
+      this.width = optionsOrWidth.width * z;
+      this.height = optionsOrWidth.height * z;
+      this.scale = optionsOrWidth.scale ?? 1;
+    } else {
+      const z = zoom ?? 1;
+      this.width = optionsOrWidth * z;
+      this.height = (height ?? 0) * z;
+      this.scale = scale ?? 1;
+    }
   }
 
   begin(): void {

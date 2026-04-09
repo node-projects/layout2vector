@@ -117,6 +117,11 @@ export async function preloadImages(root: Element): Promise<void> {
         const blob = await resp.blob();
         const dataUrl = await blobToDataUrl(blob);
         preloadedUrlMap.set(url, dataUrl);
+        // Pre-decode into an Image element so rasterToRendered can draw it synchronously
+        const tmpImg = new Image();
+        tmpImg.src = dataUrl;
+        try { await tmpImg.decode(); } catch { /* ignore */ }
+        preloadedImageElems.set(dataUrl, tmpImg);
       } catch { /* network error — sync XHR fallback during extraction */ }
       continue;
     }
@@ -258,8 +263,10 @@ function rasterToRendered(dataUrl: string, w: number, h: number): { dataUrl: str
 
 function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
   try {
-    const img = new Image();
-    img.src = dataUrl;
+    // Use pre-decoded Image from preloadImages if available (ensures synchronous decode)
+    const preloaded = preloadedImageElems.get(dataUrl);
+    const img = preloaded ?? new Image();
+    if (!preloaded) img.src = dataUrl;
     if (!img.complete || img.naturalWidth === 0) return null;
 
     // If JPEG and already at target size, use as-is (avoid re-encoding)

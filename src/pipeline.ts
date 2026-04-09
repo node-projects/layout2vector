@@ -210,14 +210,60 @@ function scaleIRNodes(nodes: IRNode[], zoom: number): void {
   }
 }
 
+/** Check if a color string represents a visible (non-transparent) color. */
+function isVisibleColor(color: string | undefined): boolean {
+  if (!color || color === "transparent" || color === "none") return false;
+  const m = color.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*([\d.]+))?\s*\)/);
+  if (m && m[1] !== undefined && parseFloat(m[1]) <= 0) return false;
+  if (color.startsWith("#") && color.length === 9) {
+    if (parseInt(color.slice(7, 9), 16) === 0) return false;
+  }
+  return true;
+}
+
+/**
+ * Check whether an IR node contributes any visible output.
+ * Filters out empty polygons/polylines with no fill, no stroke, no box-shadow, and no gradient.
+ */
+function isVisibleNode(node: IRNode): boolean {
+  switch (node.type) {
+    case "polygon": {
+      const s = node.style;
+      if (isVisibleColor(s.fill)) return true;
+      if (isVisibleColor(s.stroke) && s.strokeWidth && parseFloat(s.strokeWidth) > 0) return true;
+      if (s.boxShadow && s.boxShadow !== "none") return true;
+      // Check for gradient or url() background
+      if (s.backgroundImage && s.backgroundImage !== "none") return true;
+      // Check individual border colors (mixed borders)
+      if (isVisibleColor(s.borderTopColor) && s.borderTopWidth && parseFloat(s.borderTopWidth) > 0) return true;
+      if (isVisibleColor(s.borderRightColor) && s.borderRightWidth && parseFloat(s.borderRightWidth) > 0) return true;
+      if (isVisibleColor(s.borderBottomColor) && s.borderBottomWidth && parseFloat(s.borderBottomWidth) > 0) return true;
+      if (isVisibleColor(s.borderLeftColor) && s.borderLeftWidth && parseFloat(s.borderLeftWidth) > 0) return true;
+      return false;
+    }
+    case "polyline": {
+      const s = node.style;
+      if (node.closed && isVisibleColor(s.fill)) return true;
+      if (isVisibleColor(s.stroke) && s.strokeWidth && parseFloat(s.strokeWidth) > 0) return true;
+      return false;
+    }
+    case "text":
+      return node.text.trim().length > 0;
+    case "image":
+      return true;
+  }
+}
+
 /**
  * Render IR nodes through a writer.
  * Processes nodes in order (already sorted by the pipeline).
+ * Invisible nodes (empty polygons with no fill/stroke/shadow) are automatically skipped.
  */
 export function renderIR<T>(nodes: IRNode[], writer: Writer<T>): T {
   writer.begin();
 
   for (const node of nodes) {
+    if (!isVisibleNode(node)) continue;
     switch (node.type) {
       case "polygon":
         writer.drawPolygon(node.points, node.style);

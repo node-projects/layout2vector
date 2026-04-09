@@ -37,7 +37,7 @@ const ir = await extractIR(root, {
 });
 
 // 2. Render to DXF
-const dxfWriter = new DXFWriter(document.documentElement.scrollHeight);
+const dxfWriter = new DXFWriter({ maxY: document.documentElement.scrollHeight });
 const dxfString = renderIR(ir, dxfWriter);
 // dxfString is a complete .dxf file as a string
 
@@ -48,19 +48,19 @@ await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes(); // Uint8Array
 
 // 4. Render to PNG (requires Canvas-capable environment)
-const pngWriter = new PNGWriter(800, 600); // width, height in px
+const pngWriter = new PNGWriter({ width: 800, height: 600 });
 const pngResult = renderIR(ir, pngWriter);
 await pngResult.finalize(); // loads and draws raster images
 const pngDataUrl = pngResult.toDataURL(); // data:image/png;base64,...
 const pngBytes = pngResult.toBytes(); // Uint8Array
 
 // 5. Render to SVG
-const svgWriter = new SVGWriter(800, 600); // width, height in px
+const svgWriter = new SVGWriter({ width: 800, height: 600 });
 const svgString = renderIR(ir, svgWriter);
 // svgString is a complete standalone SVG document
 
 // 6. Render to HTML
-const htmlWriter = new HTMLWriter(800, 600); // width, height in px
+const htmlWriter = new HTMLWriter({ width: 800, height: 600, customCss: ".my-class { color: red; }" });
 const htmlString = renderIR(ir, htmlWriter);
 // htmlString is a complete standalone HTML document
 ```
@@ -92,10 +92,15 @@ Passes each IR node through the writer in paint order. Returns whatever the writ
 
 ### Writers
 
+
 #### `DXFWriter`
 
 ```ts
-new DXFWriter(maxY?: number)
+type DXFWriterOptions = {
+  maxY?: number;
+  zoom?: number;
+};
+new DXFWriter(options?: DXFWriterOptions)
 ```
 
 Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000) is used to flip the Y axis (browser Y-down → DXF Y-up).
@@ -110,10 +115,17 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - SVG images in `<img>` tags → converted to native DXF vector entities
 - Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
 
+
 #### `PNGWriter`
 
 ```ts
-new PNGWriter(width: number, height: number, scale?: number)
+type PNGWriterOptions = {
+  width: number;
+  height: number;
+  scale?: number;
+  zoom?: number;
+};
+new PNGWriter(options: PNGWriterOptions)
 ```
 
 Produces a `PNGResult` via the Canvas 2D API. Width and height are in CSS pixels. The optional `scale` parameter (default 1) acts as a device pixel ratio multiplier for higher resolution output (e.g. `scale: 2` produces a 2× image).
@@ -131,10 +143,16 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 
 After `renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
 
+
 #### `SVGWriter`
 
 ```ts
-new SVGWriter(width: number, height: number)
+type SVGWriterOptions = {
+  width: number;
+  height: number;
+  zoom?: number;
+};
+new SVGWriter(options: SVGWriterOptions)
 ```
 
 Produces a standalone SVG document string. Width and height define the viewport in CSS pixels.
@@ -156,6 +174,7 @@ The output is a self-contained SVG with all gradients, filters, and images embed
 Duplicate `<clipPath>` definitions are deduplicated (shared by reference). Duplicate raster images are embedded once as a `<symbol>` and referenced via `<use>` elements to reduce output size.
 
 
+
 #### `HTMLWriter`
 
 ```ts
@@ -164,7 +183,15 @@ type HTMLImageMode =
   | { type: "external"; basePath: string }
   | { type: "css" };
 
-new HTMLWriter(width: number, height: number, imageMode?: HTMLImageMode, zoom?: number)
+type HTMLWriterOptions = {
+  width: number;
+  height: number;
+  imageMode?: HTMLImageMode;
+  zoom?: number;
+  customCss?: string;
+};
+
+new HTMLWriter(options: HTMLWriterOptions)
 ```
 
 Produces a standalone HTML document string. Width and height define the container dimensions in CSS pixels. The `imageMode` parameter controls how images are rendered:
@@ -187,10 +214,18 @@ The optional `zoom` parameter (default 1) multiplies all coordinates and dimensi
 
 The output is a self-contained HTML document with all elements absolutely positioned to match the original layout. When `imageMode.type === "css"`, duplicate images are deduplicated into shared CSS classes. When `imageMode.type === "external"`, call `htmlWriter.imageFiles` after `end()` to get a `Map<string, string>` of image file names to data URLs for saving alongside the HTML.
 
+
 #### `PDFWriter`
 
 ```ts
-new PDFWriter(pageWidth?: number, pageHeight?: number, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array)
+type PDFWriterOptions = {
+  pageWidth?: number;
+  pageHeight?: number;
+  customFonts?: Map<string, Uint8Array>;
+  defaultFont?: Uint8Array;
+  zoom?: number;
+};
+new PDFWriter(options?: PDFWriterOptions)
 ```
 
 Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75). Call `await doc.finalize()` then `doc.toBytes()` to get the final PDF as a `Uint8Array`.
@@ -230,6 +265,11 @@ const pdfBytes = pdfDoc.toBytes();
 ```
 
 The font family name in the map must match the CSS `font-family` used in the HTML. The library includes a minimal TrueType parser (`parseTTF`) that extracts the metrics needed for PDF embedding (glyph widths, ascent/descent, cmap tables). Both Unicode fonts and symbol fonts (like Wingdings) are supported.
+
+
+#### IR Node Filtering
+
+Invisible polygons and polylines (no fill, no stroke, no border, no boxShadow, no gradient) are automatically filtered out before rendering. This reduces output size and eliminates empty elements in HTML, SVG, PNG, PDF, and DXF outputs.
 
 #### Custom Writers
 

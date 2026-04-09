@@ -122,6 +122,20 @@ export type HTMLImageMode =
   | { type: "external"; basePath: string }
   | { type: "css" };
 
+/** Options for the HTML writer. */
+export type HTMLWriterOptions = {
+  /** Viewport width in pixels. */
+  width: number;
+  /** Viewport height in pixels. */
+  height: number;
+  /** How images are embedded in the HTML output. */
+  imageMode?: HTMLImageMode;
+  /** Scale factor applied to width and height. */
+  zoom?: number;
+  /** Custom CSS to prepend inside the `<style>` block. */
+  customCss?: string;
+};
+
 export class HTMLWriter implements Writer<string> {
   private width: number;
   private height: number;
@@ -130,6 +144,7 @@ export class HTMLWriter implements Writer<string> {
   private imageCounter = 0;
   private imageDedup = new Map<string, string>(); // dataUrl → filename
   private cssImageClasses = new Map<string, string>(); // dataUrl → CSS class name
+  private customCss: string;
 
   /**
    * Image files referenced by the HTML output.
@@ -140,26 +155,26 @@ export class HTMLWriter implements Writer<string> {
   imageFiles = new Map<string, string>();
 
   /**
-   * @param width Viewport width in pixels.
-   * @param height Viewport height in pixels.
-   * @param imageMode How images are embedded in the HTML output:
-   *   - `{ type: "inline" }` (default): images are embedded as data URL `<img>` tags.
-   *   - `{ type: "external", basePath: string }`: images are extracted to external
-   *     files. `basePath` is prepended to filenames in `src` attributes.
-   *     Extracted images are collected in the `imageFiles` map.
-   *   - `{ type: "css" }`: identical images are deduplicated via shared CSS classes
-   *     using `background-image` on `<div>` elements.
+   * @param optionsOrWidth Options object, or viewport width in pixels (deprecated positional form).
+   * @param height Viewport height in pixels (positional form).
+   * @param imageMode How images are embedded in the HTML output (positional form).
+   * @param zoom Scale factor applied to width and height (positional form).
    */
-  /**
-   * @param width Viewport width in pixels.
-   * @param height Viewport height in pixels.
-   * @param imageMode How images are embedded in the HTML output.
-   * @param zoom Scale factor applied to width and height.
-   */
-  constructor(width: number, height: number, imageMode?: HTMLImageMode, zoom = 1) {
-    this.width = width * zoom;
-    this.height = height * zoom;
-    this.imageMode = imageMode ?? { type: "inline" };
+  constructor(optionsOrWidth: HTMLWriterOptions | number, height?: number, imageMode?: HTMLImageMode, zoom?: number) {
+    if (typeof optionsOrWidth === "object") {
+      const opts = optionsOrWidth;
+      const z = opts.zoom ?? 1;
+      this.width = opts.width * z;
+      this.height = opts.height * z;
+      this.imageMode = opts.imageMode ?? { type: "inline" };
+      this.customCss = opts.customCss ?? "";
+    } else {
+      const z = zoom ?? 1;
+      this.width = optionsOrWidth * z;
+      this.height = (height ?? 0) * z;
+      this.imageMode = imageMode ?? { type: "inline" };
+      this.customCss = "";
+    }
   }
 
   begin(): void {
@@ -422,6 +437,7 @@ export class HTMLWriter implements Writer<string> {
 <style>
   body { margin: 0; padding: 0; }
   .ir-container { position: relative; width: ${n(this.width)}px; height: ${n(this.height)}px; overflow: hidden; }${cssImageRules}
+${this.customCss ? "\n" + this.customCss : ""}
 </style>
 </head>
 <body>

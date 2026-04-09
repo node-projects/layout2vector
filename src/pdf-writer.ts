@@ -348,6 +348,20 @@ interface ImageDef {
 /** Bezier approximation constant for quarter-circle arcs. */
 const KAPPA = 0.5522847498;
 
+/** Options for the PDF writer. */
+export type PDFWriterOptions = {
+  /** Page width in mm (default A4 = 210). */
+  pageWidth?: number;
+  /** Page height in mm (default A4 = 297). */
+  pageHeight?: number;
+  /** Map of CSS font-family name → TTF file bytes. */
+  customFonts?: Map<string, Uint8Array>;
+  /** TTF file bytes for a default Unicode-capable font. */
+  defaultFont?: Uint8Array;
+  /** Scale factor applied to page dimensions. */
+  zoom?: number;
+};
+
 export class PDFWriter implements Writer<PdfDocument> {
   private ops: string[] = [];
   private pageWidthPt: number;
@@ -370,24 +384,40 @@ export class PDFWriter implements Writer<PdfDocument> {
   private defaultFont: ParsedTTF | null = null;
 
   /**
-   * @param pageWidth Page width in mm (default A4 = 210)
-   * @param pageHeight Page height in mm (default A4 = 297)
-   * @param customFonts Optional map of CSS font-family name → TTF file bytes
-   * @param defaultFont Optional TTF file bytes for a default Unicode-capable font.
-   *   When provided, any text containing characters outside WinAnsiEncoding will
-   *   use this font automatically (CID/Type0 embedding with full Unicode support).
-   * @param zoom Scale factor applied to page dimensions (default 1).
+   * @param optionsOrPageWidth Options object, or page width in mm (positional form).
+   * @param pageHeight Page height in mm (positional form).
+   * @param customFonts Map of CSS font-family name → TTF file bytes (positional form).
+   * @param defaultFont TTF file bytes for a default Unicode-capable font (positional form).
+   * @param zoom Scale factor applied to page dimensions (positional form).
    */
-  constructor(pageWidth = 210, pageHeight = 297, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array, zoom = 1) {
-    this.pageWidthPt = pageWidth * zoom * 2.835;    // mm → pt
-    this.pageHeightPt = pageHeight * zoom * 2.835;
-    if (customFonts) {
-      for (const [family, data] of customFonts) {
-        this.customFonts.set(family.toLowerCase(), parseTTF(data));
+  constructor(optionsOrPageWidth?: PDFWriterOptions | number, pageHeight?: number, customFonts?: Map<string, Uint8Array>, defaultFont?: Uint8Array, zoom?: number) {
+    if (typeof optionsOrPageWidth === "object" && optionsOrPageWidth !== null && !(optionsOrPageWidth instanceof Map)) {
+      const opts = optionsOrPageWidth;
+      const z = opts.zoom ?? 1;
+      this.pageWidthPt = (opts.pageWidth ?? 210) * z * 2.835;
+      this.pageHeightPt = (opts.pageHeight ?? 297) * z * 2.835;
+      if (opts.customFonts) {
+        for (const [family, data] of opts.customFonts) {
+          this.customFonts.set(family.toLowerCase(), parseTTF(data));
+        }
       }
-    }
-    if (defaultFont) {
-      this.defaultFont = parseTTF(defaultFont);
+      if (opts.defaultFont) {
+        this.defaultFont = parseTTF(opts.defaultFont);
+      }
+    } else {
+      const pw = (optionsOrPageWidth as number | undefined) ?? 210;
+      const ph = pageHeight ?? 297;
+      const z = zoom ?? 1;
+      this.pageWidthPt = pw * z * 2.835;
+      this.pageHeightPt = ph * z * 2.835;
+      if (customFonts) {
+        for (const [family, data] of customFonts) {
+          this.customFonts.set(family.toLowerCase(), parseTTF(data));
+        }
+      }
+      if (defaultFont) {
+        this.defaultFont = parseTTF(defaultFont);
+      }
     }
   }
 
