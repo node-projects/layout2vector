@@ -308,6 +308,24 @@ function stripXmlPreamble(svg: string): string {
   return svg.replace(/<\?xml[^?]*\?>\s*/g, "").replace(/<!DOCTYPE[^>]*>\s*/g, "");
 }
 
+/**
+ * Check if an SVG element tree uses fill-rule:evenodd anywhere.
+ * Polyline sampling cannot represent sub-path boundaries needed for evenodd,
+ * so these SVGs must be rasterized instead of vectorized.
+ */
+function usesEvenOddFillRule(svgEl: Element): boolean {
+  // Check the SVG root's style attribute
+  const rootStyle = svgEl.getAttribute("style") ?? "";
+  if (/fill-rule\s*:\s*evenodd/i.test(rootStyle)) return true;
+  // Check descendant elements
+  for (const el of Array.from(svgEl.querySelectorAll("*"))) {
+    if (el.getAttribute("fill-rule") === "evenodd") return true;
+    const style = el.getAttribute("style") ?? "";
+    if (/fill-rule\s*:\s*evenodd/i.test(style)) return true;
+  }
+  return false;
+}
+
 /** Convert background SVG to vector geometry. */
 function convertBgSvgToGeometry(
   svgContent: string,
@@ -322,6 +340,8 @@ function convertBgSvgToGeometry(
 
   if (parsedSvg.tagName.toLowerCase() !== "svg") return [];
   if (parsedSvg.querySelector("parsererror")) return [];
+  // SVGs with fill-rule:evenodd can't be accurately represented as polylines
+  if (usesEvenOddFillRule(parsedSvg)) return [];
 
   const tempSvg = document.importNode(parsedSvg, true) as unknown as SVGSVGElement;
 
@@ -738,6 +758,8 @@ function convertSvgToGeometry(
   if (parsedSvg.tagName.toLowerCase() !== "svg") return [];
   // Check for parse errors
   if (parsedSvg.querySelector("parsererror")) return [];
+  // SVGs with fill-rule:evenodd can't be accurately represented as polylines
+  if (usesEvenOddFillRule(parsedSvg)) return [];
 
   // Import the parsed SVG into the main document
   const tempSvg = document.importNode(parsedSvg, true) as unknown as SVGSVGElement;
