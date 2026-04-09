@@ -106,6 +106,8 @@ export class HTMLWriter implements Writer<string> {
   private imageBasePath: string | undefined;
   private imageCounter = 0;
   private imageDedup = new Map<string, string>(); // dataUrl → filename
+  private cssImages: boolean;
+  private cssImageClasses = new Map<string, string>(); // dataUrl → CSS class name
 
   /**
    * Image files referenced by the HTML output.
@@ -122,11 +124,15 @@ export class HTMLWriter implements Writer<string> {
    *   instead of being embedded as data URLs. This path is prepended to
    *   image filenames in the HTML `src` attributes. The extracted images
    *   are collected in the `imageFiles` map.
+   * @param cssImages When true, identical images are deduplicated via shared
+   *   CSS classes using `background-image`. Each unique image gets a CSS class
+   *   and elements use `<div>` with that class instead of `<img>` tags.
    */
-  constructor(width: number, height: number, imageBasePath?: string) {
+  constructor(width: number, height: number, imageBasePath?: string, cssImages = false) {
     this.width = width;
     this.height = height;
     this.imageBasePath = imageBasePath;
+    this.cssImages = cssImages;
   }
 
   begin(): void {
@@ -134,6 +140,17 @@ export class HTMLWriter implements Writer<string> {
     this.imageCounter = 0;
     this.imageDedup.clear();
     this.imageFiles.clear();
+    this.cssImageClasses.clear();
+  }
+
+  /** Get or create a CSS class name for an image data URL, deduplicating identical images. */
+  private getCssImageClass(dataUrl: string): string {
+    const existing = this.cssImageClasses.get(dataUrl);
+    if (existing) return existing;
+    const idx = ++this.imageCounter;
+    const className = `ir-img-${idx}`;
+    this.cssImageClasses.set(dataUrl, className);
+    return className;
   }
 
   /** Get or create an external filename for an image data URL, deduplicating identical images. */
@@ -343,19 +360,33 @@ export class HTMLWriter implements Writer<string> {
     }
     if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
 
-    const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
-    this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style));
+    if (this.cssImages) {
+      const className = this.getCssImageClass(dataUrl);
+      this.elements.push(this.applyClip(`<div class="${className}" style="${css.join(";")}"></div>`, style));
+    } else {
+      const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
+      this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style));
+    }
   }
 
   end(): string {
     const content = this.elements.join("\n");
+    let cssImageRules = "";
+    if (this.cssImages && this.cssImageClasses.size > 0) {
+      const rules: string[] = [];
+      for (const [dataUrl, className] of this.cssImageClasses) {
+        const src = this.imageBasePath !== undefined ? this.getImageFilename(dataUrl) : dataUrl;
+        rules.push(`  .${className} { background-image: url("${escHtml(src)}"); background-size: 100% 100%; }`);
+      }
+      cssImageRules = "\n" + rules.join("\n");
+    }
     return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
   body { margin: 0; padding: 0; }
-  .ir-container { position: relative; width: ${n(this.width)}px; height: ${n(this.height)}px; overflow: hidden; }
+  .ir-container { position: relative; width: ${n(this.width)}px; height: ${n(this.height)}px; overflow: hidden; }${cssImageRules}
 </style>
 </head>
 <body>

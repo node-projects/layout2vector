@@ -84,7 +84,8 @@ export async function preloadImages(root: Element): Promise<void> {
   }
 
   // Pre-decode raster data-URL background images so rasterToRendered can draw
-  // them synchronously during extraction. Replace with JPEG for PDF compat.
+  // them synchronously during extraction. Replace with JPEG for PDF compat
+  // (skip very small images where JPEG compression introduces artifacts).
   const allElements = root.querySelectorAll("*");
   for (const el of Array.from(allElements)) {
     const bg = getComputedStyle(el).backgroundImage;
@@ -97,6 +98,9 @@ export async function preloadImages(root: Element): Promise<void> {
       const img = new Image();
       img.src = url;
       await img.decode();
+      // Skip JPEG conversion for very small images (JPEG block size is 8×8,
+      // converting smaller images produces severe artifacts)
+      if (img.naturalWidth <= 16 && img.naturalHeight <= 16) continue;
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth || 1;
       canvas.height = img.naturalHeight || 1;
@@ -211,11 +215,16 @@ export function extractBackgroundImage(
  * Returns a PNG data URL and optional raw RGB pixel data for lossless PDF embedding.
  */
 function rasterToRendered(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
-  if (dataUrl.startsWith("data:image/jpeg")) return { dataUrl };
   try {
     const img = new Image();
     img.src = dataUrl;
     if (!img.complete || img.naturalWidth === 0) return null;
+
+    // If JPEG and already at target size, use as-is (avoid re-encoding)
+    if (dataUrl.startsWith("data:image/jpeg") && img.naturalWidth === w && img.naturalHeight === h) {
+      return { dataUrl };
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = w || img.naturalWidth || 1;
     canvas.height = h || img.naturalHeight || 1;

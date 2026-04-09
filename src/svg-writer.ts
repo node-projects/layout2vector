@@ -265,6 +265,8 @@ export class SVGWriter implements Writer<string> {
   private elements: string[] = [];
   private defs: string[] = [];
   private defIdCounter = 0;
+  private clipCache = new Map<string, string>(); // clipKey → clip-path attribute string
+  private imageCache = new Map<string, string>(); // dataUrl → symbol def id
 
   constructor(width: number, height: number) {
     this.width = width;
@@ -275,20 +277,27 @@ export class SVGWriter implements Writer<string> {
     this.elements = [];
     this.defs = [];
     this.defIdCounter = 0;
+    this.clipCache.clear();
+    this.imageCache.clear();
   }
 
-  /** Create a clipPath def for clipBounds and return the attribute string. */
+  /** Create a clipPath def for clipBounds and return the attribute string, reusing identical clip paths. */
   private getClipAttr(style: Style): string {
     const clip = style.clipBounds;
     if (!clip) return "";
+    const r = clip.radius > 0 ? Math.min(clip.radius, clip.w / 2, clip.h / 2) : 0;
+    const key = `${n(clip.x)},${n(clip.y)},${n(clip.w)},${n(clip.h)},${n(r)}`;
+    const cached = this.clipCache.get(key);
+    if (cached) return cached;
     const id = `clip${++this.defIdCounter}`;
-    if (clip.radius > 0) {
-      const r = Math.min(clip.radius, clip.w / 2, clip.h / 2);
+    if (r > 0) {
       this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}" rx="${n(r)}" ry="${n(r)}"/></clipPath>`);
     } else {
       this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}"/></clipPath>`);
     }
-    return ` clip-path="url(#${id})"`;
+    const attr = ` clip-path="url(#${id})"`;
+    this.clipCache.set(key, attr);
+    return attr;
   }
 
   /** Push an element, wrapping it in a <g> with clip-path if clipBounds is set. */
@@ -476,6 +485,14 @@ export class SVGWriter implements Writer<string> {
     const angleDeg = angle * (180 / Math.PI);
     const opacity = (style.opacity !== undefined && style.opacity < 1) ? style.opacity : undefined;
 
+    // Check if this image data has been seen before (dedup via <symbol> + <use>)
+    let symbolId = this.imageCache.get(dataUrl);
+    if (!symbolId) {
+      symbolId = this.nextId("imgSym");
+      this.imageCache.set(dataUrl, symbolId);
+      this.defs.push(`<symbol id="${symbolId}" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="${escXml(dataUrl)}" width="1" height="1" preserveAspectRatio="none"/></symbol>`);
+    }
+
     const attrs: string[] = [];
     if (Math.abs(angleDeg) > 0.5) {
       attrs.push(`transform="translate(${n(quad[0].x)},${n(quad[0].y)}) rotate(${n(angleDeg)})"`);
@@ -484,11 +501,9 @@ export class SVGWriter implements Writer<string> {
       attrs.push(`x="${n(quad[0].x)}" y="${n(quad[0].y)}"`);
     }
     attrs.push(`width="${n(topEdge)}" height="${n(leftEdge)}"`);
-    attrs.push(`href="${escXml(dataUrl)}"`);
-    attrs.push(`preserveAspectRatio="none"`);
     if (opacity !== undefined) attrs.push(`opacity="${n(opacity)}"`);
 
-    this.pushElement(`<image ${attrs.join(" ")}/>`, style);
+    this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style);
   }
 
   end(): string {
