@@ -163,7 +163,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 2
   },
@@ -220,7 +227,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 2
   },
@@ -276,7 +290,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 4
   },
@@ -332,7 +353,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 5
   },
@@ -344,11 +372,11 @@
         "y": 73.19999694824219
       },
       {
-        "x": 262.9499969482422,
+        "x": 262.95001220703125,
         "y": 73.19999694824219
       },
       {
-        "x": 262.9499969482422,
+        "x": 262.95001220703125,
         "y": 89.19999694824219
       },
       {
@@ -389,7 +417,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 5
   },
@@ -446,7 +481,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 5
   },
@@ -503,7 +545,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 5
   },
@@ -559,7 +608,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 9
   },
@@ -615,7 +671,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 10
   },
@@ -672,7 +735,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 10
   },
@@ -728,7 +798,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 12
   },
@@ -785,7 +862,14 @@
       "boxShadow": "none",
       "transform": "none",
       "overflow": "visible",
-      "textOverflow": "clip"
+      "textOverflow": "clip",
+      "clipBounds": {
+        "x": 0,
+        "y": 0,
+        "w": 320,
+        "h": 227.1999969482422,
+        "radius": 12
+      }
     },
     "zIndex": 12
   },

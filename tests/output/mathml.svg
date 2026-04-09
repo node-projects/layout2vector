@@ -2,268 +2,270 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="1053" viewBox="0 0 1264 1053">
 <path d="M0,0 L1264,0 L1264,1052.85 L0,1052.85 Z" fill="none"/>
 <path d="M20,20 L1244,20 L1244,55 L20,55 Z" fill="none"/>
-<text x="20" y="54" fill="rgb(51, 51, 51)" font-weight="700" font-size="30px" font-family="Times New Roman">MathML Examples</text>
+<text x="20" y="22.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Times New Roman">MathML Examples</text>
 <path d="M20,79.9 L1244,79.9 L1244,175.85 L20,175.85 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,96.9 L1231,96.9 L1231,114.9 L33,114.9 Z" fill="none"/>
-<text x="33" y="114.4" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Simple Fraction</text>
+<text x="33" y="97.9" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Simple Fraction</text>
 <path d="M33,142.88 L44.3,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M70.5,142.88 L81.8,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M110.47,142.88 L121.77,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M33,130.78 L121.77,130.78 L121.77,152.78 L33,152.78 Z" fill="none"/>
 <path d="M33,122.9 L44.3,122.9 L44.3,162.85 L33,162.85 Z" fill="none"/>
 <path d="M34,122.9 L43.3,122.9 L43.3,138.9 L34,138.9 Z" fill="none"/>
-<text x="34.2" y="138.9" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="34.2" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M34,146.85 L43.3,146.85 L43.3,162.85 L34,162.85 Z" fill="none"/>
-<text x="34.2" y="162.85" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="34.2" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M44.3,130.78 L70.5,130.78 L70.5,152.78 L44.3,152.78 Z" fill="none"/>
-<text x="50.42" y="152.78" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">+</text>
+<text x="50.42" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
 <path d="M70.5,122.9 L81.8,122.9 L81.8,162.85 L70.5,162.85 Z" fill="none"/>
 <path d="M71.5,122.9 L80.8,122.9 L80.8,138.9 L71.5,138.9 Z" fill="none"/>
-<text x="71.7" y="138.9" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">3</text>
+<text x="71.7" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">3</text>
 <path d="M71.5,146.85 L80.8,146.85 L80.8,162.85 L71.5,162.85 Z" fill="none"/>
-<text x="71.7" y="162.85" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">4</text>
+<text x="71.7" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <path d="M81.8,130.78 L110.47,130.78 L110.47,152.78 L81.8,152.78 Z" fill="none"/>
-<text x="87.92" y="152.78" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="87.92" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M110.47,122.9 L121.77,122.9 L121.77,162.85 L110.47,162.85 Z" fill="none"/>
 <path d="M111.47,122.9 L120.77,122.9 L120.77,138.9 L111.47,138.9 Z" fill="none"/>
-<text x="111.67" y="138.9" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">5</text>
+<text x="111.67" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">5</text>
 <path d="M111.47,146.85 L120.77,146.85 L120.77,162.85 L111.47,162.85 Z" fill="none"/>
-<text x="111.67" y="162.85" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">4</text>
+<text x="111.67" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <path d="M20,190.85 L1244,190.85 L1244,293.98 L20,293.98 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,207.85 L1231,207.85 L1231,225.85 L33,225.85 Z" fill="none"/>
-<text x="33" y="225.35" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Quadratic Formula</text>
+<text x="33" y="208.85" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Quadratic Formula</text>
 <path d="M73.38,261.01 L185.85,261.01" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M123.18,233.85 L184.85,233.85" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
+<path d="M113.04,246.6 L116.02,257.03 L123.18,233.85" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M33,248.92 L185.85,248.92 L185.85,270.92 L33,270.92 Z" fill="none"/>
 <path d="M33,248.92 L44.72,248.92 L44.72,270.92 L33,270.92 Z" fill="none"/>
-<text x="33" y="270.92" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">x</text>
+<text x="33" y="248.92" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">x</text>
 <path d="M44.72,248.92 L73.38,248.92 L73.38,270.92 L44.72,270.92 Z" fill="none"/>
-<text x="50.83" y="270.92" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="50.83" y="248.92" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M73.38,233.85 L185.85,233.85 L185.85,280.98 L73.38,280.98 Z" fill="none"/>
 <path d="M74.38,233.85 L184.85,233.85 L184.85,257.03 L74.38,257.03 Z" fill="none"/>
 <path d="M74.38,241.03 L86.07,241.03 L86.07,257.03 L74.38,257.03 Z" fill="none"/>
-<text x="76.62" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">−</text>
+<text x="76.62" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
 <path d="M86.07,241.03 L95.68,241.03 L95.68,257.03 L86.07,257.03 Z" fill="none"/>
-<text x="86.07" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">b</text>
+<text x="86.07" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
 <path d="M95.68,241.03 L111.25,241.03 L111.25,257.03 L95.68,257.03 Z" fill="none"/>
-<text x="97.92" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">±</text>
+<text x="97.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">±</text>
 <path d="M111.25,233.85 L184.85,233.85 L184.85,257.03 L111.25,257.03 Z" fill="none"/>
 <path d="M123.18,235.93 L141.65,235.93 L141.65,257.03 L123.18,257.03 Z" fill="none"/>
 <path d="M123.18,241.03 L132.8,241.03 L132.8,257.03 L123.18,257.03 Z" fill="none"/>
-<text x="123.18" y="257.55" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">b</text>
+<text x="123.18" y="241.55" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
 <path d="M133.8,235.93 L141.65,235.93 L141.65,248.93 L133.8,248.93 Z" fill="none"/>
-<text x="133.8" y="249.87" fill="rgb(34, 34, 34)" font-size="13px" font-family="serif">2</text>
+<text x="133.8" y="236.87" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
 <path d="M141.65,241.03 L156.9,241.03 L156.9,257.03 L141.65,257.03 Z" fill="none"/>
-<text x="143.88" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">−</text>
+<text x="143.88" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
 <path d="M156.9,241.03 L166.2,241.03 L166.2,257.03 L156.9,257.03 Z" fill="none"/>
-<text x="156.9" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">4</text>
+<text x="156.9" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <path d="M166.2,241.03 L176.23,241.03 L176.23,257.03 L166.2,257.03 Z" fill="none"/>
-<text x="166.2" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">a</text>
+<text x="166.2" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">a</text>
 <path d="M176.23,241.03 L184.85,241.03 L184.85,257.03 L176.23,257.03 Z" fill="none"/>
-<text x="178.92" y="257.03" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">c</text>
+<text x="178.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">c</text>
 <path d="M119.95,264.98 L139.28,264.98 L139.28,280.98 L119.95,280.98 Z" fill="none"/>
 <path d="M119.95,264.98 L129.25,264.98 L129.25,280.98 L119.95,280.98 Z" fill="none"/>
-<text x="120.15" y="280.98" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="120.15" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M129.25,264.98 L139.28,264.98 L139.28,280.98 L129.25,280.98 Z" fill="none"/>
-<text x="130.33" y="280.98" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">a</text>
+<text x="130.33" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">a</text>
 <path d="M20,308.98 L1244,308.98 L1244,405.73 L20,405.73 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,325.98 L1231,325.98 L1231,343.98 L33,343.98 Z" fill="none"/>
-<text x="33" y="343.48" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Summation</text>
+<text x="33" y="326.98" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Summation</text>
 <path d="M134.25,372.72 L252.62,372.72" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M33,360.67 L252.62,360.67 L252.62,382.67 L33,382.67 Z" fill="none"/>
 <path d="M33,355.22 L88.32,355.22 L88.32,389.73 L33,389.73 Z" fill="none"/>
 <path d="M36.67,360.67 L52.25,360.67 L52.25,382.67 L36.67,382.67 Z" fill="none"/>
-<text x="47.02" y="389.73" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">∑</text>
+<text x="47.02" y="367.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">∑</text>
 <path d="M52.25,373.73 L83.65,373.73 L83.65,389.73 L52.25,389.73 Z" fill="none"/>
 <path d="M52.25,373.73 L57.88,373.73 L57.88,389.73 L52.25,389.73 Z" fill="none"/>
-<text x="52.25" y="389.73" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">i</text>
+<text x="52.25" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">i</text>
 <path d="M57.88,373.73 L74.35,373.73 L74.35,389.73 L57.88,389.73 Z" fill="none"/>
-<text x="60.12" y="389.73" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">=</text>
+<text x="60.12" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">=</text>
 <path d="M74.35,373.73 L83.65,373.73 L83.65,389.73 L74.35,389.73 Z" fill="none"/>
-<text x="74.35" y="389.73" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="74.35" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M53.25,355.22 L63.68,355.22 L63.68,371.22 L53.25,371.22 Z" fill="none"/>
-<text x="53.25" y="371.22" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">n</text>
+<text x="53.25" y="355.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
 <path d="M88.32,356.12 L105.58,356.12 L105.58,382.67 L88.32,382.67 Z" fill="none"/>
 <path d="M88.32,360.67 L95.28,360.67 L95.28,382.67 L88.32,382.67 Z" fill="none"/>
-<text x="88.32" y="382.67" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">i</text>
+<text x="88.32" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">i</text>
 <path d="M96.28,356.12 L105.58,356.12 L105.58,372.12 L96.28,372.12 Z" fill="none"/>
-<text x="96.28" y="372.12" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="96.28" y="356.12" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M105.58,360.67 L134.25,360.67 L134.25,382.67 L105.58,382.67 Z" fill="none"/>
-<text x="111.7" y="382.67" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="111.7" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M134.25,351.98 L252.62,351.98 L252.62,392.73 L134.25,392.73 Z" fill="none"/>
 <path d="M135.25,351.98 L251.62,351.98 L251.62,368.7 L135.25,368.7 Z" fill="none"/>
 <path d="M135.25,352.7 L145.68,352.7 L145.68,368.7 L135.25,368.7 Z" fill="none"/>
-<text x="135.25" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">n</text>
+<text x="135.25" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
 <path d="M145.68,351.98 L152.35,351.98 L152.35,368.7 L145.68,368.7 Z" fill="none"/>
-<text x="147.92" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">(</text>
+<text x="147.92" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
 <path d="M152.35,352.7 L162.78,352.7 L162.78,368.7 L152.35,368.7 Z" fill="none"/>
-<text x="152.35" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">n</text>
+<text x="152.35" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
 <path d="M162.78,352.7 L178.03,352.7 L178.03,368.7 L162.78,368.7 Z" fill="none"/>
-<text x="165.02" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">+</text>
+<text x="165.02" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
 <path d="M178.03,352.7 L187.33,352.7 L187.33,368.7 L178.03,368.7 Z" fill="none"/>
-<text x="178.03" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="178.03" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M187.33,351.98 L194,351.98 L194,368.7 L187.33,368.7 Z" fill="none"/>
-<text x="189.57" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">)</text>
+<text x="189.57" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
 <path d="M194,351.98 L200.67,351.98 L200.67,368.7 L194,368.7 Z" fill="none"/>
-<text x="196.23" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">(</text>
+<text x="196.23" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
 <path d="M200.67,352.7 L209.97,352.7 L209.97,368.7 L200.67,368.7 Z" fill="none"/>
-<text x="200.67" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="200.67" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M209.97,352.7 L220.4,352.7 L220.4,368.7 L209.97,368.7 Z" fill="none"/>
-<text x="209.97" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">n</text>
+<text x="209.97" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
 <path d="M220.4,352.7 L235.65,352.7 L235.65,368.7 L220.4,368.7 Z" fill="none"/>
-<text x="222.63" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">+</text>
+<text x="222.63" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
 <path d="M235.65,352.7 L244.95,352.7 L244.95,368.7 L235.65,368.7 Z" fill="none"/>
-<text x="235.65" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="235.65" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M244.95,351.98 L251.62,351.98 L251.62,368.7 L244.95,368.7 Z" fill="none"/>
-<text x="247.18" y="368.7" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">)</text>
+<text x="247.18" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
 <path d="M188.78,376.73 L198.08,376.73 L198.08,392.73 L188.78,392.73 Z" fill="none"/>
-<text x="188.98" y="392.73" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">6</text>
+<text x="188.98" y="376.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">6</text>
 <path d="M20,420.73 L1244,420.73 L1244,575.27 L20,575.27 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,437.73 L1231,437.73 L1231,455.73 L33,455.73 Z" fill="none"/>
-<text x="33" y="455.23" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Matrix</text>
+<text x="33" y="438.73" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Matrix</text>
+<path d="M37.63,465.97 L33,465.97 L33,560.03 L37.63,560.03" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
+<path d="M118.65,465.97 L123.28,465.97 L123.28,560.03 L118.65,560.03" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
 <path d="M33,503.28 L123.28,503.28 L123.28,525.28 L33,525.28 Z" fill="none"/>
 <path d="M33,463.73 L123.28,463.73 L123.28,562.27 L33,562.27 Z" fill="none"/>
 <path d="M33,465.97 L42.27,465.97 L42.27,560.03 L33,560.03 Z" fill="none"/>
-<text x="39.12" y="525.28" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">[</text>
 <path d="M42.27,463.73 L114.02,463.73 L114.02,562.27 L42.27,562.27 Z" fill="none"/>
 <path d="M42.27,463.73 L114.02,463.73 L114.02,494.87 L42.27,494.87 Z" fill="none"/>
 <path d="M42.27,463.73 L63.25,463.73 L63.25,494.87 L42.27,494.87 Z" fill="none"/>
 <path d="M42.27,465.73 L54.45,465.73 L54.45,487.73 L42.27,487.73 Z" fill="none"/>
-<text x="42.27" y="487.73" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">1</text>
+<text x="42.27" y="465.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M63.25,463.73 L93.03,463.73 L93.03,494.87 L63.25,494.87 Z" fill="none"/>
 <path d="M72.05,465.73 L84.23,465.73 L84.23,487.73 L72.05,487.73 Z" fill="none"/>
-<text x="72.05" y="487.73" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="72.05" y="465.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M93.03,463.73 L114.02,463.73 L114.02,494.87 L93.03,494.87 Z" fill="none"/>
 <path d="M101.83,465.73 L114.02,465.73 L114.02,487.73 L101.83,487.73 Z" fill="none"/>
-<text x="101.83" y="487.73" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="101.83" y="465.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M42.27,494.87 L114.02,494.87 L114.02,531.13 L42.27,531.13 Z" fill="none"/>
 <path d="M42.27,494.87 L63.25,494.87 L63.25,531.13 L42.27,531.13 Z" fill="none"/>
 <path d="M42.27,502 L54.45,502 L54.45,524 L42.27,524 Z" fill="none"/>
-<text x="42.27" y="524" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="42.27" y="502" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M63.25,494.87 L93.03,494.87 L93.03,531.13 L63.25,531.13 Z" fill="none"/>
 <path d="M72.05,502 L84.23,502 L84.23,524 L72.05,524 Z" fill="none"/>
-<text x="72.05" y="524" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">1</text>
+<text x="72.05" y="502" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M93.03,494.87 L114.02,494.87 L114.02,531.13 L93.03,531.13 Z" fill="none"/>
 <path d="M101.83,502 L114.02,502 L114.02,524 L101.83,524 Z" fill="none"/>
-<text x="101.83" y="524" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="101.83" y="502" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M42.27,531.13 L114.02,531.13 L114.02,562.27 L42.27,562.27 Z" fill="none"/>
 <path d="M42.27,531.13 L63.25,531.13 L63.25,562.27 L42.27,562.27 Z" fill="none"/>
 <path d="M42.27,538.27 L54.45,538.27 L54.45,560.27 L42.27,560.27 Z" fill="none"/>
-<text x="42.27" y="560.27" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="42.27" y="538.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M63.25,531.13 L93.03,531.13 L93.03,562.27 L63.25,562.27 Z" fill="none"/>
 <path d="M72.05,538.27 L84.23,538.27 L84.23,560.27 L72.05,560.27 Z" fill="none"/>
-<text x="72.05" y="560.27" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">0</text>
+<text x="72.05" y="538.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">0</text>
 <path d="M93.03,531.13 L114.02,531.13 L114.02,562.27 L93.03,562.27 Z" fill="none"/>
 <path d="M101.83,538.27 L114.02,538.27 L114.02,560.27 L101.83,560.27 Z" fill="none"/>
-<text x="101.83" y="560.27" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">1</text>
+<text x="101.83" y="538.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M114.02,465.97 L123.28,465.97 L123.28,560.03 L114.02,560.03 Z" fill="none"/>
-<text x="120.13" y="525.28" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">]</text>
 <path d="M20,590.27 L1244,590.27 L1244,684.6 L20,684.6 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,607.27 L1231,607.27 L1231,625.27 L33,625.27 Z" fill="none"/>
-<text x="33" y="624.77" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Integral</text>
+<text x="33" y="608.27" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Integral</text>
 <path d="M33,642.63 L167.5,642.63 L167.5,664.63 L33,664.63 Z" fill="none"/>
 <path d="M33,633.27 L69.08,633.27 L69.08,671.6 L33,671.6 Z" fill="none"/>
 <path d="M36.67,640.33 L49.57,640.33 L49.57,664.63 L36.67,664.63 Z" fill="none"/>
-<text x="39.12" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">∫</text>
+<text x="39.12" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">∫</text>
 <path d="M49.57,655.6 L58.87,655.6 L58.87,671.6 L49.57,671.6 Z" fill="none"/>
-<text x="49.57" y="671.6" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">0</text>
+<text x="49.57" y="655.6" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">0</text>
 <path d="M50.57,633.27 L65.42,633.27 L65.42,649.27 L50.57,649.27 Z" fill="none"/>
-<text x="50.57" y="649.27" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">∞</text>
+<text x="50.57" y="633.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">∞</text>
 <path d="M69.08,639.58 L102.18,639.58 L102.18,664.63 L69.08,664.63 Z" fill="none"/>
 <path d="M69.08,642.63 L80,642.63 L80,664.63 L69.08,664.63 Z" fill="none"/>
-<text x="69.08" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">e</text>
+<text x="69.08" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">e</text>
 <path d="M81,639.58 L102.18,639.58 L102.18,655.58 L81,655.58 Z" fill="none"/>
 <path d="M81,639.58 L92.68,639.58 L92.68,655.58 L81,655.58 Z" fill="none"/>
-<text x="83.23" y="655.58" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">−</text>
+<text x="83.23" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
 <path d="M92.68,639.58 L102.18,639.58 L102.18,655.58 L92.68,655.58 Z" fill="none"/>
-<text x="92.68" y="655.58" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">x</text>
+<text x="92.68" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">x</text>
 <path d="M102.18,642.63 L114.93,642.63 L114.93,664.63 L102.18,664.63 Z" fill="none"/>
-<text x="105.85" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">d</text>
+<text x="105.85" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">d</text>
 <path d="M114.93,642.63 L126.65,642.63 L126.65,664.63 L114.93,664.63 Z" fill="none"/>
-<text x="118.6" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">x</text>
+<text x="118.6" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">x</text>
 <path d="M126.65,642.63 L155.32,642.63 L155.32,664.63 L126.65,664.63 Z" fill="none"/>
-<text x="132.77" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="132.77" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M155.32,642.63 L167.5,642.63 L167.5,664.63 L155.32,664.63 Z" fill="none"/>
-<text x="155.32" y="664.63" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">1</text>
+<text x="155.32" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M20,699.6 L1244,699.6 L1244,786.52 L20,786.52 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,716.6 L1231,716.6 L1231,734.6 L33,734.6 Z" fill="none"/>
-<text x="33" y="734.1" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Superscript &amp; Subscript</text>
+<text x="33" y="717.6" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Superscript &amp; Subscript</text>
 <path d="M33,748.03 L153,748.03 L153,770.03 L33,770.03 Z" fill="none"/>
 <path d="M33,744.98 L55.55,744.98 L55.55,770.03 L33,770.03 Z" fill="none"/>
 <path d="M33,748.03 L45.25,748.03 L45.25,770.03 L33,770.03 Z" fill="none"/>
-<text x="33" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">a</text>
+<text x="33" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">a</text>
 <path d="M46.25,744.98 L55.55,744.98 L55.55,760.98 L46.25,760.98 Z" fill="none"/>
-<text x="46.25" y="760.98" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="46.25" y="744.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M55.55,748.03 L81.75,748.03 L81.75,770.03 L55.55,770.03 Z" fill="none"/>
-<text x="61.67" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">+</text>
+<text x="61.67" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
 <path d="M81.75,742.6 L103.92,742.6 L103.92,770.03 L81.75,770.03 Z" fill="none"/>
 <path d="M81.75,748.03 L93.62,748.03 L93.62,770.03 L81.75,770.03 Z" fill="none"/>
-<text x="81.75" y="770.05" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">b</text>
+<text x="81.75" y="748.05" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
 <path d="M94.62,742.6 L103.92,742.6 L103.92,758.6 L94.62,758.6 Z" fill="none"/>
-<text x="94.62" y="758.6" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="94.62" y="742.6" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M103.92,748.03 L132.58,748.03 L132.58,770.03 L103.92,770.03 Z" fill="none"/>
-<text x="110.03" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="110.03" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M132.58,744.98 L153,744.98 L153,770.03 L132.58,770.03 Z" fill="none"/>
 <path d="M132.58,748.03 L142.7,748.03 L142.7,770.03 L132.58,770.03 Z" fill="none"/>
-<text x="132.58" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">c</text>
+<text x="132.58" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">c</text>
 <path d="M143.7,744.98 L153,744.98 L153,760.98 L143.7,760.98 Z" fill="none"/>
-<text x="143.7" y="760.98" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="143.7" y="744.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M198,748.03 L239.2,748.03 L239.2,770.03 L198,770.03 Z" fill="none"/>
 <path d="M198,748.03 L224.32,748.03 L224.32,773.52 L198,773.52 Z" fill="none"/>
 <path d="M198,748.03 L214.02,748.03 L214.02,770.03 L198,770.03 Z" fill="none"/>
-<text x="198" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">H</text>
+<text x="198" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">H</text>
 <path d="M214.02,757.52 L223.32,757.52 L223.32,773.52 L214.02,773.52 Z" fill="none"/>
-<text x="214.02" y="773.52" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="214.02" y="757.52" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M224.32,748.03 L239.2,748.03 L239.2,770.03 L224.32,770.03 Z" fill="none"/>
-<text x="227.98" y="770.03" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">O</text>
+<text x="227.98" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">O</text>
 <path d="M20,801.52 L1244,801.52 L1244,889.98 L20,889.98 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,818.52 L1231,818.52 L1231,836.52 L33,836.52 Z" fill="none"/>
-<text x="33" y="836.02" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Square Root</text>
-<path d="M49.33,844.52 L120.25,844.52" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
+<text x="33" y="819.52" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Square Root</text>
+<path d="M49.33,844.52 L120.25,844.52" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
+<path d="M35.45,861.27 L39.53,874.98 L49.33,844.52" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
 <path d="M33,852.98 L159.03,852.98 L159.03,874.98 L33,874.98 Z" fill="none"/>
 <path d="M33,844.52 L120.25,844.52 L120.25,874.98 L33,874.98 Z" fill="none"/>
 <path d="M49.33,851.38 L71.88,851.38 L71.88,874.98 L49.33,874.98 Z" fill="none"/>
 <path d="M49.33,852.98 L61.58,852.98 L61.58,874.98 L49.33,874.98 Z" fill="none"/>
-<text x="49.33" y="874.98" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">a</text>
+<text x="49.33" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">a</text>
 <path d="M62.58,851.38 L71.88,851.38 L71.88,867.38 L62.58,867.38 Z" fill="none"/>
-<text x="62.58" y="867.38" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="62.58" y="851.38" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M71.88,852.98 L98.08,852.98 L98.08,874.98 L71.88,874.98 Z" fill="none"/>
-<text x="78" y="874.98" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">+</text>
+<text x="78" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
 <path d="M98.08,847.55 L120.25,847.55 L120.25,874.98 L98.08,874.98 Z" fill="none"/>
 <path d="M98.08,852.98 L109.95,852.98 L109.95,874.98 L98.08,874.98 Z" fill="none"/>
-<text x="98.08" y="875" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">b</text>
+<text x="98.08" y="853" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
 <path d="M110.95,847.55 L120.25,847.55 L120.25,863.55 L110.95,863.55 Z" fill="none"/>
-<text x="110.95" y="864.23" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">2</text>
+<text x="110.95" y="848.23" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <path d="M120.25,852.98 L148.92,852.98 L148.92,874.98 L120.25,874.98 Z" fill="none"/>
-<text x="126.37" y="874.98" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">=</text>
+<text x="126.37" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <path d="M148.92,852.98 L159.03,852.98 L159.03,874.98 L148.92,874.98 Z" fill="none"/>
-<text x="148.92" y="874.98" fill="rgb(34, 34, 34)" font-size="22px" font-family="serif">c</text>
+<text x="148.92" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">c</text>
 <path d="M20,904.98 L1244,904.98 L1244,1017.85 L20,1017.85 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <path d="M33,921.98 L1231,921.98 L1231,939.98 L33,939.98 Z" fill="none"/>
-<text x="33" y="939.48" fill="rgb(85, 85, 85)" font-weight="700" font-size="16px" font-family="Times New Roman">Nested Fractions</text>
+<text x="33" y="922.98" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Nested Fractions</text>
 <path d="M33,964.83 L90.55,964.83" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M58.55,979.58 L89.55,979.58" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M80.2,992.67 L88.55,992.67" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M33,955.87 L90.55,955.87 L90.55,977.87 L33,977.87 Z" fill="none"/>
 <path d="M33,947.98 L90.55,947.98 L90.55,1004.85 L33,1004.85 Z" fill="none"/>
 <path d="M57.12,947.98 L66.42,947.98 L66.42,963.98 L57.12,963.98 Z" fill="none"/>
-<text x="57.32" y="963.98" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="57.32" y="947.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M34,965.67 L89.55,965.67 L89.55,1004.85 L34,1004.85 Z" fill="none"/>
 <path d="M34,973.08 L43.3,973.08 L43.3,989.08 L34,989.08 Z" fill="none"/>
-<text x="34" y="989.08" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">1</text>
+<text x="34" y="973.08" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <path d="M43.3,973.08 L58.55,973.08 L58.55,989.08 L43.3,989.08 Z" fill="none"/>
-<text x="45.53" y="989.08" fill="rgb(34, 34, 34)" font-size="16px" font-family="serif">+</text>
+<text x="45.53" y="973.08" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
 <path d="M58.55,965.67 L89.55,965.67 L89.55,1004.85 L58.55,1004.85 Z" fill="none"/>
 <path d="M70.12,965.67 L77.97,965.67 L77.97,978.67 L70.12,978.67 Z" fill="none"/>
-<text x="70.38" y="979.65" fill="rgb(34, 34, 34)" font-size="13px" font-family="serif">1</text>
+<text x="70.38" y="966.65" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">1</text>
 <path d="M59.55,980.48 L88.55,980.48 L88.55,1004.85 L59.55,1004.85 Z" fill="none"/>
 <path d="M59.55,986.22 L67.4,986.22 L67.4,999.22 L59.55,999.22 Z" fill="none"/>
-<text x="59.55" y="999.22" fill="rgb(34, 34, 34)" font-size="13px" font-family="serif">2</text>
+<text x="59.55" y="986.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
 <path d="M67.4,986.22 L80.2,986.22 L80.2,999.22 L67.4,999.22 Z" fill="none"/>
-<text x="69.23" y="999.22" fill="rgb(34, 34, 34)" font-size="13px" font-family="serif">+</text>
+<text x="69.23" y="986.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">+</text>
 <path d="M80.2,980.48 L88.55,980.48 L88.55,1004.85 L80.2,1004.85 Z" fill="none"/>
 <path d="M81.2,980.48 L87.55,980.48 L87.55,990.48 L81.2,990.48 Z" fill="none"/>
-<text x="81.42" y="991.27" fill="rgb(34, 34, 34)" font-size="10px" font-family="serif">1</text>
+<text x="81.42" y="981.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">1</text>
 <path d="M81.2,994.85 L87.55,994.85 L87.55,1004.85 L81.2,1004.85 Z" fill="none"/>
-<text x="81.42" y="1004.85" fill="rgb(34, 34, 34)" font-size="10px" font-family="serif">3</text>
+<text x="81.42" y="994.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">3</text>
 </svg>

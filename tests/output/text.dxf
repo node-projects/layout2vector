@@ -27,7 +27,7 @@ $VIEWCTR
 10
 455.7916564941406
 20
-198.25
+203
 0
 ENDSEC
 0
@@ -77,7 +77,7 @@ AcDbViewportTableRecord
 12
 455.7916564941406
 22
-198.25
+203
 13
 0
 23
@@ -103,7 +103,7 @@ AcDbViewportTableRecord
 37
 0
 40
-594.5
+594
 41
 2
 42
@@ -603,11 +603,11 @@ AcDbText
 10
 0
 20
-395.5
+400
 30
 0
 40
-17
+16
 1
 Alte Not-Halt Mobile Panel Steckplatz
 7
@@ -631,11 +631,11 @@ AcDbText
 10
 0
 20
-359.5
+364
 30
 0
 40
-17
+16
 1
 und Fördererstich AE11/AE12.
 7
@@ -659,11 +659,11 @@ AcDbText
 10
 0
 20
-323.5
+328
 30
 0
 40
-17
+16
 1
 Am Pnoz gebrückt. Im Programm nur noch für
 7
@@ -687,11 +687,11 @@ AcDbText
 10
 0
 20
-287.5
+292
 30
 0
 40
-17
+16
 1
 Diagnose, falls sie mal ausgelöst werden!
 7
@@ -759,11 +759,11 @@ AcDbText
 10
 766
 20
-97
+102
 30
 0
 40
-16
+12
 1
 Alte Not-Halt Mobile Panel Steckplatz
 7
@@ -787,11 +787,11 @@ AcDbText
 10
 766
 20
-65
+70
 30
 0
 40
-16
+12
 1
 und Fördererstich AE11/AE12.
 7
@@ -815,11 +815,11 @@ AcDbText
 10
 766
 20
-33
+38
 30
 0
 40
-16
+12
 1
 Am Pnoz gebrückt. Im Programm nur noch für
 7
@@ -843,11 +843,11 @@ AcDbText
 10
 766
 20
-1
+6
 30
 0
 40
-16
+12
 1
 Diagnose, falls sie mal ausgelöst werden!
 7

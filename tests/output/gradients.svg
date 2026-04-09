@@ -13,21 +13,21 @@
 </defs>
 <path d="M0,0 L1240,0 L1240,456.5 L0,456.5 Z" fill="none"/>
 <path d="M0,0 L1240,0 L1240,21 L0,21 Z" fill="none"/>
-<text x="0" y="20.5" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Gradients</text>
+<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Gradients</text>
 <rect x="10" y="176.5" width="250" height="80" rx="8" ry="8" fill="url(#lg1)"/>
-<text x="20" y="204" fill="rgb(255, 255, 255)" font-weight="700" font-size="16px" font-family="Arial">Linear gradient</text>
+<text x="20" y="187.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Linear gradient</text>
 <rect x="284.45" y="41" width="150" height="150" rx="75" ry="75" fill="url(#rg2)"/>
 <rect x="458.9" y="41" width="150" height="150" rx="75" ry="75" fill="rgb(255, 0, 0)"/>
 <path d="M633.35,176.5 L883.35,176.5 L883.35,256.5 L633.35,256.5 Z" fill="url(#lg3)"/>
-<text x="643.35" y="204" fill="rgb(255, 255, 255)" font-size="16px" font-family="Arial">Repeating stripes</text>
+<text x="643.35" y="187.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Repeating stripes</text>
 <path d="M907.8,175.5 L1207.8,175.5 L1207.8,275.5 L907.8,275.5 Z" fill="url(#lg4)" stroke="rgb(204, 204, 204)" stroke-width="1"/>
-<text x="918.8" y="204" fill="rgb(0, 0, 0)" font-size="16px" font-family="Arial">Multiple backgrounds</text>
+<text x="918.8" y="187.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiple backgrounds</text>
 <path d="M0,305.5 L1240,305.5 L1240,326.5 L0,326.5 Z" fill="none"/>
-<text x="0" y="326" fill="rgb(0, 0, 0)" font-weight="700" font-size="18px" font-family="Arial">Box Shadows</text>
+<text x="0" y="307" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Box Shadows</text>
 <rect x="20" y="356.5" width="200" height="80" rx="8" ry="8" fill="rgb(255, 255, 255)" filter="url(#ds5)"/>
-<text x="30" y="384" fill="rgb(0, 0, 0)" font-size="16px" font-family="Arial">Drop shadow</text>
+<text x="30" y="367.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Drop shadow</text>
 <rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="rgb(236, 239, 241)"/>
 <rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic6)" filter="url(#is7)"/>
 <rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic8)" filter="url(#is9)"/>
-<text x="274.45" y="384" fill="rgb(0, 0, 0)" font-size="16px" font-family="Arial">Inset shadow</text>
+<text x="274.45" y="367.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Inset shadow</text>
 </svg>

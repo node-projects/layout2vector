@@ -9,7 +9,7 @@ import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { setupPage } from "../helpers.js";
 import { DXFWriter } from "../../src/dxf-writer.js";
-import { PDFWriter } from "../../src/pdflite-writer.js";
+import { PDFWriter } from "../../src/pdf-writer.js";
 import { SVGWriter } from "../../src/svg-writer.js";
 import { HTMLWriter } from "../../src/html-writer.js";
 import { renderIR } from "../../src/pipeline.js";
@@ -130,6 +130,12 @@ for (const demoFile of demoFiles) {
       }, dataUrlMap);
     }
 
+    // Pre-decode images (data URL images may not be decoded after initial load)
+    await page.evaluate(async () => {
+      const root = document.getElementById("root") ?? document.body;
+      await (window as any).__HC.preloadImages(root);
+    });
+
     // Extract IR in the browser
     const ir: IRNode[] = await page.evaluate(() => {
       const root = document.getElementById("root") ?? document.body;
@@ -139,7 +145,6 @@ for (const demoFile of demoFiles) {
         includeImages: true,
       });
     });
-
     expect(ir.length).toBeGreaterThan(0);
 
     // Dump IR for specific demos
@@ -198,6 +203,20 @@ for (const demoFile of demoFiles) {
       if (fs.existsSync(fp)) {
         defaultFont = new Uint8Array(fs.readFileSync(fp));
         break;
+      }
+    }
+    // Load symbol/fallback fonts for characters not in the default font (e.g. ⚖ U+2696)
+    const symbolFontPaths = [
+      "C:\\Windows\\Fonts\\seguisym.ttf",    // Segoe UI Symbol
+      "C:\\Windows\\Fonts\\symbol.ttf",       // Symbol
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ];
+    for (const fp of symbolFontPaths) {
+      if (fs.existsSync(fp)) {
+        const fontFamily = path.basename(fp, path.extname(fp));
+        if (!customFonts.has(fontFamily)) {
+          customFonts.set(fontFamily, new Uint8Array(fs.readFileSync(fp)));
+        }
       }
     }
     const pdfWriter = new PDFWriter(viewport.width * 0.2646, viewport.height * 0.2646, customFonts.size > 0 ? customFonts : undefined, defaultFont);
