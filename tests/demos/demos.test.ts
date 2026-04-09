@@ -196,6 +196,7 @@ for (const demoFile of demoFiles) {
     const defaultFontPaths = [
       "C:\\Windows\\Fonts\\segoeui.ttf",
       "C:\\Windows\\Fonts\\arial.ttf",
+      "C:\\Windows\\Fonts\\wingding.ttf",
       "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
       "/System/Library/Fonts/Helvetica.ttc",
     ];
