@@ -106,6 +106,13 @@ export type Options = {
    * Defaults to 1 (no scaling).
    */
   zoom?: number;
+  /**
+   * Scale factor for rasterizing embedded images.
+   * Higher values produce sharper images when zooming in on the exported file.
+   * For example, `imageScale: 2` renders embedded PNGs at 2× their display size.
+   * Defaults to 1 (images rendered at display resolution).
+   */
+  imageScale?: number;
 };
 
 /** Writer interface for output generation. */

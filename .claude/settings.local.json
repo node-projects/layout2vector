@@ -11,7 +11,9 @@
       "Bash(node:*)",
       "Bash(find /c/Data/Git/node-projects/htmlConverter/tests -name \"*.ts\" -exec grep -l \"text\\\\|Text\" {} \\\\;)",
       "Bash(node_modules/.bin/tsc:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(ls -lh /c/Data/Git/node-projects/htmlConverter/tests/output/*.dwg)",
+      "Bash(awk '{print $9, $5}')"
     ]
   }
 }

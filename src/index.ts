@@ -34,7 +34,10 @@ export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./mathml-e
 
 // Writers
 export { DXFWriter, type DXFWriterOptions } from "./dxf-writer.js";
+export { EMFWriter, type EMFWriterOptions } from "./emf-writer.js";
 export { PDFWriter, type PDFWriterOptions } from "./pdf-writer.js";
+export { ImageWriter, ImageResult, type ImageWriterOptions } from "./image-writer.js";
+/** @deprecated Use ImageWriter/ImageResult/ImageWriterOptions instead. */
 export { PNGWriter, PNGResult, type PNGWriterOptions } from "./png-writer.js";
 export { SVGWriter, type SVGWriterOptions } from "./svg-writer.js";
 export { HTMLWriter, type HTMLImageMode, type HTMLWriterOptions } from "./html-writer.js";

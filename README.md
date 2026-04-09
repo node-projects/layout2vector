@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **PDF**, **PNG**, **SVG**, or **HTML**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **EMF**, **PDF**, **PNG**, **SVG**, or **HTML**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, EMFWriter, PDFWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -48,11 +48,12 @@ await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes(); // Uint8Array
 
 // 4. Render to PNG (requires Canvas-capable environment)
-const pngWriter = new PNGWriter({ width: 800, height: 600 });
-const pngResult = await renderIR(ir, pngWriter);
-await pngResult.finalize(); // loads and draws raster images
-const pngDataUrl = pngResult.toDataURL(); // data:image/png;base64,...
-const pngBytes = pngResult.toBytes(); // Uint8Array
+const imageWriter = new ImageWriter({ width: 800, height: 600 });
+const imageResult = await renderIR(ir, imageWriter);
+await imageResult.finalize(); // loads and draws raster images
+const pngDataUrl = imageResult.toDataURL(); // data:image/png;base64,...
+const pngBytes = imageResult.toBytes(); // Uint8Array
+const jpegDataUrl = imageResult.toDataURL("image/jpeg", 0.92); // JPEG output
 
 // 5. Render to SVG
 const svgWriter = new SVGWriter({ width: 800, height: 600 });
@@ -63,6 +64,11 @@ const svgString = await renderIR(ir, svgWriter);
 const htmlWriter = new HTMLWriter({ width: 800, height: 600, customCss: ".my-class { color: red; }" });
 const htmlString = await renderIR(ir, htmlWriter);
 // htmlString is a complete standalone HTML document
+
+// 7. Render to EMF (Windows Enhanced Metafile)
+const emfWriter = new EMFWriter({ width: 800, height: 600 });
+const emfBytes = await renderIR(ir, emfWriter); // Uint8Array → save as .emf file
+
 ```
 
 ## API Reference
@@ -85,6 +91,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
+| `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |
 
 #### `async renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T>`
 
@@ -97,7 +104,7 @@ Passes each IR node through the writer in paint order. Returns a Promise for the
 
 ```ts
 type DXFWriterOptions = {
-  maxY?: number;
+  maxY?: number;  // Y-axis flip height (default: 1000)
   zoom?: number;
 };
 new DXFWriter(options?: DXFWriterOptions)
@@ -116,21 +123,49 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
 
 
-#### `PNGWriter`
+#### `EMFWriter`
 
 ```ts
-type PNGWriterOptions = {
+type EMFWriterOptions = {
+  width: number;
+  height: number;
+  zoom?: number;
+};
+new EMFWriter(options: EMFWriterOptions)
+```
+
+Produces a `Uint8Array` containing a binary **Enhanced Metafile (EMF)** file (Windows GDI format). Width and height define the viewport in CSS pixels.
+
+- Polygons → `EMR_POLYGON16` entities with GDI brush/pen
+- Polylines → `EMR_POLYLINE16` entities (open or closed)
+- Rounded rectangles → `EMR_ROUNDRECT` entities
+- Text → `EMR_EXTTEXTOUTW` entities with `EMR_EXTCREATEFONTINDIRECTW` font selection
+- Images → `EMR_STRETCHDIBITS` entities with 24-bit DIB pixel data
+- Colors → GDI COLORREF (`0x00BBGGRR` values)
+- Transparent elements are skipped
+- Output is a valid AC1015-format EMF file readable by GDI-enabled applications (Word, Visio, AutoCAD, etc.)
+
+
+
+#### `ImageWriter` (formerly `PNGWriter`)
+
+```ts
+type ImageWriterOptions = {
   width: number;
   height: number;
   scale?: number;
   zoom?: number;
 };
-new PNGWriter(options: PNGWriterOptions)
+new ImageWriter(options: ImageWriterOptions)
 ```
 
-Produces a `PNGResult` via the Canvas 2D API. Width and height are in CSS pixels. The optional `scale` parameter (default 1) acts as a device pixel ratio multiplier for higher resolution output (e.g. `scale: 2` produces a 2× image).
+Produces an `ImageResult` via the Canvas 2D API. Width and height are in CSS pixels. The optional `scale` parameter (default 1) acts as a device pixel ratio multiplier for higher resolution output (e.g. `scale: 2` produces a 2× image).
+
+Output format is configurable: call `result.toDataURL(mimeType, quality)` or `result.toBytes(mimeType, quality)` with `"image/png"` (default), `"image/jpeg"`, or `"image/webp"`.
 
 Requires a Canvas-capable environment (browser `document.createElement('canvas')`). When using Playwright or Puppeteer, run the writer inside `page.evaluate()`.
+
+> **Note:** `PNGWriter`, `PNGResult`, and `PNGWriterOptions` are still exported as aliases for backward compatibility.
 
 - Polygons → Canvas filled/stroked paths
 - Polylines → Canvas path operations (open or closed)
@@ -141,7 +176,7 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 - Transparent elements are skipped
 - Raster images → drawn via async `finalize()` step using `Image` element loading
 
-After `await renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL()` for a data URL string or `result.toBytes()` for a `Uint8Array`.
+After `await renderIR()`, call `await result.finalize()` to draw any queued raster images, then use `result.toDataURL(mimeType?, quality?)` for a data URL string or `result.toBytes(mimeType?, quality?)` for a `Uint8Array`. Supported MIME types: `"image/png"` (default), `"image/jpeg"`, `"image/webp"`.
 
 
 #### `SVGWriter`
@@ -432,7 +467,7 @@ npm run test:demos
 
 ### Demo Conversion
 
-The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, `.png`, `.svg`, and `.html` files to `tests/output/`.
+The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, `.png`, `.svg`, `.html`, and `.emf` files to `tests/output/`.
 
 For GitHub-friendly browsing of the generated HTML, PDF, and preview screenshots, see [tests/output/README.md](./tests/output/README.md).
 
@@ -445,11 +480,14 @@ Demo files cover: borders, gradients, transforms, SVG shapes, declarative shadow
 │  Live DOM    │────>│    IR    │────>│  DXFWriter │──> .dxf
 │  (browser)   │     │ IRNode[] │     └────────────┘
 │              │     │          │     ┌────────────┐
-│  HTML + SVG  │     │ polygon  │────>│  PDFWriter │──> .pdf
+│  HTML + SVG  │     │ polygon  │────>│  EMFWriter │──> .emf
 │  + Shadow DOM│     │ polyline │     └────────────┘
 │  + Transforms│     │ text     │     ┌────────────┐
-└──────────────┘     │ image    │────>│  PNGWriter │──> .png
-                     └──────────┘     └────────────┘
+└──────────────┘     │ image    │────>│  PDFWriter │──> .pdf
+                                      └────────────┘
+                                      ┌────────────┐
+                                 ────>│  PNGWriter │──> .png
+                                      └────────────┘
                                       ┌────────────┐
                                  ────>│  SVGWriter │──> .svg
                                       └────────────┘

@@ -115,7 +115,16 @@ export async function preloadImages(root: Element): Promise<void> {
         const resp = await fetch(url);
         if (!resp.ok) continue;
         const blob = await resp.blob();
-        const dataUrl = await blobToDataUrl(blob);
+        let dataUrl = await blobToDataUrl(blob);
+        // If the content is SVG but MIME type is wrong (e.g. text/xml,
+        // application/xml), fix the data URL to use image/svg+xml so
+        // downstream SVG detection works correctly.
+        if (!dataUrl.startsWith("data:image/svg+xml") && isSvgUrl(url)) {
+          const raw = await blob.text();
+          if (raw.includes("<svg")) {
+            dataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(raw)));
+          }
+        }
         preloadedUrlMap.set(url, dataUrl);
         // Pre-decode into an Image element so rasterToRendered can draw it synchronously
         const tmpImg = new Image();
@@ -194,13 +203,14 @@ export function extractBackgroundImage(
   const h = htmlEl.offsetHeight || Math.abs(quad[3].y - quad[0].y);
 
   let url = urlMatch[1];
+  const originalUrl = url;
 
   // Resolve from preloaded cache (external URLs fetched during preloadImages)
   const cachedUrl = preloadedUrlMap.get(url);
   if (cachedUrl) url = cachedUrl;
 
   // If it's already a data URL, try to rasterize directly
-  if (url.startsWith("data:image/")) {
+  if (url.startsWith("data:")) {
     // For SVG data URLs, try vector extraction first
     if (url.startsWith("data:image/svg+xml")) {
       const svgContent = decodeBgSvgDataUrl(url);
@@ -209,23 +219,40 @@ export function extractBackgroundImage(
         if (svgNodes.length > 0) return svgNodes;
       }
     }
-    // Raster data URL — re-render at target size with nearest-neighbor scaling
-    const rendered = rasterToRendered(url, Math.round(w), Math.round(h));
-    return [{
-      type: "image",
-      quad,
-      dataUrl: rendered?.dataUrl ?? url,
-      width: Math.round(w),
-      height: Math.round(h),
-      rgbData: rendered?.rgbData,
-      style,
-      zIndex: globalIndex,
-    }];
+    // The original URL may be an SVG but the MIME was wrong in the data URL.
+    // Check if the original URL looks like an SVG and try to extract content.
+    if (!url.startsWith("data:image/svg+xml") && isSvgSource(originalUrl)) {
+      const svgContent = decodeBgSvgDataUrl(url) ?? extractSvgContent(originalUrl);
+      if (svgContent && svgContent.includes("<svg")) {
+        const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
+        if (svgNodes.length > 0) return svgNodes;
+      }
+    }
+    if (url.startsWith("data:image/")) {
+      // Raster data URL — re-render at target size with nearest-neighbor scaling
+      const imageScale = _options.imageScale ?? 1;
+      const rw = Math.min(Math.round(w * imageScale), 4096);
+      const rh = Math.min(Math.round(h * imageScale), 4096);
+      const rendered = rasterToRendered(url, rw, rh);
+      // For SVG sources, keep the original SVG data URL (browsers/SVG viewers render it natively);
+      // writers that need pixel data use rgbData.
+      const effectiveDataUrl = url.startsWith("data:image/svg+xml") ? url : (rendered?.dataUrl ?? url);
+      return [{
+        type: "image",
+        quad,
+        dataUrl: effectiveDataUrl,
+        width: rw,
+        height: rh,
+        rgbData: rendered?.rgbData,
+        style,
+        zIndex: globalIndex,
+      }];
+    }
   }
 
   // For external SVG URLs, try vector conversion first
-  if (isSvgSource(url)) {
-    const svgContent = extractSvgContent(url);
+  if (isSvgSource(url) || isSvgSource(originalUrl)) {
+    const svgContent = extractSvgContent(url) ?? extractSvgContent(originalUrl);
     if (svgContent) {
       const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
       if (svgNodes.length > 0) return svgNodes;
@@ -234,15 +261,25 @@ export function extractBackgroundImage(
   }
 
   // For external URLs, rasterize via canvas using a temporary img element
-  const dataUrl = rasterizeBackgroundImage(el, w, h);
+  const imageScale = _options.imageScale ?? 1;
+  const rasterW = Math.min(Math.round(w * imageScale), 4096);
+  const rasterH = Math.min(Math.round(h * imageScale), 4096);
+  const dataUrl = rasterizeBackgroundImage(el, rasterW, rasterH);
   if (!dataUrl) return [];
+
+  // For SVG sources, prefer the original SVG data URL (browsers render it natively)
+  let effectiveDataUrl = dataUrl;
+  if (isSvgSource(originalUrl)) {
+    const cached = preloadedUrlMap.get(originalUrl);
+    if (cached?.startsWith("data:image/svg+xml")) effectiveDataUrl = cached;
+  }
 
   return [{
     type: "image",
     quad,
-    dataUrl,
-    width: Math.round(w),
-    height: Math.round(h),
+    dataUrl: effectiveDataUrl,
+    width: rasterW,
+    height: rasterH,
     style,
     zIndex: globalIndex,
   }];
@@ -538,11 +575,12 @@ export function extractImageGeometry(
     // Fallback: rasterize SVG via canvas (below)
   }
 
-  // Raster image: render to canvas at display size for consistent output
+  // Raster image: render to canvas at display size (scaled by imageScale) for consistent output
+  const imageScale = options.imageScale ?? 1;
   const displayW = Math.round(Math.sqrt((adjustedQuad[1].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[1].y - adjustedQuad[0].y) ** 2)) || el.width || 1;
   const displayH = Math.round(Math.sqrt((adjustedQuad[3].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[3].y - adjustedQuad[0].y) ** 2)) || el.height || 1;
-  const renderW = Math.min(displayW, 2048);
-  const renderH = Math.min(displayH, 2048);
+  const renderW = Math.min(Math.round(displayW * imageScale), 4096);
+  const renderH = Math.min(Math.round(displayH * imageScale), 4096);
 
   let dataUrl: string | null = null;
   let rgbData: number[] | undefined;
@@ -702,6 +740,10 @@ export function extractImageGeometry(
     }
   }
 
+  // For SVG sources, use original SVG data URL (browsers/SVG viewers render it natively);
+  // writers that need pixel data use rgbData.
+  if (isSvgSource(src)) dataUrl = src;
+
   imageDataCache.set(imgCacheKey, { dataUrl, rgbData });
   return [{
     type: "image",
@@ -770,6 +812,17 @@ function adjustQuadForObjectFit(el: HTMLImageElement, quad: Quad): Quad {
   const bl = lerp(lerp(quad[0], quad[1], offsetU), lerp(quad[3], quad[2], offsetU), endV);
 
   return [tl, tr, br, bl] as Quad;
+}
+
+/**
+ * Check if a URL path looks like an SVG file (ignoring data URLs). */
+function isSvgUrl(src: string): boolean {
+  try {
+    const url = new URL(src, document.baseURI);
+    return url.pathname.toLowerCase().endsWith(".svg");
+  } catch {
+    return false;
+  }
 }
 
 /** Check if a source URL points to an SVG. */

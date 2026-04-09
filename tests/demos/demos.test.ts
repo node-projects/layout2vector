@@ -12,6 +12,7 @@ import { DXFWriter } from "../../src/dxf-writer.js";
 import { PDFWriter } from "../../src/pdf-writer.js";
 import { SVGWriter } from "../../src/svg-writer.js";
 import { HTMLWriter } from "../../src/html-writer.js";
+import { EMFWriter } from "../../src/emf-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
@@ -276,20 +277,30 @@ for (const demoFile of demoFiles) {
     const htmlOutPath = path.join(outputDir, `${name}-ir.html`);
     fs.writeFileSync(htmlOutPath, htmlContent2, "utf-8");
 
+    // --- EMF output ---
+    const emfWriter = new EMFWriter({ width: viewport.width, height: viewport.height });
+    const emfBytes = await renderIR(ir, emfWriter);
+    expect(emfBytes).toBeInstanceOf(Uint8Array);
+    expect(emfBytes.length).toBeGreaterThan(80);
+    const emfPath = path.join(outputDir, `${name}.emf`);
+    fs.writeFileSync(emfPath, emfBytes);
+
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
     const pdfStat = fs.statSync(pdfPath);
     if (!pngStat && fs.existsSync(pngPath)) pngStat = fs.statSync(pngPath);
     const svgStat = fs.statSync(svgPath);
     const htmlStat = fs.statSync(htmlOutPath);
+    const emfStat = fs.statSync(emfPath);
     expect(dxfStat.size).toBeGreaterThan(0);
     expect(pdfStat.size).toBeGreaterThan(0);
     if (pngStat) expect(pngStat.size).toBeGreaterThan(0);
     expect(svgStat.size).toBeGreaterThan(0);
     expect(htmlStat.size).toBeGreaterThan(0);
+    expect(emfStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes)`
+      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes), EMF (${emfStat.size} bytes)`
     );
   });
 }

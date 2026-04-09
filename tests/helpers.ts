@@ -75,7 +75,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "image-extractor.js",
       "mathml-extractor.js",
       "pipeline.js",
-      "png-writer.js",
+      "image-writer.js",
     ];
 
     const modules: string[] = [];
@@ -112,8 +112,10 @@ window.__HC = {
   isMathMLRoot,
   isMathMLElement,
   extractMathMLFeatures,
-  PNGWriter,
-  PNGResult,
+  PNGWriter: ImageWriter,
+  PNGResult: ImageResult,
+  ImageWriter,
+  ImageResult,
 };
 })();`;
   } else {
