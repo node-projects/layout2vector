@@ -4,7 +4,7 @@
  */
 import type { Point, Quad, Style, IRNode, Options } from "./types.js";
 import { extractStyle } from "./traversal.js";
-import { getSvgScreenCtm } from "./geometry.js";
+import { getSvgScreenCtm, getElementQuad } from "./geometry.js";
 
 /** Number of sample points for path/circle/ellipse approximation. */
 const PATH_SAMPLE_COUNT = 64;
@@ -662,24 +662,27 @@ function extractText(el: SVGTextElement, style: Style, zIndex: number): IRNode[]
   const rawQuad = rectToQuad(bbox.x, bbox.y, bbox.width, bbox.height);
   const transformed = transformPoints(rawQuad, el) as Quad;
 
-  // Clip text quad to the SVG viewport (SVGs default to overflow:hidden).
-  // This prevents text with text-anchor="middle" near edges from producing
-  // negative coordinates that fall outside all output viewports.
+  // Skip text that is fully outside the SVG viewport (SVGs default to overflow:hidden).
+  // We only discard entirely-invisible text — partially visible text keeps its original
+  // quad to preserve correct positioning (clamping individual corners would distort
+  // the quad, e.g. for text-anchor="middle" near viewport edges).
   const svgRoot = el.ownerSVGElement;
   if (svgRoot) {
     const svgCs = getComputedStyle(svgRoot);
     if (svgCs.overflow !== "visible") {
-      const svgRect = svgRoot.getBoundingClientRect();
-      for (const p of transformed) {
-        p.x = Math.max(p.x, svgRect.left);
-        p.y = Math.max(p.y, svgRect.top);
-        p.x = Math.min(p.x, svgRect.right);
-        p.y = Math.min(p.y, svgRect.bottom);
+      const svgQuad = getElementQuad(svgRoot);
+      const svgRect = svgQuad
+        ? { left: Math.min(svgQuad[0].x, svgQuad[3].x), top: Math.min(svgQuad[0].y, svgQuad[1].y),
+            right: Math.max(svgQuad[1].x, svgQuad[2].x), bottom: Math.max(svgQuad[2].y, svgQuad[3].y) }
+        : svgRoot.getBoundingClientRect();
+      const tLeft = Math.min(transformed[0].x, transformed[3].x);
+      const tRight = Math.max(transformed[1].x, transformed[2].x);
+      const tTop = Math.min(transformed[0].y, transformed[1].y);
+      const tBottom = Math.max(transformed[2].y, transformed[3].y);
+      if (tRight < svgRect.left || tLeft > svgRect.right ||
+          tBottom < svgRect.top || tTop > svgRect.bottom) {
+        return []; // Fully outside viewport
       }
-      // If the quad collapsed to zero size, the text is fully clipped
-      const w = Math.abs(transformed[1].x - transformed[0].x) + Math.abs(transformed[2].x - transformed[3].x);
-      const h = Math.abs(transformed[3].y - transformed[0].y) + Math.abs(transformed[2].y - transformed[1].y);
-      if (w < 0.5 && h < 0.5) return [];
     }
   }
 

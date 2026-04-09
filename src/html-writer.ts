@@ -302,6 +302,16 @@ export class HTMLWriter implements Writer<string> {
         css.push(`text-shadow:${style.textShadow}`);
       }
 
+      // Justified text: set explicit width and justify to match original spacing
+      if (style.textAlign === "justify") {
+        const quadWidth = Math.sqrt(dx * dx + dy * dy);
+        if (quadWidth > 0) {
+          css.push(`width:${n(quadWidth)}px`);
+          css.push("text-align:justify");
+          css.push("text-align-last:justify");
+        }
+      }
+
       this.elements.push(this.applyClip(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style));
     }
   }

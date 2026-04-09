@@ -32,16 +32,16 @@
 </defs>
 <path d="M8,8 L28,8 L28,28 L8,28 Z" fill="none"/>
 <path d="M8,8 L28,8 L28,28 L8,28 Z" fill="none"/>
-<text x="8" y="8" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="Segoe UI Symbol">📥</text>
+<text x="8" y="4.52" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="Segoe UI Symbol">📥</text>
 <path d="M244,451 L334,451 L334,583 L244,583 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <path d="M245,452 L333,452 L333,582 L245,582 Z" fill="none"/>
 <g clip-path="url(#clip1)"><path d="M245,452 L332.97,452 L332.97,485.8 L245,485.8 Z" fill="rgb(111, 216, 146)"/></g>
 <g clip-path="url(#clip2)"><path d="M288.98,453.3 L332.1,453.3 L332.1,462.4 L288.98,462.4 Z" fill="none"/></g>
 <g clip-path="url(#clip3)"><path d="M245.87,462.4 L332.1,462.4 L332.1,475.4 L245.87,475.4 Z" fill="none"/></g>
-<text x="276.55" y="462.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">AC11</text>
+<text x="276.55" y="462.58" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">AC11</text>
 <g clip-path="url(#clip4)"><path d="M245.87,475.4 L332.1,475.4 L332.1,484.5 L245.87,484.5 Z" fill="none"/></g>
 <g clip-path="url(#clip5)"><path d="M310.98,487.1 L332.1,487.1 L332.1,503.98 L310.98,503.98 Z" fill="none"/></g>
-<text x="311.83" y="487.26" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">1010</text>
+<text x="311.83" y="486.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">1010</text>
 <g clip-path="url(#clip6)"><path d="M288.98,562.48 L332.97,562.48 L332.97,581.98 L288.98,581.98 Z" fill="none"/></g>
 <g clip-path="url(#clip7)"><path d="M288.98,562.48 L308.48,562.48 L308.48,581.98 L288.98,581.98 Z" fill="none"/></g>
 <g clip-path="url(#clip8)"><path d="M288.98,562.48 L308.48,562.48 L308.48,581.98 L288.98,581.98 Z" fill="none"/></g>
@@ -52,7 +52,7 @@
 <g clip-path="url(#clip12)"><path d="M245.87,510.48 L332.1,510.48 L332.1,529.98 L245.87,529.98 Z" fill="none"/></g>
 <g clip-path="url(#clip13)"><path d="M279.23,510.48 L298.73,510.48 L298.73,529.98 L279.23,529.98 Z" fill="none"/></g>
 <g clip-path="url(#clip14)"><path d="M279.23,510.48 L298.73,510.48 L298.73,529.98 L279.23,529.98 Z" fill="none"/></g>
-<text x="279.23" y="510.48" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Segoe UI Symbol">📤</text>
+<text x="279.23" y="507.37" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Segoe UI Symbol">📤</text>
 <g clip-path="url(#clip15)"><path d="M245.87,536.48 L332.1,536.48 L332.1,555.98 L245.87,555.98 Z" fill="none"/></g>
 <g clip-path="url(#clip16)"><path d="M245.87,540.38 L257.57,540.38 L257.57,552.08 L245.87,552.08 Z" fill="none"/></g>
 <g clip-path="url(#clip17)"><path d="M245.87,540.38 L257.57,540.38 L257.57,552.08 L245.87,552.08 Z" fill="rgb(111, 216, 146)"/></g>

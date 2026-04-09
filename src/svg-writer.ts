@@ -452,6 +452,14 @@ export class SVGWriter implements Writer<string> {
       if (decoration) attrs.push(`text-decoration="${decoration}"`);
     }
 
+    // Justified text: use textLength to stretch text to match the original quad width
+    if (style.textAlign === "justify") {
+      const quadWidth = Math.sqrt(dx * dx + dy * dy);
+      if (quadWidth > 0) {
+        attrs.push(`textLength="${n(quadWidth)}" lengthAdjust="spacing"`);
+      }
+    }
+
     this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style);
   }
 

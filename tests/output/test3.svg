@@ -20,7 +20,7 @@
 <path d="M169.5,92 L169.5,55.92 L181.5,55.92 L181.5,92 Z" fill="none"/>
 <text x="170.5" y="92" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif" transform="rotate(-90,170.5,92)">AAAAA</text>
 <path d="M84,110 L104,110 L104,130 L84,130 Z" fill="none"/>
-<text x="86.24" y="110" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="Wingdings">å</text>
+<text x="86.24" y="110.02" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="Wingdings">å</text>
 <path d="M24.5,233 L24.5,201 L69.5,201 L69.5,233 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <path d="M25.5,232 L25.5,202 L68.5,202 L68.5,232 Z" fill="none"/>
 <path d="M25.5,232 L25.5,202 L68.5,202 L68.5,232 Z" fill="none"/>
@@ -32,10 +32,10 @@
 <g clip-path="url(#clip1)"><path d="M89,130 L176.97,130 L176.97,163.8 L89,163.8 Z" fill="rgb(111, 216, 146)"/></g>
 <g clip-path="url(#clip2)"><path d="M132.98,131.3 L176.1,131.3 L176.1,140.4 L132.98,140.4 Z" fill="none"/></g>
 <g clip-path="url(#clip3)"><path d="M89.87,140.4 L176.1,140.4 L176.1,153.4 L89.87,153.4 Z" fill="none"/></g>
-<text x="118.53" y="140.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">AABB</text>
+<text x="118.53" y="140.58" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">AABB</text>
 <g clip-path="url(#clip4)"><path d="M89.87,153.4 L176.1,153.4 L176.1,162.5 L89.87,162.5 Z" fill="none"/></g>
 <g clip-path="url(#clip5)"><path d="M154.98,165.1 L176.1,165.1 L176.1,181.98 L154.98,181.98 Z" fill="none"/></g>
-<text x="171.03" y="165.26" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">0</text>
+<text x="171.03" y="164.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">0</text>
 <g clip-path="url(#clip6)"><path d="M89.87,188.48 L176.1,188.48 L176.1,207.98 L89.87,207.98 Z" fill="none"/></g>
 <g clip-path="url(#clip7)"><path d="M89.87,214.48 L176.1,214.48 L176.1,233.98 L89.87,233.98 Z" fill="none"/></g>
 <g clip-path="url(#clip8)"><path d="M89,130 L110.98,130 L110.98,163.8 L89,163.8 Z" fill="none" opacity="0.3"/></g>
