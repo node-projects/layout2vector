@@ -22,10 +22,13 @@
     "test:unit": "npx playwright test --project=unit",
     "test:integration": "npx playwright test --project=integration",
     "test:ui": "npx playwright test --project=ui",
-    "test:demos": "npx playwright test --project=demos"
+    "test:demos": "npx playwright test --project=demos",
+    "prepublishOnly": "npm run build && npm run bundle",
+    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
-    "@tarikjabiri/dxf": "^2.8.9"
+    "@tarikjabiri/dxf": "^2.8.9",
+    "esbuild": "^0.28.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
