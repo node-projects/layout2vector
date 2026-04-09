@@ -15,7 +15,7 @@
 <text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Image Extraction Demo</text>
 <path d="M0,37 L1240,37 L1240,192 L0,192 Z" fill="none"/>
 <path d="M0,37 L1240,37 L1240,54 L0,54 Z" fill="none"/>
-<text x="0" y="38.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">SVG Data URLs (base64) — converted to vector geometry</text>
+<text x="0" y="38.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">SVG Data URLs (base64) &#x2014; converted to vector geometry</text>
 <path d="M0,62 L1240,62 L1240,192 L0,192 Z" fill="none"/>
 <rect x="0" y="62" width="126.87" height="130" rx="8" ry="8" fill="rgb(250, 250, 250)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <path d="M13,75 L93,75 L93,155 L13,155 Z" fill="none"/>
@@ -35,7 +35,7 @@
 <text x="331.45" y="166" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Pentagon (base64 SVG)</text>
 <path d="M0,216 L1240,216 L1240,371 L0,371 Z" fill="none"/>
 <path d="M0,216 L1240,216 L1240,233 L0,233 Z" fill="none"/>
-<text x="0" y="217.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">SVG Data URLs (URL-encoded) — converted to vector geometry</text>
+<text x="0" y="217.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">SVG Data URLs (URL-encoded) &#x2014; converted to vector geometry</text>
 <path d="M0,241 L1240,241 L1240,371 L0,371 Z" fill="none"/>
 <rect x="0" y="241" width="162.95" height="120" rx="8" ry="8" fill="rgb(250, 250, 250)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <path d="M13,254 L113,254 L113,324 L13,324 Z" fill="none"/>
@@ -55,7 +55,7 @@
 <text x="379.5" y="325" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Pill shape (URL-encoded SVG)</text>
 <path d="M0,395 L1240,395 L1240,550 L0,550 Z" fill="none"/>
 <path d="M0,395 L1240,395 L1240,412 L0,412 Z" fill="none"/>
-<text x="0" y="396.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Raster Data URLs — embedded as image nodes</text>
+<text x="0" y="396.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Raster Data URLs &#x2014; embedded as image nodes</text>
 <path d="M0,420 L1240,420 L1240,550 L0,550 Z" fill="none"/>
 <rect x="0" y="420" width="130.12" height="130" rx="8" ry="8" fill="rgb(250, 250, 250)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <path d="M13,433 L93,433 L93,513 L13,513 Z" fill="none"/>
@@ -73,7 +73,7 @@
 <text x="294.68" y="524" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Gradient PNG (data URL)</text>
 <path d="M0,574 L1240,574 L1240,749 L0,749 Z" fill="none"/>
 <path d="M0,574 L1240,574 L1240,591 L0,591 Z" fill="none"/>
-<text x="0" y="575.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">External URLs — fetched and embedded</text>
+<text x="0" y="575.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">External URLs &#x2014; fetched and embedded</text>
 <path d="M0,599 L1240,599 L1240,749 L0,749 Z" fill="none"/>
 <rect x="0" y="599" width="176" height="150" rx="8" ry="8" fill="rgb(250, 250, 250)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <path d="M13,612 L163,612 L163,712 L13,712 Z" fill="none"/>
@@ -97,7 +97,7 @@
 <text x="209" y="703" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">External PNG (placeholder)</text>
 <path d="M0,773 L1240,773 L1240,922 L0,922 Z" fill="none"/>
 <path d="M0,773 L1240,773 L1240,790 L0,790 Z" fill="none"/>
-<text x="0" y="774.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">CSS background-image url() — extracted as image nodes</text>
+<text x="0" y="774.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">CSS background-image url() &#x2014; extracted as image nodes</text>
 <path d="M0,798 L1240,798 L1240,922 L0,922 Z" fill="none"/>
 <rect x="0" y="798" width="155.6" height="124" rx="8" ry="8" fill="rgb(250, 250, 250)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <path d="M13,811 L93,811 L93,891 L13,891 Z" fill="none"/>

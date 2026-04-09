@@ -17,10 +17,17 @@ const imageDataCache = new Map<string, { dataUrl: string; rgbData?: number[] } |
 /** Cache for SVG content strings, keyed by source URL. Avoids repeated sync XHR or base64 decoding. */
 const svgContentCache = new Map<string, string | null>();
 
+/** Pre-fetched image elements for canvas drawing (keyed by original src URL). */
+const preloadedImageElems = new Map<string, HTMLImageElement>();
+/** Pre-fetched URL mappings: original URL → data URL. Populated by preloadImages without modifying the page. */
+const preloadedUrlMap = new Map<string, string>();
+
 /** Clear the image rasterization cache. Called at the start of each extraction run. */
 export function clearImageCache(): void {
   imageDataCache.clear();
   svgContentCache.clear();
+  preloadedImageElems.clear();
+  preloadedUrlMap.clear();
 }
 
 /** Check if an element is an <img> element. */
@@ -29,10 +36,11 @@ export function isImageElement(el: Element): el is HTMLImageElement {
 }
 
 /**
- * Pre-convert all <img> elements under a root to inline data URLs.
- * This is necessary when images are loaded from file:// or cross-origin URLs,
- * because canvas.toDataURL() will fail with a tainted canvas error.
- * Must be called (and awaited) before extractIR().
+ * Pre-fetch all external image URLs under a root into internal caches.
+ * This enables extractIR() to embed images that are loaded from cross-origin
+ * or file:// URLs without tainting the canvas.
+ * Does NOT modify the page DOM — all results are stored in module-level caches.
+ * Called automatically by extractIR() when includeImages is true.
  */
 export async function preloadImages(root: Element): Promise<void> {
   // Collect all elements including those inside shadow DOM
@@ -48,7 +56,7 @@ export async function preloadImages(root: Element): Promise<void> {
   // Include root itself
   allElements.unshift(root);
 
-  // Pre-convert <img> elements with external URLs to data URLs
+  // Pre-fetch <img> elements — populate caches without modifying the DOM
   for (const el of allElements) {
     if (el.tagName !== "IMG") continue;
     const img = el as HTMLImageElement;
@@ -57,12 +65,11 @@ export async function preloadImages(root: Element): Promise<void> {
     if (src.startsWith("data:")) {
       // Data URL images may not be decoded yet — force decode so
       // canvas.drawImage works synchronously during extraction.
-      try { 
-        await img.decode(); 
-      } catch { 
+      try {
+        await img.decode();
+      } catch {
         // img.decode() may fail for small images in some browsers.
-        // Fallback: create a temporary Image, load the data URL, wait for it,
-        // then draw onto canvas to get a JPEG data URL.
+        // Create a pre-decoded copy for canvas drawing (no DOM mutation).
         try {
           const tmpImg = new Image();
           tmpImg.src = src;
@@ -71,52 +78,30 @@ export async function preloadImages(root: Element): Promise<void> {
             tmpImg.onerror = () => reject(new Error("load failed"));
             if (tmpImg.complete && tmpImg.naturalWidth > 0) resolve();
           });
-          // Swap the src to a canvas-rendered JPEG so drawImage works
-          const canvas = document.createElement("canvas");
-          const nw = tmpImg.naturalWidth || img.width || 1;
-          const nh = tmpImg.naturalHeight || img.height || 1;
-          canvas.width = nw;
-          canvas.height = nh;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(tmpImg, 0, 0, nw, nh);
-            // Check if the image has any visible content before converting
-            const probeData = ctx.getImageData(0, 0, nw, nh).data;
-            let hasContent = false;
-            for (let i = 3; i < probeData.length; i += 4) {
-              if (probeData[i] > 0) { hasContent = true; break; }
-            }
-            if (hasContent) {
-              // Add white background for JPEG conversion (JPEG has no alpha)
-              ctx.clearRect(0, 0, nw, nh);
-              ctx.fillStyle = "#ffffff";
-              ctx.fillRect(0, 0, nw, nh);
-              ctx.drawImage(tmpImg, 0, 0, nw, nh);
-              img.src = canvas.toDataURL("image/jpeg", 0.92);
-              await img.decode().catch(() => {});
-            }
-          }
+          preloadedImageElems.set(src, tmpImg);
         } catch { /* give up */ }
       }
       continue;
     }
+    // External URL — fetch and cache as data URL (do NOT modify img.src)
     try {
       const resp = await fetch(src);
       if (!resp.ok) continue;
       const blob = await resp.blob();
       const dataUrl = await blobToDataUrl(blob);
-      img.src = dataUrl;
-      // Ensure the re-assigned image is decoded before extraction
-      try { await img.decode(); } catch { /* ignore */ }
+      preloadedUrlMap.set(src, dataUrl);
+      // Pre-decode into an Image element for canvas drawing
+      const tmpImg = new Image();
+      tmpImg.src = dataUrl;
+      try { await tmpImg.decode(); } catch { /* ignore */ }
+      preloadedImageElems.set(src, tmpImg);
     } catch {
-      // Network error — leave as-is
+      // Network error — sync XHR fallback will be attempted during extraction
     }
   }
 
-  // Pre-convert background-image URLs (including inside shadow DOM):
-  // - External URLs (http, file, relative) → fetch and convert to data URLs
-  // - Data URL PNGs/WebPs → convert to JPEG for PDF compatibility (skip tiny images)
+  // Pre-fetch background-image URLs (including inside shadow DOM).
+  // Populate caches without modifying element styles.
   for (const el of allElements) {
     const bg = getComputedStyle(el).backgroundImage;
     if (!bg || bg === "none") continue;
@@ -124,15 +109,15 @@ export async function preloadImages(root: Element): Promise<void> {
     if (!urlMatch) continue;
     const url = urlMatch[1];
 
-    // External URL (not a data URL) — fetch and convert to inline data URL
+    // External URL (not a data URL) — fetch and cache
     if (!url.startsWith("data:")) {
       try {
         const resp = await fetch(url);
         if (!resp.ok) continue;
         const blob = await resp.blob();
         const dataUrl = await blobToDataUrl(blob);
-        (el as HTMLElement).style.backgroundImage = `url("${dataUrl}")`;
-      } catch { /* network error — leave as-is */ }
+        preloadedUrlMap.set(url, dataUrl);
+      } catch { /* network error — sync XHR fallback during extraction */ }
       continue;
     }
 
@@ -154,7 +139,7 @@ export async function preloadImages(root: Element): Promise<void> {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
       const jpegUrl = canvas.toDataURL("image/jpeg", 0.92);
-      (el as HTMLElement).style.backgroundImage = `url(${jpegUrl})`;
+      preloadedUrlMap.set(url, jpegUrl);
     } catch { /* ignore */ }
   }
 }
@@ -203,7 +188,11 @@ export function extractBackgroundImage(
   const w = htmlEl.offsetWidth || Math.abs(quad[1].x - quad[0].x);
   const h = htmlEl.offsetHeight || Math.abs(quad[3].y - quad[0].y);
 
-  const url = urlMatch[1];
+  let url = urlMatch[1];
+
+  // Resolve from preloaded cache (external URLs fetched during preloadImages)
+  const cachedUrl = preloadedUrlMap.get(url);
+  if (cachedUrl) url = cachedUrl;
 
   // If it's already a data URL, try to rasterize directly
   if (url.startsWith("data:image/")) {
@@ -516,11 +505,15 @@ export function extractImageGeometry(
   const src = el.currentSrc || el.src;
   if (!src) return [];
 
+  // Check for a pre-fetched version of this image (from preloadImages)
+  const preloadedEl = preloadedImageElems.get(src);
+  const drawEl: HTMLImageElement = preloadedEl ?? el;
+
   // Skip images that haven't loaded or are broken.
   // For data URL images, naturalWidth may be 0 if the browser hasn't decoded yet,
   // but the data URL itself is still usable as image source.
   const isDataUrl = src.startsWith("data:image/");
-  if (!isDataUrl && (!el.complete || el.naturalWidth === 0)) return [];
+  if (!isDataUrl && !preloadedEl && (!el.complete || el.naturalWidth === 0)) return [];
 
   const quad = getElementQuad(el);
   if (!quad) return [];
@@ -567,8 +560,8 @@ export function extractImageGeometry(
   // Determine if we should use nearest-neighbor (pixelated) scaling
   const imageRendering = getComputedStyle(el).imageRendering || "";
   const isPixelated = imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges";
-  const natW = el.naturalWidth || 0;
-  const natH = el.naturalHeight || 0;
+  const natW = drawEl.naturalWidth || 0;
+  const natH = drawEl.naturalHeight || 0;
   const isSmallSource = natW > 0 && natH > 0 && (natW <= 16 || natH <= 16);
   const disableSmoothing = isPixelated || isSmallSource || renderW <= 16 || renderH <= 16;
 
@@ -581,7 +574,7 @@ export function extractImageGeometry(
       // First draw without white background to check for transparency
       // (only when the browser actually decoded the image — natW > 0)
       if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(el, 0, 0, renderW, renderH);
+      ctx.drawImage(drawEl, 0, 0, renderW, renderH);
 
       if (natW > 0 && natH > 0) {
         // Check if the image has any visible (non-transparent) content
@@ -602,12 +595,12 @@ export function extractImageGeometry(
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, renderW, renderH);
       if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(el, 0, 0, renderW, renderH);
+      ctx.drawImage(drawEl, 0, 0, renderW, renderH);
 
       // Check if drawImage actually produced content (Firefox headless bug:
       // data URL PNGs may not render to canvas at all)
       let canvasWorked = true;
-      if (isDataUrl && src.startsWith("data:image/png") && el.naturalWidth === 0) {
+      if (isDataUrl && src.startsWith("data:image/png") && drawEl.naturalWidth === 0) {
         const probe = ctx.getImageData(0, 0, 1, 1).data;
         if (probe[0] === 255 && probe[1] === 255 && probe[2] === 255) {
           canvasWorked = false;
@@ -694,7 +687,7 @@ export function extractImageGeometry(
       imageDataCache.set(imgCacheKey, null);
       return [];
     }
-    dataUrl = getImageDataUrl(el);
+    dataUrl = getImageDataUrl(drawEl);
     if (!dataUrl) dataUrl = src;
     if (!dataUrl) {
       imageDataCache.set(imgCacheKey, null);

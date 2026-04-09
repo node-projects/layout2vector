@@ -43,11 +43,11 @@
 <path d="M73.38,233.85 L185.85,233.85 L185.85,280.98 L73.38,280.98 Z" fill="none"/>
 <path d="M74.38,233.85 L184.85,233.85 L184.85,257.03 L74.38,257.03 Z" fill="none"/>
 <path d="M74.38,241.03 L86.07,241.03 L86.07,257.03 L74.38,257.03 Z" fill="none"/>
-<text x="76.62" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
+<text x="76.62" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <path d="M86.07,241.03 L95.68,241.03 L95.68,257.03 L86.07,257.03 Z" fill="none"/>
 <text x="86.07" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
 <path d="M95.68,241.03 L111.25,241.03 L111.25,257.03 L95.68,257.03 Z" fill="none"/>
-<text x="97.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">±</text>
+<text x="97.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#xB1;</text>
 <path d="M111.25,233.85 L184.85,233.85 L184.85,257.03 L111.25,257.03 Z" fill="none"/>
 <path d="M123.18,235.93 L141.65,235.93 L141.65,257.03 L123.18,257.03 Z" fill="none"/>
 <path d="M123.18,241.03 L132.8,241.03 L132.8,257.03 L123.18,257.03 Z" fill="none"/>
@@ -55,7 +55,7 @@
 <path d="M133.8,235.93 L141.65,235.93 L141.65,248.93 L133.8,248.93 Z" fill="none"/>
 <text x="133.8" y="236.87" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
 <path d="M141.65,241.03 L156.9,241.03 L156.9,257.03 L141.65,257.03 Z" fill="none"/>
-<text x="143.88" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
+<text x="143.88" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <path d="M156.9,241.03 L166.2,241.03 L166.2,257.03 L156.9,257.03 Z" fill="none"/>
 <text x="156.9" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <path d="M166.2,241.03 L176.23,241.03 L176.23,257.03 L166.2,257.03 Z" fill="none"/>
@@ -74,7 +74,7 @@
 <path d="M33,360.67 L252.62,360.67 L252.62,382.67 L33,382.67 Z" fill="none"/>
 <path d="M33,355.22 L88.32,355.22 L88.32,389.73 L33,389.73 Z" fill="none"/>
 <path d="M36.67,360.67 L52.25,360.67 L52.25,382.67 L36.67,382.67 Z" fill="none"/>
-<text x="47.02" y="367.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">∑</text>
+<text x="47.02" y="367.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x2211;</text>
 <path d="M52.25,373.73 L83.65,373.73 L83.65,389.73 L52.25,389.73 Z" fill="none"/>
 <path d="M52.25,373.73 L57.88,373.73 L57.88,389.73 L52.25,389.73 Z" fill="none"/>
 <text x="52.25" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">i</text>
@@ -165,17 +165,17 @@
 <path d="M33,642.63 L167.5,642.63 L167.5,664.63 L33,664.63 Z" fill="none"/>
 <path d="M33,633.27 L69.08,633.27 L69.08,671.6 L33,671.6 Z" fill="none"/>
 <path d="M36.67,640.33 L49.57,640.33 L49.57,664.63 L36.67,664.63 Z" fill="none"/>
-<text x="39.12" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">∫</text>
+<text x="39.12" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x222B;</text>
 <path d="M49.57,655.6 L58.87,655.6 L58.87,671.6 L49.57,671.6 Z" fill="none"/>
 <text x="49.57" y="655.6" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">0</text>
 <path d="M50.57,633.27 L65.42,633.27 L65.42,649.27 L50.57,649.27 Z" fill="none"/>
-<text x="50.57" y="633.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">∞</text>
+<text x="50.57" y="633.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x221E;</text>
 <path d="M69.08,639.58 L102.18,639.58 L102.18,664.63 L69.08,664.63 Z" fill="none"/>
 <path d="M69.08,642.63 L80,642.63 L80,664.63 L69.08,664.63 Z" fill="none"/>
 <text x="69.08" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">e</text>
 <path d="M81,639.58 L102.18,639.58 L102.18,655.58 L81,655.58 Z" fill="none"/>
 <path d="M81,639.58 L92.68,639.58 L92.68,655.58 L81,655.58 Z" fill="none"/>
-<text x="83.23" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">−</text>
+<text x="83.23" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <path d="M92.68,639.58 L102.18,639.58 L102.18,655.58 L92.68,655.58 Z" fill="none"/>
 <text x="92.68" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">x</text>
 <path d="M102.18,642.63 L114.93,642.63 L114.93,664.63 L102.18,664.63 Z" fill="none"/>

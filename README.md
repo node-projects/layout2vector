@@ -28,11 +28,12 @@ import { extractIR, renderIR, DXFWriter, PDFWriter, PNGWriter, SVGWriter, HTMLWr
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
 
-// 1. Extract geometry from the live DOM
-const ir = extractIR(root, {
+// 1. Extract geometry from the live DOM (now async!)
+const ir = await extractIR(root, {
   boxType: "border",      // "border" | "content"
   includeText: true,       // extract text node geometry
   includeInvisible: false, // skip display:none / visibility:hidden
+  includeImages: true,     // enable image extraction (recommended)
 });
 
 // 2. Render to DXF
@@ -68,9 +69,12 @@ const htmlString = renderIR(ir, htmlWriter);
 
 ### Pipeline
 
-#### `extractIR(root: Element, options?: Options): IRNode[]`
+
+#### `async extractIR(root: Element, options?: Options): Promise<IRNode[]>`
 
 Main entry point. Traverses the DOM tree under `root`, builds a stacking context tree, flattens to paint order, and extracts geometry from each element.
+
+**Note:** `extractIR` is now async and must be awaited. It automatically preloads all images (including `<img>` and CSS `background-image`, even in Shadow DOM) without mutating the DOM.
 
 **Options:**
 
@@ -331,18 +335,21 @@ import {
 - Traverses open/declarative shadow roots (`element.shadowRoot`)
 - Declarative shadow DOM (`<template shadowrootmode="open">`) supported
 
+
 ### Image Handling
 
-Enable with `includeImages: true`. Supports `<img>` elements and CSS `background-image: url()`:
+Enable with `includeImages: true`. All image preloading and embedding is now **automatic** and handled internally by `extractIR` (no need to call any preload function). The DOM is **not mutated** during preloading.
 
-- **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization
-- **Raster images** (PNG, JPEG, GIF, WebP, data URLs, remote URLs): extracted as `image` IR nodes with embedded data URL
-- **CSS `background-image: url()`**: SVG URLs are vector-converted; raster URLs are extracted as image nodes
-- **Data URLs**: all `data:` schemes are supported (`base64`, URL-encoded, UTF-8)
-- **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`
-- **DXF output**: raster images as `IMAGE` entities referencing external files; SVG shapes as native DXF entities with `HATCH` solid fills
-- **PDF output**: JPEG images are embedded natively via DCTDecode; other formats are converted to JPEG automatically
-- **Caching**: identical images (same source URL and dimensions) are rasterized only once per extraction run, improving performance when the same image appears on multiple elements
+- **All images** (including `<img>` and CSS `background-image: url()`, even in Shadow DOM) are embedded as data URLs in all output formats (DXF, PDF, PNG, SVG, HTML).
+- **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization.
+- **Raster images** (PNG, JPEG, GIF, WebP, data URLs, remote URLs): extracted as `image` IR nodes with embedded data URL.
+- **CSS `background-image: url()`**: SVG URLs are vector-converted; raster URLs are extracted as image nodes.
+- **Data URLs**: all `data:` schemes are supported (`base64`, URL-encoded, UTF-8).
+- **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`.
+- **DXF output**: raster images as `IMAGE` entities referencing external files; SVG shapes as native DXF entities with `HATCH` solid fills.
+- **PDF output**: JPEG images are embedded natively via DCTDecode; other formats are converted to JPEG automatically.
+- **Caching**: identical images (same source URL and dimensions) are rasterized only once per extraction run, improving performance when the same image appears on multiple elements.
+- **Shadow DOM**: background images and images in shadow roots are now fully supported and embedded.
 
 ### Color Handling
 - Parses `rgb()`, `rgba()`, hex (`#rgb`, `#rrggbb`, `#rrggbbaa`)

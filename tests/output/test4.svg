@@ -3,12 +3,12 @@
 <path d="M0,0 L1264,0 L1264,20 L0,20 Z" fill="none"/>
 <path d="M0,0 L20,0 L20,20 L0,20 Z" fill="none"/>
 <path d="M0,0 L20,0 L20,20 L0,20 Z" fill="none"/>
-<text x="0.65" y="-2.02" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="serif">⚖</text>
+<text x="0.65" y="-2.02" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="serif">&#x2696;</text>
 <path d="M765,299 L1011.58,299 L1011.58,413 L765,413 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <text x="766" y="302" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text>
-<text x="766" y="334" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und Fördererstich AE11/AE12.</text>
-<text x="766" y="366" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebrückt. Im Programm nur noch für</text>
-<text x="766" y="398" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgelöst werden!</text>
+<text x="766" y="334" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und F&#xF6;rdererstich AE11/AE12.</text>
+<text x="766" y="366" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text>
+<text x="766" y="398" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgel&#xF6;st werden!</text>
 <path d="M755,289 L1055,289 L1055,439 L755,439 Z" fill="none"/>
 <path d="M755,289 L1025,289 L1025,461 L755,461 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/>
 <path d="M0,92 L20,92 L20,112 L0,112 Z" fill="none"/>

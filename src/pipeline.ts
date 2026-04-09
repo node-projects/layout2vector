@@ -12,7 +12,7 @@ import {
 } from "./traversal.js";
 import { extractHTMLGeometry } from "./html-extractor.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
-import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache } from "./image-extractor.js";
+import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./image-extractor.js";
 import { isMathMLRoot, extractMathMLFeatures } from "./mathml-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
@@ -28,12 +28,19 @@ import { getElementOrigin } from "./geometry.js";
  *
  * This is the main pipeline entry point.
  */
-export function extractIR(root: Element | Element[], options: Options = {}): IRNode[] {
+export async function extractIR(root: Element | Element[], options: Options = {}): Promise<IRNode[]> {
   const roots = Array.isArray(root) ? root : [root];
   if (roots.length === 0) return [];
 
   // Clear image rasterization cache from previous runs
   clearImageCache();
+
+  // Pre-fetch external images into internal caches (non-destructive to page DOM)
+  if (options.includeImages) {
+    for (const rootEl of roots) {
+      await preloadImages(rootEl);
+    }
+  }
 
   const irNodes: IRNode[] = [];
   let globalIndex = 0;

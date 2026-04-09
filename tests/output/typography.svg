@@ -30,7 +30,7 @@
 <path d="M0,436.6 L1240,436.6 L1240,457.6 L0,457.6 Z" fill="none"/>
 <text x="0" y="438.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Text Overflow</text>
 <rect x="0" y="465.6" width="200" height="34" rx="4" ry="4" fill="rgb(232, 234, 246)"/>
-<text x="8" y="474.6" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This is a very long text…</text>
+<text x="8" y="474.6" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This is a very long text&#x2026;</text>
 <path d="M0,514.6 L1240,514.6 L1240,535.6 L0,535.6 Z" fill="none"/>
 <text x="0" y="516.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Text Alignment</text>
 <path d="M0,543.6 L300,543.6 L300,649.6 L0,649.6 Z" fill="rgb(232, 245, 233)" stroke="rgb(200, 230, 201)" stroke-width="1"/>

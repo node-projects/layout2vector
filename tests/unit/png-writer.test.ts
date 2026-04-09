@@ -12,7 +12,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, {
+      const ir = await (window as any).__HC.extractIR(el, {
         boxType: "border",
         includeText: false,
       });
@@ -40,7 +40,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, {
+      const ir = await (window as any).__HC.extractIR(el, {
         boxType: "border",
         includeText: true,
       });
@@ -75,7 +75,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, {
+      const ir = await (window as any).__HC.extractIR(el, {
         boxType: "border",
         includeText: false,
       });
@@ -102,7 +102,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, { boxType: "border" });
+      const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(150, 80);
       const pngResult = (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
@@ -122,7 +122,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, { boxType: "border" });
+      const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(200, 100);
       const pngResult = (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
@@ -142,7 +142,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, { boxType: "border" });
+      const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
 
       // 1x
       const writer1x = new (window as any).__HC.PNGWriter(100, 50, 1);
@@ -176,7 +176,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, { boxType: "border" });
+      const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(50, 50);
       const pngResult = (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
@@ -205,7 +205,7 @@ test.describe("PNG Writer Output", () => {
 
     const result = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, { boxType: "border" });
+      const ir = await (window as any).__HC.extractIR(el, { boxType: "border" });
       const writer = new (window as any).__HC.PNGWriter(100, 100);
       const pngResult = (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();

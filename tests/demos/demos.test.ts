@@ -130,12 +130,6 @@ for (const demoFile of demoFiles) {
       }, dataUrlMap);
     }
 
-    // Pre-decode images (data URL images may not be decoded after initial load)
-    await page.evaluate(async () => {
-      const root = document.getElementById("root") ?? document.body;
-      await (window as any).__HC.preloadImages(root);
-    });
-
     // Extract IR in the browser
     const ir: IRNode[] = await page.evaluate(() => {
       const root = document.getElementById("root") ?? document.body;
