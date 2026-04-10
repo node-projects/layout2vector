@@ -55,7 +55,7 @@ function walkSVGTree(
 
   // Process this element if it's a renderable SVG shape
   if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement) {
-    const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity);
+    const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity, cs);
     results.push(...nodes);
   }
 
@@ -96,9 +96,10 @@ function extractSVGElement(
   el: SVGGraphicsElement,
   zIndex: number,
   options: Options,
-  effectiveOpacity: number
+  effectiveOpacity: number,
+  preComputedStyle?: CSSStyleDeclaration
 ): IRNode[] {
-  const cs = getComputedStyle(el);
+  const cs = preComputedStyle ?? getComputedStyle(el);
   const ctm = getCtm(el);
   const style = extractSVGStyle(cs, el, ctm);
 
@@ -109,22 +110,22 @@ function extractSVGElement(
 
   switch (tag) {
     case "rect":
-      return extractRect(el as SVGRectElement, style, zIndex);
+      return extractRect(el as SVGRectElement, style, zIndex, ctm);
     case "circle":
-      return extractCircle(el as SVGCircleElement, style, zIndex);
+      return extractCircle(el as SVGCircleElement, style, zIndex, ctm);
     case "ellipse":
-      return extractEllipse(el as SVGEllipseElement, style, zIndex);
+      return extractEllipse(el as SVGEllipseElement, style, zIndex, ctm);
     case "line":
-      return extractLine(el as SVGLineElement, style, zIndex);
+      return extractLine(el as SVGLineElement, style, zIndex, ctm);
     case "polyline":
-      return extractPolyline(el as SVGPolylineElement, style, zIndex, false);
+      return extractPolyline(el as SVGPolylineElement, style, zIndex, false, ctm);
     case "polygon":
-      return extractPolyline(el as SVGPolygonElement, style, zIndex, true);
+      return extractPolyline(el as SVGPolygonElement, style, zIndex, true, ctm);
     case "path":
-      return extractPath(el as SVGPathElement, style, zIndex);
+      return extractPath(el as SVGPathElement, style, zIndex, ctm);
     case "text":
       if (options.includeText !== false) {
-        return extractText(el as SVGTextElement, style, zIndex);
+        return extractText(el as SVGTextElement, style, zIndex, ctm);
       }
       return [];
     default:
@@ -294,9 +295,9 @@ function getCtm(el: SVGGraphicsElement): DOMMatrix {
   return getSvgScreenCtm(el);
 }
 
-/** Transform an array of points using CTM. */
-function transformPoints(points: Point[], el: SVGGraphicsElement): Point[] {
-  const ctm = getCtm(el);
+/** Transform an array of points using a pre-computed or freshly-obtained CTM. */
+function transformPoints(points: Point[], el: SVGGraphicsElement, preCtm?: DOMMatrix): Point[] {
+  const ctm = preCtm ?? getCtm(el);
   return points.map((p) => applyCtm(p, ctm));
 }
 
@@ -310,7 +311,7 @@ function rectToQuad(x: number, y: number, w: number, h: number): Quad {
   ];
 }
 
-function extractRect(el: SVGRectElement, style: Style, zIndex: number): IRNode[] {
+function extractRect(el: SVGRectElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   let x = el.x.baseVal.value;
   let y = el.y.baseVal.value;
   let w = el.width.baseVal.value;
@@ -337,7 +338,6 @@ function extractRect(el: SVGRectElement, style: Style, zIndex: number): IRNode[]
   if (rx && !ry) ry = rx;
   if (ry && !rx) rx = ry;
   if (rx > 0 || ry > 0) {
-    const ctm = getCtm(el);
     const sx = Math.sqrt(ctm.a * ctm.a + ctm.b * ctm.b);
     const sy = Math.sqrt(ctm.c * ctm.c + ctm.d * ctm.d);
     const scaledR = Math.min(rx * sx, ry * sy);
@@ -345,12 +345,12 @@ function extractRect(el: SVGRectElement, style: Style, zIndex: number): IRNode[]
   }
 
   const rawQuad = rectToQuad(x, y, w, h);
-  const transformed = transformPoints(rawQuad, el) as Quad;
+  const transformed = transformPoints(rawQuad, el, ctm) as Quad;
 
   return [{ type: "polygon", points: transformed, style, zIndex }];
 }
 
-function extractCircle(el: SVGCircleElement, style: Style, zIndex: number): IRNode[] {
+function extractCircle(el: SVGCircleElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   const cx = el.cx.baseVal.value;
   const cy = el.cy.baseVal.value;
   const r = el.r.baseVal.value;
@@ -363,11 +363,11 @@ function extractCircle(el: SVGCircleElement, style: Style, zIndex: number): IRNo
     points.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
   }
 
-  const transformed = transformPoints(points, el);
+  const transformed = transformPoints(points, el, ctm);
   return [{ type: "polyline", points: transformed, closed: true, style, zIndex }];
 }
 
-function extractEllipse(el: SVGEllipseElement, style: Style, zIndex: number): IRNode[] {
+function extractEllipse(el: SVGEllipseElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   const cx = el.cx.baseVal.value;
   const cy = el.cy.baseVal.value;
   const rx = el.rx.baseVal.value;
@@ -381,15 +381,15 @@ function extractEllipse(el: SVGEllipseElement, style: Style, zIndex: number): IR
     points.push({ x: cx + rx * Math.cos(angle), y: cy + ry * Math.sin(angle) });
   }
 
-  const transformed = transformPoints(points, el);
+  const transformed = transformPoints(points, el, ctm);
   return [{ type: "polyline", points: transformed, closed: true, style, zIndex }];
 }
 
-function extractLine(el: SVGLineElement, style: Style, zIndex: number): IRNode[] {
+function extractLine(el: SVGLineElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   const p1: Point = { x: el.x1.baseVal.value, y: el.y1.baseVal.value };
   const p2: Point = { x: el.x2.baseVal.value, y: el.y2.baseVal.value };
 
-  const transformed = transformPoints([p1, p2], el);
+  const transformed = transformPoints([p1, p2], el, ctm);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed: false, style, zIndex }];
   results.push(...extractMarkers(el, transformed, style, zIndex, false));
   return results;
@@ -399,7 +399,8 @@ function extractPolyline(
   el: SVGPolylineElement | SVGPolygonElement,
   style: Style,
   zIndex: number,
-  closed: boolean
+  closed: boolean,
+  ctm: DOMMatrix
 ): IRNode[] {
   const points: Point[] = [];
   const numPoints = el.points.numberOfItems;
@@ -411,36 +412,38 @@ function extractPolyline(
 
   if (points.length === 0) return [];
 
-  const transformed = transformPoints(points, el);
+  const transformed = transformPoints(points, el, ctm);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
   results.push(...extractMarkers(el, transformed, style, zIndex, closed));
   return results;
 }
 
-function extractPath(el: SVGPathElement, style: Style, zIndex: number): IRNode[] {
+function extractPath(el: SVGPathElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   // Try getPathData if available (modern API)
   if (typeof (el as any).getPathData === "function") {
-    return extractPathFromPathData(el, style, zIndex);
+    return extractPathFromPathData(el, style, zIndex, ctm);
   }
 
   // Fallback: sample via getPointAtLength
-  return extractPathBySampling(el, style, zIndex);
+  return extractPathBySampling(el, style, zIndex, ctm);
 }
 
 function extractPathFromPathData(
   el: SVGPathElement,
   style: Style,
-  zIndex: number
+  zIndex: number,
+  ctm: DOMMatrix
 ): IRNode[] {
   // getPathData returns normalized path segments
   // Still sample for consistent output
-  return extractPathBySampling(el, style, zIndex);
+  return extractPathBySampling(el, style, zIndex, ctm);
 }
 
 function extractPathBySampling(
   el: SVGPathElement,
   style: Style,
-  zIndex: number
+  zIndex: number,
+  ctm: DOMMatrix
 ): IRNode[] {
   let totalLength: number;
   try {
@@ -464,7 +467,7 @@ function extractPathBySampling(
     points.push({ x: pt.x, y: pt.y });
   }
 
-  const transformed = transformPoints(points, el);
+  const transformed = transformPoints(points, el, ctm);
   const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
   results.push(...extractMarkers(el, transformed, style, zIndex, closed));
   return results;
@@ -667,12 +670,12 @@ function extractMarkers(
   return results;
 }
 
-function extractText(el: SVGTextElement, style: Style, zIndex: number): IRNode[] {
+function extractText(el: SVGTextElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
   const bbox = el.getBBox();
   if (bbox.width === 0 && bbox.height === 0) return [];
 
   const rawQuad = rectToQuad(bbox.x, bbox.y, bbox.width, bbox.height);
-  const transformed = transformPoints(rawQuad, el) as Quad;
+  const transformed = transformPoints(rawQuad, el, ctm) as Quad;
 
   // Skip text that is fully outside the SVG viewport (SVGs default to overflow:hidden).
   // We only discard entirely-invisible text — partially visible text keeps its original

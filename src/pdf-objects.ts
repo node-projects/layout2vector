@@ -39,9 +39,9 @@ export class PdfNumber implements PdfSerializable {
   constructor(public value: number) {}
   serialize(): string {
     if (Number.isInteger(this.value)) return this.value.toString();
-    // Use enough precision but trim trailing zeros
-    const s = this.value.toFixed(6);
-    return s.replace(/\.?0+$/, "");
+    const rounded = Math.round(this.value * 1000000) / 1000000;
+    if (Number.isInteger(rounded)) return rounded.toString();
+    return rounded.toString();
   }
 }
 
@@ -209,68 +209,79 @@ export class PdfDocument {
 
   private buildPdf(): Uint8Array {
     const encoder = new TextEncoder();
-    const chunks: Uint8Array[] = [];
+
+    // Phase 1: Build text parts into string segments, tracking binary inserts.
+    // For objects without binary data, we can batch them into a single string.
+    const textParts: string[] = [];
+    const binaryInserts: { afterTextIndex: number; data: Uint8Array }[] = [];
     const offsets = new Map<number, number>();
     let pos = 0;
 
-    const write = (s: string): void => {
-      const bytes = encoder.encode(s);
-      chunks.push(bytes);
-      pos += bytes.length;
-    };
-
-    const writeBinary = (data: Uint8Array): void => {
-      chunks.push(data);
-      pos += data.length;
+    const addText = (s: string): void => {
+      textParts.push(s);
+      // Count bytes (ASCII-safe for PDF structural text)
+      pos += s.length;
     };
 
     // Header
-    write("%PDF-1.4\n");
-    // Binary comment to indicate binary content
-    write("%\xE2\xE3\xCF\xD3\n");
+    addText("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
 
     // Body: indirect objects
     for (const obj of this.objects) {
       offsets.set(obj.objNum, pos);
-      write(`${obj.objNum} 0 obj\n`);
 
-      // Check for binary stream content
       if (obj.content instanceof PdfStream && obj.content.binaryData) {
         const stream = obj.content;
         const binaryData = stream.binaryData!;
         stream.header.set("Length", new PdfNumber(binaryData.length));
-        write(`${stream.header.serialize()}\nstream\n`);
-        writeBinary(binaryData);
-        write("\nendstream");
+        addText(`${obj.objNum} 0 obj\n${stream.header.serialize()}\nstream\n`);
+        // Mark binary insert point
+        binaryInserts.push({ afterTextIndex: textParts.length - 1, data: binaryData });
+        pos += binaryData.length;
+        addText("\nendstream\nendobj\n");
       } else {
-        write(obj.serializeBody());
+        addText(`${obj.objNum} 0 obj\n${obj.serializeBody()}\nendobj\n`);
       }
-
-      write("\nendobj\n");
     }
 
     // Cross-reference table
     const xrefOffset = pos;
-    const totalObjs = this.nextObjNum; // includes object 0
-    write("xref\n");
-    write(`0 ${totalObjs}\n`);
-    // Object 0: free entry
-    write("0000000000 65535 f \n");
+    const totalObjs = this.nextObjNum;
+    const xrefLines: string[] = [`xref\n0 ${totalObjs}\n0000000000 65535 f \n`];
     for (let i = 1; i < totalObjs; i++) {
       const offset = offsets.get(i) ?? 0;
-      write(`${offset.toString().padStart(10, "0")} 00000 n \n`);
+      xrefLines.push(`${offset.toString().padStart(10, "0")} 00000 n \n`);
     }
 
     // Trailer
     this.trailerDict.set("Size", new PdfNumber(totalObjs));
-    write("trailer\n");
-    write(this.trailerDict.serialize());
-    write("\nstartxref\n");
-    write(`${xrefOffset}\n`);
-    write("%%EOF\n");
+    xrefLines.push(`trailer\n${this.trailerDict.serialize()}\nstartxref\n${xrefOffset}\n%%EOF\n`);
+    addText(xrefLines.join(""));
 
-    // Concatenate all chunks
-    const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+    // Phase 2: If no binary data, encode the whole thing in one shot
+    if (binaryInserts.length === 0) {
+      return encoder.encode(textParts.join(""));
+    }
+
+    // Phase 2b: With binary data, we need to interleave text and binary
+    const chunks: Uint8Array[] = [];
+    let totalLength = 0;
+    const binaryMap = new Map<number, Uint8Array>();
+    for (const bi of binaryInserts) {
+      binaryMap.set(bi.afterTextIndex, bi.data);
+    }
+
+    for (let i = 0; i < textParts.length; i++) {
+      const encoded = encoder.encode(textParts[i]);
+      chunks.push(encoded);
+      totalLength += encoded.length;
+      const binData = binaryMap.get(i);
+      if (binData) {
+        chunks.push(binData);
+        totalLength += binData.length;
+      }
+    }
+
     const result = new Uint8Array(totalLength);
     let offset = 0;
     for (const chunk of chunks) {

@@ -53,10 +53,22 @@ function dataUrlToExtension(dataUrl: string): string {
   return "jpg";
 }
 
+/** Color conversion cache to avoid repeated regex parsing. */
+const hexColorCache = new Map<string, string | undefined>();
+
 /** Parse a CSS color, returning hex and alpha. Returns undefined for invisible colors. */
 function cssColorToHex(color: string | undefined): string | undefined {
   if (!color || color === "transparent" || color === "none") return undefined;
+  const cached = hexColorCache.get(color);
+  if (cached !== undefined) return cached;
+  const result = cssColorToHexUncached(color);
+  // Limit cache size to prevent unbounded memory growth
+  if (hexColorCache.size > 2000) hexColorCache.clear();
+  hexColorCache.set(color, result);
+  return result;
+}
 
+function cssColorToHexUncached(color: string): string | undefined {
   // Handle hex colors
   if (color.startsWith("#")) {
     // Normalize #rgb to #rrggbb

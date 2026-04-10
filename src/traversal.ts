@@ -33,14 +33,24 @@ function extractGradientColor(bgImage: string): string | undefined {
 /** Extract a subset of computed styles relevant to rendering. */
 export function extractStyle(cs: CSSStyleDeclaration): Style {
   // Determine fill: prefer backgroundColor, fall back to gradient first color stop
-  let fill: string | undefined = cs.backgroundColor || cs.fill || undefined;
-  const bgImage = cs.backgroundImage || undefined;
+  const bgColor = cs.backgroundColor;
+  let fill: string | undefined = bgColor || cs.fill || undefined;
+  const bgImage = cs.backgroundImage;
+  const bgImageVal = bgImage || undefined;
 
   // If backgroundColor is transparent but there's a gradient, extract its first color
-  if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImage && bgImage !== "none") {
-    const gradientColor = extractGradientColor(bgImage);
+  if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImageVal && bgImageVal !== "none") {
+    const gradientColor = extractGradientColor(bgImageVal);
     if (gradientColor) fill = gradientColor;
   }
+
+  // Read opacity once
+  const opacityStr = cs.opacity;
+  const opacity = opacityStr ? parseFloat(opacityStr) : undefined;
+
+  // Read z-index once
+  const zIndexStr = cs.zIndex;
+  const zIndex = zIndexStr && zIndexStr !== "auto" ? parseInt(zIndexStr, 10) : undefined;
 
   return {
     fill,
@@ -58,8 +68,8 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     textShadow: cs.textShadow || undefined,
     lineHeight: cs.lineHeight || undefined,
 
-    opacity: cs.opacity ? parseFloat(cs.opacity) : undefined,
-    zIndex: cs.zIndex && cs.zIndex !== "auto" ? parseInt(cs.zIndex, 10) : undefined,
+    opacity,
+    zIndex,
 
     borderTopColor: cs.borderTopColor || undefined,
     borderRightColor: cs.borderRightColor || undefined,
@@ -75,7 +85,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     borderLeftStyle: cs.borderLeftStyle || undefined,
 
     borderRadius: cs.borderRadius || undefined,
-    backgroundImage: cs.backgroundImage || undefined,
+    backgroundImage: bgImageVal,
     boxShadow: cs.boxShadow || undefined,
     transform: cs.transform || undefined,
     overflow: cs.overflowX || undefined,
@@ -244,7 +254,32 @@ export function flattenStackingOrder(root: StackingNode): StackingNode[] {
 }
 
 function collectInOrder(node: StackingNode, result: StackingNode[]): void {
-  // Separate children into groups
+  // Fast path: no children (leaf node) — just add self
+  if (node.children.length === 0) {
+    result.push(node);
+    return;
+  }
+
+  // Check if any children create stacking contexts with non-zero z-index
+  let hasNegZ = false;
+  let hasPosZ = false;
+  for (const child of node.children) {
+    if (child.createsStackingContext) {
+      if (child.zIndex < 0) hasNegZ = true;
+      else if (child.zIndex > 0) hasPosZ = true;
+    }
+  }
+
+  // Fast path: no stacking contexts with non-zero z — all children are zero/auto
+  if (!hasNegZ && !hasPosZ) {
+    result.push(node);
+    for (const child of node.children) {
+      collectInOrder(child, result);
+    }
+    return;
+  }
+
+  // Full path: need to separate and sort z-index groups
   const negativeZ: StackingNode[] = [];
   const zeroZ: StackingNode[] = [];
   const positiveZ: StackingNode[] = [];
@@ -263,24 +298,19 @@ function collectInOrder(node: StackingNode, result: StackingNode[]): void {
     }
   }
 
-  // Sort negative and positive by z-index (stable within same z)
   negativeZ.sort((a, b) => a.zIndex - b.zIndex);
   positiveZ.sort((a, b) => a.zIndex - b.zIndex);
 
-  // 1. Negative z-index children
   for (const child of negativeZ) {
     collectInOrder(child, result);
   }
 
-  // 2. The node itself
   result.push(node);
 
-  // 3. Zero / auto z-index children (DOM order preserved)
   for (const child of zeroZ) {
     collectInOrder(child, result);
   }
 
-  // 4. Positive z-index children
   for (const child of positiveZ) {
     collectInOrder(child, result);
   }

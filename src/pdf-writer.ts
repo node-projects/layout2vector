@@ -27,8 +27,21 @@ import { roundedQuadPath } from "./geometry.js";
 
 interface ParsedColor { r: number; g: number; b: number; a: number; }
 
+/** Color parsing cache to avoid repeated regex matching. */
+const colorCache = new Map<string, ParsedColor | null>();
+
 function parseColor(color: string | undefined): ParsedColor | null {
   if (!color || color === "transparent" || color === "none") return null;
+  const cached = colorCache.get(color);
+  if (cached !== undefined) return cached;
+  const result = parseColorUncached(color);
+  // Limit cache size to prevent unbounded memory growth
+  if (colorCache.size > 2000) colorCache.clear();
+  colorCache.set(color, result);
+  return result;
+}
+
+function parseColorUncached(color: string): ParsedColor | null {
   if (color.startsWith("#")) {
     let hex = color.slice(1);
     if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
@@ -82,7 +95,10 @@ function pxToPt(px: number): number { return px * 0.75; }
 /** Format a number for PDF content stream operators. */
 function pn(n: number): string {
   if (Number.isInteger(n)) return n.toString();
-  return n.toFixed(4).replace(/\.?0+$/, "");
+  // Faster than toFixed+regex: round to 4 decimal places manually
+  const rounded = Math.round(n * 10000) / 10000;
+  if (Number.isInteger(rounded)) return rounded.toString();
+  return rounded.toString();
 }
 
 /**
@@ -629,11 +645,11 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   /** Emit polygon path (4 points) in PDF coordinates. */
   private emitQuadPath(points: Quad): void {
-    const xs = points.map(p => this.ptX(p.x));
-    const ys = points.map(p => this.ptY(p.y));
-    this.ops.push(`${pn(xs[0])} ${pn(ys[0])} m`);
-    for (let i = 1; i < 4; i++) this.ops.push(`${pn(xs[i])} ${pn(ys[i])} l`);
-    this.ops.push("h");
+    const x0 = pn(this.ptX(points[0].x)), y0 = pn(this.ptY(points[0].y));
+    const x1 = pn(this.ptX(points[1].x)), y1 = pn(this.ptY(points[1].y));
+    const x2 = pn(this.ptX(points[2].x)), y2 = pn(this.ptY(points[2].y));
+    const x3 = pn(this.ptX(points[3].x)), y3 = pn(this.ptY(points[3].y));
+    this.ops.push(`${x0} ${y0} m`, `${x1} ${y1} l`, `${x2} ${y2} l`, `${x3} ${y3} l`, "h");
   }
 
   /** Emit a rounded-rectangle path in PDF coordinates. */

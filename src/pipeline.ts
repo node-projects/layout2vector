@@ -116,14 +116,15 @@ export async function extractIR(root: Element | Element[], options: Options = {}
   }
 
   // 4. Offset coordinates so they are relative to the coordinate root's top-left
+  //    and apply zoom in a single pass if both are needed
   const coordRoot = options.coordinateRoot ?? roots[0];
   const rootOrigin = getElementOrigin(coordRoot);
-  offsetIRNodes(irNodes, rootOrigin.x, rootOrigin.y);
-
-  // 5. Apply zoom factor if specified
   const zoom = options.zoom ?? 1;
+
   if (zoom !== 1) {
-    scaleIRNodes(irNodes, zoom);
+    offsetAndScaleIRNodes(irNodes, rootOrigin.x, rootOrigin.y, zoom);
+  } else {
+    offsetIRNodes(irNodes, rootOrigin.x, rootOrigin.y);
   }
 
   return irNodes;
@@ -206,6 +207,54 @@ function scaleIRNodes(nodes: IRNode[], zoom: number): void {
       s.clipBounds.h *= zoom;
       s.clipBounds.radius *= zoom;
       scaledClips.add(s.clipBounds);
+    }
+  }
+}
+
+/**
+ * Combined offset + scale in a single pass over all nodes.
+ * Subtracts (ox, oy) then multiplies by zoom for every coordinate.
+ */
+function offsetAndScaleIRNodes(nodes: IRNode[], ox: number, oy: number, zoom: number): void {
+  const processedClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
+  for (const node of nodes) {
+    switch (node.type) {
+      case "polygon":
+        for (const p of node.points) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
+        break;
+      case "polyline":
+        for (const p of node.points) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
+        break;
+      case "text":
+        for (const p of node.quad) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
+        break;
+      case "image":
+        for (const p of node.quad) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
+        node.width = Math.round(node.width * zoom);
+        node.height = Math.round(node.height * zoom);
+        break;
+    }
+    // Scale style properties
+    const s = node.style;
+    if (s.fontSize) { const v = parseFloat(s.fontSize); if (!isNaN(v)) s.fontSize = `${v * zoom}px`; }
+    if (s.strokeWidth) { const v = parseFloat(s.strokeWidth); if (!isNaN(v)) s.strokeWidth = `${v * zoom}px`; }
+    if (s.borderTopWidth) { const v = parseFloat(s.borderTopWidth); if (!isNaN(v)) s.borderTopWidth = `${v * zoom}px`; }
+    if (s.borderRightWidth) { const v = parseFloat(s.borderRightWidth); if (!isNaN(v)) s.borderRightWidth = `${v * zoom}px`; }
+    if (s.borderBottomWidth) { const v = parseFloat(s.borderBottomWidth); if (!isNaN(v)) s.borderBottomWidth = `${v * zoom}px`; }
+    if (s.borderLeftWidth) { const v = parseFloat(s.borderLeftWidth); if (!isNaN(v)) s.borderLeftWidth = `${v * zoom}px`; }
+    if (s.borderRadius) {
+      s.borderRadius = s.borderRadius.split(/\s+/).map(v => {
+        const n = parseFloat(v);
+        return isNaN(n) ? v : `${n * zoom}px`;
+      }).join(" ");
+    }
+    if (s.clipBounds && !processedClips.has(s.clipBounds)) {
+      s.clipBounds.x = (s.clipBounds.x - ox) * zoom;
+      s.clipBounds.y = (s.clipBounds.y - oy) * zoom;
+      s.clipBounds.w *= zoom;
+      s.clipBounds.h *= zoom;
+      s.clipBounds.radius *= zoom;
+      processedClips.add(s.clipBounds);
     }
   }
 }

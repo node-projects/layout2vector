@@ -292,7 +292,9 @@ function lerpPt(a: Point, b: Point, t: number): Point {
 
 /**
  * Split a text node's content into per-line strings by detecting
- * line breaks via character-level Range.getClientRects().
+ * line breaks via Range.getClientRects().
+ * Uses a coarse-then-fine approach: first checks every Nth character,
+ * then narrows down to find exact line break positions via binary search.
  * Returns one string per visual line.
  */
 function splitTextByLines(textNode: Text, expectedLines: number): string[] {
@@ -300,6 +302,100 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   if (!text) return [];
 
   const range = document.createRange();
+
+  /** Get the top position of a character at index i, or null if no rect. */
+  function charTop(i: number): { top: number; height: number } | null {
+    range.setStart(textNode, i);
+    range.setEnd(textNode, Math.min(i + 1, text.length));
+    const rects = range.getClientRects();
+    if (rects.length === 0) return null;
+    const r = rects[0];
+    if (r.width === 0 && r.height === 0) return null;
+    return { top: r.top, height: r.height };
+  }
+
+  // For short text (< 80 chars) or few expected lines, use simple linear scan
+  if (text.length < 80 || expectedLines <= 2) {
+    return splitTextByLinesLinear(textNode, text, range);
+  }
+
+  // Coarse pass: sample every STEP characters to find approximate break regions
+  const STEP = Math.max(4, Math.floor(text.length / (expectedLines * 8)));
+  const lines: string[] = [];
+  let lineStart = 0;
+  let prevInfo: { top: number; height: number } | null = null;
+
+  // Find the first valid position to get initial top
+  for (let i = 0; i < text.length && !prevInfo; i++) {
+    prevInfo = charTop(i);
+  }
+  if (!prevInfo) return [text];
+
+  // Scan with coarse step to find regions where line breaks occur
+  const breakIndices: number[] = [];
+  let lastTop = prevInfo.top;
+  let lastHeight = prevInfo.height;
+
+  for (let i = STEP; i < text.length; i += STEP) {
+    const info = charTop(i);
+    if (!info) continue;
+    if (Math.abs(info.top - lastTop) > lastHeight * 0.5) {
+      // Line break somewhere between (i - STEP) and i — binary search for exact position
+      let lo = Math.max(0, i - STEP);
+      let hi = i;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        const midInfo = charTop(mid);
+        if (!midInfo) { lo = mid + 1; continue; }
+        if (Math.abs(midInfo.top - lastTop) > lastHeight * 0.5) {
+          hi = mid;
+        } else {
+          lo = mid + 1;
+        }
+      }
+      breakIndices.push(lo);
+      lines.push(text.substring(lineStart, lo));
+      lineStart = lo;
+      // Update reference position from the new line
+      const newInfo = charTop(lo);
+      if (newInfo) { lastTop = newInfo.top; lastHeight = newInfo.height; }
+    } else {
+      lastTop = info.top;
+      lastHeight = info.height;
+    }
+  }
+
+  // Check the last segment for any remaining breaks (between last coarse sample and end)
+  // Only needed if last coarse sample was far from end
+  const lastSample = Math.floor((text.length - 1) / STEP) * STEP;
+  if (text.length - lastSample > STEP / 2) {
+    const endInfo = charTop(text.length - 1);
+    if (endInfo && Math.abs(endInfo.top - lastTop) > lastHeight * 0.5) {
+      let lo = lastSample;
+      let hi = text.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        const midInfo = charTop(mid);
+        if (!midInfo) { lo = mid + 1; continue; }
+        if (Math.abs(midInfo.top - lastTop) > lastHeight * 0.5) {
+          hi = mid;
+        } else {
+          lo = mid + 1;
+        }
+      }
+      lines.push(text.substring(lineStart, lo));
+      lineStart = lo;
+    }
+  }
+
+  // Push last line
+  lines.push(text.substring(lineStart));
+
+  return lines;
+}
+
+/** Simple linear character-by-character line splitting for short text. */
+function splitTextByLinesLinear(textNode: Text, text: string, range: Range): string[] {
   const lines: string[] = [];
   let lineStart = 0;
   let prevTop: number | null = null;
@@ -314,7 +410,6 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
     if (r.width === 0 && r.height === 0) continue;
 
     if (prevTop !== null && Math.abs(r.top - prevTop) > prevHeight * 0.5) {
-      // Line break detected — save previous line
       lines.push(text.substring(lineStart, i));
       lineStart = i;
     }
@@ -322,8 +417,6 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
     prevHeight = r.height;
   }
 
-  // Push last line
   lines.push(text.substring(lineStart));
-
   return lines;
 }
