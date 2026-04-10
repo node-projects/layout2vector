@@ -42,6 +42,7 @@
 <text x="292.51" y="306.48" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip1)"><use href="#imgSym2" x="308.48" y="302.48" width="19.5" height="19.5"/></g>
 <text x="271.67" y="250.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="302.4" y="270.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,302.4,270.15)">&#xE5;</text>
 <g clip-path="url(#clip1)"><path d="M245.87,280.38 L257.57,280.38 L257.57,292.08 L245.87,292.08 Z" fill="rgb(111, 216, 146)"/></g>
 <text x="247.1" y="282.69" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="7.02px" font-family="serif">TO</text>
 <g clip-path="url(#clip1)"><path d="M258.57,280.38 L270.27,280.38 L270.27,292.08 L258.57,292.08 Z" fill="rgb(111, 216, 146)"/></g>
@@ -199,6 +200,7 @@
 <text x="295.51" y="439.48" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip20)"><use href="#imgSym2" x="311.48" y="435.48" width="19.5" height="19.5"/></g>
 <text x="264.92" y="383.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="295.65" y="403.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,295.65,403.15)">&#xE5;</text>
 <text x="304.98" y="383.3" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="serif">R</text>
 <g clip-path="url(#clip20)"><use href="#imgSym3" x="248" y="330.91" width="21.98" height="21.98" opacity="0.3"/></g>
 <path d="M244,61 L426,61 L426,197 L244,197 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="3"/>
@@ -222,6 +224,7 @@
 <text x="295.51" y="179.48" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip22)"><use href="#imgSym2" x="311.48" y="175.48" width="19.5" height="19.5"/></g>
 <text x="274.67" y="123.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="305.4" y="143.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,305.4,143.15)">&#xE5;</text>
 <g clip-path="url(#clip22)"><use href="#imgSym3" x="248" y="70.91" width="21.98" height="21.98" opacity="0.3"/></g>
 <path d="M68,61 L250,61 L250,197 L68,197 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="3"/>
 <path d="M159,64 L249,64 L249,196 L159,196 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
@@ -238,6 +241,7 @@
 <text x="119.51" y="179.48" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip24)"><use href="#imgSym2" x="135.48" y="175.48" width="19.5" height="19.5"/></g>
 <text x="79.17" y="123.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="109.9" y="143.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,109.9,143.15)">&#xE5;</text>
 <text x="119.23" y="123.3" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="serif">R</text>
 <text x="136.12" y="121.8" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="serif">&#x2696;</text>
 <g clip-path="url(#clip24)"><path d="M72.87,153.38 L84.57,153.38 L84.57,165.08 L72.87,165.08 Z" fill="rgb(111, 216, 146)"/></g>
@@ -253,6 +257,7 @@
 <text x="912.56" y="806.58" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">BA71</text>
 <text x="947.83" y="830.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">1023</text>
 <text x="907.67" y="854.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="938.4" y="874.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,938.4,874.15)">&#xE5;</text>
 <g clip-path="url(#clip25)"><path d="M881.87,884.38 L893.57,884.38 L893.57,896.08 L881.87,896.08 Z" fill="rgb(111, 216, 146)"/></g>
 <text x="883.43" y="886.69" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="7.02px" font-family="serif">ET</text>
 <g clip-path="url(#clip25)"><use href="#imgSym3" x="881" y="801.91" width="21.98" height="21.98" opacity="0.3"/></g>
@@ -277,6 +282,7 @@
 <text x="752.51" y="910.47" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip27)"><use href="#imgSym2" x="768.48" y="906.48" width="19.5" height="19.5"/></g>
 <text x="712.17" y="854.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="742.9" y="874.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,742.9,874.15)">&#xE5;</text>
 <text x="752.23" y="854.3" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="serif">R</text>
 <text x="769.12" y="852.8" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="serif">&#x2696;</text>
 <g clip-path="url(#clip27)"><use href="#imgSym3" x="705" y="801.91" width="21.98" height="21.98" opacity="0.3"/></g>
@@ -286,6 +292,7 @@
 <text x="912.84" y="1066.58" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="serif">BA11</text>
 <text x="947.83" y="1090.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">1017</text>
 <text x="907.67" y="1114.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="938.4" y="1134.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,938.4,1134.15)">&#xE5;</text>
 <g clip-path="url(#clip28)"><path d="M881.87,1144.38 L893.57,1144.38 L893.57,1156.08 L881.87,1156.08 Z" fill="rgb(111, 216, 146)"/></g>
 <text x="883.1" y="1146.69" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="7.02px" font-family="serif">TO</text>
 <g clip-path="url(#clip28)"><path d="M894.57,1144.38 L906.27,1144.38 L906.27,1156.08 L894.57,1156.08 Z" fill="rgb(111, 216, 146)"/></g>
@@ -304,6 +311,7 @@
 <text x="752.51" y="1170.47" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="11.7px" font-family="serif">3=</text>
 <g clip-path="url(#clip30)"><use href="#imgSym2" x="768.48" y="1166.48" width="19.5" height="19.5"/></g>
 <text x="731.67" y="1114.32" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings">&#xE5;</text>
+<text x="762.4" y="1134.15" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="19.5px" font-family="Wingdings" transform="rotate(180,762.4,1134.15)">&#xE5;</text>
 <g clip-path="url(#clip30)"><use href="#imgSym3" x="705" y="1061.91" width="21.98" height="21.98" opacity="0.3"/></g>
 <path d="M700.4,922 L790.4,922 L790.4,1054 L700.4,1054 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <g clip-path="url(#clip31)"><path d="M701.4,923 L789.37,923 L789.37,956.8 L701.4,956.8 Z" fill="rgb(111, 216, 146)"/></g>

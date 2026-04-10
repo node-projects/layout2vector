@@ -125,10 +125,16 @@ function hasVisibleStroke(style: Style): boolean {
 }
 
 /** Parse border-radius to a radius value in pixels. */
-function parseBorderRadius(borderRadius: string | undefined): number {
+function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): number {
   if (!borderRadius || borderRadius === "0px") return 0;
   const val = parseFloat(borderRadius);
-  return isNaN(val) ? 0 : val;
+  if (isNaN(val) || val <= 0) return 0;
+  if (borderRadius.includes("%")) {
+    // Resolve percentage against element dimensions (average of width/height for uniform radius)
+    const avgDim = ((elWidth ?? 0) + (elHeight ?? 0)) / 2;
+    return avgDim > 0 ? avgDim * val / 100 : val;
+  }
+  return val;
 }
 
 /** Generate arc points for a rounded corner. */
@@ -158,11 +164,20 @@ export type DXFWriterOptions = {
   maxY?: number;
   /** Scale factor applied to the maxY coordinate. */
   zoom?: number;
+  /**
+   * When true, raster images are embedded directly in the DXF file as data URLs
+   * in the IMAGEDEF path field. This avoids the need for external image files,
+   * but may not be supported by all DXF viewers.
+   * When false (default), images are stored as external file references and the
+   * actual image data is available in the `imageFiles` map.
+   */
+  embedImages?: boolean;
 };
 
 export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriterType;
   private maxY: number;
+  private embedImages: boolean;
   private imageCounter = 0;
   private fontStyles = new Map<string, string>();
 
@@ -170,6 +185,7 @@ export class DXFWriter implements Writer<string> {
    * Image files referenced by the DXF output.
    * Maps relative file paths (as used in the DXF IMAGE entities) to data URL strings.
    * After calling `end()`, save these files alongside the DXF to display raster images.
+   * Empty when `embedImages` is true.
    */
   imageFiles = new Map<string, string>();
 
@@ -181,9 +197,11 @@ export class DXFWriter implements Writer<string> {
     if (typeof optionsOrMaxY === "object") {
       const z = optionsOrMaxY.zoom ?? 1;
       this.maxY = (optionsOrMaxY.maxY ?? 1000) * z;
+      this.embedImages = optionsOrMaxY.embedImages ?? false;
     } else {
       const z = zoom ?? 1;
       this.maxY = (optionsOrMaxY ?? 1000) * z;
+      this.embedImages = false;
     }
   }
 
@@ -242,7 +260,9 @@ export class DXFWriter implements Writer<string> {
     const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
     // Check for rounded rect
-    const radius = parseBorderRadius(style.borderRadius);
+    const dxfElW = Math.abs(points[1].x - points[0].x);
+    const dxfElH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, dxfElW, dxfElH);
     if (radius > 0 && isAxisAlignedRect(points)) {
       const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
@@ -407,13 +427,19 @@ export class DXFWriter implements Writer<string> {
   }
 
   async drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): Promise<void> {
-    // Determine file extension from data URL MIME type
-    const ext = dataUrlToExtension(dataUrl);
     const idx = ++this.imageCounter;
-    const fileName = `images/image${idx}.${ext}`;
+    let imagePath: string;
 
-    // Store the image data for external saving
-    this.imageFiles.set(fileName, dataUrl);
+    if (this.embedImages) {
+      // Embed the image data directly in the DXF as a data URL
+      imagePath = dataUrl;
+    } else {
+      // Reference as external file
+      const ext = dataUrlToExtension(dataUrl);
+      const fileName = `images/image${idx}.${ext}`;
+      this.imageFiles.set(fileName, dataUrl);
+      imagePath = fileName;
+    }
 
     // Compute rotation angle from the top edge of the quad (topLeft → topRight)
     const dx = quad[1].x - quad[0].x;
@@ -435,7 +461,7 @@ export class DXFWriter implements Writer<string> {
 
     const Point3d = point3d!;
     this.dxf.addImage(
-      fileName,
+      imagePath,
       `image${idx}`,
       Point3d(x, y, 0),
       width,

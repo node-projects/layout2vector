@@ -92,6 +92,11 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 | `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |
+| `svgToVector` | `boolean` | `false` | When true, embedded SVG images (in `<img>` tags and CSS `background-image`) are always converted to vector IR nodes (polygon, polyline, text) instead of being rasterized to bitmap image nodes. This produces resolution-independent output but may not accurately render SVGs that use fill-rule:evenodd with complex multi-subpath paths. |
+
+
+**Note:**
+If `svgToVector` is `true`, all embedded SVG images are vectorized, even if they use `fill-rule:evenodd`. This produces resolution-independent output, but may not exactly match browser rendering for complex SVGs with multiple subpaths and evenodd fill rules. By default (`svgToVector: false`), such SVGs are rasterized to ensure visual fidelity.
 
 #### `async renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T>`
 

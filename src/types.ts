@@ -113,6 +113,15 @@ export type Options = {
    * Defaults to 1 (images rendered at display resolution).
    */
   imageScale?: number;
+  /**
+   * When true, embedded SVG images (in `<img>` tags and CSS `background-image`)
+   * are converted directly to vector IR nodes (polygon, polyline, text) instead
+   * of being rasterized to bitmap image nodes. This produces resolution-independent
+   * output but may not accurately render SVGs that use fill-rule:evenodd with
+   * complex multi-subpath paths.
+   * Defaults to false (SVGs with evenodd multi-subpath paths are rasterized).
+   */
+  svgToVector?: boolean;
 };
 
 /** Writer interface for output generation. */

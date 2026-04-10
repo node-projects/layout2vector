@@ -58,11 +58,17 @@ function parseVisibleColor(color: string | undefined): ParsedColor | null {
   return c && c.a > 0 ? c : null;
 }
 
-function parseBorderRadius(borderRadius: string | undefined): { rx: number; ry: number } | null {
+function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): { rx: number; ry: number } | null {
   if (!borderRadius || borderRadius === "0px") return null;
+  const hasPercent = borderRadius.includes("%");
   const parts = borderRadius.split(/\s+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
   if (parts.length === 0) return null;
-  return { rx: parts[0], ry: parts.length > 1 ? parts[1] : parts[0] };
+  let rx = parts[0], ry = parts.length > 1 ? parts[1] : parts[0];
+  if (hasPercent) {
+    rx = (elWidth ?? 0) * rx / 100 || rx;
+    ry = (elHeight ?? 0) * ry / 100 || ry;
+  }
+  return { rx, ry };
 }
 
 function isAxisAlignedRect(points: Quad): boolean {
@@ -889,14 +895,16 @@ export class PDFWriter implements Writer<PdfDocument> {
     const paintOp = this.applyStyleOps(style);
     if (!paintOp) { this.ops.push("Q"); return; }
 
-    const radius = parseBorderRadius(style.borderRadius);
+    const elW = Math.abs(points[1].x - points[0].x);
+    const elH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, elW, elH);
     if (radius && isAxisAlignedRect(points)) {
       const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
       const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-      const w = pxToPt(Math.abs(points[1].x - points[0].x));
-      const h = pxToPt(Math.abs(points[3].y - points[0].y));
-      const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
-      const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
+      const w = pxToPt(elW);
+      const h = pxToPt(elH);
+      const rx = pxToPt(Math.min(radius.rx, elW / 2));
+      const ry = pxToPt(Math.min(radius.ry, elH / 2));
       this.emitRoundedRectPath(left, top, w, h, rx, ry);
     } else if (radius && !isAxisAlignedRect(points)) {
       // Non-axis-aligned quad with border-radius: use rounded quad path
@@ -1611,14 +1619,16 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
 
     // Clip path
-    const radius = parseBorderRadius(style.borderRadius);
+    const gradElW = Math.abs(points[1].x - points[0].x);
+    const gradElH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, gradElW, gradElH);
     if (radius && isAxisAlignedRect(points)) {
       const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
       const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-      const rw = pxToPt(Math.abs(points[1].x - points[0].x));
-      const rh = pxToPt(Math.abs(points[3].y - points[0].y));
-      const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
-      const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
+      const rw = pxToPt(gradElW);
+      const rh = pxToPt(gradElH);
+      const rx = pxToPt(Math.min(radius.rx, gradElW / 2));
+      const ry = pxToPt(Math.min(radius.ry, gradElH / 2));
       this.emitRoundedRectPath(left, top, rw, rh, rx, ry);
     } else {
       this.emitQuadPath(points);
@@ -1751,12 +1761,14 @@ export class PDFWriter implements Writer<PdfDocument> {
           this.ops.push(`/${gsName} gs`);
           this.setFill(color);
 
-          const radius = parseBorderRadius(style.borderRadius);
+          const shadowElW = Math.abs(layerQuad[1].x - layerQuad[0].x);
+          const shadowElH = Math.abs(layerQuad[3].y - layerQuad[0].y);
+          const radius = parseBorderRadius(style.borderRadius, shadowElW, shadowElH);
           if (radius && isAxisAlignedRect(layerQuad)) {
             const left = this.ptX(Math.min(layerQuad[0].x, layerQuad[1].x));
             const top = this.ptY(Math.min(layerQuad[0].y, layerQuad[1].y));
-            const w = pxToPt(Math.abs(layerQuad[1].x - layerQuad[0].x));
-            const h = pxToPt(Math.abs(layerQuad[3].y - layerQuad[0].y));
+            const w = pxToPt(shadowElW);
+            const h = pxToPt(shadowElH);
             const rx = pxToPt(Math.min(radius.rx + expand, w / 2));
             const ry = pxToPt(Math.min(radius.ry + expand, h / 2));
             this.emitRoundedRectPath(left, top, w, h, rx, ry);
@@ -1805,14 +1817,16 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
 
     // Set clip path to the polygon shape
-    const radius = parseBorderRadius(style.borderRadius);
+    const conicElW = Math.abs(points[1].x - points[0].x);
+    const conicElH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, conicElW, conicElH);
     if (radius && isAxisAlignedRect(points)) {
       const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
       const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-      const rw = pxToPt(Math.abs(points[1].x - points[0].x));
-      const rh = pxToPt(Math.abs(points[3].y - points[0].y));
-      const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
-      const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
+      const rw = pxToPt(conicElW);
+      const rh = pxToPt(conicElH);
+      const rx = pxToPt(Math.min(radius.rx, conicElW / 2));
+      const ry = pxToPt(Math.min(radius.ry, conicElH / 2));
       this.emitRoundedRectPath(left, top, rw, rh, rx, ry);
     } else {
       this.emitQuadPath(points);

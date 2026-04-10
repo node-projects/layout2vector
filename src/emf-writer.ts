@@ -49,10 +49,15 @@ function hasVisibleStroke(style: Style): { color: number; width: number } | null
   return { color: col, width: w };
 }
 
-function parseBorderRadius(borderRadius: string | undefined): number {
+function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): number {
   if (!borderRadius || borderRadius === "0px") return 0;
   const val = parseFloat(borderRadius);
-  return isNaN(val) ? 0 : val;
+  if (isNaN(val) || val <= 0) return 0;
+  if (borderRadius.includes("%")) {
+    const avgDim = ((elWidth ?? 0) + (elHeight ?? 0)) / 2;
+    return avgDim > 0 ? avgDim * val / 100 : val;
+  }
+  return val;
 }
 
 function isAxisAlignedRect(points: Quad): boolean {
@@ -304,7 +309,9 @@ export class EMFWriter implements Writer<Uint8Array> {
     this.saveState();
     this.applyClip(style);
 
-    const radius = parseBorderRadius(style.borderRadius);
+    const emfElW = Math.abs(points[1].x - points[0].x);
+    const emfElH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, emfElW, emfElH);
 
     // Rounded rectangle
     if (radius > 0 && isAxisAlignedRect(points)) {

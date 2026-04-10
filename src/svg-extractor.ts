@@ -690,10 +690,10 @@ function extractText(el: SVGTextElement, style: Style, zIndex: number, ctm: DOMM
         ? { left: Math.min(svgQuad[0].x, svgQuad[3].x), top: Math.min(svgQuad[0].y, svgQuad[1].y),
             right: Math.max(svgQuad[1].x, svgQuad[2].x), bottom: Math.max(svgQuad[2].y, svgQuad[3].y) }
         : svgRoot.getBoundingClientRect();
-      const tLeft = Math.min(transformed[0].x, transformed[3].x);
-      const tRight = Math.max(transformed[1].x, transformed[2].x);
-      const tTop = Math.min(transformed[0].y, transformed[1].y);
-      const tBottom = Math.max(transformed[2].y, transformed[3].y);
+      const tLeft = Math.min(transformed[0].x, transformed[1].x, transformed[2].x, transformed[3].x);
+      const tRight = Math.max(transformed[0].x, transformed[1].x, transformed[2].x, transformed[3].x);
+      const tTop = Math.min(transformed[0].y, transformed[1].y, transformed[2].y, transformed[3].y);
+      const tBottom = Math.max(transformed[0].y, transformed[1].y, transformed[2].y, transformed[3].y);
       if (tRight < svgRect.left || tLeft > svgRect.right ||
           tBottom < svgRect.top || tTop > svgRect.bottom) {
         return []; // Fully outside viewport

@@ -409,16 +409,25 @@ function stripXmlPreamble(svg: string): string {
  * so these SVGs must be rasterized instead of vectorized.
  */
 function usesEvenOddFillRule(svgEl: Element): boolean {
-  // Only check individual descendant elements for fill-rule:evenodd.
-  // The root SVG's style attribute is skipped because SVG editors (e.g. Serif)
-  // commonly set fill-rule:evenodd as a global CSS default, but simple shapes
-  // (rect, ellipse, single-subpath paths) render identically with either fill rule.
-  // Rejecting those SVGs forces rasterization, which breaks DXF (missing external
-  // image files) and PDF (lost transparency).
+  // Check individual descendant elements for explicit fill-rule:evenodd.
   for (const el of Array.from(svgEl.querySelectorAll("*"))) {
     if (el.getAttribute("fill-rule") === "evenodd") return true;
     const style = el.getAttribute("style") ?? "";
     if (/fill-rule\s*:\s*evenodd/i.test(style)) return true;
+  }
+
+  // The root SVG's style may set fill-rule:evenodd as a CSS cascade default
+  // (common in Serif Affinity/Illustrator exports). This only matters when
+  // there are <path> elements with multiple subpaths (multiple M commands),
+  // where the winding rule changes which regions are "inside". Simple shapes
+  // (rect, ellipse, single-subpath paths) render identically with either rule.
+  const rootStyle = svgEl.getAttribute("style") ?? "";
+  if (/fill-rule\s*:\s*evenodd/i.test(rootStyle)) {
+    for (const pathEl of Array.from(svgEl.querySelectorAll("path"))) {
+      const d = pathEl.getAttribute("d") ?? "";
+      const mCount = (d.match(/[Mm]/g) || []).length;
+      if (mCount > 1) return true;
+    }
   }
   return false;
 }
@@ -438,7 +447,8 @@ function convertBgSvgToGeometry(
   if (parsedSvg.tagName.toLowerCase() !== "svg") return [];
   if (parsedSvg.querySelector("parsererror")) return [];
   // SVGs with fill-rule:evenodd can't be accurately represented as polylines
-  if (usesEvenOddFillRule(parsedSvg)) return [];
+  // unless the user explicitly opts in via svgToVector
+  if (!options.svgToVector && usesEvenOddFillRule(parsedSvg)) return [];
 
   const tempSvg = document.importNode(parsedSvg, true) as unknown as SVGSVGElement;
 
@@ -902,7 +912,8 @@ function convertSvgToGeometry(
   // Check for parse errors
   if (parsedSvg.querySelector("parsererror")) return [];
   // SVGs with fill-rule:evenodd can't be accurately represented as polylines
-  if (usesEvenOddFillRule(parsedSvg)) return [];
+  // unless the user explicitly opts in via svgToVector
+  if (!options.svgToVector && usesEvenOddFillRule(parsedSvg)) return [];
 
   // Import the parsed SVG into the main document
   const tempSvg = document.importNode(parsedSvg, true) as unknown as SVGSVGElement;

@@ -361,6 +361,65 @@ test.describe("Image Extraction", () => {
     expect(result.emptyHasImage).toBe(false);
   });
 
+  test("SVG with root evenodd + multi-subpath paths is rasterized (MultipleSignalLamp)", async ({ page }) => {
+    // MultipleSignalLamp SVG: root has fill-rule:evenodd, paths have multiple subpaths (M commands)
+    // => evenodd matters for rendering, so it must be rasterized, not vectorized
+    const MULTI_SUBPATH_SVG = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" style="fill-rule:evenodd;clip-rule:evenodd;">' +
+      '<path d="M303,100C398,100 475,183 475,286C475,388 398,471 303,471C208,471 131,388 131,286C131,183 208,100 303,100Z' +
+      'M181,178C158,207 145,245 145,286C145,327 158,364 181,394L289,286L181,178Z" style="fill:rgb(6,0,0);"/>' +
+      '</svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${MULTI_SUBPATH_SVG}" style="width:120px;height:80px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, { includeImages: true, includeText: false });
+    });
+
+    // Should be rasterized as image (not vector), because evenodd + multi-subpath
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    const polylineNodes = ir.filter((n: any) => n.type === "polyline");
+    expect(imageNodes.length).toBeGreaterThan(0);
+    expect(polylineNodes.length).toBe(0);
+  });
+
+  test("SVG with root evenodd + simple shapes is vectorized (PhotoelectricProximitySensor)", async ({ page }) => {
+    // SVG with fill-rule:evenodd on root but only simple shapes (single-subpath paths, rect, ellipse)
+    // => evenodd doesn't matter, safe to vectorize
+    const SIMPLE_SVG = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" style="fill-rule:evenodd;clip-rule:evenodd;">' +
+      '<ellipse cx="400" cy="110" rx="85" ry="78" style="fill:none;stroke:black;stroke-width:7px;"/>' +
+      '<path d="M141,101L141,104L5,101L141,98L141,101L305,101L305,101L141,101Z"/>' +
+      '<rect x="4" y="5" width="4" height="190"/>' +
+      '</svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${SIMPLE_SVG}" style="width:200px;height:80px;" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, { includeImages: true, includeText: false });
+    });
+
+    // Should be vectorized (polygon/polyline), NOT rasterized
+    const vectorNodes = ir.filter((n: any) => n.type === "polygon" || n.type === "polyline");
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    expect(vectorNodes.length).toBeGreaterThan(0);
+    expect(imageNodes.length).toBe(0);
+  });
+
   test("SVG in img tag produces geometry at correct position", async ({ page }) => {
     await setupPage(
       page,
