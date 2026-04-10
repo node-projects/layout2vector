@@ -228,7 +228,8 @@ function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } 
 interface GradientStop { offset: number; color: ParsedColor; }
 interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; }
 interface RadialGradient { type: "radial"; stops: GradientStop[]; }
-type ParsedGradient = LinearGradient | RadialGradient;
+interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; }
+type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
 function parseGradientAngle(dirStr: string): number {
   dirStr = dirStr.trim();
@@ -337,7 +338,121 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     if (stops.length < 2) return null;
     return { type: "radial", stops };
   }
+
+  const conicMatch = gradientStr.match(/^(?:repeating-)?conic-gradient\((.+)\)$/);
+  if (conicMatch) {
+    const inner = conicMatch[1];
+    // Parse optional "from <angle>" prefix
+    let fromAngle = 0;
+    let stopsStr = inner;
+    const fromMatch = inner.match(/^from\s+([\d.]+)(deg|rad|turn)?\s*,\s*/i);
+    if (fromMatch) {
+      const val = parseFloat(fromMatch[1]);
+      const unit = fromMatch[2]?.toLowerCase();
+      if (unit === "rad") fromAngle = val * (180 / Math.PI);
+      else if (unit === "turn") fromAngle = val * 360;
+      else fromAngle = val;
+      stopsStr = inner.slice(fromMatch[0].length);
+    }
+    const stops = parseColorStops(stopsStr);
+    if (stops.length < 2) return null;
+    return { type: "conic", stops, fromAngle };
+  }
   return null;
+}
+
+// ── Box-shadow parsing ──────────────────────────────────────────────
+
+interface BoxShadow {
+  offsetX: number;
+  offsetY: number;
+  blur: number;
+  spread: number;
+  color: ParsedColor | null;
+  inset: boolean;
+}
+
+/**
+ * Parse a CSS box-shadow value into individual shadow definitions.
+ * Format: [inset] h-offset v-offset [blur [spread]] [color], ...
+ */
+function parseBoxShadow(value: string): BoxShadow[] {
+  const shadows: BoxShadow[] = [];
+  // Split by comma, respecting parentheses (for rgba(...))
+  const parts: string[] = [];
+  let depth = 0, current = "";
+  for (const ch of value) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (ch === "," && depth === 0) {
+      parts.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) parts.push(current.trim());
+
+  for (const part of parts) {
+    const inset = /\binset\b/i.test(part);
+    const clean = part.replace(/\binset\b/gi, "").trim();
+
+    // Extract color (rgb/rgba or hex or named)
+    let colorStr: string | undefined;
+    let rest = clean;
+    const rgbaMatch = clean.match(/rgba?\([^)]+\)/);
+    if (rgbaMatch) {
+      colorStr = rgbaMatch[0];
+      rest = clean.replace(rgbaMatch[0], "").trim();
+    } else {
+      // Try hex color at start or end
+      const hexMatch = clean.match(/(#[0-9a-fA-F]{3,8})/);
+      if (hexMatch) {
+        colorStr = hexMatch[1];
+        rest = clean.replace(hexMatch[1], "").trim();
+      }
+    }
+
+    // Parse numeric values (px units)
+    const nums = rest.match(/-?[\d.]+px/g)?.map(s => parseFloat(s)) ?? [];
+    const offsetX = nums[0] ?? 0;
+    const offsetY = nums[1] ?? 0;
+    const blur = nums[2] ?? 0;
+    const spread = nums[3] ?? 0;
+    const color = parseColor(colorStr);
+
+    shadows.push({ offsetX, offsetY, blur, spread, color, inset });
+  }
+
+  return shadows;
+}
+
+// ── Conic gradient color interpolation ──────────────────────────────
+
+/** Interpolate color at position t [0..1] along conic gradient stops. */
+function interpolateConicColor(
+  t: number,
+  stops: GradientStop[]
+): { r: number; g: number; b: number } {
+  if (stops.length === 0) return { r: 0, g: 0, b: 0 };
+  if (t <= stops[0].offset) return stops[0].color;
+  if (t >= stops[stops.length - 1].offset) return stops[stops.length - 1].color;
+
+  // Find the two stops that t falls between
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t >= stops[i].offset && t <= stops[i + 1].offset) {
+      const range = stops[i + 1].offset - stops[i].offset;
+      const f = range > 0 ? (t - stops[i].offset) / range : 0;
+      const c0 = stops[i].color;
+      const c1 = stops[i + 1].color;
+      return {
+        r: Math.round(c0.r + (c1.r - c0.r) * f),
+        g: Math.round(c0.g + (c1.g - c0.g) * f),
+        b: Math.round(c0.b + (c1.b - c0.b) * f),
+      };
+    }
+  }
+  return stops[stops.length - 1].color;
 }
 
 // ── Resource tracking ───────────────────────────────────────────────
@@ -736,6 +851,11 @@ export class PDFWriter implements Writer<PdfDocument> {
   // ── Drawing methods ─────────────────────────────────────────────
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
+    // Draw box-shadow(s) before the element itself
+    if (style.boxShadow && style.boxShadow !== "none") {
+      this.drawBoxShadows(points, style);
+    }
+
     const gradient = parseGradient(style.backgroundImage);
     if (gradient) {
       this.drawGradientPolygon(points, gradient, style);
@@ -1431,6 +1551,17 @@ export class PDFWriter implements Writer<PdfDocument> {
   // ── Gradient drawing ────────────────────────────────────────────
 
   private drawGradientPolygon(points: Quad, gradient: ParsedGradient, style: Style): void {
+    // Draw box-shadow before gradient element too
+    if (style.boxShadow && style.boxShadow !== "none") {
+      this.drawBoxShadows(points, style);
+    }
+
+    // Conic gradients need a completely different approach (sector fills)
+    if (gradient.type === "conic") {
+      this.drawConicGradient(points, gradient, style);
+      return;
+    }
+
     // Compute bounding box in PDF coords
     const xs = points.map(p => this.ptX(p.x));
     const ys = points.map(p => this.ptY(p.y));
@@ -1559,5 +1690,162 @@ export class PDFWriter implements Writer<PdfDocument> {
     func.set("C1", new PdfArray([new PdfNumber(c1.r / 255), new PdfNumber(c1.g / 255), new PdfNumber(c1.b / 255)]));
     func.set("N", new PdfNumber(1));
     return func;
+  }
+
+  // ── Box-shadow rendering ──────────────────────────────────────────
+
+  /**
+   * Parse and draw CSS box-shadow(s) behind a polygon.
+   * Each shadow is drawn as a filled shape offset from the element.
+   * Inset shadows are skipped (they require clipping inside the element).
+   * Blur is approximated with multiple expanding semi-transparent layers.
+   */
+  private drawBoxShadows(points: Quad, style: Style): void {
+    const shadows = parseBoxShadow(style.boxShadow!);
+    for (const shadow of shadows) {
+      if (shadow.inset) continue;
+
+      const { offsetX, offsetY, blur, spread, color } = shadow;
+      if (!color || color.a <= 0) continue;
+
+      // Expand the quad by spread and offset
+      const sx = spread; // spread in all directions
+      const expanded: Quad = [
+        { x: points[0].x - sx + offsetX, y: points[0].y - sx + offsetY },
+        { x: points[1].x + sx + offsetX, y: points[1].y - sx + offsetY },
+        { x: points[2].x + sx + offsetX, y: points[2].y + sx + offsetY },
+        { x: points[3].x - sx + offsetX, y: points[3].y + sx + offsetY },
+      ];
+
+      const elementOpacity = style.opacity ?? 1;
+
+      if (blur <= 0) {
+        // Sharp shadow: single filled quad
+        this.ops.push("q");
+        const a = color.a * elementOpacity;
+        if (a < 1) {
+          const gsName = this.getGStateResName(a, a);
+          this.ops.push(`/${gsName} gs`);
+        }
+        this.setFill(color);
+        this.emitQuadPath(expanded);
+        this.ops.push("f");
+        this.ops.push("Q");
+      } else {
+        // Blurred shadow: draw 3 graduated layers to approximate Gaussian blur
+        const layers = 3;
+        for (let i = layers; i >= 1; i--) {
+          const expand = (blur * i) / layers;
+          const layerQuad: Quad = [
+            { x: expanded[0].x - expand, y: expanded[0].y - expand },
+            { x: expanded[1].x + expand, y: expanded[1].y - expand },
+            { x: expanded[2].x + expand, y: expanded[2].y + expand },
+            { x: expanded[3].x - expand, y: expanded[3].y + expand },
+          ];
+          // Opacity decreases as we go further out
+          const layerA = (color.a / layers) * (1 - (i - 1) / layers) * elementOpacity;
+          if (layerA <= 0) continue;
+
+          this.ops.push("q");
+          const gsName = this.getGStateResName(layerA, layerA);
+          this.ops.push(`/${gsName} gs`);
+          this.setFill(color);
+
+          const radius = parseBorderRadius(style.borderRadius);
+          if (radius && isAxisAlignedRect(layerQuad)) {
+            const left = this.ptX(Math.min(layerQuad[0].x, layerQuad[1].x));
+            const top = this.ptY(Math.min(layerQuad[0].y, layerQuad[1].y));
+            const w = pxToPt(Math.abs(layerQuad[1].x - layerQuad[0].x));
+            const h = pxToPt(Math.abs(layerQuad[3].y - layerQuad[0].y));
+            const rx = pxToPt(Math.min(radius.rx + expand, w / 2));
+            const ry = pxToPt(Math.min(radius.ry + expand, h / 2));
+            this.emitRoundedRectPath(left, top, w, h, rx, ry);
+          } else {
+            this.emitQuadPath(layerQuad);
+          }
+
+          this.ops.push("f");
+          this.ops.push("Q");
+        }
+      }
+    }
+  }
+
+  // ── Conic gradient rendering ──────────────────────────────────────
+
+  /**
+   * Emulate a conic gradient by drawing many narrow pie-slice sectors.
+   * PDF doesn't support conic gradients natively, so we subdivide
+   * 360° into small sectors, each filled with the interpolated color.
+   */
+  private drawConicGradient(points: Quad, gradient: ConicGradient, style: Style): void {
+    const xs = points.map(p => this.ptX(p.x));
+    const ys = points.map(p => this.ptY(p.y));
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const r = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2) / 2;
+
+    const opacity = style.opacity ?? 1;
+    const stops = gradient.stops;
+    const fromRad = gradient.fromAngle * Math.PI / 180;
+
+    // Number of sectors (more = smoother)
+    const SECTORS = 72;
+    const sectorAngle = (2 * Math.PI) / SECTORS;
+
+    this.ops.push("q");
+
+    if (opacity < 1) {
+      const gsName = this.getGStateResName(opacity, opacity);
+      this.ops.push(`/${gsName} gs`);
+    }
+
+    // Set clip path to the polygon shape
+    const radius = parseBorderRadius(style.borderRadius);
+    if (radius && isAxisAlignedRect(points)) {
+      const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
+      const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
+      const rw = pxToPt(Math.abs(points[1].x - points[0].x));
+      const rh = pxToPt(Math.abs(points[3].y - points[0].y));
+      const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
+      const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
+      this.emitRoundedRectPath(left, top, rw, rh, rx, ry);
+    } else {
+      this.emitQuadPath(points);
+    }
+    this.ops.push("W n"); // clip
+
+    for (let i = 0; i < SECTORS; i++) {
+      // CSS conic gradient: 0 = top (12 o'clock), clockwise
+      // PDF coordinates: angles measure from 3 o'clock, counter-clockwise
+      const t = (i + 0.5) / SECTORS; // normalized position [0..1]
+      const color = interpolateConicColor(t, stops);
+
+      // Sector angles in PDF space:
+      // CSS 0° = top = PDF 90°, CSS goes clockwise = PDF counter-clockwise
+      const cssAngle1 = fromRad + i * sectorAngle;
+      const cssAngle2 = fromRad + (i + 1) * sectorAngle;
+      // Convert: PDF_angle = 90° - CSS_angle (since CSS is clockwise, PDF is counter-clockwise)
+      const pdfA1 = Math.PI / 2 - cssAngle1;
+      const pdfA2 = Math.PI / 2 - cssAngle2;
+
+      // Draw pie sector: center → arc edge → center
+      const x1 = cx + r * Math.cos(pdfA1);
+      const y1 = cy + r * Math.sin(pdfA1);
+      const x2 = cx + r * Math.cos(pdfA2);
+      const y2 = cy + r * Math.sin(pdfA2);
+
+      this.ops.push(`${pn(color.r / 255)} ${pn(color.g / 255)} ${pn(color.b / 255)} rg`);
+      this.ops.push(`${pn(cx)} ${pn(cy)} m`);
+      this.ops.push(`${pn(x1)} ${pn(y1)} l`);
+      this.ops.push(`${pn(x2)} ${pn(y2)} l`);
+      this.ops.push("h f");
+    }
+
+    this.ops.push("Q");
   }
 }

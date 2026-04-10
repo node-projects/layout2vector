@@ -172,6 +172,17 @@ for (const demoFile of demoFiles) {
     const dxfPath = path.join(outputDir, `${name}.dxf`);
     fs.writeFileSync(dxfPath, dxfContent, "utf-8");
 
+    // Save DXF image files alongside the DXF (referenced by IMAGE entities)
+    for (const [relPath, imageDataUrl] of dxfWriter.imageFiles) {
+      const imgPath = path.join(outputDir, relPath);
+      const imgDir = path.dirname(imgPath);
+      if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
+      const base64Match = imageDataUrl.match(/^data:[^;]+;base64,(.+)$/);
+      if (base64Match) {
+        fs.writeFileSync(imgPath, Buffer.from(base64Match[1], "base64"));
+      }
+    }
+
     // --- PDF output ---
     // Convert viewport px to mm (1px ≈ 0.2646mm)
     // Load custom TTF font files from the demos directory
@@ -207,6 +218,17 @@ for (const demoFile of demoFiles) {
       "C:\\Windows\\Fonts\\symbol.ttf",       // Symbol
       "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ];
+    // Load Wingdings font for symbolic characters (å → arrow etc.)
+    const wingdingsPaths = [
+      "C:\\Windows\\Fonts\\wingding.ttf",
+      "C:\\Windows\\Fonts\\WINGDING.TTF",
+    ];
+    for (const fp of wingdingsPaths) {
+      if (fs.existsSync(fp) && !customFonts.has("wingdings")) {
+        customFonts.set("wingdings", new Uint8Array(fs.readFileSync(fp)));
+        break;
+      }
+    }
     for (const fp of symbolFontPaths) {
       if (fs.existsSync(fp)) {
         const fontFamily = path.basename(fp, path.extname(fp));

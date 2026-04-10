@@ -409,10 +409,12 @@ function stripXmlPreamble(svg: string): string {
  * so these SVGs must be rasterized instead of vectorized.
  */
 function usesEvenOddFillRule(svgEl: Element): boolean {
-  // Check the SVG root's style attribute
-  const rootStyle = svgEl.getAttribute("style") ?? "";
-  if (/fill-rule\s*:\s*evenodd/i.test(rootStyle)) return true;
-  // Check descendant elements
+  // Only check individual descendant elements for fill-rule:evenodd.
+  // The root SVG's style attribute is skipped because SVG editors (e.g. Serif)
+  // commonly set fill-rule:evenodd as a global CSS default, but simple shapes
+  // (rect, ellipse, single-subpath paths) render identically with either fill rule.
+  // Rejecting those SVGs forces rasterization, which breaks DXF (missing external
+  // image files) and PDF (lost transparency).
   for (const el of Array.from(svgEl.querySelectorAll("*"))) {
     if (el.getAttribute("fill-rule") === "evenodd") return true;
     const style = el.getAttribute("style") ?? "";
