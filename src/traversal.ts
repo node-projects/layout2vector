@@ -67,6 +67,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     textTransform: cs.textTransform || undefined,
     textShadow: cs.textShadow || undefined,
     lineHeight: cs.lineHeight || undefined,
+    whiteSpace: cs.whiteSpace || undefined,
 
     opacity,
     zIndex,

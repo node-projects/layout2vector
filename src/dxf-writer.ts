@@ -100,6 +100,15 @@ function cssColorToHexUncached(color: string): string | undefined {
   return undefined;
 }
 
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeTextForRendering(text: string, style: Style): string {
+  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
+  return text.replace(/\s+/g, " ").trim();
+}
+
 /**
  * Convert a hex color string to a DXF trueColor integer.
  * DXF group 420 requires a 24-bit decimal integer: (R << 16) | (G << 8) | B
@@ -376,9 +385,8 @@ export class DXFWriter implements Writer<string> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    // Sanitize text: collapse whitespace/newlines to single spaces (DXF is line-based)
-    const sanitized = text.replace(/\s+/g, " ").trim();
-    if (!sanitized) return;
+    const sanitized = normalizeTextForRendering(text, style);
+    if (sanitized.length === 0) return;
 
     // Compute rotation angle from quad top edge (topLeft → topRight)
     const dx = quad[1].x - quad[0].x;

@@ -25,6 +25,7 @@ export type Style = {
   textTransform?: string;
   textShadow?: string;
   lineHeight?: string;
+  whiteSpace?: string;
 
   opacity?: number;
   zIndex?: number;

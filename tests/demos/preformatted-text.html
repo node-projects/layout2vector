@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Preformatted Text Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Georgia, serif;
+      background: linear-gradient(180deg, #f8f3ea 0%, #efe4d2 100%);
+      color: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px;
+      background:
+        radial-gradient(circle at top right, rgba(188, 108, 37, 0.18), transparent 32%),
+        linear-gradient(180deg, #f8f3ea 0%, #efe4d2 100%);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      padding: 24px;
+      border-radius: 24px;
+      background: rgba(255, 252, 247, 0.92);
+      border: 1px solid rgba(47, 72, 88, 0.16);
+      box-shadow: 0 22px 40px rgba(88, 68, 48, 0.14);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #7c4f2a;
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #52606d;
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px 24px;
+      border-radius: 18px;
+      border: 2px solid rgba(47, 72, 88, 0.18);
+      background: #fffdf8;
+      color: #102a43;
+      font: 18px/1.45 "Courier New", monospace;
+      white-space: pre;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .tilted {
+      transform: rotate(-3deg) skewX(-5deg);
+      transform-origin: top left;
+      border-color: rgba(188, 108, 37, 0.35);
+      background: #fff8ef;
+    }
+
+    .scaled {
+      transform: translate(8px, 12px) rotate(2deg) scale(1.03);
+      transform-origin: top left;
+      border-color: rgba(127, 85, 57, 0.35);
+      background: #fffaf2;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <section class="panel">
+      <h1>Code Block</h1>
+      <p>Padding, indentation, and repeated spaces should survive extraction and rendering.</p>
+      <pre>function renderBlock() {
+  const title = "pre  block";
+    return title.padEnd(14, " ");
+}</pre>
+    </section>
+
+    <section class="panel">
+      <h1>Rotated Pre</h1>
+      <p>This block is transformed so Firefox uses native line quads instead of the polyfill path.</p>
+      <pre class="tilted">if (line.startsWith("  ")) {
+  rows.push(line);
+    render("keep  spaces");
+}</pre>
+    </section>
+
+    <section class="panel">
+      <h1>Scaled Notes</h1>
+      <p>Columns rely on fixed-width spacing and should keep their alignment.</p>
+      <pre class="scaled">column A    column B    column C
+alpha 01    beta  02    gamma 03
+  keep this padding ->   exactly here</pre>
+    </section>
+  </div>
+</body>
+</html>

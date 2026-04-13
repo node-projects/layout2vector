@@ -70,6 +70,15 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeTextForRendering(text: string, style: Style): string {
+  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
+  return text.replace(/\s+/g, " ").trim();
+}
+
 // ── EMF Binary Helpers ──────────────────────────────────────────────
 
 /** EMF record type constants. */
@@ -417,8 +426,8 @@ export class EMFWriter implements Writer<Uint8Array> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = text.replace(/\s+/g, " ").trim();
-    if (!sanitized) return;
+    const sanitized = normalizeTextForRendering(text, style);
+    if (sanitized.length === 0) return;
     if (style.opacity !== undefined && style.opacity <= 0) return;
 
     this.saveState();

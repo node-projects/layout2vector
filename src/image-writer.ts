@@ -60,6 +60,15 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeTextForRendering(text: string, style: Style): string {
+  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
+  return text.replace(/\s+/g, " ").trim();
+}
+
 // ── Gradient parsing ────────────────────────────────────────────────
 
 interface GradientStop { offset: number; color: string; }
@@ -585,8 +594,8 @@ export class ImageWriter implements Writer<ImageResult> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = text.replace(/\s+/g, " ").trim();
-    if (!sanitized) return;
+    const sanitized = normalizeTextForRendering(text, style);
+    if (sanitized.length === 0) return;
 
     const ctx = this.ctx;
     ctx.save();

@@ -50,6 +50,15 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeTextForRendering(text: string, style: Style): string {
+  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
+  return text.replace(/\s+/g, " ").trim();
+}
+
 /** Escape text for use inside XML/SVG elements.
  *  Encodes XML special characters and non-BMP Unicode characters as numeric
  *  character references so the output is safe for any XML parser.
@@ -443,8 +452,9 @@ export class SVGWriter implements Writer<string> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = text.replace(/\s+/g, " ").trim();
-    if (!sanitized) return;
+    const preserveWhitespace = preservesWhitespace(style);
+    const sanitized = normalizeTextForRendering(text, style);
+    if (sanitized.length === 0) return;
 
     const opacity = (style.opacity !== undefined && style.opacity < 1) ? style.opacity : undefined;
 
@@ -488,6 +498,9 @@ export class SVGWriter implements Writer<string> {
     }
     if (opacity !== undefined) {
       attrs.push(`opacity="${n(opacity)}"`);
+    }
+    if (preserveWhitespace) {
+      attrs.push(`xml:space="preserve"`);
     }
 
     // Text shadow

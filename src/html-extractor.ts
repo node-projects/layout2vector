@@ -97,7 +97,11 @@ function extractTextNode(
 ): IRNode[] {
   const results: IRNode[] = [];
   const fullText = textNode.textContent ?? "";
-  if (!fullText.trim()) return results;
+  if (preservesWhitespace(parentStyle)) {
+    if (fullText.length === 0) return results;
+  } else if (!fullText.trim()) {
+    return results;
+  }
 
   // Get all quads (one per line fragment) using getBoxQuads.
   // This correctly handles CSS transforms — each quad is properly rotated.
@@ -116,8 +120,8 @@ function extractTextNode(
 
   if (effectiveLineCount === 1) {
     // Single line: use the first quad directly
-    let text = lineTexts[0].replace(/\s+/g, ' ').trim();
-    if (!text) return results;
+    let text = normalizeExtractedText(lineTexts[0], parentStyle);
+    if (text.length === 0) return results;
 
     if (parentStyle.textTransform) {
       switch (parentStyle.textTransform) {
@@ -149,8 +153,8 @@ function extractTextNode(
     // Multi-line: use per-line quads from getBoxQuads (transform-aware)
     const N = allQuads.length;
     for (let i = 0; i < N; i++) {
-      let text = (i < lineTexts.length ? lineTexts[i] : "").replace(/\s+/g, ' ').trim();
-      if (!text) continue;
+      let text = normalizeExtractedText(i < lineTexts.length ? lineTexts[i] : "", parentStyle);
+      if (text.length === 0) continue;
 
       if (parentStyle.textTransform) {
         switch (parentStyle.textTransform) {
@@ -238,7 +242,8 @@ function clipTextToParent(
 
   // Measure the full text width using a hidden measuring span
   const measSpan = document.createElement("span");
-  measSpan.style.cssText = "visibility:hidden;position:absolute;white-space:nowrap;overflow:visible;pointer-events:none";
+  measSpan.style.cssText = "visibility:hidden;position:absolute;overflow:visible;pointer-events:none";
+  measSpan.style.whiteSpace = preservesWhitespace(parentStyle) ? "pre" : "nowrap";
   // Copy font styles
   measSpan.style.fontSize = cs.fontSize;
   measSpan.style.fontFamily = cs.fontFamily;
@@ -305,6 +310,9 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   const text = textNode.textContent ?? "";
   if (!text) return [];
 
+  const sourceLines = splitPreformattedTextBySourceLines(textNode, expectedLines);
+  if (sourceLines) return sourceLines;
+
   const range = document.createRange();
   const lines: string[] = [];
   let lineStart = 0;
@@ -332,4 +340,32 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   lines.push(text.substring(lineStart));
 
   return lines;
+}
+
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeExtractedText(text: string, style: Style): string {
+  if (preservesWhitespace(style)) {
+    return text.replace(/\r\n?/g, "\n");
+  }
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function splitPreformattedTextBySourceLines(textNode: Text, expectedLines: number): string[] | null {
+  const parentElement = textNode.parentElement;
+  if (!parentElement) return null;
+
+  const parentStyle = getComputedStyle(parentElement);
+  if (parentStyle.whiteSpace !== "pre" && parentStyle.whiteSpace !== "pre-wrap" && parentStyle.whiteSpace !== "break-spaces") {
+    return null;
+  }
+
+  const sourceLines = (textNode.textContent ?? "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .filter((line) => line.length > 0);
+
+  return sourceLines.length === expectedLines ? sourceLines : null;
 }

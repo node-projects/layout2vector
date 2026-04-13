@@ -114,4 +114,57 @@ test.describe("HTML Geometry Extraction", () => {
     expect(width).toBeCloseTo(100, 0);
     expect(height).toBeCloseTo(100, 0);
   });
+
+  test("preserves preformatted whitespace for transformed pre blocks", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:32px;background:#f5f1ea;">
+        <pre id="plain" style="margin:0 0 24px;padding:18px 24px;background:#fff;border:2px solid #2f4858;font:18px/1.4 'Courier New', monospace;white-space:pre;">function renderBlock() {
+  const title = "pre  block";
+    return title.padEnd(14, " ");
+}</pre>
+        <pre id="rotated" style="margin:0;padding:18px 24px;background:#fff;border:2px solid #bc6c25;font:18px/1.4 'Courier New', monospace;white-space:pre;transform:rotate(-4deg) skewX(-5deg);transform-origin:top left;">if (line.startsWith("  ")) {
+  rows.push(line);
+    render("keep  spaces");
+}</pre>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const plainIr = await extract(document.getElementById("plain"), { boxType: "border", includeText: true });
+      const rotatedIr = await extract(document.getElementById("rotated"), { boxType: "border", includeText: true });
+
+      const plainPolygon = plainIr.find((node: any) => node.type === "polygon");
+      const plainTextNodes = plainIr.filter((node: any) => node.type === "text");
+      const rotatedTextNodes = rotatedIr.filter((node: any) => node.type === "text");
+      const rotatedFirstQuad = rotatedTextNodes[0].quad;
+      const rotatedAngle = Math.atan2(
+        rotatedFirstQuad[1].y - rotatedFirstQuad[0].y,
+        rotatedFirstQuad[1].x - rotatedFirstQuad[0].x,
+      );
+
+      return {
+        plainTexts: plainTextNodes.map((node: any) => node.text),
+        rotatedTexts: rotatedTextNodes.map((node: any) => node.text),
+        plainPaddingX: plainTextNodes[0].quad[0].x - plainPolygon.points[0].x,
+        rotatedAngle,
+      };
+    });
+
+    expect(summary.plainTexts).toEqual([
+      'function renderBlock() {',
+      '  const title = "pre  block";',
+      '    return title.padEnd(14, " ");',
+      '}',
+    ]);
+    expect(summary.rotatedTexts).toEqual([
+      "if (line.startsWith(\"  \")) {",
+      "  rows.push(line);",
+      "    render(\"keep  spaces\");",
+      "}",
+    ]);
+    expect(summary.plainPaddingX).toBeGreaterThan(20);
+    expect(Math.abs(summary.rotatedAngle)).toBeGreaterThan(0.03);
+  });
 });

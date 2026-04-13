@@ -36,6 +36,15 @@ function isAxisAlignedRect(points: Quad): boolean {
   );
 }
 
+function preservesWhitespace(style: Style): boolean {
+  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
+}
+
+function normalizeTextForRendering(text: string, style: Style): string {
+  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
+  return text.replace(/\s+/g, " ").trim();
+}
+
 function parseBorderRadiusValue(borderRadius: string | undefined, w?: number, h?: number): number {
   if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return 0;
   const raw = borderRadius.split(/\s+/)[0];
@@ -295,8 +304,9 @@ export class HTMLWriter implements Writer<string> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = text.replace(/\s+/g, " ").trim();
-    if (!sanitized) return;
+    const preserveWhitespace = preservesWhitespace(style);
+    const sanitized = normalizeTextForRendering(text, style);
+    if (sanitized.length === 0) return;
 
     const opacity = style.opacity;
 
@@ -339,6 +349,7 @@ export class HTMLWriter implements Writer<string> {
       attrs.push(`font-family="${escHtml(fontFamily)}"`);
       attrs.push(`transform="rotate(${n(angleDeg)},${n(x)},${n(y)})"`);
       if (opacity !== undefined && opacity < 1) attrs.push(`opacity="${n(opacity)}"`);
+      if (preserveWhitespace) attrs.push(`xml:space="preserve"`);
 
       this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`, style));
     } else {
@@ -350,7 +361,7 @@ export class HTMLWriter implements Writer<string> {
         `font-size:${n(fontSize)}px`,
         `font-family:${escHtml(fontFamily)}`,
         `color:${textColor}`,
-        "white-space:nowrap",
+        preserveWhitespace ? "white-space:pre" : "white-space:nowrap",
         "line-height:1",
       ];
 
