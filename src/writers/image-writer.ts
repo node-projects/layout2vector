@@ -8,12 +8,12 @@
  *
  * Requires a Canvas-capable environment (browser with document.createElement).
  */
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { getVisibleCssColorString } from "./css-color.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./gradient-utils.js";
-import { roundedQuadPath } from "./geometry.js";
-import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
-import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./writer-utils.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { roundedQuadPath } from "../geometry.js";
+import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
+import { getVisibleCssColorString } from "./shared/css-color.js";
+import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
 

@@ -35,11 +35,11 @@ async function ensureDxfLoaded() {
     pattern = dxf.pattern;
   }
 }
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { cssColorToTrueColor } from "./css-color.js";
-import { roundedQuadPath } from "./geometry.js";
-import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
-import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./writer-utils.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { roundedQuadPath } from "../geometry.js";
+import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
+import { cssColorToTrueColor } from "./shared/css-color.js";
+import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 /** Determine file extension from a data URL MIME type. */
 function dataUrlToExtension(dataUrl: string): string {

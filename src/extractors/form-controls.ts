@@ -1,6 +1,6 @@
-import type { IRNode, Options, Point, Quad, Style } from "./types.js";
-import type { StackingNode } from "./traversal.js";
-import { getElementQuad, quadSize } from "./geometry.js";
+import type { IRNode, Options, Point, Quad, Style } from "../types.js";
+import type { StackingNode } from "../traversal.js";
+import { getElementQuad, quadSize } from "../geometry.js";
 
 const DEFAULT_ACCENT_COLOR = "rgb(0, 117, 255)";
 const DEFAULT_BORDER_COLOR = "rgb(118, 118, 118)";

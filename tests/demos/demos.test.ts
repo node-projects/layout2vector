@@ -8,11 +8,11 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { setupPage } from "../helpers.js";
-import { DXFWriter } from "../../src/dxf-writer.js";
-import { PDFWriter } from "../../src/pdf-writer.js";
-import { SVGWriter } from "../../src/svg-writer.js";
-import { HTMLWriter } from "../../src/html-writer.js";
-import { EMFWriter } from "../../src/emf-writer.js";
+import { DXFWriter } from "../../src/writers/dxf-writer.js";
+import { PDFWriter } from "../../src/writers/pdf-writer.js";
+import { SVGWriter } from "../../src/writers/svg-writer.js";
+import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { EMFWriter } from "../../src/writers/emf-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 

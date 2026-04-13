@@ -1,4 +1,4 @@
-import type { Style } from "./types.js";
+import type { Style } from "../types.js";
 
 export function preservesWhitespace(style: Pick<Style, "whiteSpace">): boolean {
   return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";

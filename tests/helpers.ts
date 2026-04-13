@@ -29,8 +29,8 @@ export async function injectLibrary(page: Page): Promise<void> {
 
   const typesSource = readSrc("types.ts");
   const traversalSource = readSrc("traversal.ts");
-  const htmlExtractorSource = readSrc("html-extractor.ts");
-  const svgExtractorSource = readSrc("svg-extractor.ts");
+  const htmlExtractorSource = readSrc("extractors/html-extractor.ts");
+  const svgExtractorSource = readSrc("extractors/svg-extractor.ts");
   const pipelineSource = readSrc("pipeline.ts");
 
   // Strip TypeScript import/export statements and type annotations for browser eval
@@ -68,19 +68,19 @@ export async function injectLibrary(page: Page): Promise<void> {
     // Use compiled JS from dist
     const files = [
       "types.js",
-      "css-color.js",
-      "gradient-utils.js",
-      "text-whitespace.js",
-      "writer-utils.js",
+      "writers/shared/css-color.js",
+      "writers/shared/gradient-utils.js",
+      "shared/text-whitespace.js",
+      "writers/shared/writer-utils.js",
       "geometry.js",
       "traversal.js",
-      "form-controls.js",
-      "html-extractor.js",
-      "svg-extractor.js",
-      "image-extractor.js",
-      "mathml-extractor.js",
+      "extractors/form-controls.js",
+      "extractors/html-extractor.js",
+      "extractors/svg-extractor.js",
+      "extractors/image-extractor.js",
+      "extractors/mathml-extractor.js",
       "pipeline.js",
-      "image-writer.js",
+      "writers/image-writer.js",
     ];
 
     const modules: string[] = [];

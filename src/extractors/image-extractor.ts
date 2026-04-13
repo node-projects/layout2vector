@@ -3,9 +3,9 @@
  * Handles <img> tags: SVG images are converted to vector geometry,
  * raster images are embedded as data URLs.
  */
-import type { Quad, IRNode, Options, Style } from "./types.js";
+import type { Quad, IRNode, Options, Style } from "../types.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
-import { getElementQuad } from "./geometry.js";
+import { getElementQuad } from "../geometry.js";
 
 /**
  * Cache for image rasterization results, keyed by source URL + dimensions.

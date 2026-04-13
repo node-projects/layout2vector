@@ -3,7 +3,7 @@
  * Detects MathML-specific visual features rendered by the browser
  * (fraction bars, radical overlines, stretchy operators) that are not exposed as DOM text.
  */
-import type { IRNode, Options, Style, Quad } from "./types.js";
+import type { IRNode, Options, Style, Quad } from "../types.js";
 
 /** Characters that the browser stretches vertically in MathML. */
 const STRETCHY_CHARS = new Set([

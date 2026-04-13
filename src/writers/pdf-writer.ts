@@ -18,13 +18,13 @@ import {
   PdfDocument,
   PdfPage,
   PdfPages,
-} from "./pdf-objects.js";
-import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./css-color.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./gradient-utils.js";
-import { parseTTF, type ParsedTTF } from "./ttf-parser.js";
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { roundedQuadPath } from "./geometry.js";
-import { isAxisAlignedRect } from "./writer-utils.js";
+} from "../pdf-objects.js";
+import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
+import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { parseTTF, type ParsedTTF } from "../ttf-parser.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { roundedQuadPath } from "../geometry.js";
+import { isAxisAlignedRect } from "./shared/writer-utils.js";
 
 // ── Shared helpers ──────────────────────────────────────────────────
 

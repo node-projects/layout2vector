@@ -1,12 +1,12 @@
 /**
  * HTML geometry extraction using browser layout APIs.
  */
-import type { Point, Quad, Style, IRNode, Options } from "./types.js";
-import type { StackingNode } from "./traversal.js";
-import { isSVGElement } from "./traversal.js";
-import { getElementQuads } from "./geometry.js";
+import type { Point, Quad, Style, IRNode, Options } from "../types.js";
+import type { StackingNode } from "../traversal.js";
+import { isSVGElement } from "../traversal.js";
+import { getElementQuads } from "../geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
-import { normalizeWhitespaceAwareText, preservesWhitespace } from "./text-whitespace.js";
+import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 
 /** Characters that MathML stretches vertically. */
 const STRETCHY_MO_CHARS = new Set([

@@ -2,12 +2,12 @@
  * SVG Writer.
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { getVisibleCssColorString } from "./css-color.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./gradient-utils.js";
-import { roundedQuadPath } from "./geometry.js";
-import { normalizeWhitespaceAwareText, preservesWhitespace } from "./text-whitespace.js";
-import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./writer-utils.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { roundedQuadPath } from "../geometry.js";
+import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
+import { getVisibleCssColorString } from "./shared/css-color.js";
+import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 

@@ -2,11 +2,11 @@
  * HTML Writer.
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { getVisibleCssColorString } from "./css-color.js";
-import { roundedQuadPath } from "./geometry.js";
-import { normalizeWhitespaceAwareText, preservesWhitespace } from "./text-whitespace.js";
-import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./writer-utils.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { roundedQuadPath } from "../geometry.js";
+import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
+import { getVisibleCssColorString } from "./shared/css-color.js";
+import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 

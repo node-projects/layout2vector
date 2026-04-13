@@ -5,10 +5,10 @@
  */
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
-import { PDFWriter } from "../../src/pdf-writer.js";
-import { DXFWriter } from "../../src/dxf-writer.js";
-import { HTMLWriter } from "../../src/html-writer.js";
-import { SVGWriter } from "../../src/svg-writer.js";
+import { PDFWriter } from "../../src/writers/pdf-writer.js";
+import { DXFWriter } from "../../src/writers/dxf-writer.js";
+import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { SVGWriter } from "../../src/writers/svg-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 

@@ -27,20 +27,20 @@ export {
 export { getElementQuad, getElementQuads, getElementOrigin, quadSize, getSvgScreenCtm, roundedQuadPath, type PathSegment } from "./geometry.js";
 
 // Extractors (advanced usage)
-export { extractHTMLGeometry } from "./html-extractor.js";
-export { extractSVGSubtree } from "./svg-extractor.js";
-export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgroundImage, preloadImages } from "./image-extractor.js";
-export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./mathml-extractor.js";
+export { extractHTMLGeometry } from "./extractors/html-extractor.js";
+export { extractSVGSubtree } from "./extractors/svg-extractor.js";
+export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgroundImage, preloadImages } from "./extractors/image-extractor.js";
+export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
 
 // Writers
-export { DXFWriter, type DXFWriterOptions } from "./dxf-writer.js";
-export { EMFWriter, type EMFWriterOptions } from "./emf-writer.js";
-export { PDFWriter, type PDFWriterOptions } from "./pdf-writer.js";
-export { ImageWriter, ImageResult, type ImageWriterOptions } from "./image-writer.js";
+export { DXFWriter, type DXFWriterOptions } from "./writers/dxf-writer.js";
+export { EMFWriter, type EMFWriterOptions } from "./writers/emf-writer.js";
+export { PDFWriter, type PDFWriterOptions } from "./writers/pdf-writer.js";
+export { ImageWriter, ImageResult, type ImageWriterOptions } from "./writers/image-writer.js";
 /** @deprecated Use ImageWriter/ImageResult/ImageWriterOptions instead. */
-export { PNGWriter, PNGResult, type PNGWriterOptions } from "./png-writer.js";
-export { SVGWriter, type SVGWriterOptions } from "./svg-writer.js";
-export { HTMLWriter, type HTMLImageMode, type HTMLWriterOptions } from "./html-writer.js";
+export { PNGWriter, PNGResult, type PNGWriterOptions } from "./writers/png-writer.js";
+export { SVGWriter, type SVGWriterOptions } from "./writers/svg-writer.js";
+export { HTMLWriter, type HTMLImageMode, type HTMLWriterOptions } from "./writers/html-writer.js";
 
 // Font utilities
 export { parseTTF, type ParsedTTF } from "./ttf-parser.js";

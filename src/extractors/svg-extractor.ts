@@ -2,9 +2,9 @@
  * SVG geometry extraction using SVG-native APIs.
  * This is a SEPARATE path from HTML extraction — SVG never uses getBoxQuads.
  */
-import type { Point, Quad, Style, IRNode, Options } from "./types.js";
-import { extractStyle } from "./traversal.js";
-import { getSvgScreenCtm, getElementQuad } from "./geometry.js";
+import type { Point, Quad, Style, IRNode, Options } from "../types.js";
+import { extractStyle } from "../traversal.js";
+import { getSvgScreenCtm, getElementQuad } from "../geometry.js";
 
 /** Number of sample points for path/circle/ellipse approximation. */
 const PATH_SAMPLE_COUNT = 64;

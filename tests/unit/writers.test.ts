@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
-import { EMFWriter } from "../../src/emf-writer.js";
+import { EMFWriter } from "../../src/writers/emf-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 

@@ -1,4 +1,4 @@
-import type { Quad, Style } from "./types.js";
+import type { Quad, Style } from "../../types.js";
 
 export function getVisibleStroke<T>(
   style: Pick<Style, "stroke" | "strokeWidth">,

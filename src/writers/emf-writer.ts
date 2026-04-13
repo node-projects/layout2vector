@@ -7,10 +7,10 @@
  *
  * Reference: [MS-EMF] Enhanced Metafile Format specification.
  */
-import type { Point, Quad, Style, Writer } from "./types.js";
-import { cssColorToColorRef } from "./css-color.js";
-import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
-import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./writer-utils.js";
+import type { Point, Quad, Style, Writer } from "../types.js";
+import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
+import { cssColorToColorRef } from "./shared/css-color.js";
+import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 // ── EMF Binary Helpers ──────────────────────────────────────────────

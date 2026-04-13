@@ -10,10 +10,10 @@ import {
   isSVGElement,
   type StackingNode,
 } from "./traversal.js";
-import { extractHTMLGeometry } from "./html-extractor.js";
-import { extractSVGSubtree } from "./svg-extractor.js";
-import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./image-extractor.js";
-import { isMathMLRoot, extractMathMLFeatures } from "./mathml-extractor.js";
+import { extractHTMLGeometry } from "./extractors/html-extractor.js";
+import { extractSVGSubtree } from "./extractors/svg-extractor.js";
+import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
+import { isMathMLRoot, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
 /**
