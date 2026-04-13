@@ -6,6 +6,7 @@ import type { Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
+import { getPointBounds, getQuadBounds, type ClipPathBounds } from "./shared/clip-path.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -164,10 +165,26 @@ export class HTMLWriter implements Writer<string> {
     return relativePath;
   }
 
-  /** Wrap an HTML string in a clip container if clipBounds is set. */
-  private applyClip(html: string, style: Style): string {
+  /** Wrap an HTML string in clip containers when clip bounds or clip-path are present. */
+  private applyClip(html: string, style: Style, bounds?: ClipPathBounds): string {
+    let wrapped = html;
+
+    if (bounds && style.clipPath && style.clipPath !== "none" && bounds.w > 0 && bounds.h > 0) {
+      const css = [
+        "position:absolute",
+        `left:${n(bounds.x)}px`,
+        `top:${n(bounds.y)}px`,
+        `width:${n(bounds.w)}px`,
+        `height:${n(bounds.h)}px`,
+        `clip-path:${style.clipPath}`,
+        `-webkit-clip-path:${style.clipPath}`,
+      ];
+      wrapped = `<div style="${css.join(";")}"><div style="position:relative;left:${n(-bounds.x)}px;top:${n(-bounds.y)}px">${wrapped}</div></div>`;
+    }
+
     const clip = style.clipBounds;
-    if (!clip) return html;
+    if (!clip) return wrapped;
+
     const css = [
       "position:absolute",
       `left:${n(clip.x)}px`,
@@ -177,7 +194,7 @@ export class HTMLWriter implements Writer<string> {
       "overflow:hidden",
     ];
     if (clip.radius > 0) css.push(`border-radius:${n(clip.radius)}px`);
-    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px">${html}</div></div>`;
+    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px">${wrapped}</div></div>`;
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -190,6 +207,8 @@ export class HTMLWriter implements Writer<string> {
     if (!fill && !stroke && !style.boxShadow && !hasGradient) return;
 
     const opacity = style.opacity;
+
+    const clipBounds = getQuadBounds(points);
 
     if (isAxisAlignedRect(points)) {
       // Axis-aligned rectangle → use a positioned div
@@ -214,7 +233,7 @@ export class HTMLWriter implements Writer<string> {
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
 
-      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style));
+      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style, clipBounds));
     } else {
       // Non-axis-aligned quad → use inline SVG
       // Calculate edge lengths for border-radius resolution
@@ -228,7 +247,7 @@ export class HTMLWriter implements Writer<string> {
       if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);
       if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style));
+      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, clipBounds));
     }
   }
 
@@ -247,7 +266,7 @@ export class HTMLWriter implements Writer<string> {
     if (style.strokeDasharray && style.strokeDasharray !== "none") svgAttrs.push(`stroke-dasharray="${escHtml(style.strokeDasharray)}"`);
     if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-    this.elements.push(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`);
+    this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points)));
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
@@ -298,7 +317,7 @@ export class HTMLWriter implements Writer<string> {
       if (opacity !== undefined && opacity < 1) attrs.push(`opacity="${n(opacity)}"`);
       if (preserveWhitespace) attrs.push(`xml:space="preserve"`);
 
-      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`, style));
+      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`, style, getQuadBounds(quad)));
     } else {
       // Axis-aligned text → use a positioned span
       const css: string[] = [
@@ -333,7 +352,7 @@ export class HTMLWriter implements Writer<string> {
         }
       }
 
-      this.elements.push(this.applyClip(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style));
+      this.elements.push(this.applyClip(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style, getQuadBounds(quad)));
     }
   }
 
@@ -370,10 +389,10 @@ export class HTMLWriter implements Writer<string> {
 
     if (this.imageMode.type === "css") {
       const className = this.getCssImageClass(dataUrl);
-      this.elements.push(this.applyClip(`<div class="${className}" style="${css.join(";")}"></div>`, style));
+      this.elements.push(this.applyClip(`<div class="${className}" style="${css.join(";")}"></div>`, style, getQuadBounds(quad)));
     } else {
       const src = this.imageMode.type === "external" ? this.getImageFilename(dataUrl) : dataUrl;
-      this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style));
+      this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style, getQuadBounds(quad)));
     }
   }
 

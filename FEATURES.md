@@ -50,7 +50,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | `image-rendering` / pixelated image export | Yes | Not documented | Yes | html2canvas-pro explicitly supports CSS `image-rendering` and global image smoothing controls. `layout2vector` preserves `imageRendering` and disables smoothing when requested. |
 | Modern CSS color functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`) | Partial | No | Yes | `layout2vector` now has tested parsing for `color(srgb ...)`, `lab()`, `lch()`, `oklab()`, and `oklch()`. Broader `color()` profiles such as `display-p3` are still not covered. |
 | `object-fit` on `<img>` | Partial | No | Yes | `layout2vector` has direct test coverage for `contain`, `cover`, and `scale-down` on extracted `<img>` content. Custom `object-position` handling is still not explicitly covered. |
-| CSS `clip-path` shapes | Partial | Not documented | Yes | `layout2vector` now has tested canvas/image support for `inset()`, `circle()`, `ellipse()`, and `polygon()`. `path()` and more complex nested clip composition are still missing. |
+| CSS `clip-path` shapes | Partial | Not documented | Yes | `layout2vector` now has tested support for `inset()`, `circle()`, `ellipse()`, and `polygon()` across the Image/Canvas, HTML, SVG, PDF, and EMF writers. `path()` and more complex nested clip composition are still missing. |
 | Form controls as value-aware export | Yes | No | No | `layout2vector` can synthesize native controls into IR that preserves visible values and states across writers. html2canvas tools may paint controls into pixels, but they do not expose a structured form-control export model. |
 | MathML-specific handling | Yes | Not documented | Not documented | `layout2vector` has a MathML extractor for browser-rendered MathML features. |
 | SVG markers (`marker-start`, `marker-mid`, `marker-end`) | Yes | Not documented | Not documented | `layout2vector` has explicit SVG marker extraction and tests. |
@@ -86,12 +86,15 @@ Internal project sources used for this comparison:
 - [src/extractors/svg-extractor.ts](./src/extractors/svg-extractor.ts)
 - [src/writers/html-writer.ts](./src/writers/html-writer.ts)
 - [src/writers/image-writer.ts](./src/writers/image-writer.ts)
+- [src/writers/emf-writer.ts](./src/writers/emf-writer.ts)
 - [src/writers/pdf-writer.ts](./src/writers/pdf-writer.ts)
 - [src/writers/svg-writer.ts](./src/writers/svg-writer.ts)
+- [src/writers/shared/clip-path.ts](./src/writers/shared/clip-path.ts)
 - [src/writers/shared/css-color.ts](./src/writers/shared/css-color.ts)
 - [tests/ui/rendering.test.ts](./tests/ui/rendering.test.ts)
 - [src/writers/canvas-writer.ts](./src/writers/canvas-writer.ts)
 - [tests/unit/canvas-writer.test.ts](./tests/unit/canvas-writer.test.ts)
+- [tests/unit/clip-path-writers.test.ts](./tests/unit/clip-path-writers.test.ts)
 - [tests/unit/css-color.test.ts](./tests/unit/css-color.test.ts)
 - [tests/unit/form-controls.test.ts](./tests/unit/form-controls.test.ts)
 - [tests/unit/image-extractor.test.ts](./tests/unit/image-extractor.test.ts)

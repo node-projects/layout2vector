@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1272" height="704" viewBox="0 0 1272 704">
 <defs>
-<clipPath id="clip1"><rect x="773" y="307" width="246.69" height="114"/></clipPath>
+<clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="773" y="307" width="246.69" height="114"/></clipPath>
 </defs>
 <text x="8" y="8.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">Alte Not-Halt Mobile Panel Steckplatz</text>
 <text x="8" y="44.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">und F&#xF6;rdererstich AE11/AE12.</text>

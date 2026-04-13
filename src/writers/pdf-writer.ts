@@ -20,6 +20,7 @@ import {
   PdfPages,
 } from "../pdf-objects.js";
 import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
+import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
 import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
 import { parseTTF, type ParsedTTF } from "../ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "../types.js";
@@ -721,6 +722,91 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("h");
   }
 
+  /** Emit a polygon/polyline path in PDF coordinates. */
+  private emitPolygonPath(points: Point[], closed: boolean): void {
+    if (points.length === 0) return;
+
+    this.ops.push(`${pn(this.ptX(points[0].x))} ${pn(this.ptY(points[0].y))} m`);
+    for (let i = 1; i < points.length; i++) {
+      this.ops.push(`${pn(this.ptX(points[i].x))} ${pn(this.ptY(points[i].y))} l`);
+    }
+    if (closed) this.ops.push("h");
+  }
+
+  /** Emit an axis-aligned rectangle path in PDF coordinates. */
+  private emitRectPath(x: number, y: number, w: number, h: number): void {
+    const bottom = y - h;
+    this.ops.push(
+      `${pn(x)} ${pn(y)} m`,
+      `${pn(x + w)} ${pn(y)} l`,
+      `${pn(x + w)} ${pn(bottom)} l`,
+      `${pn(x)} ${pn(bottom)} l`,
+      "h",
+    );
+  }
+
+  /** Emit an ellipse path in PDF coordinates using cubic Beziers. */
+  private emitEllipsePath(cx: number, cy: number, rx: number, ry: number): void {
+    const centerX = this.ptX(cx);
+    const centerY = this.ptY(cy);
+    const radiusX = pxToPt(rx);
+    const radiusY = pxToPt(ry);
+    const ox = radiusX * KAPPA;
+    const oy = radiusY * KAPPA;
+
+    this.ops.push(`${pn(centerX + radiusX)} ${pn(centerY)} m`);
+    this.ops.push(`${pn(centerX + radiusX)} ${pn(centerY - oy)} ${pn(centerX + ox)} ${pn(centerY - radiusY)} ${pn(centerX)} ${pn(centerY - radiusY)} c`);
+    this.ops.push(`${pn(centerX - ox)} ${pn(centerY - radiusY)} ${pn(centerX - radiusX)} ${pn(centerY - oy)} ${pn(centerX - radiusX)} ${pn(centerY)} c`);
+    this.ops.push(`${pn(centerX - radiusX)} ${pn(centerY + oy)} ${pn(centerX - ox)} ${pn(centerY + radiusY)} ${pn(centerX)} ${pn(centerY + radiusY)} c`);
+    this.ops.push(`${pn(centerX + ox)} ${pn(centerY + radiusY)} ${pn(centerX + radiusX)} ${pn(centerY + oy)} ${pn(centerX + radiusX)} ${pn(centerY)} c`);
+    this.ops.push("h");
+  }
+
+  /** Apply rectangular clip bounds and CSS clip-path shapes before painting. */
+  private emitClip(style: Style, bounds: ClipPathBounds): void {
+    const clip = style.clipBounds;
+    if (clip) {
+      const x = this.ptX(clip.x);
+      const y = this.ptY(clip.y);
+      const w = pxToPt(clip.w);
+      const h = pxToPt(clip.h);
+      const radius = Math.min(clip.radius, clip.w / 2, clip.h / 2);
+      if (radius > 0) {
+        const r = pxToPt(radius);
+        this.emitRoundedRectPath(x, y, w, h, r, r);
+      } else {
+        this.emitRectPath(x, y, w, h);
+      }
+      this.ops.push("W n");
+    }
+
+    const clipShape = parseClipPathShape(style.clipPath, bounds);
+    if (!clipShape) return;
+
+    switch (clipShape.kind) {
+      case "inset": {
+        const x = this.ptX(clipShape.x);
+        const y = this.ptY(clipShape.y);
+        const w = pxToPt(clipShape.w);
+        const h = pxToPt(clipShape.h);
+        if (clipShape.rx > 0 || clipShape.ry > 0) {
+          this.emitRoundedRectPath(x, y, w, h, pxToPt(clipShape.rx), pxToPt(clipShape.ry));
+        } else {
+          this.emitRectPath(x, y, w, h);
+        }
+        break;
+      }
+      case "ellipse":
+        this.emitEllipsePath(clipShape.cx, clipShape.cy, clipShape.rx, clipShape.ry);
+        break;
+      case "polygon":
+        this.emitPolygonPath(clipShape.points, true);
+        break;
+    }
+
+    this.ops.push(clipShape.fillRule === "evenodd" ? "W* n" : "W n");
+  }
+
   // ── Style helpers ───────────────────────────────────────────────
 
   /** Set fill color (RGB 0–1). */
@@ -792,7 +878,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     // Check if we need per-side border drawing (mixed colors/widths/styles)
     const mixed = this.hasMixedBorders(style);
 
+    const clipBounds = getQuadBounds(points);
+
     this.ops.push("q");
+    this.emitClip(style, clipBounds);
 
     if (mixed) {
       // Draw fill only first (no stroke from applyStyleOps)
@@ -956,17 +1045,14 @@ export class PDFWriter implements Writer<PdfDocument> {
   async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
 
+    const clipBounds = getPointBounds(points);
+
     this.ops.push("q");
+    this.emitClip(style, clipBounds);
     const paintOp = this.applyStyleOps(style);
     if (!paintOp) { this.ops.push("Q"); return; }
 
-    const x0 = this.ptX(points[0].x);
-    const y0 = this.ptY(points[0].y);
-    this.ops.push(`${pn(x0)} ${pn(y0)} m`);
-    for (let i = 1; i < points.length; i++) {
-      this.ops.push(`${pn(this.ptX(points[i].x))} ${pn(this.ptY(points[i].y))} l`);
-    }
-    if (closed) this.ops.push("h");
+    this.emitPolygonPath(points, closed);
 
     this.ops.push(paintOp);
     this.ops.push("Q");
@@ -1015,8 +1101,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     const cosA = Math.cos(anglePdf);
     const bx = this.ptX(quad[0].x) + sinA * baselineOffset;
     const by = this.ptY(quad[0].y) - cosA * baselineOffset;
+    const clipBounds = getQuadBounds(quad);
 
     this.ops.push("q");
+    this.emitClip(style, clipBounds);
 
     const opacity = style.opacity ?? 1;
     if (opacity < 1) {
@@ -1057,6 +1145,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       const lineWidthPt = Math.max(0.5, fontSize / 14);
 
       this.ops.push("q");
+      this.emitClip(style, clipBounds);
       this.ops.push(`${pn(r)} ${pn(g)} ${pn(b)} RG`);
       this.ops.push(`${pn(lineWidthPt)} w`);
 
@@ -1135,7 +1224,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     const c = tl.x - bl.x, d = tl.y - bl.y; // (0,1) - (0,0)
     const e = bl.x, f = bl.y;                // (0,0) origin
 
+    const clipBounds = getQuadBounds(quad);
+
     this.ops.push("q");
+    this.emitClip(style, clipBounds);
 
     const opacity = style.opacity ?? 1;
     if (opacity < 1) {
@@ -1539,6 +1631,8 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.ops.push(`/${gsName} gs`);
     }
 
+    this.emitClip(style, getQuadBounds(points));
+
     // Clip path
     const gradElW = Math.abs(points[1].x - points[0].x);
     const gradElH = Math.abs(points[3].y - points[0].y);
@@ -1565,6 +1659,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
     if (strokeColor && strokeWidth > 0) {
       this.ops.push("q");
+      this.emitClip(style, getQuadBounds(points));
       this.setStroke(strokeColor);
       this.setLineWidth(pxToPt(strokeWidth));
       if (radius && isAxisAlignedRect(points)) {
@@ -1633,6 +1728,7 @@ export class PDFWriter implements Writer<PdfDocument> {
    */
   private drawBoxShadows(points: Quad, style: Style): void {
     const shadows = parseBoxShadow(style.boxShadow!);
+    const clipBounds = getQuadBounds(points);
     for (const shadow of shadows) {
       if (shadow.inset) continue;
 
@@ -1653,6 +1749,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       if (blur <= 0) {
         // Sharp shadow: single filled quad
         this.ops.push("q");
+        this.emitClip(style, clipBounds);
         const a = color.a * elementOpacity;
         if (a < 1) {
           const gsName = this.getGStateResName(a, a);
@@ -1678,6 +1775,7 @@ export class PDFWriter implements Writer<PdfDocument> {
           if (layerA <= 0) continue;
 
           this.ops.push("q");
+          this.emitClip(style, clipBounds);
           const gsName = this.getGStateResName(layerA, layerA);
           this.ops.push(`/${gsName} gs`);
           this.setFill(color);
@@ -1736,6 +1834,8 @@ export class PDFWriter implements Writer<PdfDocument> {
       const gsName = this.getGStateResName(opacity, opacity);
       this.ops.push(`/${gsName} gs`);
     }
+
+    this.emitClip(style, getQuadBounds(points));
 
     // Set clip path to the polygon shape
     const conicElW = Math.abs(points[1].x - points[0].x);

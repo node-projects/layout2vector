@@ -7,7 +7,7 @@
 <text x="246.45" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dashed border</text>
 <path d="M458.9,104.5 L658.9,104.5 L658.9,184.5 L458.9,184.5 Z" fill="rgb(255, 205, 210)" stroke="rgb(198, 40, 40)" stroke-width="2"/>
 <text x="470.9" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dotted border</text>
-<path d="M683.35,102.5 L883.35,102.5 L883.35,182.5 L683.35,182.5 Z" fill="rgb(232, 245, 233)" stroke="rgb(255, 0, 0) rgb(0, 128, 0) rgb(0, 0, 255) rgb(255, 165, 0)" stroke-width="4"/>
+<path d="M683.35,102.5 L883.35,102.5 L883.35,182.5 L683.35,182.5 Z" fill="rgb(232, 245, 233)"/>
 <text x="694.35" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Mixed borders</text>
 <rect x="907.8" y="104.5" width="200" height="80" rx="15" ry="15" fill="rgb(225, 190, 231)" stroke="rgb(106, 27, 154)" stroke-width="2"/>
 <text x="919.8" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Rounded corners</text>

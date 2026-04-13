@@ -6,6 +6,7 @@ import type { Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
+import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds, type ClipPathShape } from "./shared/clip-path.js";
 import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
@@ -210,7 +211,7 @@ export class SVGWriter implements Writer<string> {
   private elements: string[] = [];
   private defs: string[] = [];
   private defIdCounter = 0;
-  private clipCache = new Map<string, string>(); // clipKey → clip-path attribute string
+  private clipCache = new Map<string, string>(); // clipKey → clip-path id
   private imageCache = new Map<string, string>(); // dataUrl → symbol def id
 
   /**
@@ -238,33 +239,77 @@ export class SVGWriter implements Writer<string> {
     this.imageCache.clear();
   }
 
-  /** Create a clipPath def for clipBounds and return the attribute string, reusing identical clip paths. */
-  private getClipAttr(style: Style): string {
-    const clip = style.clipBounds;
-    if (!clip) return "";
-    const r = clip.radius > 0 ? Math.min(clip.radius, clip.w / 2, clip.h / 2) : 0;
-    const key = `${n(clip.x)},${n(clip.y)},${n(clip.w)},${n(clip.h)},${n(r)}`;
+  private getCachedClipId(key: string, buildDef: (id: string) => string): string {
     const cached = this.clipCache.get(key);
     if (cached) return cached;
+
     const id = `clip${++this.defIdCounter}`;
-    if (r > 0) {
-      this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}" rx="${n(r)}" ry="${n(r)}"/></clipPath>`);
-    } else {
-      this.defs.push(`<clipPath id="${id}"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}"/></clipPath>`);
-    }
-    const attr = ` clip-path="url(#${id})"`;
-    this.clipCache.set(key, attr);
-    return attr;
+    this.defs.push(buildDef(id));
+    this.clipCache.set(key, id);
+    return id;
   }
 
-  /** Push an element, wrapping it in a <g> with clip-path if clipBounds is set. */
-  private pushElement(element: string, style: Style): void {
-    const clipAttr = this.getClipAttr(style);
-    if (clipAttr) {
-      this.elements.push(`<g${clipAttr}>${element}</g>`);
-    } else {
-      this.elements.push(element);
+  /** Create a clipPath def for clipBounds and return its id, reusing identical clip paths. */
+  private getRectClipId(style: Style): string | null {
+    const clip = style.clipBounds;
+    if (!clip) return null;
+
+    const r = clip.radius > 0 ? Math.min(clip.radius, clip.w / 2, clip.h / 2) : 0;
+    const key = `rect:${n(clip.x)},${n(clip.y)},${n(clip.w)},${n(clip.h)},${n(r)}`;
+    return this.getCachedClipId(key, (id) => {
+      if (r > 0) {
+        return `<clipPath id="${id}" clipPathUnits="userSpaceOnUse"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}" rx="${n(r)}" ry="${n(r)}"/></clipPath>`;
+      }
+      return `<clipPath id="${id}" clipPathUnits="userSpaceOnUse"><rect x="${n(clip.x)}" y="${n(clip.y)}" width="${n(clip.w)}" height="${n(clip.h)}"/></clipPath>`;
+    });
+  }
+
+  private buildClipShapeElement(shape: ClipPathShape): string {
+    switch (shape.kind) {
+      case "inset": {
+        const radiusAttrs = shape.rx > 0 || shape.ry > 0
+          ? ` rx="${n(shape.rx)}" ry="${n(shape.ry)}"`
+          : "";
+        return `<rect x="${n(shape.x)}" y="${n(shape.y)}" width="${n(shape.w)}" height="${n(shape.h)}"${radiusAttrs}/>`;
+      }
+      case "ellipse":
+        if (Math.abs(shape.rx - shape.ry) < 0.0001) {
+          return `<circle cx="${n(shape.cx)}" cy="${n(shape.cy)}" r="${n(shape.rx)}"/>`;
+        }
+        return `<ellipse cx="${n(shape.cx)}" cy="${n(shape.cy)}" rx="${n(shape.rx)}" ry="${n(shape.ry)}"/>`;
+      case "polygon": {
+        const d = shape.points.map((point, index) => `${index === 0 ? "M" : "L"}${n(point.x)},${n(point.y)}`).join(" ") + " Z";
+        const clipRule = shape.fillRule === "evenodd" ? ' clip-rule="evenodd"' : "";
+        return `<path d="${d}"${clipRule}/>`;
+      }
     }
+  }
+
+  private getShapeClipId(style: Style, bounds?: ClipPathBounds): string | null {
+    if (!bounds) return null;
+
+    const shape = parseClipPathShape(style.clipPath, bounds);
+    if (!shape) return null;
+
+    const key = `shape:${style.clipPath}|${n(bounds.x)},${n(bounds.y)},${n(bounds.w)},${n(bounds.h)}`;
+    return this.getCachedClipId(key, (id) => `<clipPath id="${id}" clipPathUnits="userSpaceOnUse">${this.buildClipShapeElement(shape)}</clipPath>`);
+  }
+
+  /** Push an element, wrapping it in clip groups when clipBounds or clip-path are set. */
+  private pushElement(element: string, style: Style, bounds?: ClipPathBounds): void {
+    let wrapped = element;
+
+    const shapeClipId = this.getShapeClipId(style, bounds);
+    if (shapeClipId) {
+      wrapped = `<g clip-path="url(#${shapeClipId})">${wrapped}</g>`;
+    }
+
+    const rectClipId = this.getRectClipId(style);
+    if (rectClipId) {
+      wrapped = `<g clip-path="url(#${rectClipId})">${wrapped}</g>`;
+    }
+
+    this.elements.push(wrapped);
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -293,7 +338,7 @@ export class SVGWriter implements Writer<string> {
 
       const gradId = this.addGradientDef(style.backgroundImage, x, y, w, h);
       const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-      this.pushElement(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>`, style);
+      this.pushElement(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>`, style, getQuadBounds(points));
 
       // Inset shadows as clipped overlays
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, r);
@@ -324,7 +369,7 @@ export class SVGWriter implements Writer<string> {
 
     const gradId = this.addGradientDef(style.backgroundImage, x, y, w || 1, h || 1);
     const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-    this.pushElement(`<path d="${pathD}"${attrs}/>`, style);
+    this.pushElement(`<path d="${pathD}"${attrs}/>`, style, getQuadBounds(points));
 
     if (isAxisAlignedRect(points)) {
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, 0);
@@ -351,7 +396,7 @@ export class SVGWriter implements Writer<string> {
 
     const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
     const attrs = this.buildPolylineAttrs(fill, stroke, style, gradId, opacity, closed);
-    this.pushElement(`<path d="${d}"${attrs}/>`, style);
+    this.pushElement(`<path d="${d}"${attrs}/>`, style, getPointBounds(points));
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
@@ -430,7 +475,7 @@ export class SVGWriter implements Writer<string> {
       }
     }
 
-    this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style);
+    this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style, getQuadBounds(quad));
   }
 
   async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
@@ -468,7 +513,7 @@ export class SVGWriter implements Writer<string> {
       attrs.push(`image-rendering="pixelated"`);
     }
 
-    this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style);
+    this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style, getQuadBounds(quad));
   }
 
   async end(): Promise<string> {

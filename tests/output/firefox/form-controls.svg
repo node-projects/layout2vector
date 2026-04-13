@@ -2,21 +2,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="682" viewBox="0 0 1232 682">
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip2"><rect x="31" y="134" width="369" height="20"/></clipPath>
-<clipPath id="clip3"><rect x="31" y="210" width="369" height="19.2"/></clipPath>
-<clipPath id="clip4"><rect x="31" y="229.2" width="369" height="19.2"/></clipPath>
-<clipPath id="clip5"><rect x="31" y="248.4" width="369" height="19.2"/></clipPath>
-<clipPath id="clip6"><rect x="31" y="334" width="323" height="20"/></clipPath>
+<clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="31" y="134" width="369" height="20"/></clipPath>
+<clipPath id="clip3" clipPathUnits="userSpaceOnUse"><rect x="31" y="210" width="369" height="19.2"/></clipPath>
+<clipPath id="clip4" clipPathUnits="userSpaceOnUse"><rect x="31" y="229.2" width="369" height="19.2"/></clipPath>
+<clipPath id="clip5" clipPathUnits="userSpaceOnUse"><rect x="31" y="248.4" width="369" height="19.2"/></clipPath>
+<clipPath id="clip6" clipPathUnits="userSpaceOnUse"><rect x="31" y="334" width="323" height="20"/></clipPath>
 <filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip8"><rect x="469" y="230" width="391" height="16"/></clipPath>
+<clipPath id="clip8" clipPathUnits="userSpaceOnUse"><rect x="469" y="230" width="391" height="16"/></clipPath>
 <filter id="ds9" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip10"><rect x="31" y="483" width="369" height="20"/></clipPath>
-<clipPath id="clip11"><rect x="31" y="558" width="369" height="20"/></clipPath>
-<clipPath id="clip12"><rect x="31" y="633" width="369" height="20"/></clipPath>
+<clipPath id="clip10" clipPathUnits="userSpaceOnUse"><rect x="31" y="483" width="369" height="20"/></clipPath>
+<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="31" y="558" width="369" height="20"/></clipPath>
+<clipPath id="clip12" clipPathUnits="userSpaceOnUse"><rect x="31" y="633" width="369" height="20"/></clipPath>
 <filter id="ds13" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip14"><rect x="480" y="483" width="369" height="20"/></clipPath>
-<clipPath id="clip15"><rect x="480" y="558" width="369" height="20"/></clipPath>
-<clipPath id="clip16"><rect x="480" y="633" width="369" height="20"/></clipPath>
+<clipPath id="clip14" clipPathUnits="userSpaceOnUse"><rect x="480" y="483" width="369" height="20"/></clipPath>
+<clipPath id="clip15" clipPathUnits="userSpaceOnUse"><rect x="480" y="558" width="369" height="20"/></clipPath>
+<clipPath id="clip16" clipPathUnits="userSpaceOnUse"><rect x="480" y="633" width="369" height="20"/></clipPath>
 </defs>
 <text x="0" y="2" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Arial">Native Form Controls</text>
 <rect x="0" y="52" width="431" height="331" rx="14" ry="14" fill="rgb(255, 255, 255)" stroke="rgb(215, 222, 234)" stroke-width="1" filter="url(#ds1)"/>

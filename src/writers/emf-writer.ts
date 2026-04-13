@@ -10,6 +10,7 @@
 import type { Point, Quad, Style, Writer } from "../types.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { cssColorToColorRef } from "./shared/css-color.js";
+import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
 import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -28,6 +29,7 @@ const EMR = {
   EOF: 0x000E,
   SETMAPMODE: 0x0011,
   SETBKMODE: 0x0012,
+  SETPOLYFILLMODE: 0x0013,
   SETTEXTALIGN: 0x0016,
   SETTEXTCOLOR: 0x0018,
   MOVETOEX: 0x001B,
@@ -76,6 +78,10 @@ const MM_TEXT = 0x0001;
 
 /** Background mode: TRANSPARENT. */
 const TRANSPARENT = 1;
+
+/** Polygon fill modes. */
+const ALTERNATE = 1;
+const WINDING = 2;
 
 /** Text alignment: TA_LEFT | TA_TOP. */
 const TA_LEFT = 0;
@@ -220,12 +226,14 @@ export class EMFWriter implements Writer<Uint8Array> {
     const fillColor = cssColorToColorRef(style.fill);
     const stroke = getVisibleStroke(style, cssColorToColorRef);
 
+    const clipBounds = getQuadBounds(points);
+
     // Check for per-side borders
     if (this.hasMixedBorders(style)) {
       // Draw fill first, then per-side borders
       if (fillColor !== null) {
         this.saveState();
-        this.applyClip(style);
+        this.applyClip(style, clipBounds);
         const brushHandle = this.createBrush(fillColor);
         const penHandle = this.createPen(null);
         this.selectObject(brushHandle);
@@ -250,7 +258,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (fillColor === null && !stroke) return;
 
     this.saveState();
-    this.applyClip(style);
+  this.applyClip(style, clipBounds);
 
     const emfElW = Math.abs(points[1].x - points[0].x);
     const emfElH = Math.abs(points[3].y - points[0].y);
@@ -311,7 +319,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (fillColor === null && !stroke) return;
 
     this.saveState();
-    this.applyClip(style);
+    this.applyClip(style, getPointBounds(points));
 
     if (closed && fillColor !== null && points.length >= 3) {
       // Draw as filled polygon
@@ -365,7 +373,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (style.opacity !== undefined && style.opacity <= 0) return;
 
     this.saveState();
-    this.applyClip(style);
+    this.applyClip(style, getQuadBounds(quad));
 
     // Text color
     const textColor = cssColorToColorRef(style.color) ?? cssColorToColorRef(style.fill) ?? 0x00000000;
@@ -478,7 +486,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (displayW <= 0 || displayH <= 0) return;
 
     this.saveState();
-    this.applyClip(style);
+    this.applyClip(style, getQuadBounds(quad));
 
     // Apply rotation via world transform if the quad is rotated
     const angle = Math.atan2(dy, dx);
@@ -768,18 +776,75 @@ export class EMFWriter implements Writer<Uint8Array> {
     this.records.writeRecord(EMR.RESTOREDC, int32Array(-1));
   }
 
-  /** Apply clip bounds from style (overflow:hidden ancestor). */
-  private applyClip(style: Style): void {
+  /** Apply clip bounds and clip-path shapes from style. */
+  private applyClip(style: Style, bounds?: ClipPathBounds): void {
     const clip = style.clipBounds;
-    if (!clip) return;
+    if (clip) {
+      // Use INTERSECTCLIPRECT for rectangular clipping (simpler and more compatible)
+      this.records.writeRecord(EMR.INTERSECTCLIPRECT, int32Array(
+        Math.round(clip.x),
+        Math.round(clip.y),
+        Math.round(clip.x + clip.w),
+        Math.round(clip.y + clip.h)
+      ));
+    }
 
-    // Use INTERSECTCLIPRECT for rectangular clipping (simpler and more compatible)
-    this.records.writeRecord(EMR.INTERSECTCLIPRECT, int32Array(
-      Math.round(clip.x),
-      Math.round(clip.y),
-      Math.round(clip.x + clip.w),
-      Math.round(clip.y + clip.h)
-    ));
+    const clipShape = bounds ? parseClipPathShape(style.clipPath, bounds) : null;
+    if (!clipShape) return;
+
+    if (clipShape.kind === "polygon") {
+      this.records.writeRecord(
+        EMR.SETPOLYFILLMODE,
+        uint32Array(clipShape.fillRule === "evenodd" ? ALTERNATE : WINDING),
+      );
+    }
+
+    this.records.writeRecord(EMR.BEGINPATH, null);
+
+    switch (clipShape.kind) {
+      case "inset":
+        if (clipShape.rx > 0 || clipShape.ry > 0) {
+          this.records.writeRecord(EMR.ROUNDRECT, int32Array(
+            Math.round(clipShape.x),
+            Math.round(clipShape.y),
+            Math.round(clipShape.x + clipShape.w),
+            Math.round(clipShape.y + clipShape.h),
+            Math.round(clipShape.rx * 2),
+            Math.round(clipShape.ry * 2),
+          ));
+        } else {
+          this.records.writeRecord(EMR.RECTANGLE, int32Array(
+            Math.round(clipShape.x),
+            Math.round(clipShape.y),
+            Math.round(clipShape.x + clipShape.w),
+            Math.round(clipShape.y + clipShape.h),
+          ));
+        }
+        break;
+      case "ellipse":
+        this.records.writeRecord(EMR.ELLIPSE, int32Array(
+          Math.round(clipShape.cx - clipShape.rx),
+          Math.round(clipShape.cy - clipShape.ry),
+          Math.round(clipShape.cx + clipShape.rx),
+          Math.round(clipShape.cy + clipShape.ry),
+        ));
+        break;
+      case "polygon": {
+        const shapeBounds = this.computeBoundsFromPoints(clipShape.points);
+        const ptData = int16Array(
+          ...clipShape.points.flatMap((point) => [Math.round(point.x), Math.round(point.y)])
+        );
+        this.records.writeRecord(EMR.POLYGON16, concat(
+          int32Array(shapeBounds.left, shapeBounds.top, shapeBounds.right, shapeBounds.bottom),
+          uint32Array(clipShape.points.length),
+          ptData,
+        ));
+        break;
+      }
+    }
+
+    this.records.writeRecord(EMR.ENDPATH, null);
+    this.records.writeRecord(EMR.SELECTCLIPPATH, uint32Array(clip ? RGN_AND : RGN_COPY));
   }
 
   /**

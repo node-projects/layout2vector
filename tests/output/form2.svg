@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="704" viewBox="0 0 1264 704">
 <defs>
-<clipPath id="clip1"><rect x="68" y="204" width="182" height="16"/></clipPath>
-<clipPath id="clip2"><rect x="410" y="50" width="165" height="13"/></clipPath>
+<clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="68" y="204" width="182" height="16"/></clipPath>
+<clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="410" y="50" width="165" height="13"/></clipPath>
 </defs>
 <path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)" stroke="rgb(0, 0, 0)" stroke-width="2"/>
 <text x="143" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>

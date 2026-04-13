@@ -3,7 +3,7 @@
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0, 0, 0, 0.1)" result="s0"/></filter>
 <linearGradient id="lg2" x1="67.25" y1="-65.25" x2="252.75" y2="120.25" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(26, 35, 126)"/><stop offset="100%" stop-color="rgb(57, 73, 171)"/></linearGradient>
-<clipPath id="clip3"><rect x="0" y="0" width="320" height="226.17" rx="12" ry="12"/></clipPath>
+<clipPath id="clip3" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="320" height="226.17" rx="12" ry="12"/></clipPath>
 <linearGradient id="lg4" x1="43" y1="456" x2="43" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
 <linearGradient id="lg5" x1="83" y1="426" x2="83" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
 <linearGradient id="lg6" x1="123" y1="406" x2="123" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>

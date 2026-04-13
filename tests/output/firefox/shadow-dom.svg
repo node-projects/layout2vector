@@ -3,7 +3,7 @@
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(0, 0, 0, 0.15)" result="s0"/></filter>
 <linearGradient id="lg2" x1="56.75" y1="-25.75" x2="223.25" y2="140.75" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(102, 126, 234)"/><stop offset="100%" stop-color="rgb(118, 75, 162)"/></linearGradient>
-<clipPath id="clip3"><rect x="0" y="31" width="280" height="209" rx="12" ry="12"/></clipPath>
+<clipPath id="clip3" clipPathUnits="userSpaceOnUse"><rect x="0" y="31" width="280" height="209" rx="12" ry="12"/></clipPath>
 <filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0, 0, 0, 0.2)" result="s0"/></filter>
 </defs>
 <text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Declarative Shadow DOM</text>
@@ -14,7 +14,7 @@
 <g clip-path="url(#clip3)"><text x="16" y="124.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">shadow DOM. It demonstrates</text></g>
 <g clip-path="url(#clip3)"><text x="16" y="145.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">encapsulated styling and layout</text></g>
 <g clip-path="url(#clip3)"><text x="16" y="166.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">extraction.</text></g>
-<g clip-path="url(#clip3)"><path d="M0,200 L280,200 L280,240 L0,240 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(136, 136, 136) rgb(136, 136, 136)" stroke-width="1"/></g>
+<g clip-path="url(#clip3)"><path d="M0,200 L280,200 L280,240 L0,240 Z" fill="rgb(245, 245, 245)"/></g>
 <g clip-path="url(#clip3)"><text x="16" y="214.5" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Footer text</text></g>
 <rect x="0" y="263.5" width="156.02" height="37" rx="6" ry="6" fill="rgb(30, 136, 229)" filter="url(#ds4)"/>
 <text x="24" y="275" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="14px" font-family="MS Shell Dlg \32">Shadow Button</text>
