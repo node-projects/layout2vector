@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="733" height="484" viewBox="0 0 733 484">
+<path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(233, 233, 237)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<text x="142.58" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">Button</text>
+<path d="M62,112 L262,112 L262,200 L62,200 Z" fill="rgb(233, 233, 237)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<path d="M62,201 L256,201 L256,376 L62,376 Z" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<path d="M62,381 L273,381 L273,402 L62,402 Z" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<path d="M404,46 L568.67,46 L568.67,68 L404,68 Z" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<path d="M404,82 L733,82 L733,311 L404,311 Z" fill="rgba(194, 31, 31, 0.52)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="405" y="84" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
+<text x="405" y="99" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
+<text x="405" y="114" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf</text>
+<text x="405" y="129" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfsdfddsfdfssddfs</text>
+</svg>
