@@ -21,7 +21,8 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Output format | layout2vector | html2canvas | html2canvas-pro | Notes |
 | --- | --- | --- | --- | --- |
 | DXF | Yes | No | No | Native writer in `layout2vector`. |
-| DWG | No | No | No | Included here for completeness. None of the compared tools ships native DWG output. |
+| DXF (acad-ts) | Yes | No | No | Alternative DXF writer in `layout2vector` using `@node-projects/acad-ts`. |
+| DWG | Yes | No | No | Native writer in `layout2vector` using `@node-projects/acad-ts`. |
 | EMF | Yes | No | No | Native writer in `layout2vector`. |
 | PDF | Yes | No | No | Native writer in `layout2vector`. html2canvas tools do not emit PDF directly. |
 | PNG | Yes | Yes | Yes | html2canvas and html2canvas-pro can export PNG through the returned canvas, not through a dedicated PNG writer abstraction. |
@@ -35,7 +36,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | --- | --- | --- | --- | --- |
 | Core rendering model | Structured DOM -> IR -> writer pipeline | DOM -> canvas reconstruction | DOM -> canvas reconstruction | `layout2vector` exposes typed IR nodes and writer backends. Both html2canvas projects document canvas screenshot generation rather than structured export. |
 | Requires a temporary cloned document/container | No | Yes | Yes | html2canvas exposes clone-oriented options such as `onclone` and `removeContainer`. html2canvas-pro stays clone-based and adds `iframeContainer` plus document-cloner fixes for edge cases. |
-| Built-in output formats | DXF, EMF, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | See the output-format matrix above for the per-format breakdown, including DWG as an explicit unsupported row. |
+| Built-in output formats | DXF, DWG, EMF, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | See the output-format matrix above for the per-format breakdown, including DWG as an explicit unsupported row. |
 | Structured IR / custom backends | Yes | No | No | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. |
 | Keeps text as text/vector objects | Yes | No | No | html2canvas tools rasterize text into a canvas. `layout2vector` preserves text nodes for text-capable writers. |
 | Open Shadow DOM | Yes | Not documented | Yes | `layout2vector` traverses open Shadow DOM. html2canvas-pro documents automatic Shadow DOM handling and `iframeContainer`. |

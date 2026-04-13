@@ -48,7 +48,7 @@ LEANS INTO RHYTHM AND SPACING</text></g>
 <g clip-path="url(#clip9)"><text x="851" y="1061.5" fill="#000000" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRAPPING AND DIRECTION</text></g>
 <g clip-path="url(#clip9)"><text x="848.77" y="1151.96" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,848.77,1151.96)">WrapThisAbsurdlyLongTokenWithoutAnyMercyBecauseWordBreakAndOverflowWrapShouldStillPreserveTheLayout.</text></g>
 <g clip-path="url(#clip9)"><path d="M849.12,1245.9 Q851,1228 868.9,1229.88 L972.33,1240.75 Q990.23,1242.63 988.35,1260.54 L965.98,1473.36 Q964.1,1491.26 946.2,1489.38 L842.77,1478.51 Q824.87,1476.63 826.75,1458.73 Z" fill="url(#lg10)"/></g>
-<g clip-path="url(#clip9)"><text x="947.64" y="1351.28" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="26px" font-family="Segoe UI" transform="rotate(6,947.64,1351.28)">RTL FLOW</text></g>
+<g clip-path="url(#clip9)"><text x="947.64" y="1351.28" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="26px" font-family="Segoe UI" transform="rotate(6,947.64,1351.28)" direction="rtl" unicode-bidi="embed" writing-mode="vertical-rl">RTL FLOW</text></g>
 <g clip-path="url(#clip9)"><text x="1011" y="1343" fill="rgb(61, 64, 91)" dominant-baseline="text-before-edge" font-weight="600" font-size="18px" font-family="Courier New" xml:space="preserve">white-space: pre-wrap
 keeps   deliberate gaps
 and carries line breaks forward.</text></g>

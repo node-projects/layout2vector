@@ -13,6 +13,8 @@ import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
+import { DWGWriter } from "../../src/writers/acad-writer.js";
+import { AcadDXFWriter } from "../../src/writers/acad-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
@@ -317,6 +319,22 @@ for (const demoFile of demoFiles) {
     const emfPath = path.join(projectOutputDir, `${name}.emf`);
     fs.writeFileSync(emfPath, emfBytes);
 
+    // --- DWG output ---
+    const dwgWriter = new DWGWriter({ maxY: viewport.height });
+    const dwgBytes = await renderIR(ir, dwgWriter);
+    expect(dwgBytes).toBeInstanceOf(Uint8Array);
+    expect(dwgBytes.length).toBeGreaterThan(100);
+    const dwgPath = path.join(projectOutputDir, `${name}.dwg`);
+    fs.writeFileSync(dwgPath, dwgBytes);
+
+    // --- Acad DXF output ---
+    const acadDxfWriter = new AcadDXFWriter({ maxY: viewport.height });
+    const acadDxfContent = await renderIR(ir, acadDxfWriter);
+    expect(acadDxfContent).toBeTruthy();
+    expect(acadDxfContent.length).toBeGreaterThan(100);
+    const acadDxfPath = path.join(projectOutputDir, `${name}-acad.dxf`);
+    fs.writeFileSync(acadDxfPath, acadDxfContent, "utf-8");
+
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);
     const pdfStat = fs.statSync(pdfPath);
@@ -324,15 +342,19 @@ for (const demoFile of demoFiles) {
     const svgStat = fs.statSync(svgPath);
     const htmlStat = fs.statSync(htmlOutPath);
     const emfStat = fs.statSync(emfPath);
+    const dwgStat = fs.statSync(dwgPath);
+    const acadDxfStat = fs.statSync(acadDxfPath);
     expect(dxfStat.size).toBeGreaterThan(0);
     expect(pdfStat.size).toBeGreaterThan(0);
     if (pngStat) expect(pngStat.size).toBeGreaterThan(0);
     expect(svgStat.size).toBeGreaterThan(0);
     expect(htmlStat.size).toBeGreaterThan(0);
     expect(emfStat.size).toBeGreaterThan(0);
+    expect(dwgStat.size).toBeGreaterThan(0);
+    expect(acadDxfStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes), EMF (${emfStat.size} bytes)`
+      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes), EMF (${emfStat.size} bytes), DWG (${dwgStat.size} bytes), AcadDXF (${acadDxfStat.size} bytes)`
     );
   });
 }

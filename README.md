@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **EMF**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **DWG**, **EMF**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees and, optionally, same-origin iframe documents), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
 For a feature-by-feature comparison with html2canvas and html2canvas-pro, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
 
@@ -25,7 +25,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, EMFWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, DWGWriter, AcadDXFWriter, EMFWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -77,6 +77,15 @@ const htmlString = await renderIR(ir, htmlWriter);
 // 8. Render to EMF (Windows Enhanced Metafile)
 const emfWriter = new EMFWriter({ width: 800, height: 600 });
 const emfBytes = await renderIR(ir, emfWriter); // Uint8Array → save as .emf file
+
+// 9. Render to DWG (AutoCAD binary format via @node-projects/acad-ts)
+const dwgWriter = new DWGWriter({ maxY: document.documentElement.scrollHeight });
+const dwgBytes = await renderIR(ir, dwgWriter); // Uint8Array → save as .dwg file
+
+// 10. Render to DXF via acad-ts (alternative DXF writer)
+const acadDxfWriter = new AcadDXFWriter({ maxY: document.documentElement.scrollHeight });
+const acadDxfString = await renderIR(ir, acadDxfWriter);
+// acadDxfString is a complete .dxf file as a string
 
 ```
 
@@ -142,6 +151,51 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - Transparent elements (rgba alpha=0, `transparent`) are skipped
 - SVG images in `<img>` tags → converted to native DXF vector entities
 - Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
+
+
+#### `DWGWriter`
+
+```ts
+type DWGWriterOptions = {
+  maxY?: number;  // Y-axis flip height (default: 1000)
+  zoom?: number;
+  acadVersion?: ACadVersion
+};
+new DWGWriter(options?: DWGWriterOptions)
+```
+
+Produces a `Uint8Array` containing an AutoCAD DWG binary file via `@node-projects/acad-ts`. The `maxY` parameter (default 1000) is used to flip the Y axis (browser Y-down → DWG Y-up).
+
+- Polygons → closed `LWPOLYLINE` entities with optional solid `HATCH` fill
+- Polylines → `LWPOLYLINE` entities (open or closed)
+- Filled shapes → `HATCH` entities with `SOLID` pattern
+- Text → `TEXT` entities with rotation and color
+- Rounded rectangles → `LWPOLYLINE` with arc-approximated corners
+- Colors → true color from CSS `backgroundColor` / `color` / SVG fill/stroke
+- Transparent elements (rgba alpha=0, `transparent`) are skipped
+- Output is an AC1032-format (AutoCAD 2018+) DWG file
+
+
+#### `AcadDXFWriter`
+
+```ts
+type AcadDXFWriterOptions = {
+  maxY?: number;  // Y-axis flip height (default: 1000)
+  zoom?: number;
+  acadVersion?: ACadVersion
+};
+new AcadDXFWriter(options?: AcadDXFWriterOptions)
+```
+
+An alternative DXF writer that uses `@node-projects/acad-ts` instead of `@tarikjabiri/dxf`. Produces a DXF string with the same entity types as `DWGWriter`:
+
+- Polygons → closed `LWPOLYLINE` entities with optional solid `HATCH` fill
+- Polylines → `LWPOLYLINE` entities (open or closed)
+- Filled shapes → `HATCH` entities with `SOLID` pattern
+- Text → `TEXT` entities with rotation and color
+- Rounded rectangles → `LWPOLYLINE` with arc-approximated corners
+- Colors → true color from CSS `backgroundColor` / `color` / SVG fill/stroke
+- Transparent elements are skipped
 
 
 #### `EMFWriter`

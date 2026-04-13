@@ -42,6 +42,7 @@ export { ImageWriter, ImageResult, type ImageWriterOptions } from "./writers/ima
 export { PNGWriter, PNGResult, type PNGWriterOptions } from "./writers/png-writer.js";
 export { SVGWriter, type SVGWriterOptions } from "./writers/svg-writer.js";
 export { HTMLWriter, type HTMLImageMode, type HTMLWriterOptions } from "./writers/html-writer.js";
+export { DWGWriter, type DWGWriterOptions, AcadDXFWriter, type AcadDXFWriterOptions } from "./writers/acad-writer.js";
 
 // Font utilities
 export { parseTTF, type ParsedTTF } from "./ttf-parser.js";
