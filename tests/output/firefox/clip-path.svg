@@ -17,17 +17,17 @@
 <text x="24" y="26" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial">Clip Path Shapes</text>
 <text x="24" y="61" fill="rgb(71, 85, 105)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This demo covers inset(), circle(), ellipse(), and polygon() clipping on both filled boxes and images.</text>
 <rect x="24" y="96" width="606" height="241" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
-<g clip-path="url(#clip3)"><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="url(#lg2)"/></g>
+<g clip-path="url(#clip3)"><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="url(#lg2)" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <text x="310.67" y="305.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Inset</text>
 <rect x="650" y="96" width="606" height="241" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds4)"/>
-<g clip-path="url(#clip6)"><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="url(#lg5)"/></g>
+<g clip-path="url(#clip6)"><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="url(#lg5)" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <text x="933.55" y="305.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Circle</text>
 <rect x="24" y="357" width="606" height="241" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds7)"/>
-<g clip-path="url(#clip8)"><path d="M237,373 L417,373 L417,553 L237,553 Z" fill="none"/></g>
+<g clip-path="url(#clip8)"><path d="M237,373 L417,373 L417,553 L237,553 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <g clip-path="url(#clip8)"><use href="#imgSym9" x="237" y="373" width="180" height="180"/></g>
 <text x="304.45" y="566.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Ellipse</text>
 <rect x="650" y="357" width="606" height="241" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds10)"/>
-<g clip-path="url(#clip11)"><path d="M863,373 L1043,373 L1043,553 L863,553 Z" fill="none"/></g>
+<g clip-path="url(#clip11)"><path d="M863,373 L1043,373 L1043,553 L863,553 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <g clip-path="url(#clip11)"><use href="#imgSym12" x="863" y="373" width="180" height="180"/></g>
 <text x="925.4" y="566.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Polygon</text>
 </svg>

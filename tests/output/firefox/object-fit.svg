@@ -17,17 +17,17 @@
 <text x="24" y="26" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial">Object Fit</text>
 <text x="24" y="61" fill="rgb(71, 85, 105)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">The same wide image is rendered with contain, cover, and scale-down inside fixed portrait frames.</text>
 <rect x="24" y="96" width="400" height="254" rx="16" ry="16" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
-<rect x="38" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg2)"/>
+<rect x="38" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg2)" stroke="rgba(15, 23, 42, 0.12)" stroke-width="2"/>
 <g clip-path="url(#clip4)"><use href="#imgSym3" x="148.79" y="112" width="150.43" height="176"/></g>
 <text x="38" y="301.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Contain</text>
 <text x="38" y="322.5" fill="rgb(100, 116, 139)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Preserves the full image with letterboxing.</text>
 <rect x="440" y="96" width="400" height="254" rx="16" ry="16" fill="rgb(255, 255, 255)" filter="url(#ds5)"/>
-<rect x="454" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg6)"/>
+<rect x="454" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg6)" stroke="rgba(15, 23, 42, 0.12)" stroke-width="2"/>
 <g clip-path="url(#clip8)"><use href="#imgSym7" x="456" y="112" width="368" height="176"/></g>
 <text x="454" y="301.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Cover</text>
 <text x="454" y="322.5" fill="rgb(100, 116, 139)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Fills the frame by cropping the source edges.</text>
 <rect x="856" y="96" width="400" height="254" rx="16" ry="16" fill="rgb(255, 255, 255)" filter="url(#ds9)"/>
-<rect x="870" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg10)"/>
+<rect x="870" y="110" width="372" height="180" rx="12" ry="12" fill="url(#lg10)" stroke="rgba(15, 23, 42, 0.12)" stroke-width="2"/>
 <g clip-path="url(#clip12)"><use href="#imgSym11" x="992" y="136" width="128" height="128"/></g>
 <text x="870" y="301.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Scale Down</text>
 <text x="870" y="322.5" fill="rgb(100, 116, 139)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Does not upscale when the intrinsic image is already smaller.</text>

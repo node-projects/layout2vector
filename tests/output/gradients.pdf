@@ -7,19 +7,37 @@ endobj
 <</Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding>>
 endobj
 3 0 obj
-<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [31.647333 249.667104 170.852667 110.46177] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.4 0.494118 0.917647] /C1 [0.462745 0.294118 0.635294] /N 1>> /Extend [true true]>>
+<</Type /ExtGState /ca 0.033333 /CA 0.033333>>
 endobj
 4 0 obj
-<</ShadingType 3 /ColorSpace /DeviceRGB /Coords [269.25 255.814437 0 269.25 255.814437 56.25] /Function <</FunctionType 3 /Domain [0 1] /Functions [<</FunctionType 2 /Domain [0 1] /C0 [1 0.603922 0.619608] /C1 [0.996078 0.811765 0.937255] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.996078 0.811765 0.937255] /C1 [0.992157 0.988235 0.984314] /N 1>>] /Bounds [0.5] /Encode [0 1 0 1]>> /Extend [true true]>>
+<</Type /ExtGState /ca 0.066667 /CA 0.066667>>
 endobj
 5 0 obj
-<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [498.897333 110.46177 638.102667 249.667104] /Function <</FunctionType 3 /Domain [0 1] /Functions [<</FunctionType 2 /Domain [0 1] /C0 [0.376471 0.427451 0.737255] /C1 [0.376471 0.427451 0.737255] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.376471 0.427451 0.737255] /C1 [0.27451 0.321569 0.596078] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.27451 0.321569 0.596078] /C1 [0.27451 0.321569 0.596078] /N 1>>] /Bounds [0.5 0.5] /Encode [0 1 0 1 0 1]>> /Extend [true true]>>
+<</Type /ExtGState /ca 0.1 /CA 0.1>>
 endobj
 6 0 obj
-<</Font <</F1 1 0 R /F2 2 0 R>> /Shading <</SH1 3 0 R /SH2 4 0 R /SH3 5 0 R>>>>
+<</Type /ExtGState /ca 0.011111 /CA 0.011111>>
 endobj
 7 0 obj
-<</Length 7441>>
+<</Type /ExtGState /ca 0.022222 /CA 0.022222>>
+endobj
+8 0 obj
+<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [31.647333 249.667104 170.852667 110.46177] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.4 0.494118 0.917647] /C1 [0.462745 0.294118 0.635294] /N 1>> /Extend [true true]>>
+endobj
+9 0 obj
+<</ShadingType 3 /ColorSpace /DeviceRGB /Coords [269.25 255.814437 0 269.25 255.814437 56.25] /Function <</FunctionType 3 /Domain [0 1] /Functions [<</FunctionType 2 /Domain [0 1] /C0 [1 0.603922 0.619608] /C1 [0.996078 0.811765 0.937255] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.996078 0.811765 0.937255] /C1 [0.992157 0.988235 0.984314] /N 1>>] /Bounds [0.5] /Encode [0 1 0 1]>> /Extend [true true]>>
+endobj
+10 0 obj
+<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [498.897333 110.46177 638.102667 249.667104] /Function <</FunctionType 3 /Domain [0 1] /Functions [<</FunctionType 2 /Domain [0 1] /C0 [0.376471 0.427451 0.737255] /C1 [0.376471 0.427451 0.737255] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.376471 0.427451 0.737255] /C1 [0.27451 0.321569 0.596078] /N 1>> <</FunctionType 2 /Domain [0 1] /C0 [0.27451 0.321569 0.596078] /C1 [0.27451 0.321569 0.596078] /N 1>>] /Bounds [0.5 0.5] /Encode [0 1 0 1 0 1]>> /Extend [true true]>>
+endobj
+11 0 obj
+<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [674.914588 173.314437 912.085412 173.314437] /Function <</FunctionType 2 /Domain [0 1] /C0 [1 0 0] /C1 [0 0 0] /N 1>> /Extend [true true]>>
+endobj
+12 0 obj
+<</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R /GS3 5 0 R /GS4 6 0 R /GS5 7 0 R>> /Shading <</SH1 8 0 R /SH2 9 0 R /SH3 10 0 R /SH4 11 0 R>>>>
+endobj
+13 0 obj
+<</Length 9175>>
 stream
 q
 BT
@@ -456,7 +474,15 @@ BT
 ET
 Q
 q
-0.9098 0.9098 0.9098 rg
+681 210.8144 m
+906 210.8144 l
+906 135.8144 l
+681 135.8144 l
+h
+W n
+/SH4 sh
+Q
+q
 0.8 0.8 0.8 RG
 0.75 w
 681 210.8144 m
@@ -464,7 +490,7 @@ q
 906 135.8144 l
 681 135.8144 l
 h
-B
+S
 Q
 q
 BT
@@ -481,6 +507,96 @@ BT
 0 102.8714 Td
 (Box Shadows) Tj
 ET
+Q
+q
+/GS1 gs
+0 0 0 rg
+24.75 82.5644 m
+162.75 82.5644 l
+172.2769 82.5644 180 73.0375 180 65.3144 c
+180 17.3144 l
+180 7.7875 172.2769 0.0644 162.75 0.0644 c
+24.75 0.0644 l
+15.2231 0.0644 7.5 7.7875 7.5 17.3144 c
+7.5 65.3144 l
+7.5 74.8413 15.2231 82.5644 24.75 82.5644 c
+h
+f
+Q
+q
+/GS2 gs
+0 0 0 rg
+24.75 78.8144 m
+162.75 78.8144 l
+170.2058 78.8144 176.25 71.3586 176.25 65.3144 c
+176.25 17.3144 l
+176.25 9.8586 170.2058 3.8144 162.75 3.8144 c
+24.75 3.8144 l
+17.2942 3.8144 11.25 9.8586 11.25 17.3144 c
+11.25 65.3144 l
+11.25 72.7703 17.2942 78.8144 24.75 78.8144 c
+h
+f
+Q
+q
+/GS3 gs
+0 0 0 rg
+24.75 75.0644 m
+162.75 75.0644 l
+168.1348 75.0644 172.5 69.6797 172.5 65.3144 c
+172.5 17.3144 l
+172.5 11.9297 168.1348 7.5644 162.75 7.5644 c
+24.75 7.5644 l
+19.3652 7.5644 15 11.9297 15 17.3144 c
+15 65.3144 l
+15 70.6992 19.3652 75.0644 24.75 75.0644 c
+h
+f
+Q
+q
+/GS4 gs
+0 0 0 rg
+19.5 82.5644 m
+157.5 82.5644 l
+164.1274 82.5644 169.5 75.937 169.5 70.5644 c
+169.5 22.5644 l
+169.5 15.937 164.1274 10.5644 157.5 10.5644 c
+19.5 10.5644 l
+12.8726 10.5644 7.5 15.937 7.5 22.5644 c
+7.5 70.5644 l
+7.5 77.1919 12.8726 82.5644 19.5 82.5644 c
+h
+f
+Q
+q
+/GS5 gs
+0 0 0 rg
+19.5 80.5644 m
+157.5 80.5644 l
+163.0228 80.5644 167.5 75.0416 167.5 70.5644 c
+167.5 22.5644 l
+167.5 17.0416 163.0228 12.5644 157.5 12.5644 c
+19.5 12.5644 l
+13.9772 12.5644 9.5 17.0416 9.5 22.5644 c
+9.5 70.5644 l
+9.5 76.0873 13.9772 80.5644 19.5 80.5644 c
+h
+f
+Q
+q
+/GS1 gs
+0 0 0 rg
+19.5 78.5644 m
+157.5 78.5644 l
+161.9183 78.5644 165.5 74.1462 165.5 70.5644 c
+165.5 22.5644 l
+165.5 18.1462 161.9183 14.5644 157.5 14.5644 c
+19.5 14.5644 l
+15.0817 14.5644 11.5 18.1462 11.5 22.5644 c
+11.5 70.5644 l
+11.5 74.9827 15.0817 78.5644 19.5 78.5644 c
+h
+f
 Q
 q
 1 1 1 rg
@@ -532,30 +648,36 @@ ET
 Q
 endstream
 endobj
-8 0 obj
-<</Type /Page /Parent 9 0 R /MediaBox [0 0 930.17484 342.814437] /Resources 6 0 R /Contents 7 0 R>>
+14 0 obj
+<</Type /Page /Parent 15 0 R /MediaBox [0 0 930.17484 342.814437] /Resources 12 0 R /Contents 13 0 R>>
 endobj
-9 0 obj
-<</Type /Pages /Kids [8 0 R] /Count 1>>
+15 0 obj
+<</Type /Pages /Kids [14 0 R] /Count 1>>
 endobj
-10 0 obj
-<</Type /Catalog /Pages 9 0 R>>
+16 0 obj
+<</Type /Catalog /Pages 15 0 R>>
 endobj
 xref
-0 11
+0 17
 0000000000 65535 f 
 0000000015 00000 n 
 0000000115 00000 n 
 0000000210 00000 n 
-0000000449 00000 n 
-0000000872 00000 n 
-0000001411 00000 n 
-0000001506 00000 n 
-0000008997 00000 n 
-0000009112 00000 n 
-0000009167 00000 n 
+0000000272 00000 n 
+0000000334 00000 n 
+0000000386 00000 n 
+0000000448 00000 n 
+0000000510 00000 n 
+0000000749 00000 n 
+0000001172 00000 n 
+0000001712 00000 n 
+0000001917 00000 n 
+0000002096 00000 n 
+0000011322 00000 n 
+0000011441 00000 n 
+0000011498 00000 n 
 trailer
-<</Root 10 0 R /Size 11>>
+<</Root 16 0 R /Size 17>>
 startxref
-9215
+11547
 %%EOF

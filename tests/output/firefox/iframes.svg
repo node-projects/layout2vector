@@ -17,7 +17,7 @@
 <filter id="ds14" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(36, 50, 74, 0.08)" result="s0"/></filter>
 <filter id="ds15" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(36, 50, 74, 0.08)" result="s0"/></filter>
 </defs>
-<rect x="42" y="42" width="1136" height="309.5" rx="30" ry="30" fill="url(#lg2)" filter="url(#ds1)"/>
+<rect x="42" y="42" width="1136" height="309.5" rx="30" ry="30" fill="url(#lg2)" stroke="rgba(22, 33, 62, 0.14)" stroke-width="1" filter="url(#ds1)"/>
 <rect x="75" y="71" width="170.45" height="29" rx="14.5" ry="14.5" fill="rgb(247, 215, 196)"/>
 <text x="87" y="79" fill="rgb(184, 92, 56)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Georgia">IFRAME WALKING</text>
 <text x="75" y="112" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="52px" font-family="Georgia">Embedded documents can now join the</text>
@@ -27,7 +27,7 @@
 <text x="632.67" y="264.75" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="21px" font-family="Georgia">to traverse those</text>
 <text x="75" y="296.25" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="21px" font-family="Georgia">nested documents and keep them in the same paint-order pipeline.</text>
 <text x="496.37" y="264.75" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="21px" font-family="Georgia">walkIframes</text>
-<rect x="42" y="379.5" width="633.15" height="581.7" rx="28" ry="28" fill="none" filter="url(#ds3)"/>
+<rect x="42" y="379.5" width="633.15" height="581.7" rx="28" ry="28" fill="rgba(255, 255, 255, 0.88)" stroke="rgba(22, 33, 62, 0.14)" stroke-width="1" filter="url(#ds3)"/>
 <text x="67" y="406" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">Embedded existing demo</text>
 <text x="67" y="452.17" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">The left frame points at</text>
 <text x="326.65" y="452.17" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">, so this page exercises same-origin iframe</text>
@@ -43,7 +43,7 @@
 <g clip-path="url(#clip7)"><g clip-path="url(#clip5)"><text x="851.21" y="868.2" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und F&#xF6;rdererstich AE11/AE12.</text></g></g>
 <g clip-path="url(#clip7)"><g clip-path="url(#clip5)"><text x="851.21" y="900.2" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text></g></g>
 <g clip-path="url(#clip7)"><g clip-path="url(#clip5)"><text x="851.21" y="932.2" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgel&#xF6;st werden!</text></g></g>
-<rect x="703.15" y="379.5" width="474.85" height="488.05" rx="28" ry="28" fill="none" filter="url(#ds8)"/>
+<rect x="703.15" y="379.5" width="474.85" height="488.05" rx="28" ry="28" fill="rgba(255, 255, 255, 0.88)" stroke="rgba(22, 33, 62, 0.14)" stroke-width="1" filter="url(#ds8)"/>
 <text x="728.15" y="406" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">Transformed iframe</text>
 <text x="728.15" y="452.17" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">The right frame is rotated slightly so iframe descendants</text>
 <text x="728.15" y="478.52" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">have to inherit the iframe viewport transform instead of</text>
@@ -57,10 +57,10 @@
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="783.76" y="684.53" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia" transform="rotate(-7,783.76,684.53)">This inline frame stays fully inside its</text></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="786.36" y="705.69" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia" transform="rotate(-7,786.36,705.69)">viewport so the transform math is visible</text></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="788.95" y="726.85" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia" transform="rotate(-7,788.95,726.85)">without depending on overflow clipping.</text></g></g>
-<g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><path d="M795.27,778.3 Q793.08,760.44 810.95,758.24 L905.55,746.63 Q923.42,744.43 925.61,762.3 L931.02,806.33 Q933.21,824.2 915.35,826.39 L820.74,838.01 Q802.87,840.2 800.68,822.33 Z" fill="rgb(255, 255, 255)" filter="url(#ds14)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><path d="M795.27,778.3 Q793.08,760.44 810.95,758.24 L905.55,746.63 Q923.42,744.43 925.61,762.3 L931.02,806.33 Q933.21,824.2 915.35,826.39 L820.74,838.01 Q802.87,840.2 800.68,822.33 Z" fill="rgb(255, 255, 255)" stroke="rgba(36, 50, 74, 0.12)" stroke-width="1" filter="url(#ds14)"/></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="809.61" y="774.46" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="Georgia" transform="rotate(-7,809.61,774.46)">42%</text></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="813.86" y="809.1" fill="rgb(93, 106, 128)" dominant-baseline="text-before-edge" font-size="13px" font-family="Georgia" transform="rotate(-7,813.86,809.1)">coverage</text></g></g>
-<g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><path d="M937.29,760.87 Q935.09,743 952.96,740.81 L1047.57,729.19 Q1065.43,727 1067.63,744.86 L1073.03,788.89 Q1075.23,806.76 1057.36,808.95 L962.75,820.57 Q944.89,822.76 942.69,804.9 Z" fill="rgb(255, 255, 255)" filter="url(#ds15)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><path d="M937.29,760.87 Q935.09,743 952.96,740.81 L1047.57,729.19 Q1065.43,727 1067.63,744.86 L1073.03,788.89 Q1075.23,806.76 1057.36,808.95 L962.75,820.57 Q944.89,822.76 942.69,804.9 Z" fill="rgb(255, 255, 255)" stroke="rgba(36, 50, 74, 0.12)" stroke-width="1" filter="url(#ds15)"/></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="951.62" y="757.02" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="Georgia" transform="rotate(-7,951.62,757.02)">2x</text></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><text x="955.88" y="791.66" fill="rgb(93, 106, 128)" dominant-baseline="text-before-edge" font-size="13px" font-family="Georgia" transform="rotate(-7,955.88,791.66)">layers</text></g></g>
 <g clip-path="url(#clip11)"><g clip-path="url(#clip13)"><path d="M806.49,869.7 Q804.54,853.82 820.43,851.87 L1061.02,822.33 Q1076.9,820.38 1078.85,836.26 L1081.64,858.97 Q1083.59,874.85 1067.71,876.8 L827.11,906.34 Q811.23,908.29 809.28,892.41 Z" fill="rgb(219, 232, 244)"/></g></g>

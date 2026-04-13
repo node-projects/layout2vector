@@ -79,10 +79,18 @@ function parseCssColorUncached(color: string): ParsedCssColor | null {
 }
 
 function parseRgbColor(color: string): ParsedCssColor | null {
-  const match = color.match(/^rgba?\((.+)\)$/);
+  const match = color.match(/^(rgb|rgba)\((.+)\)$/);
   if (!match) return null;
 
-  const { channels, alpha } = splitChannels(match[1]);
+  const fnName = match[1];
+  const { channels, alpha: slashAlpha } = splitChannels(match[2]);
+  let alpha = slashAlpha;
+
+  if (channels.length === 4 && fnName === "rgba" && !match[2].includes("/")) {
+    alpha = parseAlpha(channels[3]);
+    channels.pop();
+  }
+
   if (channels.length !== 3) return null;
 
   const r = parseRgbChannel(channels[0]);

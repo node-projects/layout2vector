@@ -24,10 +24,10 @@
 <rect x="1022" y="100" width="234" height="120" rx="16" ry="16" fill="oklch(0.62796 0.25768 29.234)" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3" filter="url(#ds5)"/>
 <text x="1039" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">OKLCH()</text>
 <text x="1039" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">OKLCH card</text>
-<rect x="24" y="240" width="120" height="70" rx="35" ry="35" fill="color(srgb 0.18 0.66 0.35)"/>
+<rect x="24" y="240" width="120" height="70" rx="35" ry="35" fill="color(srgb 0.18 0.66 0.35)" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/>
 <text x="60.33" y="270.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">success</text>
-<rect x="158" y="240" width="120" height="70" rx="35" ry="35" fill="lab(70 -10 60)"/>
+<rect x="158" y="240" width="120" height="70" rx="35" ry="35" fill="lab(70 -10 60)" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/>
 <text x="203.02" y="270.5" fill="rgb(16, 16, 16)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">warm</text>
-<rect x="292" y="240" width="120" height="70" rx="35" ry="35" fill="oklch(0.82 0.12 120)"/>
+<rect x="292" y="240" width="120" height="70" rx="35" ry="35" fill="oklch(0.82 0.12 120)" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/>
 <text x="340.27" y="270.5" fill="rgb(16, 32, 20)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">mint</text>
 </svg>

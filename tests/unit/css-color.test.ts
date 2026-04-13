@@ -10,6 +10,12 @@ function expectOpaqueRed(parsed: { r: number; g: number; b: number; a: number } 
 }
 
 test.describe("CSS color parsing", () => {
+  test("parses legacy rgba() comma syntax", () => {
+    const parsed = parseCssColor("rgba(194, 31, 31, 0.52)");
+    expect(parsed).not.toBeNull();
+    expect(parsed).toEqual({ r: 194, g: 31, b: 31, a: 0.52 });
+  });
+
   test("parses color(srgb ...) modern syntax", () => {
     const parsed = parseCssColor("color(srgb 1 0 0 / 0.5)");
     expect(parsed).not.toBeNull();

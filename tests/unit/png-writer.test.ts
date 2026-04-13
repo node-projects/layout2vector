@@ -209,10 +209,116 @@ test.describe("PNG Writer Output", () => {
       const writer = new (window as any).__HC.PNGWriter(100, 100);
       const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
-      return pngResult.toDataURL();
+      const canvas = pngResult.getCanvas();
+      const ctx = canvas.getContext("2d")!;
+      const pixel = Array.from(ctx.getImageData(40, 40, 1, 1).data);
+      return {
+        dataUrl: pngResult.toDataURL(),
+        pixel,
+      };
     });
 
-    expect(result).toMatch(/^data:image\/png;base64,/);
+    expect(result.dataUrl).toMatch(/^data:image\/png;base64,/);
+    expect(result.pixel[0]).toBeGreaterThan(240);
+    expect(result.pixel[1]).toBeLessThan(200);
+    expect(result.pixel[2]).toBeLessThan(200);
+    expect(result.pixel[3]).toBe(255);
+  });
+
+  test("renders translucent pre backgrounds", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="position:relative;width:400px;height:320px;">
+          <pre
+            style="position:absolute;left:40px;top:30px;width:240px;height:160px;border:1px solid black;background:rgba(194, 31, 31, 0.52);margin:0;"
+          >line one
+line two
+line three</pre>
+        </div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+      const prePolygon = ir.find((node: any) =>
+        node.type === "polygon" &&
+        Math.min(...node.points.map((point: any) => point.x)) >= 40 &&
+        Math.min(...node.points.map((point: any) => point.y)) >= 30
+      );
+
+      const writer = new (window as any).__HC.PNGWriter(400, 320);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
+      await pngResult.finalize();
+      const canvas = pngResult.getCanvas();
+      const ctx = canvas.getContext("2d")!;
+
+      return {
+        fill: prePolygon?.style?.fill,
+        pixel: Array.from(ctx.getImageData(120, 100, 1, 1).data),
+      };
+    });
+
+    expect(result.fill).toBe("rgba(194, 31, 31, 0.52)");
+    expect(result.pixel[0]).toBeGreaterThan(210);
+    expect(result.pixel[1]).toBeLessThan(170);
+    expect(result.pixel[2]).toBeLessThan(170);
+    expect(result.pixel[3]).toBe(255);
+  });
+
+  test("renders translucent pre backgrounds in the test8 layout", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="root" style="width: 100%; height: 100%; border: none; overflow: auto; position: absolute;">
+          <button style="width:200px;height:53px;position:absolute;left:62px;top:59px;rotate:0deg;">Button</button>
+          <select style="position:absolute;left:62px;top:112px;width:200px;height:88px;"></select>
+          <textarea style="position:absolute;left:62px;top:200px;width:194px;height:175px;"></textarea>
+          <input type="checkbox" style="position:absolute;left:106px;top:422px;width:75px;height:59px;">
+          <input type="datetime-local" style="position:absolute;left:62px;top:381px;">
+          <input value="mnnmnmnm" style="position:absolute;left:407px;top:114px;">
+          <pre
+            style="position:absolute;left:407px;top:122px;width:327px;height:227px;border:1px solid black;background:rgba(194, 31, 31, 0.52);margin:0;"
+          >    dsfd.  fsdfd
+    dsfdfs.  dfddsf
+    sdf x
+    dsfdfsdfddsfdfssddfs </pre>
+        </div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("root")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+        includeImages: true,
+      });
+      const prePolygon = ir.find((node: any) =>
+        node.type === "polygon" && node.style?.fill === "rgba(194, 31, 31, 0.52)"
+      );
+
+      const writer = new (window as any).__HC.PNGWriter(740, 500);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
+      await pngResult.finalize();
+      const canvas = pngResult.getCanvas();
+      const ctx = canvas.getContext("2d")!;
+
+      return {
+        fill: prePolygon?.style?.fill,
+        pixel: Array.from(ctx.getImageData(520, 260, 1, 1).data),
+      };
+    });
+
+    expect(result.fill).toBe("rgba(194, 31, 31, 0.52)");
+    expect(result.pixel[0]).toBeGreaterThan(210);
+    expect(result.pixel[1]).toBeLessThan(170);
+    expect(result.pixel[2]).toBeLessThan(170);
+    expect(result.pixel[3]).toBe(255);
   });
 
   test("renders object-fit: cover by cropping source image edges", async ({ page }) => {

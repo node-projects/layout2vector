@@ -15,23 +15,23 @@
 <text x="56" y="53.5" fill="rgb(143, 16, 39)" dominant-baseline="text-before-edge" font-weight="800" font-size="70px" font-family="Georgia">CSS</text>
 <text x="56" y="120" fill="rgb(143, 16, 39)" dominant-baseline="text-before-edge" font-weight="800" font-size="70px" font-family="Georgia">PROPERTY</text>
 <text x="56" y="186.5" fill="rgb(143, 16, 39)" dominant-baseline="text-before-edge" font-weight="800" font-size="70px" font-family="Georgia">SUPPORT</text>
-<text x="56" y="280" fill="#000000" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">A focused demo for visual and text properties,</text>
-<text x="56" y="314.09" fill="#000000" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">including transformed boxes, mixed compositing,</text>
-<text x="56" y="348.19" fill="#000000" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">masking, ellipsis, vertical writing, and whitespace-</text>
-<text x="56" y="382.28" fill="#000000" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">sensitive text.</text>
-<rect x="885" y="56" width="107" height="38" rx="19" ry="19" fill="none"/>
+<text x="56" y="280" fill="rgba(22, 50, 79, 0.78)" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">A focused demo for visual and text properties,</text>
+<text x="56" y="314.09" fill="rgba(22, 50, 79, 0.78)" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">including transformed boxes, mixed compositing,</text>
+<text x="56" y="348.19" fill="rgba(22, 50, 79, 0.78)" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">masking, ellipsis, vertical writing, and whitespace-</text>
+<text x="56" y="382.28" fill="rgba(22, 50, 79, 0.78)" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">sensitive text.</text>
+<rect x="885" y="56" width="107" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="903" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">OUTLINE</text>
-<rect x="1004" y="56" width="89" height="38" rx="19" ry="19" fill="none"/>
+<rect x="1004" y="56" width="89" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="1022" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">FILTER</text>
-<rect x="1104" y="56" width="185" height="38" rx="19" ry="19" fill="none"/>
+<rect x="1104" y="56" width="185" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="1122" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">MIX-BLEND-MODE</text>
-<rect x="1301" y="56" width="83" height="38" rx="19" ry="19" fill="none"/>
+<rect x="1301" y="56" width="83" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="1319" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">MASK</text>
-<rect x="1035" y="106" width="165" height="38" rx="19" ry="19" fill="none"/>
+<rect x="1035" y="106" width="165" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="1053" y="117.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRITING-MODE</text>
-<rect x="1212" y="106" width="172" height="38" rx="19" ry="19" fill="none"/>
+<rect x="1212" y="106" width="172" height="38" rx="19" ry="19" fill="rgba(255, 255, 255, 0.72)"/>
 <text x="1230" y="117.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">TEXT-OVERFLOW</text>
-<rect x="56" y="454" width="1328" height="469" rx="28" ry="28" fill="none" filter="url(#ds1)"/>
+<rect x="56" y="454" width="1328" height="469" rx="28" ry="28" fill="rgba(255, 248, 232, 0.86)" filter="url(#ds1)"/>
 <text x="84" y="483.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">VISUAL PROPERTIES</text>
 <rect x="84" y="535" width="1272" height="360" rx="24" ry="24" fill="url(#lg2)"/>
 <path d="M129.02,618.98 Q130,591 157.73,587.1 L359.74,558.71 Q387.47,554.82 386.49,582.8 L382.64,693.26 Q381.66,721.24 353.93,725.14 L151.92,753.53 Q124.19,757.43 125.17,729.45 Z" fill="url(#lg3)"/>
@@ -44,16 +44,16 @@
 <text x="460.98" y="674.94" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(2,460.98,674.94)">BLEND</text>
 <path d="M923.51,617 Q924,589 951.79,592.41 L1184.05,620.93 Q1211.84,624.34 1211.35,652.34 L1208.64,807.47 Q1208.15,835.47 1180.36,832.06 L948.11,803.54 Q920.31,800.13 920.8,772.13 Z" fill="url(#rg6)"/>
 <text x="945.42" y="742.79" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(7,945.42,742.79)">MASKED</text>
-<rect x="56" y="957" width="1328" height="573" rx="28" ry="28" fill="none" filter="url(#ds7)"/>
+<rect x="56" y="957" width="1328" height="573" rx="28" ry="28" fill="rgba(255, 248, 232, 0.86)" filter="url(#ds7)"/>
 <text x="84" y="986.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">TEXT PROPERTIES</text>
-<rect x="84" y="1038" width="715" height="256" rx="24" ry="24" fill="none"/>
-<g clip-path="url(#clip8)"><text x="108" y="1061.5" fill="#000000" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">TYPOGRAPHY STACK</text></g>
+<rect x="84" y="1038" width="715" height="256" rx="24" ry="24" fill="rgba(255, 255, 255, 0.7)"/>
+<g clip-path="url(#clip8)"><text x="108" y="1061.5" fill="rgba(22, 50, 79, 0.6)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">TYPOGRAPHY STACK</text></g>
 <g clip-path="url(#clip8)"><text x="-41.02" y="1034.23" fill="rgb(106, 27, 77)" dominant-baseline="text-before-edge" font-style="italic" font-weight="700" font-size="30px" font-family="Georgia" transform="rotate(-3,-41.02,1034.23)" xml:space="preserve" text-decoration="underline">MUSEUM COPY</text></g>
 <g clip-path="url(#clip8)"><text x="-102.52" y="1083.51" fill="rgb(106, 27, 77)" dominant-baseline="text-before-edge" font-style="italic" font-weight="700" font-size="30px" font-family="Georgia" transform="rotate(-3,-102.52,1083.51)" xml:space="preserve" text-decoration="underline">LEANS INTO RHYTHM </text></g>
 <g clip-path="url(#clip8)"><text x="316.9" y="1061.53" fill="rgb(106, 27, 77)" dominant-baseline="text-before-edge" font-style="italic" font-weight="700" font-size="30px" font-family="Georgia" transform="rotate(-3,316.9,1061.53)" xml:space="preserve" text-decoration="underline">AND SPACING</text></g>
 <g clip-path="url(#clip8)"><text x="-45.84" y="1222.02" fill="rgb(127, 85, 57)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Segoe UI" transform="rotate(4,-45.84,1222.02)">This sentence intentionally&#x2026;</text></g>
-<rect x="827" y="1038" width="529" height="464" rx="24" ry="24" fill="none"/>
-<g clip-path="url(#clip9)"><text x="851" y="1061.5" fill="#000000" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRAPPING AND DIRECTION</text></g>
+<rect x="827" y="1038" width="529" height="464" rx="24" ry="24" fill="rgba(255, 255, 255, 0.7)"/>
+<g clip-path="url(#clip9)"><text x="851" y="1061.5" fill="rgba(22, 50, 79, 0.6)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRAPPING AND DIRECTION</text></g>
 <g clip-path="url(#clip9)"><text x="702.97" y="1029.02" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,702.97,1029.02)">WrapThisAbsurdlyLongToken</text></g>
 <g clip-path="url(#clip9)"><text x="701.86" y="1060.89" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,701.86,1060.89)">WithoutAnyMercyBecauseWo</text></g>
 <g clip-path="url(#clip9)"><text x="700.74" y="1092.76" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,700.74,1092.76)">rdBreakAndOverflowWrapSh</text></g>
