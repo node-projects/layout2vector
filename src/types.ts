@@ -8,6 +8,12 @@ export type Point = { x: number; y: number };
 /** A quad defined by 4 points (top-left, top-right, bottom-right, bottom-left). */
 export type Quad = [Point, Point, Point, Point];
 
+/** An absolute clip quad, optionally with rounded corners. */
+export type ClipQuad = {
+  points: Quad;
+  radius: number;
+};
+
 /** Extracted computed style subset. */
 export type Style = {
   fill?: string;
@@ -51,6 +57,8 @@ export type Style = {
   textOverflow?: string;
   imageRendering?: string;
   clipPath?: string;
+  /** One or more absolute clip quads inherited from iframe viewports. */
+  clipQuads?: ClipQuad[];
   /** Clip boundary from an ancestor with overflow:hidden + border-radius (absolute page coords). */
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 };
@@ -95,6 +103,12 @@ export type Options = {
   includeText?: boolean;
   includeImages?: boolean;
   includeInvisible?: boolean;
+  /**
+   * When true, same-origin iframe documents are traversed and extracted as part
+   * of the parent tree. Cross-origin or not-yet-loaded iframes are skipped.
+   * Defaults to false.
+   */
+  walkIframes?: boolean;
   /**
    * When extracting from multiple elements (passing an array to extractIR),
    * specifies which element's top-left corner to use as the coordinate origin.

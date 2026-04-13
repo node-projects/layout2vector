@@ -764,6 +764,13 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   /** Apply rectangular clip bounds and CSS clip-path shapes before painting. */
   private emitClip(style: Style, bounds: ClipPathBounds): void {
+    if (style.clipQuads?.length) {
+      for (const clipQuad of style.clipQuads) {
+        this.emitPolygonPath(clipQuad.points, true);
+        this.ops.push("W n");
+      }
+    }
+
     const clip = style.clipBounds;
     if (clip) {
       const x = this.ptX(clip.x);

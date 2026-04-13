@@ -2,15 +2,15 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, and Shadow DOM — and converts it to **DXF**, **EMF**, **PDF**, **PNG**, **SVG**, or **HTML**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **EMF**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
 
 ## Overview
 
 layout2vector works in three stages:
 
-1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
+1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees and, optionally, same-origin iframe documents), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), PNG (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
 For a feature-by-feature comparison with html2canvas and html2canvas-pro, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
 
@@ -25,7 +25,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, EMFWriter, PDFWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, EMFWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -37,6 +37,7 @@ const ir = await extractIR(root, {
   includeInvisible: false, // skip display:none / visibility:hidden
   includeImages: true,     // enable image extraction (recommended)
   convertFormControls: true, // synthesize native form controls into value/state-aware IR
+  walkIframes: true,       // walk same-origin iframe documents too
 });
 
 // 2. Render to DXF
@@ -50,7 +51,12 @@ const pdfDoc = await renderIR(ir, pdfWriter); // returns a PdfDocument
 await pdfDoc.finalize();
 const pdfBytes = pdfDoc.toBytes(); // Uint8Array
 
-// 4. Render to PNG (requires Canvas-capable environment)
+// 4. Render to Canvas (requires Canvas-capable environment)
+const canvasWriter = new CanvasWriter({ width: 800, height: 600, scale: 2 });
+const canvas = await renderIR(ir, canvasWriter);
+document.body.append(canvas);
+
+// 5. Render to PNG/JPEG/WEBP (requires Canvas-capable environment)
 const imageWriter = new ImageWriter({ width: 800, height: 600 });
 const imageResult = await renderIR(ir, imageWriter);
 await imageResult.finalize(); // loads and draws raster images
@@ -58,17 +64,17 @@ const pngDataUrl = imageResult.toDataURL(); // data:image/png;base64,...
 const pngBytes = imageResult.toBytes(); // Uint8Array
 const jpegDataUrl = imageResult.toDataURL("image/jpeg", 0.92); // JPEG output
 
-// 5. Render to SVG
+// 6. Render to SVG
 const svgWriter = new SVGWriter({ width: 800, height: 600 });
 const svgString = await renderIR(ir, svgWriter);
 // svgString is a complete standalone SVG document
 
-// 6. Render to HTML
+// 7. Render to HTML
 const htmlWriter = new HTMLWriter({ width: 800, height: 600, customCss: ".my-class { color: red; }" });
 const htmlString = await renderIR(ir, htmlWriter);
 // htmlString is a complete standalone HTML document
 
-// 7. Render to EMF (Windows Enhanced Metafile)
+// 8. Render to EMF (Windows Enhanced Metafile)
 const emfWriter = new EMFWriter({ width: 800, height: 600 });
 const emfBytes = await renderIR(ir, emfWriter); // Uint8Array → save as .emf file
 
@@ -93,6 +99,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
+| `walkIframes` | `boolean` | `false` | Traverse same-origin iframe documents and merge their content into the same IR paint order |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 | `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |
 | `svgToVector` | `boolean` | `false` | When true, embedded SVG images (in `<img>` tags and CSS `background-image`) are always converted to vector IR nodes (polygon, polyline, text) instead of being rasterized to bitmap image nodes. This produces resolution-independent output but may not accurately render SVGs that use fill-rule:evenodd with complex multi-subpath paths. |
@@ -103,6 +110,8 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 If `svgToVector` is `true`, all embedded SVG images are vectorized, even if they use `fill-rule:evenodd`. This produces resolution-independent output, but may not exactly match browser rendering for complex SVGs with multiple subpaths and evenodd fill rules. By default (`svgToVector: false`), such SVGs are rasterized to ensure visual fidelity.
 
 If `convertFormControls` is `true`, the extractor approximates native control chrome with ordinary IR primitives (`polygon`, `polyline`, and `text`) so every writer can render control values and states without special-case renderer code.
+
+If `walkIframes` is `true`, `extractIR()` descends into same-origin iframe documents and maps their geometry back into the parent page coordinate space. Cross-origin iframes and not-yet-loaded frames are skipped.
 
 #### `async renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T>`
 
@@ -156,6 +165,25 @@ Produces a `Uint8Array` containing a binary **Enhanced Metafile (EMF)** file (Wi
 - Transparent elements are skipped
 - Output is a valid AC1015-format EMF file readable by GDI-enabled applications (Word, Visio, AutoCAD, etc.)
 
+
+
+#### `CanvasWriter`
+
+```ts
+type CanvasWriterOptions = {
+  width: number;
+  height: number;
+  scale?: number;
+  zoom?: number;
+};
+new CanvasWriter(options: CanvasWriterOptions)
+```
+
+Produces an `HTMLCanvasElement` directly via the Canvas 2D API. `CanvasWriter` uses the same drawing backend as `ImageWriter`, but it automatically finalizes queued raster images before returning the canvas.
+
+- Polygons, polylines, text, gradients, opacity, and embedded images render through the Canvas 2D API
+- Returns a ready-to-use `HTMLCanvasElement` from `await renderIR(ir, new CanvasWriter(...))`
+- Best fit when you want to continue drawing, display the export immediately, or call `canvas.toDataURL()` / `canvas.toBlob()` yourself
 
 
 #### `ImageWriter` (formerly `PNGWriter`)

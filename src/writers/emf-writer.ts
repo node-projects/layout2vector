@@ -778,6 +778,15 @@ export class EMFWriter implements Writer<Uint8Array> {
 
   /** Apply clip bounds and clip-path shapes from style. */
   private applyClip(style: Style, bounds?: ClipPathBounds): void {
+    let hasClip = false;
+
+    if (style.clipQuads?.length) {
+      for (const clipQuad of style.clipQuads) {
+        this.applyPolygonClipPath(clipQuad.points, hasClip ? RGN_AND : RGN_COPY);
+        hasClip = true;
+      }
+    }
+
     const clip = style.clipBounds;
     if (clip) {
       // Use INTERSECTCLIPRECT for rectangular clipping (simpler and more compatible)
@@ -787,6 +796,7 @@ export class EMFWriter implements Writer<Uint8Array> {
         Math.round(clip.x + clip.w),
         Math.round(clip.y + clip.h)
       ));
+      hasClip = true;
     }
 
     const clipShape = bounds ? parseClipPathShape(style.clipPath, bounds) : null;
@@ -797,54 +807,118 @@ export class EMFWriter implements Writer<Uint8Array> {
         EMR.SETPOLYFILLMODE,
         uint32Array(clipShape.fillRule === "evenodd" ? ALTERNATE : WINDING),
       );
+      this.applyPolygonClipPath(clipShape.points, hasClip ? RGN_AND : RGN_COPY);
+      return;
     }
-
-    this.records.writeRecord(EMR.BEGINPATH, null);
 
     switch (clipShape.kind) {
       case "inset":
-        if (clipShape.rx > 0 || clipShape.ry > 0) {
-          this.records.writeRecord(EMR.ROUNDRECT, int32Array(
-            Math.round(clipShape.x),
-            Math.round(clipShape.y),
-            Math.round(clipShape.x + clipShape.w),
-            Math.round(clipShape.y + clipShape.h),
-            Math.round(clipShape.rx * 2),
-            Math.round(clipShape.ry * 2),
-          ));
-        } else {
-          this.records.writeRecord(EMR.RECTANGLE, int32Array(
-            Math.round(clipShape.x),
-            Math.round(clipShape.y),
-            Math.round(clipShape.x + clipShape.w),
-            Math.round(clipShape.y + clipShape.h),
-          ));
-        }
+        this.applyPolygonClipPath(
+          this.buildRoundedRectClipPoints(
+            clipShape.x,
+            clipShape.y,
+            clipShape.w,
+            clipShape.h,
+            clipShape.rx,
+            clipShape.ry,
+          ),
+          hasClip ? RGN_AND : RGN_COPY,
+        );
         break;
       case "ellipse":
-        this.records.writeRecord(EMR.ELLIPSE, int32Array(
-          Math.round(clipShape.cx - clipShape.rx),
-          Math.round(clipShape.cy - clipShape.ry),
-          Math.round(clipShape.cx + clipShape.rx),
-          Math.round(clipShape.cy + clipShape.ry),
-        ));
-        break;
-      case "polygon": {
-        const shapeBounds = this.computeBoundsFromPoints(clipShape.points);
-        const ptData = int16Array(
-          ...clipShape.points.flatMap((point) => [Math.round(point.x), Math.round(point.y)])
+        this.applyPolygonClipPath(
+          this.buildEllipseClipPoints(clipShape.cx, clipShape.cy, clipShape.rx, clipShape.ry),
+          hasClip ? RGN_AND : RGN_COPY,
         );
-        this.records.writeRecord(EMR.POLYGON16, concat(
-          int32Array(shapeBounds.left, shapeBounds.top, shapeBounds.right, shapeBounds.bottom),
-          uint32Array(clipShape.points.length),
-          ptData,
-        ));
         break;
-      }
+    }
+  }
+
+  private applyPolygonClipPath(points: Point[], combineMode: number): void {
+    const shapeBounds = this.computeBoundsFromPoints(points);
+    const ptData = int16Array(
+      ...points.flatMap((point) => [Math.round(point.x), Math.round(point.y)])
+    );
+
+    this.records.writeRecord(EMR.BEGINPATH, null);
+    this.records.writeRecord(EMR.POLYGON16, concat(
+      int32Array(shapeBounds.left, shapeBounds.top, shapeBounds.right, shapeBounds.bottom),
+      uint32Array(points.length),
+      ptData,
+    ));
+    this.records.writeRecord(EMR.ENDPATH, null);
+    this.records.writeRecord(EMR.SELECTCLIPPATH, uint32Array(combineMode));
+  }
+
+  private buildEllipseClipPoints(cx: number, cy: number, rx: number, ry: number, segments = 32): Point[] {
+    const points: Point[] = [];
+
+    for (let index = 0; index < segments; index += 1) {
+      const angle = (-Math.PI / 2) + (Math.PI * 2 * index) / segments;
+      points.push({
+        x: cx + Math.cos(angle) * rx,
+        y: cy + Math.sin(angle) * ry,
+      });
     }
 
-    this.records.writeRecord(EMR.ENDPATH, null);
-    this.records.writeRecord(EMR.SELECTCLIPPATH, uint32Array(clip ? RGN_AND : RGN_COPY));
+    return points;
+  }
+
+  private buildRoundedRectClipPoints(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rx: number,
+    ry: number,
+    segmentsPerCorner = 6,
+  ): Point[] {
+    const clampedRx = Math.max(0, Math.min(rx, w / 2));
+    const clampedRy = Math.max(0, Math.min(ry, h / 2));
+
+    if (clampedRx === 0 || clampedRy === 0) {
+      return [
+        { x, y },
+        { x: x + w, y },
+        { x: x + w, y: y + h },
+        { x, y: y + h },
+      ];
+    }
+
+    const points: Point[] = [
+      { x: x + clampedRx, y },
+      { x: x + w - clampedRx, y },
+    ];
+
+    this.appendArcPoints(points, x + w - clampedRx, y + clampedRy, clampedRx, clampedRy, -Math.PI / 2, 0, segmentsPerCorner);
+    points.push({ x: x + w, y: y + h - clampedRy });
+    this.appendArcPoints(points, x + w - clampedRx, y + h - clampedRy, clampedRx, clampedRy, 0, Math.PI / 2, segmentsPerCorner);
+    points.push({ x: x + clampedRx, y: y + h });
+    this.appendArcPoints(points, x + clampedRx, y + h - clampedRy, clampedRx, clampedRy, Math.PI / 2, Math.PI, segmentsPerCorner);
+    points.push({ x, y: y + clampedRy });
+    this.appendArcPoints(points, x + clampedRx, y + clampedRy, clampedRx, clampedRy, Math.PI, (Math.PI * 3) / 2, segmentsPerCorner);
+
+    return points;
+  }
+
+  private appendArcPoints(
+    points: Point[],
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    startAngle: number,
+    endAngle: number,
+    segments: number,
+  ): void {
+    for (let index = 1; index <= segments; index += 1) {
+      const ratio = index / segments;
+      const angle = startAngle + (endAngle - startAngle) * ratio;
+      points.push({
+        x: cx + Math.cos(angle) * rx,
+        y: cy + Math.sin(angle) * ry,
+      });
+    }
   }
 
   /**

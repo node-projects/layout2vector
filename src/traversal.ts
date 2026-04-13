@@ -1,7 +1,12 @@
 /**
  * DOM traversal with stacking context awareness.
  */
-import type { Style } from "./types.js";
+import type { ClipQuad, Quad, Style } from "./types.js";
+import { getElementQuad } from "./geometry.js";
+
+type CoordinateTransform = { a: number; b: number; c: number; d: number; e: number; f: number };
+
+const IDENTITY_TRANSFORM: CoordinateTransform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
 
 /** Represents a node in the stacking context tree. */
 export interface StackingNode {
@@ -12,6 +17,10 @@ export interface StackingNode {
   children: StackingNode[];
   textNodes: Text[];
   zIndex: number;
+  /** Accumulated outer-page transform for nested browsing contexts. */
+  coordinateTransform: CoordinateTransform;
+  /** Clip quads inherited from iframe viewports. */
+  clipQuads?: ClipQuad[];
   /** Clip boundary from an ancestor with overflow:hidden + border-radius. */
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 }
@@ -158,16 +167,20 @@ export function isSVGRoot(el: Element): boolean {
  */
 export function traverseDOM(
   root: Element,
-  includeInvisible = false
+  includeInvisible = false,
+  walkIframes = false
 ): StackingNode {
-  return buildStackingNode(root, includeInvisible, 1, undefined);
+  return buildStackingNode(root, includeInvisible, 1, undefined, IDENTITY_TRANSFORM, walkIframes, undefined);
 }
 
 function buildStackingNode(
   element: Element,
   includeInvisible: boolean,
   parentOpacity: number,
-  parentClipBounds: StackingNode["clipBounds"]
+  parentClipBounds: StackingNode["clipBounds"],
+  coordinateTransform: CoordinateTransform,
+  walkIframes: boolean,
+  parentClipQuads: ClipQuad[] | undefined
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
@@ -189,6 +202,8 @@ function buildStackingNode(
     children: [],
     textNodes: [],
     zIndex: zVal,
+    coordinateTransform,
+    clipQuads: parentClipQuads,
     clipBounds: parentClipBounds,
   };
 
@@ -199,13 +214,14 @@ function buildStackingNode(
   if (overflow === "hidden" || overflow === "clip") {
     const rect = element.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
-      const br = cs.borderRadius;
-      let radius = 0;
-      if (br && br !== "0px") {
-        const val = parseFloat(br);
-        if (!isNaN(val) && val > 0) radius = val;
-      }
-      childClipBounds = { x: rect.left, y: rect.top, w: rect.width, h: rect.height, radius };
+      const bounds = getTransformedRectBounds(rect, coordinateTransform);
+      childClipBounds = {
+        x: bounds.x,
+        y: bounds.y,
+        w: bounds.w,
+        h: bounds.h,
+        radius: parseBorderRadius(cs),
+      };
     }
   }
 
@@ -235,11 +251,213 @@ function buildStackingNode(
         continue;
       }
 
-      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds));
+      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds, coordinateTransform, walkIframes, parentClipQuads));
+    }
+  }
+
+  if (walkIframes && isHTMLIFrameElement(element)) {
+    const iframeRoot = getIframeTraversalRoot(element);
+    const iframeViewport = getIframeViewport(element, cs, coordinateTransform);
+    if (iframeRoot && iframeViewport) {
+      const iframeRootStyle = getComputedStyle(iframeRoot);
+      if (includeInvisible || isVisible(iframeRootStyle)) {
+        const iframeClipQuads = parentClipQuads
+          ? [...parentClipQuads, iframeViewport.clipQuad]
+          : [iframeViewport.clipQuad];
+        node.children.push(
+          buildStackingNode(
+            iframeRoot,
+            includeInvisible,
+            effectiveOpacity,
+            intersectClipBounds(childClipBounds, iframeViewport.clipBounds),
+            iframeViewport.transform,
+            walkIframes,
+            iframeClipQuads,
+          )
+        );
+      }
     }
   }
 
   return node;
+}
+
+function parseBorderRadius(cs: CSSStyleDeclaration): number {
+  const borderRadius = cs.borderRadius;
+  if (!borderRadius || borderRadius === "0px") return 0;
+
+  const value = parseFloat(borderRadius);
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+function isHTMLIFrameElement(element: Element): element is HTMLIFrameElement {
+  return element.tagName.toLowerCase() === "iframe";
+}
+
+function getIframeTraversalRoot(element: HTMLIFrameElement): Element | null {
+  try {
+    const doc = element.contentDocument;
+    if (!doc) return null;
+    return doc.body ?? doc.documentElement;
+  } catch {
+    return null;
+  }
+}
+
+function getIframeViewport(
+  element: HTMLIFrameElement,
+  cs: CSSStyleDeclaration,
+  coordinateTransform: CoordinateTransform
+): { transform: CoordinateTransform; clipBounds?: NonNullable<StackingNode["clipBounds"]>; clipQuad: ClipQuad } | null {
+  const contentQuad = getElementQuad(element, "content");
+  const radius = parseBorderRadius(cs);
+
+  let transform: CoordinateTransform;
+  let transformedQuad: Quad;
+
+  if (contentQuad) {
+    const viewportWidth = element.clientWidth;
+    const viewportHeight = element.clientHeight;
+    if (viewportWidth <= 0 || viewportHeight <= 0) return null;
+
+    transformedQuad = transformQuad(contentQuad, coordinateTransform);
+    transform = {
+      a: (transformedQuad[1].x - transformedQuad[0].x) / viewportWidth,
+      b: (transformedQuad[1].y - transformedQuad[0].y) / viewportWidth,
+      c: (transformedQuad[3].x - transformedQuad[0].x) / viewportHeight,
+      d: (transformedQuad[3].y - transformedQuad[0].y) / viewportHeight,
+      e: transformedQuad[0].x,
+      f: transformedQuad[0].y,
+    };
+  } else {
+    const rect = element.getBoundingClientRect();
+    const viewportWidth = element.clientWidth;
+    const viewportHeight = element.clientHeight;
+    if (viewportWidth <= 0 || viewportHeight <= 0) return null;
+
+    const viewportQuad = rectToQuad(
+      rect.left + element.clientLeft,
+      rect.top + element.clientTop,
+      viewportWidth,
+      viewportHeight,
+    );
+    transformedQuad = transformQuad(viewportQuad, coordinateTransform);
+
+    transform = composeCoordinateTransforms(coordinateTransform, {
+      a: 1,
+      b: 0,
+      c: 0,
+      d: 1,
+      e: rect.left + element.clientLeft,
+      f: rect.top + element.clientTop,
+    });
+  }
+
+  const clipBounds = isAxisAlignedQuad(transformedQuad)
+    ? {
+        ...getBoundsFromPoints(transformedQuad),
+        radius,
+      }
+    : undefined;
+
+  return {
+    transform,
+    clipQuad: { points: transformedQuad, radius },
+    clipBounds,
+  };
+}
+
+function rectToQuad(x: number, y: number, width: number, height: number): Quad {
+  return [
+    { x, y },
+    { x: x + width, y },
+    { x: x + width, y: y + height },
+    { x, y: y + height },
+  ];
+}
+
+function transformQuad(quad: Quad, coordinateTransform: CoordinateTransform): Quad {
+  return quad.map((point) => applyCoordinateTransform(point, coordinateTransform)) as Quad;
+}
+
+function isAxisAlignedQuad(quad: Quad): boolean {
+  const epsilon = 0.01;
+  return (
+    Math.abs(quad[0].y - quad[1].y) < epsilon &&
+    Math.abs(quad[1].x - quad[2].x) < epsilon &&
+    Math.abs(quad[2].y - quad[3].y) < epsilon &&
+    Math.abs(quad[3].x - quad[0].x) < epsilon
+  );
+}
+
+function intersectClipBounds(
+  parent: StackingNode["clipBounds"],
+  child: StackingNode["clipBounds"],
+): StackingNode["clipBounds"] {
+  if (!parent) return child;
+  if (!child) return parent;
+
+  const x = Math.max(parent.x, child.x);
+  const y = Math.max(parent.y, child.y);
+  const right = Math.min(parent.x + parent.w, child.x + child.w);
+  const bottom = Math.min(parent.y + parent.h, child.y + child.h);
+
+  return {
+    x,
+    y,
+    w: Math.max(0, right - x),
+    h: Math.max(0, bottom - y),
+    radius: Math.min(parent.radius, child.radius),
+  };
+}
+
+function composeCoordinateTransforms(
+  outer: CoordinateTransform,
+  inner: CoordinateTransform
+): CoordinateTransform {
+  return {
+    a: outer.a * inner.a + outer.c * inner.b,
+    b: outer.b * inner.a + outer.d * inner.b,
+    c: outer.a * inner.c + outer.c * inner.d,
+    d: outer.b * inner.c + outer.d * inner.d,
+    e: outer.a * inner.e + outer.c * inner.f + outer.e,
+    f: outer.b * inner.e + outer.d * inner.f + outer.f,
+  };
+}
+
+function applyCoordinateTransform(
+  point: { x: number; y: number },
+  transform: CoordinateTransform
+): { x: number; y: number } {
+  return {
+    x: transform.a * point.x + transform.c * point.y + transform.e,
+    y: transform.b * point.x + transform.d * point.y + transform.f,
+  };
+}
+
+function getTransformedRectBounds(
+  rect: DOMRect,
+  coordinateTransform: CoordinateTransform
+): { x: number; y: number; w: number; h: number } {
+  return getBoundsFromPoints([
+    applyCoordinateTransform({ x: rect.left, y: rect.top }, coordinateTransform),
+    applyCoordinateTransform({ x: rect.right, y: rect.top }, coordinateTransform),
+    applyCoordinateTransform({ x: rect.right, y: rect.bottom }, coordinateTransform),
+    applyCoordinateTransform({ x: rect.left, y: rect.bottom }, coordinateTransform),
+  ]);
+}
+
+function getBoundsFromPoints(points: Array<{ x: number; y: number }>): { x: number; y: number; w: number; h: number } {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return {
+    x,
+    y,
+    w: Math.max(...xs) - x,
+    h: Math.max(...ys) - y,
+  };
 }
 
 /**

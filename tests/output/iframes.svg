@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1349" height="1003" viewBox="0 0 1349 1003">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="24" stdDeviation="30" flood-color="rgba(22, 33, 62, 0.16)" result="s0"/></filter>
+<linearGradient id="lg2" x1="350.31" y1="-173.88" x2="869.69" y2="567.88" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(255, 255, 255, 0.9)"/><stop offset="100%" stop-color="rgba(245, 232, 221, 0.72)"/></linearGradient>
+<filter id="ds3" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="rgba(22, 33, 62, 0.1)" result="s0"/></filter>
+<filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="rgba(18, 38, 63, 0.18)" result="s0"/></filter>
+<filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="rgba(22, 33, 62, 0.1)" result="s0"/></filter>
+<linearGradient id="lg6" x1="940.5" y1="543" x2="940.5" y2="843" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(232, 241, 248, 0.92)"/><stop offset="100%" stop-color="rgba(247, 215, 196, 0.52)"/></linearGradient>
+<filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="rgba(18, 38, 63, 0.18)" result="s0"/></filter>
+<clipPath id="clip8" clipPathUnits="userSpaceOnUse"><rect x="728.14" y="542.53" width="424.86" height="300" rx="26" ry="26"/></clipPath>
+<linearGradient id="lg9" x1="908.65" y1="558.48" x2="908.65" y2="890.42" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(255, 248, 240)"/><stop offset="100%" stop-color="rgb(243, 237, 229)"/></linearGradient>
+<clipPath id="clip10" clipPathUnits="userSpaceOnUse"><path d="M755.95,620.52 Q753.02,596.7 776.84,593.78 L1040.46,561.41 Q1064.29,558.48 1067.21,582.31 L1084.05,719.48 Q1086.98,743.3 1063.16,746.22 L799.54,778.59 Q775.71,781.52 772.79,757.69 Z"/></clipPath>
+<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="742.24" y="547.09" width="355.8" height="244.87" rx="24" ry="24"/></clipPath>
+<filter id="ds12" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(36, 50, 74, 0.08)" result="s0"/></filter>
+<filter id="ds13" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(36, 50, 74, 0.08)" result="s0"/></filter>
+</defs>
+<rect x="42" y="42" width="1136" height="310" rx="30" ry="30" fill="url(#lg2)" filter="url(#ds1)"/>
+<rect x="75" y="71" width="171" height="29" rx="14.5" ry="14.5" fill="rgb(247, 215, 196)"/>
+<text x="87" y="79" fill="rgb(184, 92, 56)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Georgia">IFRAME WALKING</text>
+<text x="75" y="137.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="52px" font-family="Georgia">Embedded documents can now join the export.</text>
+<text x="75" y="248.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="21px" font-family="Georgia">This demo mixes a same-origin iframe that loads another demo file with a rotated iframe rendered from srcdoc content. Enable</text>
+<text x="633" y="280.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="21px" font-family="Georgia">to traverse those nested documents and keep them in the same paint-order pipeline.</text>
+<text x="496" y="264.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="21px" font-family="Georgia">walkIframes</text>
+<rect x="42" y="380" width="633" height="582" rx="28" ry="28" fill="none" filter="url(#ds3)"/>
+<text x="67" y="406.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">Embedded existing demo</text>
+<text x="67" y="452.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">The left frame points at</text>
+<text x="327" y="465.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">, so this page exercises same-origin iframe walking across a nested file load instead of only inline markup.</text>
+<text x="246" y="452.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Georgia">text.html</text>
+<rect x="67" y="516" width="583" height="420" rx="24" ry="24" fill="rgb(255, 255, 255)" stroke="rgb(18, 38, 63)" stroke-width="10" filter="url(#ds4)"/>
+<rect x="703" y="380" width="475" height="488" rx="28" ry="28" fill="none" filter="url(#ds5)"/>
+<text x="728" y="406.5" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">Transformed iframe</text>
+<text x="728" y="479" fill="rgb(22, 33, 62)" dominant-baseline="text-before-edge" font-size="17px" font-family="Georgia">The right frame is rotated slightly so iframe descendants have to inherit the iframe viewport transform instead of using plain viewport-relative coordinates.</text>
+<rect x="728" y="543" width="425" height="300" rx="26" ry="26" fill="url(#lg6)"/>
+<g clip-path="url(#clip8)"><path d="M745.03,611.99 Q742.1,588.17 765.92,585.25 L1049,550.49 Q1072.82,547.56 1075.74,571.38 L1094.97,728.01 Q1097.9,751.83 1074.08,754.75 L791,789.51 Q767.18,792.44 764.26,768.62 Z" fill="rgb(255, 255, 255)" stroke="rgb(18, 38, 63)" stroke-width="10" filter="url(#ds7)"/></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><path d="M753.02,596.7 L1064.29,558.48 L1105.04,890.42 L793.78,928.64 Z" fill="url(#lg9)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><path d="M775.94,622.52 Q774.63,611.82 785.33,610.51 L866.94,600.49 Q877.64,599.17 878.95,609.87 L878.95,609.87 Q880.27,620.57 869.57,621.89 L787.95,631.91 Q777.25,633.22 775.94,622.52 Z" fill="rgb(36, 50, 74)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="785" y="615.87" fill="rgb(255, 246, 235)" dominant-baseline="text-before-edge" font-size="11px" font-family="Georgia" transform="rotate(-7,785,615.87)">NESTED VIEW</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="778.89" y="646.56" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="28px" font-family="Georgia" transform="rotate(-7,778.89,646.56)">Viewport Card</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="786.19" y="706.03" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia" transform="rotate(-7,786.19,706.03)">This inline frame stays fully inside its viewport so the transform math is visible without depending on overflow clipping.</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><path d="M795.12,778.75 Q792.93,760.89 810.8,758.69 L905.4,747.08 Q923.27,744.88 925.46,762.75 L930.87,806.78 Q933.06,824.65 915.2,826.84 L820.59,838.46 Q802.72,840.65 800.53,822.78 Z" fill="rgb(255, 255, 255)" filter="url(#ds12)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="810.48" y="783.17" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-weight="700" font-size="14.7px" font-family="Georgia" transform="rotate(-7,810.48,783.17)">42%</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="813.68" y="809.3" fill="rgb(93, 106, 128)" dominant-baseline="text-before-edge" font-size="13px" font-family="Georgia" transform="rotate(-7,813.68,809.3)">coverage</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><path d="M937.14,761.32 Q934.94,743.45 952.81,741.26 L1047.42,729.64 Q1065.28,727.45 1067.48,745.31 L1072.88,789.34 Q1075.08,807.21 1057.21,809.4 L962.6,821.02 Q944.74,823.21 942.54,805.35 Z" fill="rgb(255, 255, 255)" filter="url(#ds13)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="952.49" y="765.73" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-weight="700" font-size="14.7px" font-family="Georgia" transform="rotate(-7,952.49,765.73)">2x</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="955.7" y="791.87" fill="rgb(93, 106, 128)" dominant-baseline="text-before-edge" font-size="13px" font-family="Georgia" transform="rotate(-7,955.7,791.87)">layers</text></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><path d="M806.34,870.15 Q804.39,854.27 820.28,852.32 L1060.87,822.78 Q1076.75,820.83 1078.7,836.71 L1081.49,859.42 Q1083.44,875.3 1067.56,877.25 L826.96,906.79 Q811.08,908.74 809.13,892.86 Z" fill="rgb(219, 232, 244)"/></g></g>
+<g clip-path="url(#clip11)"><g clip-path="url(#clip10)"><text x="820.47" y="872.64" fill="rgb(36, 50, 74)" dominant-baseline="text-before-edge" font-size="14px" font-family="Georgia" transform="rotate(-7,820.47,872.64)">Affine mapping keeps the card aligned when the iframe itself is rotated.</text></g></g>
+</svg>

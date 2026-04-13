@@ -2,7 +2,7 @@
  * SVG Writer.
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
-import type { Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
@@ -295,9 +295,44 @@ export class SVGWriter implements Writer<string> {
     return this.getCachedClipId(key, (id) => `<clipPath id="${id}" clipPathUnits="userSpaceOnUse">${this.buildClipShapeElement(shape)}</clipPath>`);
   }
 
+  private buildClipQuadElement(clipQuad: ClipQuad): string {
+    if (clipQuad.radius > 0) {
+      const path = roundedQuadPath(clipQuad.points, clipQuad.radius)
+        .map((segment) => {
+          switch (segment.type) {
+            case "M": return `M${n(segment.x)},${n(segment.y)}`;
+            case "L": return `L${n(segment.x)},${n(segment.y)}`;
+            case "Q": return `Q${n(segment.cx)},${n(segment.cy)} ${n(segment.x)},${n(segment.y)}`;
+          }
+        })
+        .join(" ") + " Z";
+      return `<path d="${path}"/>`;
+    }
+
+    const path = clipQuad.points.map((point, index) => `${index === 0 ? "M" : "L"}${n(point.x)},${n(point.y)}`).join(" ") + " Z";
+    return `<path d="${path}"/>`;
+  }
+
+  private getQuadClipIds(style: Style): string[] {
+    const clipQuads = style.clipQuads;
+    if (!clipQuads?.length) return [];
+
+    return clipQuads.map((clipQuad) => {
+      const key = `quad:${n(clipQuad.radius)}:${clipQuad.points.map((point) => `${n(point.x)},${n(point.y)}`).join("|")}`;
+      return this.getCachedClipId(
+        key,
+        (id) => `<clipPath id="${id}" clipPathUnits="userSpaceOnUse">${this.buildClipQuadElement(clipQuad)}</clipPath>`,
+      );
+    });
+  }
+
   /** Push an element, wrapping it in clip groups when clipBounds or clip-path are set. */
   private pushElement(element: string, style: Style, bounds?: ClipPathBounds): void {
     let wrapped = element;
+
+    for (const quadClipId of this.getQuadClipIds(style)) {
+      wrapped = `<g clip-path="url(#${quadClipId})">${wrapped}</g>`;
+    }
 
     const shapeClipId = this.getShapeClipId(style, bounds);
     if (shapeClipId) {

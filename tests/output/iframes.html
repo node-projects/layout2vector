@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iframes Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #16213e;
+      --panel: rgba(255, 255, 255, 0.88);
+      --line: rgba(22, 33, 62, 0.14);
+      --glow: rgba(22, 33, 62, 0.16);
+      --accent: #b85c38;
+      --accent-soft: #f7d7c4;
+      --mist: #e8f1f8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(247, 215, 196, 0.78), transparent 34%),
+        radial-gradient(circle at right 12% top 20%, rgba(184, 92, 56, 0.18), transparent 26%),
+        linear-gradient(135deg, #f8efe8 0%, #eff5fb 52%, #fbf7f2 100%);
+    }
+
+    #root {
+      width: 1220px;
+      min-height: 920px;
+      padding: 42px;
+    }
+
+    .hero {
+      margin-bottom: 28px;
+      padding: 28px 32px;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(245, 232, 221, 0.72));
+      box-shadow: 0 24px 60px var(--glow);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 18px 40px rgba(22, 33, 62, 0.1);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .card p {
+      margin: 0 0 16px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .frame {
+      display: block;
+      width: 100%;
+      background: white;
+      border: 10px solid #12263f;
+      border-radius: 24px;
+      box-shadow: 0 20px 36px rgba(18, 38, 63, 0.18);
+    }
+
+    .external-frame {
+      height: 420px;
+    }
+
+    .stage {
+      position: relative;
+      height: 300px;
+      margin-top: 6px;
+      padding: 22px;
+      border-radius: 26px;
+      background:
+        linear-gradient(180deg, rgba(232, 241, 248, 0.92), rgba(247, 215, 196, 0.52)),
+        repeating-linear-gradient(135deg, rgba(22, 33, 62, 0.05) 0 14px, transparent 14px 28px);
+      overflow: hidden;
+    }
+
+    .tilted-frame {
+      width: 340px;
+      height: 210px;
+      transform: rotate(-7deg) scale(0.98);
+      transform-origin: center center;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <section class="hero">
+      <div class="badge">Iframe Walking</div>
+      <h1>Embedded documents can now join the export.</h1>
+      <p>This demo mixes a same-origin iframe that loads another demo file with a rotated iframe rendered from srcdoc content. Enable <strong>walkIframes</strong> to traverse those nested documents and keep them in the same paint-order pipeline.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Embedded existing demo</h2>
+        <p>The left frame points at <strong>text.html</strong>, so this page exercises same-origin iframe walking across a nested file load instead of only inline markup.</p>
+        <iframe class="frame external-frame" title="Embedded text demo" src="text.html"></iframe>
+      </article>
+
+      <article class="card">
+        <h2>Transformed iframe</h2>
+        <p>The right frame is rotated slightly so iframe descendants have to inherit the iframe viewport transform instead of using plain viewport-relative coordinates.</p>
+        <div class="stage">
+          <iframe
+            class="frame tilted-frame"
+            title="Transformed iframe card"
+            srcdoc='<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{margin:0;font-family:Georgia,"Times New Roman",serif;background:linear-gradient(180deg,#fff8f0,#f3ede5);color:#24324a}.wrap{padding:18px 20px}.eyebrow{display:inline-block;padding:5px 10px;border-radius:999px;background:#24324a;color:#fff6eb;font-size:11px;letter-spacing:.08em;text-transform:uppercase}.title{margin:14px 0 8px;font-size:28px;line-height:1}.lede{margin:0 0 16px;font-size:15px;line-height:1.45}.row{display:flex;gap:12px}.tile{flex:1;padding:14px;border-radius:18px;background:#fff;border:1px solid rgba(36,50,74,.12);box-shadow:0 10px 20px rgba(36,50,74,.08)}.tile strong{display:block;font-size:24px;margin-bottom:6px}.tile span{font-size:13px;color:#5d6a80}.band{margin-top:14px;padding:12px 14px;border-radius:16px;background:#dbe8f4;color:#24324a;font-size:14px}</style></head><body><div class="wrap"><div class="eyebrow">Nested View</div><div class="title">Viewport Card</div><p class="lede">This inline frame stays fully inside its viewport so the transform math is visible without depending on overflow clipping.</p><div class="row"><div class="tile"><strong>42%</strong><span>coverage</span></div><div class="tile"><strong>2x</strong><span>layers</span></div></div><div class="band">Affine mapping keeps the card aligned when the iframe itself is rotated.</div></div></body></html>'
+          ></iframe>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

@@ -2,7 +2,7 @@
  * HTML Writer.
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
-import type { Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
@@ -54,6 +54,17 @@ function roundedQuadToSvgPath(points: Quad, radius: number): string {
       case "Q": return `Q${n(s.cx)},${n(s.cy)} ${n(s.x)},${n(s.y)}`;
     }
   }).join(" ") + " Z";
+}
+
+function clipQuadToCssClipPath(clipQuad: ClipQuad): string {
+  if (clipQuad.radius > 0) {
+    return `path('${roundedQuadToSvgPath(clipQuad.points, clipQuad.radius)}')`;
+  }
+
+  const polygon = clipQuad.points
+    .map((point) => `${n(point.x)}px ${n(point.y)}px`)
+    .join(",");
+  return `polygon(${polygon})`;
 }
 
 /** Determine file extension from a data URL MIME type. */
@@ -180,6 +191,22 @@ export class HTMLWriter implements Writer<string> {
         `-webkit-clip-path:${style.clipPath}`,
       ];
       wrapped = `<div style="${css.join(";")}"><div style="position:relative;left:${n(-bounds.x)}px;top:${n(-bounds.y)}px">${wrapped}</div></div>`;
+    }
+
+    if (style.clipQuads?.length) {
+      for (const clipQuad of style.clipQuads) {
+        const clipPath = clipQuadToCssClipPath(clipQuad);
+        const css = [
+          "position:absolute",
+          "left:0",
+          "top:0",
+          `width:${n(this.width)}px`,
+          `height:${n(this.height)}px`,
+          `clip-path:${clipPath}`,
+          `-webkit-clip-path:${clipPath}`,
+        ];
+        wrapped = `<div style="${css.join(";")}">${wrapped}</div>`;
+      }
     }
 
     const clip = style.clipBounds;

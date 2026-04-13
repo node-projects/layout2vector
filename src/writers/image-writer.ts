@@ -8,7 +8,7 @@
  *
  * Requires a Canvas-capable environment (browser with document.createElement).
  */
-import type { Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
@@ -24,6 +24,35 @@ interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop
 interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
 interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
+
+function traceClipQuadPath(ctx: CanvasRenderingContext2D, clipQuad: ClipQuad): void {
+  if (clipQuad.radius > 0) {
+    const segments = roundedQuadPath(clipQuad.points, clipQuad.radius);
+    ctx.beginPath();
+    for (const segment of segments) {
+      switch (segment.type) {
+        case "M":
+          ctx.moveTo(segment.x, segment.y);
+          break;
+        case "L":
+          ctx.lineTo(segment.x, segment.y);
+          break;
+        case "Q":
+          ctx.quadraticCurveTo(segment.cx, segment.cy, segment.x, segment.y);
+          break;
+      }
+    }
+    ctx.closePath();
+    return;
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(clipQuad.points[0].x, clipQuad.points[0].y);
+  for (let index = 1; index < clipQuad.points.length; index++) {
+    ctx.lineTo(clipQuad.points[index].x, clipQuad.points[index].y);
+  }
+  ctx.closePath();
+}
 
 function parseColorStops(argsStr: string): GradientStop[] {
   const stops: GradientStop[] = [];
@@ -295,6 +324,7 @@ export class ImageResult {
     ctx.save();
 
     // Apply clip bounds from ancestor with overflow:hidden
+    this.applyClipQuads(ctx, img.style);
     this.applyClipBounds(ctx, img.style);
     this.applyClipPath(ctx, quadBounds(img.quad), img.style);
 
@@ -339,6 +369,15 @@ export class ImageResult {
       ctx.rect(clip.x, clip.y, clip.w, clip.h);
     }
     ctx.clip();
+  }
+
+  private applyClipQuads(ctx: CanvasRenderingContext2D, style: Style): void {
+    if (!style.clipQuads?.length) return;
+
+    for (const clipQuad of style.clipQuads) {
+      traceClipQuadPath(ctx, clipQuad);
+      ctx.clip();
+    }
   }
 
   private applyClipPath(ctx: CanvasRenderingContext2D, bounds: Bounds, style: Style): void {
@@ -556,6 +595,7 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipQuads(ctx, style);
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, quadBounds(points), style);
     this.applyOpacity(ctx, style);
@@ -621,6 +661,7 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipQuads(ctx, style);
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, this.computeBoundingBox(points), style);
     this.applyOpacity(ctx, style);
@@ -655,6 +696,7 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipQuads(ctx, style);
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, quadBounds(quad), style);
     this.applyOpacity(ctx, style);
@@ -744,6 +786,15 @@ export class ImageWriter implements Writer<ImageResult> {
       ctx.rect(clip.x, clip.y, clip.w, clip.h);
     }
     ctx.clip();
+  }
+
+  private applyClipQuads(ctx: CanvasRenderingContext2D, style: Style): void {
+    if (!style.clipQuads?.length) return;
+
+    for (const clipQuad of style.clipQuads) {
+      traceClipQuadPath(ctx, clipQuad);
+      ctx.clip();
+    }
   }
 
   private applyClipPath(ctx: CanvasRenderingContext2D, bounds: Bounds, style: Style): void {

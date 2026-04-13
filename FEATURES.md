@@ -39,6 +39,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Structured IR / custom backends | Yes | No | No | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. |
 | Keeps text as text/vector objects | Yes | No | No | html2canvas tools rasterize text into a canvas. `layout2vector` preserves text nodes for text-capable writers. |
 | Open Shadow DOM | Yes | Not documented | Yes | `layout2vector` traverses open Shadow DOM. html2canvas-pro documents automatic Shadow DOM handling and `iframeContainer`. |
+| Same-origin iframe traversal | Partial | Not documented | Not documented | `layout2vector` can opt into live same-origin iframe walking with `walkIframes`. Cross-origin or unavailable iframe documents are skipped. |
 | Flexbox layouts | Yes | Yes | Yes | html2canvas and html2canvas-pro list `flex` support. `layout2vector` has a UI test for flexbox layout extraction. |
 | Grid layouts | Yes | Not documented | Not documented | `layout2vector` has a UI test for CSS grid. I did not find an explicit grid claim in upstream feature pages. |
 | CSS transforms | Yes | Partial | Partial | html2canvas and html2canvas-pro both describe transform support as limited. `layout2vector` extracts transformed geometry from live layout APIs. |

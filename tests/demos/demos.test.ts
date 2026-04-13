@@ -79,6 +79,8 @@ for (const demoFile of demoFiles) {
     await injectBoxQuadsPolyfill(page);
     await injectLibrary(page);
 
+    const walkIframes = await page.evaluate(() => document.querySelector("iframe") !== null);
+
     // Pre-convert file:// URLs to data URLs (file:// taints canvas and blocks XHR in Chromium)
     // Collect all image src and background-image URLs from the page (including shadow DOM)
     const fileUrls: string[] = await page.evaluate(() => {
@@ -138,15 +140,16 @@ for (const demoFile of demoFiles) {
     }
 
     // Extract IR in the browser
-    const ir: IRNode[] = await page.evaluate((shouldConvertFormControls: boolean) => {
+    const ir: IRNode[] = await page.evaluate(({ shouldConvertFormControls, shouldWalkIframes }: { shouldConvertFormControls: boolean; shouldWalkIframes: boolean }) => {
       const root = document.getElementById("root") ?? document.body;
       return (window as any).__HC.extractIR(root, {
         boxType: "border",
         includeText: true,
         includeImages: true,
         convertFormControls: shouldConvertFormControls,
+        walkIframes: shouldWalkIframes,
       });
-    }, convertFormControls);
+    }, { shouldConvertFormControls: convertFormControls, shouldWalkIframes: walkIframes });
     expect(ir.length).toBeGreaterThan(0);
 
     // Dump IR for specific demos

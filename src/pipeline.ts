@@ -47,7 +47,11 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
   for (const rootEl of roots) {
     // 1. Traverse DOM and build stacking context tree
-    const stackingTree = traverseDOM(rootEl, options.includeInvisible ?? false);
+    const stackingTree = traverseDOM(
+      rootEl,
+      options.includeInvisible ?? false,
+      options.walkIframes ?? false
+    );
 
     // 2. Flatten to paint order
     const ordered = flattenStackingOrder(stackingTree);
@@ -60,12 +64,16 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       if (node.clipBounds) {
         node.extractedStyle.clipBounds = node.clipBounds;
       }
+      if (node.clipQuads?.length) {
+        node.extractedStyle.clipQuads = node.clipQuads;
+      }
 
       // SVG root elements: extract HTML box first (background, borders),
       // then the SVG subtree on top. The HTML box must come first so
       // the SVG content paints over it (correct paint order).
       if (isSVGRoot(el)) {
         const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+        transformIRGeometry(htmlNodes, node.coordinateTransform);
         irNodes.push(...htmlNodes);
         globalIndex += htmlNodes.length || 1;
 
@@ -77,6 +85,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
           // so the SVG extractor can combine it with the SVG element tree opacity.
           (node.extractedStyle.opacity ?? 1) / (parseFloat(getComputedStyle(el).opacity || '1') || 1)
         );
+        transformIRGeometry(svgNodes, node.coordinateTransform);
         irNodes.push(...svgNodes);
         globalIndex += svgNodes.length || 1;
         continue;
@@ -90,18 +99,21 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // MathML root: extract decorations (fraction bars, radical overlines)
       if (isMathMLRoot(el)) {
         const mathNodes = extractMathMLFeatures(el, node.extractedStyle, globalIndex, options);
+        transformIRGeometry(mathNodes, node.coordinateTransform);
         irNodes.push(...mathNodes);
         globalIndex += mathNodes.length;
       }
 
       // HTML element extraction
       const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+      transformIRGeometry(htmlNodes, node.coordinateTransform);
       irNodes.push(...htmlNodes);
       globalIndex += htmlNodes.length || 1;
 
       // Image element extraction (on top of HTML geometry)
       if (options.includeImages && isImageElement(el)) {
         const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
+        transformIRGeometry(imageNodes, node.coordinateTransform);
         irNodes.push(...imageNodes);
         globalIndex += imageNodes.length || 1;
       }
@@ -109,6 +121,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // CSS background-image url() extraction
       if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
         const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
+        transformIRGeometry(bgNodes, node.coordinateTransform);
         irNodes.push(...bgNodes);
         globalIndex += bgNodes.length || 1;
       }
@@ -130,6 +143,54 @@ export async function extractIR(root: Element | Element[], options: Options = {}
   return irNodes;
 }
 
+function transformIRGeometry(nodes: IRNode[], transform: StackingNode["coordinateTransform"]): void {
+  if (
+    transform.a === 1 &&
+    transform.b === 0 &&
+    transform.c === 0 &&
+    transform.d === 1 &&
+    transform.e === 0 &&
+    transform.f === 0
+  ) {
+    return;
+  }
+
+  for (const node of nodes) {
+    switch (node.type) {
+      case "polygon":
+        for (const point of node.points) {
+          applyTransformToPoint(point, transform);
+        }
+        break;
+      case "polyline":
+        for (const point of node.points) {
+          applyTransformToPoint(point, transform);
+        }
+        break;
+      case "text":
+        for (const point of node.quad) {
+          applyTransformToPoint(point, transform);
+        }
+        break;
+      case "image":
+        for (const point of node.quad) {
+          applyTransformToPoint(point, transform);
+        }
+        break;
+    }
+  }
+}
+
+function applyTransformToPoint(
+  point: { x: number; y: number },
+  transform: StackingNode["coordinateTransform"]
+): void {
+  const nextX = transform.a * point.x + transform.c * point.y + transform.e;
+  const nextY = transform.b * point.x + transform.d * point.y + transform.f;
+  point.x = nextX;
+  point.y = nextY;
+}
+
 /**
  * Subtract (ox, oy) from every coordinate in the IR node list,
  * converting from absolute page coordinates to root-relative coordinates.
@@ -139,6 +200,7 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
   // Track already-offset clipBounds objects to avoid double-offsetting
   // (multiple IR nodes can share the same clipBounds reference).
   const offsetClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
+  const offsetClipQuads = new Set<NonNullable<IRNode["style"]["clipQuads"]>>();
   for (const node of nodes) {
     switch (node.type) {
       case "polygon":
@@ -160,6 +222,15 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
       node.style.clipBounds.y -= oy;
       offsetClips.add(node.style.clipBounds);
     }
+    if (node.style.clipQuads && !offsetClipQuads.has(node.style.clipQuads)) {
+      for (const clipQuad of node.style.clipQuads) {
+        for (const point of clipQuad.points) {
+          point.x -= ox;
+          point.y -= oy;
+        }
+      }
+      offsetClipQuads.add(node.style.clipQuads);
+    }
   }
 }
 
@@ -169,6 +240,7 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
  */
 function scaleIRNodes(nodes: IRNode[], zoom: number): void {
   const scaledClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
+  const scaledClipQuads = new Set<NonNullable<IRNode["style"]["clipQuads"]>>();
   for (const node of nodes) {
     switch (node.type) {
       case "polygon":
@@ -208,6 +280,16 @@ function scaleIRNodes(nodes: IRNode[], zoom: number): void {
       s.clipBounds.radius *= zoom;
       scaledClips.add(s.clipBounds);
     }
+    if (s.clipQuads && !scaledClipQuads.has(s.clipQuads)) {
+      for (const clipQuad of s.clipQuads) {
+        for (const point of clipQuad.points) {
+          point.x *= zoom;
+          point.y *= zoom;
+        }
+        clipQuad.radius *= zoom;
+      }
+      scaledClipQuads.add(s.clipQuads);
+    }
   }
 }
 
@@ -217,6 +299,7 @@ function scaleIRNodes(nodes: IRNode[], zoom: number): void {
  */
 function offsetAndScaleIRNodes(nodes: IRNode[], ox: number, oy: number, zoom: number): void {
   const processedClips = new Set<NonNullable<IRNode["style"]["clipBounds"]>>();
+  const processedClipQuads = new Set<NonNullable<IRNode["style"]["clipQuads"]>>();
   for (const node of nodes) {
     switch (node.type) {
       case "polygon":
@@ -255,6 +338,16 @@ function offsetAndScaleIRNodes(nodes: IRNode[], ox: number, oy: number, zoom: nu
       s.clipBounds.h *= zoom;
       s.clipBounds.radius *= zoom;
       processedClips.add(s.clipBounds);
+    }
+    if (s.clipQuads && !processedClipQuads.has(s.clipQuads)) {
+      for (const clipQuad of s.clipQuads) {
+        for (const point of clipQuad.points) {
+          point.x = (point.x - ox) * zoom;
+          point.y = (point.y - oy) * zoom;
+        }
+        clipQuad.radius *= zoom;
+      }
+      processedClipQuads.add(s.clipQuads);
     }
   }
 }
