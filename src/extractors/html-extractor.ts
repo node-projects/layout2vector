@@ -190,6 +190,10 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   if (!parent) return [];
 
   const parentEl = parent instanceof Element ? parent : null;
+  const parentWhiteSpace = parentEl ? getComputedStyle(parentEl).whiteSpace : "";
+  if (parentWhiteSpace === "pre" && (textNode.textContent ?? "").includes("\n")) {
+    return getPreformattedLineQuads(textNode, parent);
+  }
   const isSlottedInShadowDOM = parentEl?.shadowRoot != null;
 
   const span = document.createElement("span");
@@ -214,6 +218,45 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   parent.removeChild(span);
 
   return quads;
+}
+
+function getPreformattedLineQuads(textNode: Text, parent: Node): Quad[] {
+  const sourceText = (textNode.textContent ?? "").replace(/\r\n?/g, "\n");
+  const lines = sourceText.split("\n");
+  if (lines.length <= 1) return [];
+
+  const marker = document.createComment("hc-pre-text");
+  const fragment = document.createDocumentFragment();
+  const lineSpans: HTMLSpanElement[] = [];
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    if (line.length > 0) {
+      const span = document.createElement("span");
+      span.textContent = line;
+      span.style.whiteSpace = "pre";
+      fragment.appendChild(span);
+      lineSpans.push(span);
+    }
+    if (index < lines.length - 1) {
+      fragment.appendChild(document.createTextNode("\n"));
+    }
+  }
+
+  parent.replaceChild(marker, textNode);
+  marker.parentNode!.insertBefore(fragment, marker);
+
+  try {
+    const quads: Quad[] = [];
+    for (const span of lineSpans) {
+      const spanQuads = getElementQuads(span, "border");
+      if (spanQuads.length > 0) quads.push(spanQuads[0]);
+    }
+    return quads;
+  } finally {
+    marker.parentNode!.insertBefore(textNode, marker);
+    marker.parentNode!.removeChild(marker);
+  }
 }
 
 /**

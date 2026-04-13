@@ -13,7 +13,7 @@ import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
 import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
-import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
+import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
 
@@ -416,7 +416,7 @@ export class ImageWriter implements Writer<ImageResult> {
     // Border-radius for axis-aligned rectangles
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
-    const radius = parseBorderRadius(style.borderRadius, w, h);
+    const radius = parseMinDimensionBorderRadius(style.borderRadius, w, h);
     if (radius > 0 && isAxisAlignedRect(points)) {
       this.drawRoundedRect(points, radius, fill, stroke, style);
       // Draw inset shadows after fill
@@ -429,7 +429,7 @@ export class ImageWriter implements Writer<ImageResult> {
     if (radius > 0) {
       const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
       const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
-      const r = parseBorderRadius(style.borderRadius, edgeW, edgeH);
+      const r = parseMinDimensionBorderRadius(style.borderRadius, edgeW, edgeH);
       if (r > 0) {
         const segs = roundedQuadPath(points, r);
         ctx.beginPath();
@@ -857,7 +857,7 @@ export class ImageWriter implements Writer<ImageResult> {
     const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
-    const radius = parseBorderRadius(style.borderRadius, w, h);
+    const radius = parseMinDimensionBorderRadius(style.borderRadius, w, h);
     const r = isAARect ? Math.min(radius, w / 2, h / 2) : 0;
 
     for (const shadow of shadows) {

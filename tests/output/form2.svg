@@ -16,9 +16,8 @@
 <rect x="404" y="46" width="177" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="2"/>
 <g clip-path="url(#clip2)"><text x="410" y="50" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">mnnmnmnm</text></g>
 <path d="M404,82 L733,82 L733,311 L404,311 Z" fill="rgba(194, 31, 31, 0.52)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
-<text x="405" y="106.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd
-    dsfdfs.  dfddsf
-    sdf
-    dsfdfsdfddsfdfssddfs
-</text>
+<text x="405" y="84" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
+<text x="405" y="99" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
+<text x="405" y="114" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf</text>
+<text x="405" y="129" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfsdfddsfdfssddfs</text>
 </svg>
