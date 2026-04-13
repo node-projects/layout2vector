@@ -13,7 +13,7 @@ $LASTSAVEDBY
 9
 $HANDSEED
 5
-32
+35
 9
 $INSUNITS
 70
@@ -365,7 +365,7 @@ Georgia.ttf
 0
 STYLE
 5
-1F
+20
 330
 4
 100
@@ -629,7 +629,7 @@ AcDbEntity
 100
 AcDbText
 10
-65
+64.99993749999703
 20
 640
 30
@@ -657,15 +657,43 @@ AcDbEntity
 100
 AcDbText
 10
-65
+64.99993749999999
 20
-595.25
+606.75
 30
 0
 40
 15
 1
-Padding, indentation, and repeated spaces should survive extraction and rendering.
+Padding, indentation, and repeated spaces should
+7
+Georgia
+100
+AcDbText
+0
+TEXT
+5
+1D
+330
+C
+100
+AcDbEntity
+420
+5398637
+8
+0
+100
+AcDbText
+10
+64.99993749999999
+20
+584.25
+30
+0
+40
+15
+1
+survive extraction and rendering.
 7
 Georgia
 100
@@ -673,7 +701,7 @@ AcDbText
 0
 LWPOLYLINE
 5
-1D
+1E
 330
 C
 100
@@ -865,7 +893,7 @@ AcDbPolyline
 0
 TEXT
 5
-1E
+1F
 330
 C
 100
@@ -877,7 +905,7 @@ AcDbEntity
 100
 AcDbText
 10
-91
+90.99993749999999
 20
 518.5
 30
@@ -886,34 +914,6 @@ AcDbText
 18
 1
 function renderBlock() {
-7
-Courier New
-100
-AcDbText
-0
-TEXT
-5
-20
-330
-C
-100
-AcDbEntity
-420
-1059395
-8
-0
-100
-AcDbText
-10
-91
-20
-492.5
-30
-0
-40
-18
-1
-  const title = "pre  block";
 7
 Courier New
 100
@@ -933,15 +933,15 @@ AcDbEntity
 100
 AcDbText
 10
-91
+90.99993749999999
 20
-466.5
+492.40625
 30
 0
 40
 18
 1
-    return title.padEnd(14, " ");
+  const title = "pre  block";
 7
 Courier New
 100
@@ -961,15 +961,15 @@ AcDbEntity
 100
 AcDbText
 10
-91
+90.99993749999999
 20
-440.5
+466.3125
 30
 0
 40
 18
 1
-}
+    return title.padEnd(14, " ");
 7
 Courier New
 100
@@ -983,13 +983,41 @@ C
 100
 AcDbEntity
 420
+1059395
+8
+0
+100
+AcDbText
+10
+90.99993749999999
+20
+440.21875
+30
+0
+40
+18
+1
+}
+7
+Courier New
+100
+AcDbText
+0
+TEXT
+5
+24
+330
+C
+100
+AcDbEntity
+420
 8146730
 8
 0
 100
 AcDbText
 10
-474
+473.99993749999703
 20
 640
 30
@@ -1005,7 +1033,7 @@ AcDbText
 0
 TEXT
 5
-24
+25
 330
 C
 100
@@ -1017,15 +1045,43 @@ AcDbEntity
 100
 AcDbText
 10
-474
+473.9999375
 20
-595.25
+606.75
 30
 0
 40
 15
 1
-This block is transformed so Firefox uses native line quads instead of the polyfill path.
+This block is transformed so Firefox uses native
+7
+Georgia
+100
+AcDbText
+0
+TEXT
+5
+26
+330
+C
+100
+AcDbEntity
+420
+5398637
+8
+0
+100
+AcDbText
+10
+473.9999375
+20
+584.25
+30
+0
+40
+15
+1
+line quads instead of the polyfill path.
 7
 Georgia
 100
@@ -1033,7 +1089,7 @@ AcDbText
 0
 HATCH
 5
-25
+27
 330
 C
 100
@@ -1165,7 +1221,7 @@ SOLID
 0
 LWPOLYLINE
 5
-26
+28
 330
 C
 100
@@ -1273,66 +1329,6 @@ AcDbPolyline
 0
 TEXT
 5
-27
-330
-C
-100
-AcDbEntity
-420
-1059395
-8
-0
-100
-AcDbText
-10
-498.65399015659483
-20
-519.6528752682257
-30
-0
-40
-18
-1
-if (line.startsWith("  ")) {
-50
-3.000001108559623
-7
-Courier New
-100
-AcDbText
-0
-TEXT
-5
-28
-330
-C
-100
-AcDbEntity
-420
-1059395
-8
-0
-100
-AcDbText
-10
-497.74313735659484
-20
-493.5694152682257
-30
-0
-40
-18
-1
-  rows.push(line);
-50
-3.0000011085596237
-7
-Courier New
-100
-AcDbText
-0
-TEXT
-5
 29
 330
 C
@@ -1345,17 +1341,17 @@ AcDbEntity
 100
 AcDbText
 10
-496.8322845565948
+335.91906066096175
 20
-467.48595526822567
+585.5157276841671
 30
 0
 40
 18
 1
-    render("keep  spaces");
+if (line.startsWith("  ")) {
 50
-3.0000011085596237
+3.000001108559622
 7
 Courier New
 100
@@ -1375,17 +1371,17 @@ AcDbEntity
 100
 AcDbText
 10
-495.9214317565948
+335.0049370613951
 20
-441.4024952682257
+559.338266738347
 30
 0
 40
 18
 1
-}
+  rows.push(line);
 50
-3.0000011085595824
+3.0000011085596188
 7
 Courier New
 100
@@ -1399,13 +1395,73 @@ C
 100
 AcDbEntity
 420
+1059395
+8
+0
+100
+AcDbText
+10
+334.09081366645717
+20
+533.1607944382853
+30
+0
+40
+18
+1
+    render("keep  spaces");
+50
+3.0000011085596205
+7
+Courier New
+100
+AcDbText
+0
+TEXT
+5
+2C
+330
+C
+100
+AcDbEntity
+420
+1059395
+8
+0
+100
+AcDbText
+10
+333.17666013727194
+20
+506.983344711397
+30
+0
+40
+18
+1
+}
+50
+3.0000011085595966
+7
+Courier New
+100
+AcDbText
+0
+TEXT
+5
+2D
+330
+C
+100
+AcDbEntity
+420
 8146730
 8
 0
 100
 AcDbText
 10
-884
+884.0001250000059
 20
 640
 30
@@ -1421,7 +1477,7 @@ AcDbText
 0
 TEXT
 5
-2C
+2E
 330
 C
 100
@@ -1433,15 +1489,43 @@ AcDbEntity
 100
 AcDbText
 10
-884
+884.000125
 20
-595.25
+606.75
 30
 0
 40
 15
 1
-Columns rely on fixed-width spacing and should keep their alignment.
+Columns rely on fixed-width spacing and should
+7
+Georgia
+100
+AcDbText
+0
+TEXT
+5
+2F
+330
+C
+100
+AcDbEntity
+420
+5398637
+8
+0
+100
+AcDbText
+10
+884.000125
+20
+584.25
+30
+0
+40
+15
+1
+keep their alignment.
 7
 Georgia
 100
@@ -1449,7 +1533,7 @@ AcDbText
 0
 HATCH
 5
-2D
+30
 330
 C
 100
@@ -1581,7 +1665,7 @@ SOLID
 0
 LWPOLYLINE
 5
-2E
+31
 330
 C
 100
@@ -1689,7 +1773,7 @@ AcDbPolyline
 0
 TEXT
 5
-2F
+32
 330
 C
 100
@@ -1701,9 +1785,9 @@ AcDbEntity
 100
 AcDbText
 10
-917.3615972957133
+741.008233908081
 20
-504.6708152947963
+585.4319131973773
 30
 0
 40
@@ -1711,7 +1795,7 @@ AcDbText
 1
 column A    column B    column C
 50
--2.0000059767316105
+-2.0000059767316087
 7
 Courier New
 100
@@ -1719,7 +1803,7 @@ AcDbText
 0
 TEXT
 5
-30
+33
 330
 C
 100
@@ -1731,9 +1815,9 @@ AcDbEntity
 100
 AcDbText
 10
-916.4269882957133
+740.0702453600807
 20
-477.90719529479634
+558.5717218614776
 30
 0
 40
@@ -1741,7 +1825,7 @@ AcDbText
 1
 alpha 01    beta  02    gamma 03
 50
--2.0000059767316096
+-2.000005976731609
 7
 Courier New
 100
@@ -1749,7 +1833,7 @@ AcDbText
 0
 TEXT
 5
-31
+34
 330
 C
 100
@@ -1761,9 +1845,9 @@ AcDbEntity
 100
 AcDbText
 10
-915.4923792957132
+739.1322568896935
 20
-451.1435752947963
+531.7115435618191
 30
 0
 40
@@ -1771,7 +1855,7 @@ AcDbText
 1
   keep this padding ->   exactly here
 50
--2.000005976731611
+-2.000005976731609
 7
 Courier New
 100

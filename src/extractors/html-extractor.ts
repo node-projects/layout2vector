@@ -4,7 +4,7 @@
 import type { Point, Quad, Style, IRNode, Options } from "../types.js";
 import type { StackingNode } from "../traversal.js";
 import { isSVGElement } from "../traversal.js";
-import { getElementQuads } from "../geometry.js";
+import { getElementQuads, getNodeQuads } from "../geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 
@@ -207,45 +207,12 @@ function extractCharacterTextNodes(
 }
 
 /**
- * Get all quads for a text node by wrapping it in a temporary inline <span>
- * and calling getBoxQuads() on the span. Returns one quad per line fragment.
+ * Get all quads for a text node via getBoxQuads() called directly on the
+ * Text node. Returns one quad per line fragment.
  * This correctly handles CSS transforms — each quad is properly rotated.
  */
 function getTextNodeQuads(textNode: Text): Quad[] {
-  const parent = textNode.parentNode;
-  if (!parent) return [];
-
-  const parentEl = parent instanceof Element ? parent : null;
-  const parentWhiteSpace = parentEl ? getComputedStyle(parentEl).whiteSpace : "";
-  if (parentWhiteSpace === "pre" && (textNode.textContent ?? "").includes("\n")) {
-    return getPreformattedLineQuads(textNode, parent);
-  }
-  const isSlottedInShadowDOM = parentEl?.shadowRoot != null;
-
-  const span = document.createElement("span");
-  parent.insertBefore(span, textNode);
-  span.appendChild(textNode);
-
-  try {
-    let quads: Quad[];
-    if (isSlottedInShadowDOM) {
-      const r = span.getBoundingClientRect();
-      quads = (r.width === 0 && r.height === 0) ? [] : [[
-        { x: r.left, y: r.top },
-        { x: r.right, y: r.top },
-        { x: r.right, y: r.bottom },
-        { x: r.left, y: r.bottom },
-      ]];
-    } else {
-      quads = getElementQuads(span, "border");
-    }
-
-    return quads;
-  } finally {
-    // Restore original DOM structure
-    parent.insertBefore(textNode, span);
-    parent.removeChild(span);
-  }
+  return getNodeQuads(textNode, "border");
 }
 
 function getTextNodeCharacterQuads(
@@ -359,47 +326,6 @@ function applyTextTransform(text: string, textTransform: string | undefined): st
       return text.replace(/(^|\s)\S/g, (char) => char.toUpperCase());
     default:
       return text;
-  }
-}
-
-function getPreformattedLineQuads(textNode: Text, parent: Node): Quad[] {
-  const sourceText = (textNode.textContent ?? "").replace(/\r\n?/g, "\n");
-  const lines = sourceText.split("\n");
-  if (lines.length <= 1) return [];
-
-  const marker = document.createComment("hc-pre-text");
-  const fragment = document.createDocumentFragment();
-  const lineSpans: HTMLSpanElement[] = [];
-
-  for (let index = 0; index < lines.length; index++) {
-    const line = lines[index];
-    if (line.length > 0) {
-      const span = document.createElement("span");
-      span.textContent = line;
-      span.style.whiteSpace = "pre";
-      fragment.appendChild(span);
-      lineSpans.push(span);
-    }
-    if (index < lines.length - 1) {
-      fragment.appendChild(document.createTextNode("\n"));
-    }
-  }
-
-  const tempNodes = Array.from(fragment.childNodes);
-  parent.replaceChild(marker, textNode);
-  marker.parentNode!.insertBefore(fragment, marker);
-
-  try {
-    const quads: Quad[] = [];
-    for (const span of lineSpans) {
-      const spanQuads = getElementQuads(span, "border");
-      if (spanQuads.length > 0) quads.push(spanQuads[0]);
-    }
-    return quads;
-  } finally {
-    for (const n of tempNodes) n.parentNode?.removeChild(n);
-    marker.parentNode!.insertBefore(textNode, marker);
-    marker.parentNode!.removeChild(marker);
   }
 }
 

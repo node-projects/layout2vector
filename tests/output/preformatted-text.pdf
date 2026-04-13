@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 2959>>
+<</Length 3185>>
 stream
 q
 Q
@@ -31,8 +31,16 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-48.75 446.899 Td
-(Padding, indentation, and repeated spaces should survive extraction and rendering.) Tj
+48.75 455.524 Td
+(Padding, indentation, and repeated spaces should) Tj
+ET
+Q
+q
+BT
+0.3216 0.3765 0.4275 rg
+/F2 11.25 Tf
+48.75 438.649 Td
+(survive extraction and rendering.) Tj
 ET
 Q
 q
@@ -63,7 +71,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 371.11 Td
+68.25 371.0397 Td
 (  const title = "pre  block";) Tj
 ET
 Q
@@ -71,7 +79,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 351.61 Td
+68.25 351.4694 Td
 (    return title.padEnd\(14, " "\);) Tj
 ET
 Q
@@ -79,7 +87,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 332.11 Td
+68.25 331.8991 Td
 (}) Tj
 ET
 Q
@@ -97,8 +105,16 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-355.5 446.899 Td
-(This block is transformed so Firefox uses native line quads instead of the polyfill path.) Tj
+355.5 455.524 Td
+(This block is transformed so Firefox uses native) Tj
+ET
+Q
+q
+BT
+0.3216 0.3765 0.4275 rg
+/F2 11.25 Tf
+355.5 438.649 Td
+(line quads instead of the polyfill path.) Tj
 ET
 Q
 q
@@ -120,7 +136,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 374.8562 391.4807 Tm
+0.9986 0.0523 -0.0523 0.9986 252.8086 440.8779 Tm
 (if \(line.startsWith\("  "\)\) {) Tj
 ET
 Q
@@ -128,7 +144,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 374.173 371.9181 Tm
+0.9986 0.0523 -0.0523 0.9986 252.123 421.2448 Tm
 (  rows.push\(line\);) Tj
 ET
 Q
@@ -136,7 +152,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 373.4899 352.3555 Tm
+0.9986 0.0523 -0.0523 0.9986 251.4374 401.6117 Tm
 (    render\("keep  spaces"\);) Tj
 ET
 Q
@@ -144,7 +160,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 372.8068 332.793 Tm
+0.9986 0.0523 -0.0523 0.9986 250.7518 381.9786 Tm
 (}) Tj
 ET
 Q
@@ -154,7 +170,7 @@ q
 BT
 0.4863 0.3098 0.1647 rg
 /F1 21 Tf
-663 480.7735 Td
+663.0001 480.7735 Td
 (SCALED NOTES) Tj
 ET
 Q
@@ -162,8 +178,16 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-663 446.899 Td
-(Columns rely on fixed-width spacing and should keep their alignment.) Tj
+663.0001 455.524 Td
+(Columns rely on fixed-width spacing and should) Tj
+ET
+Q
+q
+BT
+0.3216 0.3765 0.4275 rg
+/F2 11.25 Tf
+663.0001 438.649 Td
+(keep their alignment.) Tj
 ET
 Q
 q
@@ -185,7 +209,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 688.0782 380.2371 Tm
+0.9994 -0.0349 0.0349 0.9994 555.8132 440.808 Tm
 (column A    column B    column C) Tj
 ET
 Q
@@ -193,7 +217,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 687.3772 360.1644 Tm
+0.9994 -0.0349 0.0349 0.9994 555.1097 420.6628 Tm
 (alpha 01    beta  02    gamma 03) Tj
 ET
 Q
@@ -201,14 +225,14 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 686.6763 340.0917 Tm
+0.9994 -0.0349 0.0349 0.9994 554.4062 400.5177 Tm
 (  keep this padding ->   exactly here) Tj
 ET
 Q
 endstream
 endobj
 6 0 obj
-<</Type /Page /Parent 7 0 R /MediaBox [0 0 996.187248 540.10152] /Resources 4 0 R /Contents 5 0 R>>
+<</Type /Page /Parent 7 0 R /MediaBox [0 0 960.18048 540.10152] /Resources 4 0 R /Contents 5 0 R>>
 endobj
 7 0 obj
 <</Type /Pages /Kids [6 0 R] /Count 1>>
@@ -224,11 +248,11 @@ xref
 0000000210 00000 n 
 0000000303 00000 n 
 0000000362 00000 n 
-0000003371 00000 n 
-0000003486 00000 n 
-0000003541 00000 n 
+0000003597 00000 n 
+0000003711 00000 n 
+0000003766 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-3588
+3813
 %%EOF

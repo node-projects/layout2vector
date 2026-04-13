@@ -58,6 +58,52 @@ export function getElementQuads(el: Element, box: "border" | "content" = "border
   ]];
 }
 
+/**
+ * Get all quads for any DOM node (Element, Text, or Range) via getBoxQuads.
+ * Text nodes and Ranges support getBoxQuads natively.
+ */
+export function getNodeQuads(node: Element | Text | Range, box: "border" | "content" = "border"): Quad[] {
+  if ("getBoxQuads" in node && typeof (node as any).getBoxQuads === "function") {
+    try {
+      const rawQuads: DOMQuad[] = (node as any).getBoxQuads({ box });
+      return rawQuads.map(domQuadToQuad).filter(hasArea);
+    } catch { /* fall through */ }
+  }
+  // Fallback for Text nodes: use Range.getClientRects()
+  if ("nodeType" in node && node.nodeType === 3 /* Node.TEXT_NODE */) {
+    const textNode = node as Text;
+    const range = (textNode.ownerDocument ?? document).createRange();
+    range.selectNodeContents(textNode);
+    return rectsToQuads(range.getClientRects());
+  }
+  // Fallback for Range
+  if (!("nodeType" in node)) {
+    return rectsToQuads((node as Range).getClientRects());
+  }
+  const r = (node as Element).getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) return [];
+  return [[
+    { x: r.left, y: r.top },
+    { x: r.right, y: r.top },
+    { x: r.right, y: r.bottom },
+    { x: r.left, y: r.bottom },
+  ]];
+}
+
+function rectsToQuads(rects: DOMRectList): Quad[] {
+  const quads: Quad[] = [];
+  for (const r of rects) {
+    if (r.width === 0 && r.height === 0) continue;
+    quads.push([
+      { x: r.left, y: r.top },
+      { x: r.right, y: r.top },
+      { x: r.right, y: r.bottom },
+      { x: r.left, y: r.bottom },
+    ]);
+  }
+  return quads;
+}
+
 /** Get the top-left corner of an element's border box via getBoxQuads. */
 export function getElementOrigin(el: Element): Point {
   const q = getElementQuad(el);

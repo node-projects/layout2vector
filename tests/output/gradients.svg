@@ -19,7 +19,7 @@
 <path d="M633,177 L883,177 L883,257 L633,257 Z" fill="url(#lg3)"/>
 <text x="643" y="187.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Repeating stripes</text>
 <path d="M908,176 L1208,176 L1208,276 L908,276 Z" fill="url(#lg4)" stroke="rgb(204, 204, 204)" stroke-width="1"/>
-<text x="919" y="187.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiple backgrounds</text>
+<text x="920" y="188.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiple backgrounds</text>
 <text x="0" y="307" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Box Shadows</text>
 <rect x="20" y="357" width="200" height="80" rx="8" ry="8" fill="rgb(255, 255, 255)" filter="url(#ds5)"/>
 <text x="30" y="367.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Drop shadow</text>

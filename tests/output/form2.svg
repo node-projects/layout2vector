@@ -5,7 +5,7 @@
 <clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="410" y="50" width="165" height="13"/></clipPath>
 </defs>
 <path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)" stroke="rgb(0, 0, 0)" stroke-width="2"/>
-<text x="143" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>
+<text x="144.72" y="80.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>
 <rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>
 <path d="M246.33,154.39 L250,157.61 L253.67,154.39" fill="none" stroke="rgb(80, 80, 80)" stroke-width="1.47"/>
 <rect x="62" y="200" width="194" height="175" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>

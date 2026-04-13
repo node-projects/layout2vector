@@ -25,9 +25,9 @@
 <text x="1039" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">OKLCH()</text>
 <text x="1039" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">OKLCH card</text>
 <rect x="24" y="240" width="120" height="70" rx="35" ry="35" fill="color(srgb 0.18 0.66 0.35)"/>
-<text x="58" y="269" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">success</text>
+<text x="60.33" y="270.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">success</text>
 <rect x="158" y="240" width="120" height="70" rx="35" ry="35" fill="lab(70 -10 60)"/>
-<text x="201" y="269" fill="rgb(16, 16, 16)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">warm</text>
+<text x="203.02" y="270.5" fill="rgb(16, 16, 16)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">warm</text>
 <rect x="292" y="240" width="120" height="70" rx="35" ry="35" fill="oklch(0.82 0.12 120)"/>
-<text x="338" y="269" fill="rgb(16, 32, 20)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">mint</text>
+<text x="340.27" y="270.5" fill="rgb(16, 32, 20)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">mint</text>
 </svg>

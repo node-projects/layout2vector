@@ -6,56 +6,56 @@
 <path d="M33,142.88 L44.3,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M70.5,142.88 L81.8,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M110.47,142.88 L121.77,142.88" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
-<text x="34.2" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
-<text x="34.2" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="50.42" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
-<text x="71.7" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">3</text>
-<text x="71.7" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
-<text x="87.92" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
-<text x="111.67" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">5</text>
-<text x="111.67" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
+<text x="34" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
+<text x="34" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
+<text x="49.18" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
+<text x="71.5" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">3</text>
+<text x="71.5" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
+<text x="81.8" y="130.78" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="111.47" y="122.9" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">5</text>
+<text x="111.47" y="146.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <path d="M20,190.85 L1244,190.85 L1244,293.98 L20,293.98 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="208.85" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Quadratic Formula</text>
 <path d="M73.38,261.01 L185.85,261.01" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M123.18,233.85 L184.85,233.85" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M113.04,246.6 L116.02,257.03 L123.18,233.85" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <text x="33" y="248.92" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">x</text>
-<text x="50.83" y="248.92" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
-<text x="76.62" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
+<text x="44.72" y="248.92" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="74.38" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <text x="86.07" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
-<text x="97.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#xB1;</text>
-<text x="123.18" y="241.55" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
-<text x="133.8" y="236.87" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
-<text x="143.88" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
+<text x="97.47" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#xB1;</text>
+<text x="123.18" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">b</text>
+<text x="133.8" y="235.93" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
+<text x="143.43" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <text x="156.9" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">4</text>
 <text x="166.2" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">a</text>
-<text x="178.92" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">c</text>
-<text x="120.15" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="130.33" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">a</text>
+<text x="176.23" y="241.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">c</text>
+<text x="119.95" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
+<text x="129.25" y="264.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">a</text>
 <path d="M20,308.98 L1244,308.98 L1244,405.73 L20,405.73 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="326.98" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Summation</text>
 <path d="M134.25,372.72 L252.62,372.72" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
-<text x="47.02" y="367.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x2211;</text>
+<text x="36.67" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x2211;</text>
 <text x="52.25" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">i</text>
-<text x="60.12" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">=</text>
+<text x="57.88" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">=</text>
 <text x="74.35" y="373.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <text x="53.25" y="355.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
 <text x="88.32" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">i</text>
 <text x="96.28" y="356.12" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="111.7" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="105.58" y="360.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <text x="135.25" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
-<text x="147.92" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
+<text x="145.68" y="351.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
 <text x="152.35" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
-<text x="165.02" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
+<text x="164.57" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
 <text x="178.03" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
-<text x="189.57" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
-<text x="196.23" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
+<text x="187.33" y="351.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
+<text x="194" y="351.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">(</text>
 <text x="200.67" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <text x="209.97" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">n</text>
-<text x="222.63" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
+<text x="222.18" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
 <text x="235.65" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
-<text x="247.18" y="352.7" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
-<text x="188.98" y="376.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">6</text>
+<text x="244.95" y="351.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">)</text>
+<text x="188.78" y="376.73" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">6</text>
 <path d="M20,420.73 L1244,420.73 L1244,575.27 L20,575.27 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="438.73" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Matrix</text>
 <path d="M37.63,465.97 L33,465.97 L33,560.03 L37.63,560.03" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
@@ -71,51 +71,51 @@
 <text x="101.83" y="538.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M20,590.27 L1244,590.27 L1244,684.6 L20,684.6 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="608.27" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Integral</text>
-<text x="39.12" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x222B;</text>
+<text x="36.67" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">&#x222B;</text>
 <text x="49.57" y="655.6" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">0</text>
 <text x="50.57" y="633.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x221E;</text>
 <text x="69.08" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">e</text>
-<text x="83.23" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
+<text x="81" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">&#x2212;</text>
 <text x="92.68" y="639.58" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">x</text>
-<text x="105.85" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">d</text>
-<text x="118.6" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">x</text>
-<text x="132.77" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="102.18" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">d</text>
+<text x="114.93" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">x</text>
+<text x="126.65" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <text x="155.32" y="642.63" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">1</text>
 <path d="M20,699.6 L1244,699.6 L1244,786.52 L20,786.52 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="717.6" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Superscript &amp; Subscript</text>
 <text x="33" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">a</text>
 <text x="46.25" y="744.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="61.67" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
-<text x="81.75" y="748.05" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
+<text x="60.43" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
+<text x="81.75" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
 <text x="94.62" y="742.6" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="110.03" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="103.92" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <text x="132.58" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">c</text>
 <text x="143.7" y="744.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
 <text x="198" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">H</text>
 <text x="214.02" y="757.52" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="227.98" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">O</text>
+<text x="224.32" y="748.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">O</text>
 <path d="M20,801.52 L1244,801.52 L1244,889.98 L20,889.98 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="819.52" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Square Root</text>
 <path d="M49.33,844.52 L120.25,844.52" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
 <path d="M35.45,861.27 L39.53,874.98 L49.33,844.52" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
 <text x="49.33" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">a</text>
 <text x="62.58" y="851.38" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="78" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
-<text x="98.08" y="853" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
-<text x="110.95" y="848.23" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
-<text x="126.37" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
+<text x="76.77" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">+</text>
+<text x="98.08" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">b</text>
+<text x="110.95" y="847.55" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">2</text>
+<text x="120.25" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">=</text>
 <text x="148.92" y="852.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="serif">c</text>
 <path d="M20,904.98 L1244,904.98 L1244,1017.85 L20,1017.85 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
 <text x="33" y="922.98" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Nested Fractions</text>
 <path d="M33,964.83 L90.55,964.83" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M58.55,979.58 L89.55,979.58" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M80.2,992.67 L88.55,992.67" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
-<text x="57.32" y="947.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
+<text x="57.12" y="947.98" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
 <text x="34" y="973.08" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">1</text>
-<text x="45.53" y="973.08" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
-<text x="70.38" y="966.65" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">1</text>
+<text x="45.08" y="973.08" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">+</text>
+<text x="70.12" y="965.67" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">1</text>
 <text x="59.55" y="986.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">2</text>
-<text x="69.23" y="986.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">+</text>
-<text x="81.42" y="981.27" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">1</text>
-<text x="81.42" y="994.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">3</text>
+<text x="68.87" y="986.22" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="13px" font-family="serif">+</text>
+<text x="81.2" y="980.48" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">1</text>
+<text x="81.2" y="994.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="10px" font-family="serif">3</text>
 </svg>

@@ -9,15 +9,15 @@
 <text x="60" y="96.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">z:3</text>
 <text x="0" y="252" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Opacity Levels</text>
 <rect x="0" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/>
-<text x="30" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">1.0</text>
+<text x="30.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">1.0</text>
 <rect x="90" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.75"/>
-<text x="116" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.75">0.75</text>
+<text x="116.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.75">0.75</text>
 <rect x="180" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.5"/>
-<text x="210" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.5">0.5</text>
+<text x="210.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.5">0.5</text>
 <rect x="270" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.25"/>
-<text x="296" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.25">0.25</text>
+<text x="296.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.25">0.25</text>
 <rect x="360" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.1"/>
-<text x="390" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.1">0.1</text>
+<text x="390.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.1">0.1</text>
 <text x="0" y="383" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Isolation: Isolate</text>
 <path d="M0,415 L200,415 L200,535 L0,535 Z" fill="rgb(255, 249, 196)" stroke="rgb(249, 168, 37)" stroke-width="2"/>
 <path d="M32,447 L112,447 L112,527 L32,527 Z" fill="rgb(66, 165, 245)"/>
@@ -30,10 +30,10 @@
 <text x="20" y="603.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiply</text>
 <text x="0" y="719" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Will-Change</text>
 <path d="M0,751 L100,751 L100,851 L0,851 Z" fill="rgb(0, 137, 123)"/>
-<text x="6" y="793" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">will-change</text>
+<text x="6.44" y="792.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">will-change</text>
 <text x="0" y="867" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Filter</text>
 <rect x="0" y="899" width="120" height="80" rx="8" ry="8" fill="rgb(94, 53, 177)"/>
-<text x="33" y="931" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">filtered</text>
+<text x="33.33" y="930.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">filtered</text>
 <text x="0" y="995" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Contain: Paint</text>
 <path d="M0,1027 L150,1027 L150,1127 L0,1127 Z" fill="rgb(2, 119, 189)"/>
 <text x="10" y="1037.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">contain:paint</text>

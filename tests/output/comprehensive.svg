@@ -16,21 +16,23 @@
 <rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1" filter="url(#ds1)"/>
 <g clip-path="url(#clip3)"><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/></g>
 <g clip-path="url(#clip3)"><text x="21" y="18" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text></g>
-<g clip-path="url(#clip3)"><text x="21" y="96.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders, border-radius, box-shadow, and typography in a realistic component layout.</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="74" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders,</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="96.39" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">border-radius, box-shadow, and typography</text></g>
+<g clip-path="url(#clip3)"><text x="21" y="118.78" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">in a realistic component layout.</text></g>
 <g clip-path="url(#clip3)"><path d="M1,165 L319,165 L319,225 L1,225 Z" fill="rgb(245, 245, 245)"/></g>
 <g clip-path="url(#clip3)"><rect x="21" y="178" width="75" height="35" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
 <g clip-path="url(#clip3)"><text x="37" y="189" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Accept</text></g>
 <g clip-path="url(#clip3)"><rect x="106" y="178" width="79" height="35" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/></g>
-<g clip-path="url(#clip3)"><text x="124" y="189" fill="rgb(30, 136, 229)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Cancel</text></g>
+<g clip-path="url(#clip3)"><text x="126" y="191" fill="rgb(30, 136, 229)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Cancel</text></g>
 <rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="53" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
-<text x="71" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">USERS</text>
+<text x="52.64" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
+<text x="71.48" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">USERS</text>
 <rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="263" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
-<text x="267" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">REVENUE</text>
+<text x="262.31" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
+<text x="267.16" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">REVENUE</text>
 <rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<text x="459" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
-<text x="480" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">UPTIME</text>
+<text x="458.98" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
+<text x="479.98" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">UPTIME</text>
 <rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
 <rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="url(#lg4)"/>
 <rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="url(#lg5)"/>
@@ -48,7 +50,7 @@
 <rect x="159.57" y="534.7" width="75.9" height="28.6" rx="14.3" ry="14.3" fill="rgb(229, 57, 53)"/>
 <text x="174.97" y="543" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Critical</text>
 <path d="M244,549 Q245.14,536 258.19,536 L282.09,536 Q295.14,536 294,549 L294,549 Q292.86,562 279.81,562 L255.91,562 Q242.86,562 244,549 Z" fill="rgb(30, 136, 229)"/>
-<text x="258.52" y="543.02" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Info</text>
+<text x="257.91" y="543.02" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Info</text>
 <rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="url(#lg11)" stroke="rgb(126, 87, 194)" stroke-width="2"/>
 <text x="2" y="584.5" fill="rgb(69, 39, 160)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Shadow DOM Widget</text>
 <text x="2" y="613" fill="rgb(94, 53, 177)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.</text>

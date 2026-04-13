@@ -1957,13 +1957,13 @@ AcDbText
  10
 11.0
  20
-1053.0
+1086.5000500000001011
  30
 0.0
  40
 14.0
   1
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Lorem ipsum dolor sit amet,
  50
 0.0
  41
@@ -1996,6 +1996,192 @@ AcDbText
 TEXT
   5
 1D
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+3355443
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+1064.1094250000001011
+ 30
+0.0
+ 40
+14.0
+  1
+consectetur adipiscing elit. Sed do
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+1E
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+3355443
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+1041.7188000000001011
+ 30
+0.0
+ 40
+14.0
+  1
+eiusmod tempor incididunt ut labore
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+1F
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+3355443
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+1019.3281749999999874
+ 30
+0.0
+ 40
+14.0
+  1
+et dolore magna aliqua.
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+20
 330
 F
 100
@@ -2057,7 +2243,7 @@ AcDbText
   0
 TEXT
   5
-1E
+21
 330
 F
 100
@@ -2119,7 +2305,7 @@ AcDbText
   0
 TEXT
   5
-1F
+22
 330
 F
 100
@@ -2181,7 +2367,7 @@ AcDbText
   0
 TEXT
   5
-20
+23
 330
 F
 100
@@ -2243,7 +2429,7 @@ AcDbText
   0
 TEXT
   5
-21
+24
 330
 F
 100
@@ -2305,7 +2491,7 @@ AcDbText
   0
 TEXT
   5
-22
+25
 330
 F
 100
@@ -2367,7 +2553,7 @@ AcDbText
   0
 TEXT
   5
-23
+26
 330
 F
 100
@@ -2429,7 +2615,7 @@ AcDbText
   0
 TEXT
   5
-24
+27
 330
 F
 100
@@ -2491,7 +2677,7 @@ AcDbText
   0
 TEXT
   5
-25
+28
 330
 F
 100
@@ -2553,7 +2739,7 @@ AcDbText
   0
 HATCH
   5
-26
+29
 330
 F
 100
@@ -2773,7 +2959,7 @@ SOLID
   0
 LWPOLYLINE
   5
-27
+2A
 330
 F
 100
@@ -3221,7 +3407,7 @@ AcDbPolyline
   0
 TEXT
   5
-28
+2B
 330
 F
 100
@@ -3283,7 +3469,7 @@ AcDbText
   0
 TEXT
   5
-29
+2C
 330
 F
 100
@@ -3345,7 +3531,7 @@ AcDbText
   0
 HATCH
   5
-2A
+2D
 330
 F
 100
@@ -3417,7 +3603,7 @@ SOLID
   0
 LWPOLYLINE
   5
-2B
+2E
 330
 F
 100
@@ -3495,7 +3681,7 @@ AcDbPolyline
   0
 TEXT
   5
-2C
+2F
 330
 F
 100
@@ -3517,7 +3703,7 @@ AcDbText
  39
 0.0
  10
-207.0
+207.265625
  20
 572.5
  30
@@ -3557,7 +3743,7 @@ AcDbText
   0
 TEXT
   5
-2D
+30
 330
 F
 100
@@ -3579,7 +3765,7 @@ AcDbText
  39
 0.0
  10
-104.0
+104.46875
  20
 552.5
  30
@@ -3619,7 +3805,7 @@ AcDbText
   0
 TEXT
   5
-2E
+31
 330
 F
 100
@@ -3643,13 +3829,13 @@ AcDbText
  10
 11.0
  20
-524.5
+532.5
  30
 0.0
  40
 14.0
   1
-Justified text that spans across the full width of the container element here.
+Justified text that spans across the full width of
  50
 0.0
  41
@@ -3681,7 +3867,69 @@ AcDbText
   0
 TEXT
   5
-2F
+32
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+516.5
+ 30
+0.0
+ 40
+14.0
+  1
+the container element here.
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+33
 330
 F
 100
@@ -3743,7 +3991,7 @@ AcDbText
   0
 HATCH
   5
-30
+34
 330
 F
 100
@@ -3815,7 +4063,7 @@ SOLID
   0
 LWPOLYLINE
   5
-31
+35
 330
 F
 100
@@ -3893,7 +4141,7 @@ AcDbPolyline
   0
 TEXT
   5
-32
+36
 330
 F
 100
@@ -3917,13 +4165,13 @@ AcDbText
  10
 11.0
  20
-401.0
+428.0
  30
 0.0
  40
 12.0
   1
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+Lorem ipsum dolor sit amet,
  50
 0.0
  41
@@ -3955,7 +4203,379 @@ AcDbText
   0
 TEXT
   5
-33
+37
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+410.0
+ 30
+0.0
+ 40
+12.0
+  1
+consectetur adipiscing elit. Nulla
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+38
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+392.0
+ 30
+0.0
+ 40
+12.0
+  1
+facilisi. Duis aute irure dolor in
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+39
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+11.0
+ 20
+374.0
+ 30
+0.0
+ 40
+12.0
+  1
+reprehenderit in voluptate velit
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+3A
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+210.0
+ 20
+428.0
+ 30
+0.0
+ 40
+12.0
+  1
+esse cillum dolore eu fugiat nulla
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+3B
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+210.0
+ 20
+410.0
+ 30
+0.0
+ 40
+12.0
+  1
+pariatur. Excepteur sint occaecat
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+3C
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+210.0
+ 20
+392.0
+ 30
+0.0
+ 40
+12.0
+  1
+cupidatat non proident.
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+3D
 330
 F
 100
@@ -4017,7 +4637,7 @@ AcDbText
   0
 TEXT
   5
-34
+3E
 330
 F
 100
@@ -4079,7 +4699,7 @@ AcDbText
   0
 TEXT
   5
-35
+3F
 330
 F
 100
@@ -4101,7 +4721,7 @@ AcDbText
  39
 0.0
  10
-159.0
+159.234375
  20
 293.75
  30
@@ -4141,7 +4761,7 @@ AcDbText
   0
 TEXT
   5
-36
+40
 330
 F
 100
@@ -4163,7 +4783,7 @@ AcDbText
  39
 0.0
  10
-255.0
+255.109375
  20
 293.75
  30
@@ -4203,7 +4823,7 @@ AcDbText
   0
 TEXT
   5
-37
+41
 330
 F
 100
@@ -4225,7 +4845,7 @@ AcDbText
  39
 0.0
  10
-379.0
+379.109375
  20
 293.75
  30
@@ -4265,7 +4885,7 @@ AcDbText
   0
 TEXT
   5
-38
+42
 330
 F
 100
@@ -4287,9 +4907,9 @@ AcDbText
  39
 0.0
  10
-61.0
+11.8125
  20
-293.75
+302.25
  30
 0.0
  40
@@ -4327,7 +4947,7 @@ AcDbText
   0
 TEXT
   5
-39
+43
 330
 F
 100
@@ -4349,9 +4969,9 @@ AcDbText
  39
 0.0
  10
-193.0
+161.75
  20
-293.75
+302.25
  30
 0.0
  40
@@ -4389,7 +5009,7 @@ AcDbText
   0
 HATCH
   5
-3A
+44
 330
 F
 100
@@ -4609,7 +5229,7 @@ SOLID
   0
 LWPOLYLINE
   5
-3B
+45
 330
 F
 100
@@ -5057,7 +5677,7 @@ AcDbPolyline
   0
 TEXT
   5
-3C
+46
 330
 F
 100
@@ -5079,9 +5699,9 @@ AcDbText
  39
 0.0
  10
-294.0
+248.6875
  20
-293.25
+302.75
  30
 0.0
  40
@@ -5119,7 +5739,7 @@ AcDbText
   0
 TEXT
   5
-3D
+47
 330
 F
 100
@@ -5181,7 +5801,7 @@ AcDbText
   0
 HATCH
   5
-3E
+48
 330
 F
 100
@@ -5253,7 +5873,7 @@ SOLID
   0
 LWPOLYLINE
   5
-3F
+49
 330
 F
 100
@@ -5331,7 +5951,7 @@ AcDbPolyline
   0
 TEXT
   5
-40
+4A
 330
 F
 100
@@ -5353,17 +5973,389 @@ AcDbText
  39
 0.0
  10
-37.4551732809566147
+24.3211600882204486
  20
-43.2679491924311606
+67.2846206536985392
  30
 0.0
  40
 12.0
   1
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+Lorem ipsum dolor sit amet,
+ 50
+29.9999999999999929
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+4B
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+33.3212128323305095
+ 20
+51.6962110326144284
+ 30
+0.0
+ 40
+12.0
+  1
+consectetur adipiscing elit. Nulla
+ 50
+30.0000000000000036
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+4C
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+42.3212125661293186
+ 20
+36.1077095949781324
+ 30
+0.0
+ 40
+12.0
+  1
+facilisi. Duis aute irure dolor in
+ 50
+29.9999999999999645
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+4D
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+51.3211621518015022
+ 20
+20.5192433685508604
+ 30
+0.0
+ 40
+12.0
+  1
+reprehenderit in voluptate velit
+ 50
+30.0000000000000178
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+4E
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+196.6602643548438891
+ 20
+166.7846531036544775
+ 30
+0.0
+ 40
+12.0
+  1
+esse cillum dolore eu fugiat nulla
+ 50
+29.9999999999999716
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+4F
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+205.660234835889753
+ 20
+151.1961620339199044
+ 30
+0.0
+ 40
+12.0
+  1
+pariatur. Excepteur sint occaecat
  50
 29.9999999999999964
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+50
+330
+F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+0
+ 48
+1.0
+ 60
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+214.6602623145180928
+ 20
+135.6077086517378802
+ 30
+0.0
+ 40
+12.0
+  1
+cupidatat non proident.
+ 50
+30.0000000000000178
  41
 1.0
  51

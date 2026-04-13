@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1328" height="720" viewBox="0 0 1328 720">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
 <defs>
 <radialGradient id="rg1" cx="640" cy="360" r="640" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(188, 108, 37, 0.18)"/><stop offset="32%" stop-color="rgba(0, 0, 0, 0)"/></radialGradient>
 <filter id="ds2" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="rgba(88, 68, 48, 0.14)" result="s0"/></filter>
@@ -11,26 +11,29 @@
 <path d="M0,0 L1280,0 L1280,720 L0,720 Z" fill="url(#rg1)"/>
 <rect x="40" y="32" width="381" height="303" rx="24" ry="24" fill="none" filter="url(#ds2)"/>
 <text x="65" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">CODE BLOCK</text>
-<text x="65" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Padding, indentation, and repeated spaces should survive extraction and rendering.</text>
+<text x="65" y="102" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Padding, indentation, and repeated spaces should</text>
+<text x="65" y="124.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">survive extraction and rendering.</text>
 <rect x="65" y="162" width="331" height="148" rx="18" ry="18" fill="rgb(255, 253, 248)"/>
 <rect x="65" y="162" width="331" height="148" rx="18" ry="18" fill="none" clip-path="url(#ic3)" filter="url(#is4)"/>
 <text x="91" y="188" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">function renderBlock() {</text>
-<text x="91" y="214" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">  const title = &quot;pre  block&quot;;</text>
-<text x="91" y="240" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">    return title.padEnd(14, &quot; &quot;);</text>
-<text x="91" y="266" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">}</text>
+<text x="91" y="214.09" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">  const title = &quot;pre  block&quot;;</text>
+<text x="91" y="240.19" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">    return title.padEnd(14, &quot; &quot;);</text>
+<text x="91" y="266.28" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">}</text>
 <rect x="449" y="32" width="381" height="303" rx="24" ry="24" fill="none" filter="url(#ds5)"/>
 <text x="474" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">ROTATED PRE</text>
-<text x="474" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">This block is transformed so Firefox uses native line quads instead of the polyfill path.</text>
+<text x="474" y="102" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">This block is transformed so Firefox uses native</text>
+<text x="474" y="124.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">line quads instead of the polyfill path.</text>
 <path d="M473.37,179.99 Q474,162 491.98,161.06 L786.57,145.62 Q804.55,144.68 803.92,162.67 L799.99,275.16 Q799.36,293.15 781.39,294.09 L486.79,309.53 Q468.82,310.48 469.44,292.49 Z" fill="rgb(255, 248, 239)"/>
-<text x="499.13" y="186.86" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,499.13,186.86)" xml:space="preserve">if (line.startsWith(&quot;  &quot;)) {</text>
-<text x="498.21" y="212.94" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,498.21,212.94)" xml:space="preserve">  rows.push(line);</text>
-<text x="497.3" y="239.02" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,497.3,239.02)" xml:space="preserve">    render(&quot;keep  spaces&quot;);</text>
-<text x="496.39" y="265.11" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,496.39,265.11)" xml:space="preserve">}</text>
+<text x="336.39" y="120.99" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,336.39,120.99)" xml:space="preserve">if (line.startsWith(&quot;  &quot;)) {</text>
+<text x="335.48" y="147.17" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,335.48,147.17)" xml:space="preserve">  rows.push(line);</text>
+<text x="334.56" y="173.35" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,334.56,173.35)" xml:space="preserve">    render(&quot;keep  spaces&quot;);</text>
+<text x="333.65" y="199.52" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,333.65,199.52)" xml:space="preserve">}</text>
 <rect x="859" y="32" width="381" height="303" rx="24" ry="24" fill="none" filter="url(#ds6)"/>
 <text x="884" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">SCALED NOTES</text>
-<text x="884" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Columns rely on fixed-width spacing and should keep their alignment.</text>
+<text x="884" y="102" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Columns rely on fixed-width spacing and should</text>
+<text x="884" y="124.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">keep their alignment.</text>
 <path d="M891.37,191.99 Q892,174 909.99,174.63 L1214.73,185.27 Q1232.72,185.9 1232.09,203.89 L1228.96,293.49 Q1228.34,311.48 1210.35,310.85 L905.6,300.21 Q887.61,299.58 888.24,281.59 Z" fill="rgb(255, 250, 242)"/>
-<text x="917.83" y="201.84" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,917.83,201.84)" xml:space="preserve">column A    column B    column C</text>
-<text x="916.9" y="228.6" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,916.9,228.6)" xml:space="preserve">alpha 01    beta  02    gamma 03</text>
-<text x="915.96" y="255.36" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,915.96,255.36)" xml:space="preserve">  keep this padding -&gt;   exactly here</text>
+<text x="741.48" y="121.08" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,741.48,121.08)" xml:space="preserve">column A    column B    column C</text>
+<text x="740.54" y="147.94" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,740.54,147.94)" xml:space="preserve">alpha 01    beta  02    gamma 03</text>
+<text x="739.6" y="174.8" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,739.6,174.8)" xml:space="preserve">  keep this padding -&gt;   exactly here</text>
 </svg>

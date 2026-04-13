@@ -34,9 +34,11 @@
 <text x="84" y="449.3" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">VISUAL PROPERTIES</text>
 <rect x="84" y="500.8" width="1272" height="360" rx="24" ry="24" fill="url(#lg2)"/>
 <path d="M129.02,584.78 Q130,556.8 157.73,552.9 L359.74,524.51 Q387.47,520.61 386.49,548.6 L382.64,659.06 Q381.66,687.04 353.93,690.94 L151.92,719.33 Q124.19,723.23 125.17,695.25 Z" fill="url(#lg3)"/>
-<text x="150.29" y="653.13" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-8,150.29,653.13)">OUTLINE + FILTER</text>
+<text x="150.78" y="638.92" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-8,150.78,638.92)">OUTLINE +</text>
+<text x="149.79" y="667.33" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-8,149.79,667.33)">FILTER</text>
 <path d="M474.44,614.69 Q472,586.8 499.89,584.36 L683.19,568.32 Q711.09,565.88 713.53,593.78 L721.72,687.42 Q724.16,715.31 696.27,717.75 L512.97,733.79 Q485.07,736.23 482.63,708.34 Z" fill="url(#lg4)"/>
-<text x="503.23" y="668.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-5,503.23,668.39)">BASE LAYER</text>
+<text x="502.01" y="654.44" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-5,502.01,654.44)">BASE</text>
+<text x="504.45" y="682.34" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-5,504.45,682.34)">LAYER</text>
 <path d="M565.14,644.37 Q570,616.8 597.98,617.78 L794.32,624.63 Q822.3,625.61 817.44,653.19 L799.38,755.61 Q794.52,783.18 766.54,782.2 L570.2,775.35 Q542.22,774.37 547.08,746.79 Z" fill="url(#lg5)"/>
 <text x="575.47" y="724.01" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(2,575.47,724.01)">BLEND</text>
 <path d="M923.51,582.8 Q924,554.8 951.79,558.21 L1184.05,586.73 Q1211.84,590.14 1211.35,618.14 L1208.64,773.27 Q1208.15,801.27 1180.36,797.85 L948.11,769.34 Q920.31,765.92 920.8,737.93 Z" fill="url(#rg6)"/>
@@ -56,7 +58,7 @@
 <g clip-path="url(#clip9)"><text x="848.48" y="1134.5" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,848.48,1134.5)">rdBreakAndOverflowWrapSh</text></g>
 <g clip-path="url(#clip9)"><text x="847.37" y="1166.38" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,847.37,1166.38)">ouldStillPreserveTheLayout.</text></g>
 <g clip-path="url(#clip9)"><path d="M849.42,1211.3 Q851.3,1193.4 869.2,1195.28 L972.63,1206.15 Q990.53,1208.03 988.65,1225.94 L966.28,1438.76 Q964.4,1456.66 946.5,1454.78 L843.07,1443.91 Q825.17,1442.03 827.05,1424.13 Z" fill="url(#lg10)"/></g>
-<g clip-path="url(#clip9)"><text x="951.68" y="1316.57" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="26px" font-family="Segoe UI" transform="rotate(6,951.68,1316.57)" direction="rtl" unicode-bidi="embed" writing-mode="vertical-rl">RTL FLOW</text></g>
+<g clip-path="url(#clip9)"><text x="947.2" y="1316.1" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="26px" font-family="Segoe UI" transform="rotate(6,947.2,1316.1)" direction="rtl" unicode-bidi="embed" writing-mode="vertical-rl">RTL FLOW</text></g>
 <g clip-path="url(#clip9)"><text x="1011.3" y="1267.55" fill="rgb(61, 64, 91)" dominant-baseline="text-before-edge" font-weight="600" font-size="18px" font-family="Courier New" xml:space="preserve">white-space: pre-wrap</text></g>
 <g clip-path="url(#clip9)"><text x="1011.3" y="1295.45" fill="rgb(61, 64, 91)" dominant-baseline="text-before-edge" font-weight="600" font-size="18px" font-family="Courier New" xml:space="preserve">keeps   deliberate gaps</text></g>
 <g clip-path="url(#clip9)"><text x="1011.3" y="1323.35" fill="rgb(61, 64, 91)" dominant-baseline="text-before-edge" font-weight="600" font-size="18px" font-family="Courier New" xml:space="preserve">and carries line breaks </text></g>

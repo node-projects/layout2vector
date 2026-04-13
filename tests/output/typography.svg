@@ -5,7 +5,10 @@
 </defs>
 <text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Text Wrapping</text>
 <rect x="0" y="31" width="250" height="112" rx="6" ry="6" fill="rgb(255, 243, 224)" stroke="rgb(255, 204, 128)" stroke-width="1"/>
-<text x="11" y="79.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</text>
+<text x="11" y="46" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="68.39" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">consectetur adipiscing elit. Sed do</text>
+<text x="11" y="90.78" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">eiusmod tempor incididunt ut labore</text>
+<text x="11" y="113.17" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">et dolore magna aliqua.</text>
 <text x="0" y="159" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Font Sizes &amp; Weights</text>
 <text x="0" y="193.5" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="900" font-size="32px" font-family="Arial">Large Bold Title</text>
 <text x="0" y="240.5" fill="rgb(74, 20, 140)" dominant-baseline="text-before-edge" font-style="italic" font-size="16px" font-family="Arial">Italic text content</text>
@@ -19,22 +22,35 @@
 <text x="8" y="474.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This is a very long text&#x2026;</text>
 <text x="0" y="516" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Text Alignment</text>
 <path d="M0,544 L300,544 L300,646 L0,646 Z" fill="rgb(232, 245, 233)" stroke="rgb(200, 230, 201)" stroke-width="1"/>
-<text x="207" y="560" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Right aligned</text>
-<text x="104" y="580" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Center aligned</text>
-<text x="11" y="608" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial" textLength="300" lengthAdjust="spacing">Justified text that spans across the full width of the container element here.</text>
+<text x="207.27" y="560" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Right aligned</text>
+<text x="104.47" y="580" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Center aligned</text>
+<text x="11" y="600" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Justified text that spans across the full width of</text>
+<text x="11" y="616" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">the container element here.</text>
 <text x="0" y="662" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text</text>
 <path d="M0,692 L400,692 L400,786 L0,786 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
-<text x="11" y="733" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</text>
+<text x="11" y="706" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
+<text x="11" y="724" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">consectetur adipiscing elit. Nulla</text>
+<text x="11" y="742" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">facilisi. Duis aute irure dolor in</text>
+<text x="11" y="760" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">reprehenderit in voluptate velit</text>
+<text x="210" y="706" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">esse cillum dolore eu fugiat nulla</text>
+<text x="210" y="724" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">pariatur. Excepteur sint occaecat</text>
+<text x="210" y="742" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">cupidatat non proident.</text>
 <text x="0" y="802" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Inline Formatting</text>
 <text x="0" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">This has</text>
-<text x="159" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">and</text>
-<text x="255" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">and</text>
-<text x="379" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">mixed together in a single paragraph.</text>
-<text x="61" y="838" fill="rgb(211, 47, 47)" dominant-baseline="text-before-edge" font-style="italic" font-size="15px" font-family="Arial">italic emphasis</text>
-<text x="193" y="838" fill="rgb(21, 101, 192)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">bold text</text>
+<text x="159.23" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">and</text>
+<text x="255.11" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">and</text>
+<text x="379.11" y="838" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">mixed together in a single paragraph.</text>
+<text x="11.81" y="829.5" fill="rgb(211, 47, 47)" dominant-baseline="text-before-edge" font-style="italic" font-size="15px" font-family="Arial">italic emphasis</text>
+<text x="161.75" y="829.5" fill="rgb(21, 101, 192)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">bold text</text>
 <rect x="288" y="837" width="91" height="19" rx="3" ry="3" fill="rgb(38, 50, 56)"/>
-<text x="294" y="840" fill="rgb(128, 203, 196)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace">inline code</text>
+<text x="248.69" y="830.5" fill="rgb(128, 203, 196)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace">inline code</text>
 <text x="0" y="875" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text 2</text>
 <path d="M3.29,1061.3 L349.71,861.3 L396.71,942.7 L50.29,1142.7 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
-<text x="32.96" y="1091.94" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,32.96,1091.94)">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.</text>
+<text x="19.82" y="1067.92" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,19.82,1067.92)">Lorem ipsum dolor sit amet,</text>
+<text x="28.82" y="1083.51" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,28.82,1083.51)">consectetur adipiscing elit. Nulla</text>
+<text x="37.82" y="1099.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,37.82,1099.1)">facilisi. Duis aute irure dolor in</text>
+<text x="46.82" y="1114.69" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,46.82,1114.69)">reprehenderit in voluptate velit</text>
+<text x="192.16" y="968.42" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,192.16,968.42)">esse cillum dolore eu fugiat nulla</text>
+<text x="201.16" y="984.01" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,201.16,984.01)">pariatur. Excepteur sint occaecat</text>
+<text x="210.16" y="999.6" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(-30,210.16,999.6)">cupidatat non proident.</text>
 </svg>

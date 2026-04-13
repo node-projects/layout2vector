@@ -2,18 +2,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="315" viewBox="0 0 1240 315">
 <text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Borders &amp; Border Radius</text>
 <path d="M10,104 L210,104 L210,184 L10,184 Z" fill="rgb(255, 224, 178)" stroke="rgb(51, 51, 51)" stroke-width="3"/>
-<text x="23" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Solid border</text>
+<text x="26" y="120.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Solid border</text>
 <path d="M234,105 L434,105 L434,185 L234,185 Z" fill="rgb(187, 222, 251)" stroke="rgb(21, 101, 192)" stroke-width="2"/>
-<text x="246" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dashed border</text>
+<text x="248" y="119.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dashed border</text>
 <path d="M459,105 L659,105 L659,185 L459,185 Z" fill="rgb(255, 205, 210)" stroke="rgb(198, 40, 40)" stroke-width="2"/>
-<text x="471" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dotted border</text>
+<text x="473" y="119.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Dotted border</text>
 <path d="M683,103 L883,103 L883,183 L683,183 Z" fill="rgb(232, 245, 233)"/>
-<text x="694" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Mixed borders</text>
+<text x="695" y="121.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Mixed borders</text>
 <rect x="908" y="105" width="200" height="80" rx="15" ry="15" fill="rgb(225, 190, 231)" stroke="rgb(106, 27, 154)" stroke-width="2"/>
-<text x="920" y="117.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Rounded corners</text>
+<text x="922" y="119.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Rounded corners</text>
 <rect x="1132" y="41" width="80" height="80" rx="40" ry="40" fill="rgb(239, 83, 80)"/>
 <rect x="10" y="242" width="200" height="40" rx="20" ry="20" fill="rgb(38, 166, 154)"/>
-<text x="78" y="255" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Pill Shape</text>
+<text x="78.47" y="255" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Pill Shape</text>
 <path d="M234,205 L384,205 L384,305 L234,305 Z" fill="rgb(255, 248, 225)" stroke="rgb(255, 111, 0)" stroke-width="10"/>
-<text x="264" y="244.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Thick border + padding</text>
+<text x="264" y="235.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Thick border</text>
+<text x="264" y="253.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">+ padding</text>
 </svg>

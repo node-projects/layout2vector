@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>> /Shading <</SH1 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 10628>>
+<</Length 12620>>
 stream
 q
 Q
@@ -45,31 +45,55 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F1 39 Tf
-56.25 621.2644 Td
-(Embedded documents can now join the export.) Tj
+56.25 640.7644 Td
+(Embedded documents can now join the) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F1 39 Tf
+56.25 601.7644 Td
+(export.) Tj
 ET
 Q
 q
 BT
 0.0863 0.1294 0.2431 rg
 /F2 15.75 Tf
-56.25 554.7079 Td
-(This demo mixes a same-origin iframe that loads another demo file with a rotated iframe rendered from srcdoc content. Enable) Tj
+56.25 566.7079 Td
+(This demo mixes a same-origin iframe that loads another demo file with a rotated) Tj
 ET
 Q
 q
 BT
 0.0863 0.1294 0.2431 rg
 /F2 15.75 Tf
-474.75 530.7079 Td
-(to traverse those nested documents and keep them in the same paint-order pipeline.) Tj
+56.25 543.0829 Td
+(iframe rendered from srcdoc content. Enable) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F2 15.75 Tf
+474.5156 543.0829 Td
+(to traverse those) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F2 15.75 Tf
+56.25 519.4579 Td
+(nested documents and keep them in the same paint-order pipeline.) Tj
 ET
 Q
 q
 BT
 0.0863 0.1294 0.2431 rg
 /F1 15.75 Tf
-372 542.7079 Td
+320.8887 551.7079 Td
 (walkIframes) Tj
 ET
 Q
@@ -79,7 +103,7 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F1 22.5 Tf
-50.25 431.3614 Td
+50.2498 431.3614 Td
 (Embedded existing demo) Tj
 ET
 Q
@@ -87,7 +111,7 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F2 12.75 Tf
-50.25 403.8619 Td
+50.2498 403.8619 Td
 (The left frame points at) Tj
 ET
 Q
@@ -95,15 +119,23 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F2 12.75 Tf
-245.25 394.1119 Td
-(, so this page exercises same-origin iframe walking across a nested file load instead of only inline markup.) Tj
+245.0037 403.8619 Td
+(, so this page exercises same-origin iframe) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F2 12.75 Tf
+50.2498 384.1041 Td
+(walking across a nested file load instead of only inline markup.) Tj
 ET
 Q
 q
 BT
 0.0863 0.1294 0.2431 rg
 /F1 12.75 Tf
-184.5 403.8619 Td
+154.4063 411.3619 Td
 (text.html) Tj
 ET
 Q
@@ -129,7 +161,7 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F1 22.5 Tf
-546 431.3614 Td
+546.0002 431.3614 Td
 (Transformed iframe) Tj
 ET
 Q
@@ -137,8 +169,24 @@ q
 BT
 0.0863 0.1294 0.2431 rg
 /F2 12.75 Tf
-546 383.9869 Td
-(The right frame is rotated slightly so iframe descendants have to inherit the iframe viewport transform instead of using plain viewport-relative coordinates.) Tj
+546.0002 403.8619 Td
+(The right frame is rotated slightly so iframe descendants) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F2 12.75 Tf
+546.0002 384.1041 Td
+(have to inherit the iframe viewport transform instead of) Tj
+ET
+Q
+q
+BT
+0.0863 0.1294 0.2431 rg
+/F2 12.75 Tf
+546.0002 364.3463 Td
+(using plain viewport-relative coordinates.) Tj
 ET
 Q
 q
@@ -298,8 +346,58 @@ W n
 BT
 0.1412 0.1961 0.2902 rg
 /F2 11.25 Tf
-0.9925 0.1219 -0.1219 0.9925 590.6292 214.855 Tm
-(This inline frame stays fully inside its viewport so the transform math is visible without depending on overflow clipping.) Tj
+0.9925 0.1219 -0.1219 0.9925 588.6586 230.9045 Tm
+(This inline frame stays fully inside its) Tj
+ET
+Q
+q
+564.7671 304.8641 m
+798.2139 333.5278 l
+815.2329 194.9187 l
+581.7861 166.2551 l
+h
+W n
+574.6815 342.0703 m
+805.5294 342.0703 l
+815.4705 342.0703 823.5294 332.1292 823.5294 324.0703 c
+823.5294 176.4157 l
+823.5294 166.4746 815.4705 158.4157 805.5294 158.4157 c
+574.6815 158.4157 l
+564.7404 158.4157 556.6815 166.4746 556.6815 176.4157 c
+556.6815 324.0703 l
+556.6815 334.0115 564.7404 342.0703 574.6815 342.0703 c
+h
+W n
+BT
+0.1412 0.1961 0.2902 rg
+/F2 11.25 Tf
+0.9925 0.1219 -0.1219 0.9925 590.6068 215.0374 Tm
+(viewport so the transform math is visible) Tj
+ET
+Q
+q
+564.7671 304.8641 m
+798.2139 333.5278 l
+815.2329 194.9187 l
+581.7861 166.2551 l
+h
+W n
+574.6815 342.0703 m
+805.5294 342.0703 l
+815.4705 342.0703 823.5294 332.1292 823.5294 324.0703 c
+823.5294 176.4157 l
+823.5294 166.4746 815.4705 158.4157 805.5294 158.4157 c
+574.6815 158.4157 l
+564.7404 158.4157 556.6815 166.4746 556.6815 176.4157 c
+556.6815 324.0703 l
+556.6815 334.0115 564.7404 342.0703 574.6815 342.0703 c
+h
+W n
+BT
+0.1412 0.1961 0.2902 rg
+/F2 11.25 Tf
+0.9925 0.1219 -0.1219 0.9925 592.555 199.1703 Tm
+(without depending on overflow clipping.) Tj
 ET
 Q
 q
@@ -354,8 +452,8 @@ h
 W n
 BT
 0.1412 0.1961 0.2902 rg
-/F1 11.025 Tf
-0.9925 0.1219 -0.1219 0.9925 608.8215 157.1561 Tm
+/F1 18 Tf
+0.9925 0.1219 -0.1219 0.9925 608.6709 158.3826 Tm
 (42%) Tj
 ET
 Q
@@ -380,7 +478,7 @@ W n
 BT
 0.3647 0.4157 0.502 rg
 /F2 9.75 Tf
-0.9925 0.1219 -0.1219 0.9925 611.1166 138.4644 Tm
+0.9925 0.1219 -0.1219 0.9925 611.139 138.282 Tm
 (coverage) Tj
 ET
 Q
@@ -436,8 +534,8 @@ h
 W n
 BT
 0.1412 0.1961 0.2902 rg
-/F1 11.025 Tf
-0.9925 0.1219 -0.1219 0.9925 715.3316 170.2339 Tm
+/F1 18 Tf
+0.9925 0.1219 -0.1219 0.9925 715.181 171.4604 Tm
 (2x) Tj
 ET
 Q
@@ -462,7 +560,7 @@ W n
 BT
 0.3647 0.4157 0.502 rg
 /F2 9.75 Tf
-0.9925 0.1219 -0.1219 0.9925 717.6267 151.5422 Tm
+0.9925 0.1219 -0.1219 0.9925 717.6491 151.3598 Tm
 (layers) Tj
 ET
 Q
@@ -519,14 +617,39 @@ W n
 BT
 0.1412 0.1961 0.2902 rg
 /F2 10.5 Tf
-0.9925 0.1219 -0.1219 0.9925 616.2741 90.4289 Tm
-(Affine mapping keeps the card aligned when the iframe itself is rotated.) Tj
+0.9925 0.1219 -0.1219 0.9925 615.5799 96.0827 Tm
+(Affine mapping keeps the card aligned) Tj
+ET
+Q
+q
+564.7671 304.8641 m
+798.2139 333.5278 l
+815.2329 194.9187 l
+581.7861 166.2551 l
+h
+W n
+574.6815 342.0703 m
+805.5294 342.0703 l
+815.4705 342.0703 823.5294 332.1292 823.5294 324.0703 c
+823.5294 176.4157 l
+823.5294 166.4746 815.4705 158.4157 805.5294 158.4157 c
+574.6815 158.4157 l
+564.7404 158.4157 556.6815 166.4746 556.6815 176.4157 c
+556.6815 324.0703 l
+556.6815 334.0115 564.7404 342.0703 574.6815 342.0703 c
+h
+W n
+BT
+0.1412 0.1961 0.2902 rg
+/F2 10.5 Tf
+0.9925 0.1219 -0.1219 0.9925 617.0131 84.4104 Tm
+(when the iframe itself is rotated.) Tj
 ET
 Q
 endstream
 endobj
 6 0 obj
-<</Type /Page /Parent 7 0 R /MediaBox [0 0 1011.940209 752.391423] /Resources 4 0 R /Contents 5 0 R>>
+<</Type /Page /Parent 7 0 R /MediaBox [0 0 915.17202 752.391423] /Resources 4 0 R /Contents 5 0 R>>
 endobj
 7 0 obj
 <</Type /Pages /Kids [6 0 R] /Count 1>>
@@ -542,11 +665,11 @@ xref
 0000000210 00000 n 
 0000000447 00000 n 
 0000000520 00000 n 
-0000011199 00000 n 
-0000011316 00000 n 
-0000011371 00000 n 
+0000013191 00000 n 
+0000013306 00000 n 
+0000013361 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-11418
+13408
 %%EOF
