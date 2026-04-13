@@ -70,6 +70,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "types.js",
       "geometry.js",
       "traversal.js",
+      "form-controls.js",
       "html-extractor.js",
       "svg-extractor.js",
       "image-extractor.js",

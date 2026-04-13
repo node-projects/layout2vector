@@ -122,6 +122,14 @@ export type Options = {
    * Defaults to false (SVGs with evenodd multi-subpath paths are rasterized).
    */
   svgToVector?: boolean;
+  /**
+   * When true, native form controls are converted to synthetic IR nodes that
+   * preserve their visible state or value (for example checkbox/radio state,
+   * input values, select labels, and progress values) instead of relying on the
+   * browser exposing those visuals as regular DOM text and boxes.
+   * Defaults to false.
+   */
+  convertFormControls?: boolean;
 };
 
 /** Writer interface for output generation. */

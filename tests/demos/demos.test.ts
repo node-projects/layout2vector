@@ -138,6 +138,7 @@ for (const demoFile of demoFiles) {
         boxType: "border",
         includeText: true,
         includeImages: true,
+        convertFormControls: root.id === "root" && window.location.pathname.endsWith("form-controls.html"),
       });
     });
     expect(ir.length).toBeGreaterThan(0);

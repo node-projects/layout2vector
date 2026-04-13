@@ -5,6 +5,7 @@ import type { Point, Quad, Style, IRNode, Options } from "./types.js";
 import type { StackingNode } from "./traversal.js";
 import { isSVGElement } from "./traversal.js";
 import { getElementQuads } from "./geometry.js";
+import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
 
 /** Characters that MathML stretches vertically. */
 const STRETCHY_MO_CHARS = new Set([
@@ -40,6 +41,11 @@ export function extractHTMLGeometry(
 ): IRNode[] {
   const el = node.element;
   const results: IRNode[] = [];
+
+  if (shouldSkipFormControlDescendant(el, options)) return results;
+
+  const formControlNodes = extractFormControlGeometry(node, globalIndex, options);
+  if (formControlNodes !== null) return formControlNodes;
 
   // Skip non-root SVG elements — they're handled by SVG subtree extraction.
   // SVG roots are kept because they participate in HTML layout (background, borders).

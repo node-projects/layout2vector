@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="684" viewBox="0 0 1232 684">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip2"><rect x="31" y="133" width="369" height="20"/></clipPath>
+<clipPath id="clip3"><rect x="31" y="207" width="369" height="19.2"/></clipPath>
+<clipPath id="clip4"><rect x="31" y="226.2" width="369" height="19.2"/></clipPath>
+<clipPath id="clip5"><rect x="31" y="245.4" width="369" height="19.2"/></clipPath>
+<clipPath id="clip6"><rect x="31" y="329" width="300" height="21"/></clipPath>
+<filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip8"><rect x="469" y="229" width="391" height="16"/></clipPath>
+<filter id="ds9" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip10"><rect x="31" y="478" width="369" height="22"/></clipPath>
+<clipPath id="clip11"><rect x="31" y="554" width="369" height="25"/></clipPath>
+<clipPath id="clip12"><rect x="31" y="633" width="369" height="22"/></clipPath>
+<filter id="ds13" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip14"><rect x="480" y="478" width="369" height="22"/></clipPath>
+<clipPath id="clip15"><rect x="480" y="554" width="369" height="22"/></clipPath>
+<clipPath id="clip16"><rect x="480" y="630" width="369" height="20"/></clipPath>
+</defs>
+<text x="0" y="1.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Arial">Native Form Controls</text>
+<rect x="0" y="52" width="431" height="327" rx="14" ry="14" fill="rgb(255, 255, 255)" stroke="rgb(215, 222, 234)" stroke-width="1" filter="url(#ds1)"/>
+<text x="19" y="71.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Value Fields</text>
+<text x="19" y="104" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">TEXT INPUT</text>
+<rect x="19" y="123" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip2)"><text x="31" y="135" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Alice Johnson</text></g>
+<text x="19" y="178" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">TEXTAREA</text>
+<rect x="19" y="197" width="393" height="88" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip3)"><text x="31" y="208.6" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">First line</text></g>
+<g clip-path="url(#clip4)"><text x="31" y="227.8" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Second line</text></g>
+<g clip-path="url(#clip5)"><text x="31" y="247" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Third line</text></g>
+<text x="19" y="300" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">SELECT</text>
+<rect x="19" y="319" width="393" height="41" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<path d="M371,319 L412,319 L412,360 L371,360 Z" fill="rgb(245, 245, 245)"/>
+<path d="M371,320 L371,359" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip6)"><text x="31" y="331.5" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Normal</text></g>
+<path d="M383.3,336.22 L391.5,342.78 L399.7,336.22" fill="none" stroke="rgb(80, 80, 80)" stroke-width="3.28"/>
+<rect x="449" y="52" width="431" height="327" rx="14" ry="14" fill="rgb(255, 255, 255)" stroke="rgb(215, 222, 234)" stroke-width="1" filter="url(#ds7)"/>
+<text x="468" y="71.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">State Fields</text>
+<rect x="472" y="106" width="18" height="18" rx="3" ry="3" fill="rgb(15, 98, 254)" stroke="rgb(15, 98, 254)" stroke-width="1.5"/>
+<path d="M475.96,115.72 L479.56,119.32 L486.04,111.4" fill="none" stroke="rgb(255, 255, 255)" stroke-width="2.52"/>
+<text x="503" y="109" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">CHECKED CHECKBOX</text>
+<rect x="472" y="142" width="18" height="18" rx="3" ry="3" fill="rgb(15, 98, 254)" stroke="rgb(15, 98, 254)" stroke-width="1.5"/>
+<path d="M475.6,149.74 L486.4,149.74 L486.4,152.26 L475.6,152.26 Z" fill="rgb(255, 255, 255)"/>
+<text x="503" y="145" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">INDETERMINATE CHECKBOX</text>
+<path d="M491,187 L490.77,189 L490.11,190.9 L489.04,192.61 L487.61,194.04 L485.9,195.11 L484,195.77 L482,196 L480,195.77 L478.1,195.11 L476.39,194.04 L474.96,192.61 L473.89,190.9 L473.23,189 L473,187 L473.23,185 L473.89,183.1 L474.96,181.39 L476.39,179.96 L478.1,178.89 L480,178.23 L482,178 L484,178.23 L485.9,178.89 L487.61,179.96 L489.04,181.39 L490.11,183.1 L490.77,185 Z" fill="rgb(255, 255, 255)" stroke="rgb(15, 98, 254)" stroke-width="1.5"/>
+<path d="M485.78,187 L485.65,187.98 L485.27,188.89 L484.67,189.67 L483.89,190.27 L482.98,190.65 L482,190.78 L481.02,190.65 L480.11,190.27 L479.33,189.67 L478.73,188.89 L478.35,187.98 L478.22,187 L478.35,186.02 L478.73,185.11 L479.33,184.33 L480.11,183.73 L481.02,183.35 L482,183.22 L482.98,183.35 L483.89,183.73 L484.67,184.33 L485.27,185.11 L485.65,186.02 Z" fill="rgb(15, 98, 254)" stroke="rgb(15, 98, 254)" stroke-width="1"/>
+<text x="504" y="180" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">SELECTED RADIO BUTTON</text>
+<text x="468" y="209" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">PROGRESS</text>
+<rect x="468" y="228" width="393" height="18" rx="9" ry="9" fill="rgb(232, 232, 232)" stroke="rgb(29, 39, 54)" stroke-width="1"/>
+<rect x="469" y="229" width="281.52" height="16" rx="8" ry="8" fill="rgb(15, 98, 254)"/>
+<g clip-path="url(#clip8)"><text x="648.49" y="229" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">72%</text></g>
+<rect x="0" y="397" width="431" height="287" rx="14" ry="14" fill="rgb(255, 255, 255)" stroke="rgb(215, 222, 234)" stroke-width="1" filter="url(#ds9)"/>
+<text x="19" y="416.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Date &amp; Time</text>
+<text x="19" y="449" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">DATE</text>
+<rect x="19" y="468" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip10)"><text x="31" y="481" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">2026-04-13</text></g>
+<text x="19" y="525" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">TIME</text>
+<rect x="19" y="544" width="393" height="45" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip11)"><text x="31" y="558.5" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">14:35</text></g>
+<text x="19" y="604" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">DATETIME</text>
+<rect x="19" y="623" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip12)"><text x="31" y="636" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">2026-04-13 14:35</text></g>
+<rect x="449" y="397" width="431" height="287" rx="14" ry="14" fill="rgb(255, 255, 255)" stroke="rgb(215, 222, 234)" stroke-width="1" filter="url(#ds13)"/>
+<text x="468" y="416.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Additional Inputs</text>
+<text x="468" y="449" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">MONTH</text>
+<rect x="468" y="468" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip14)"><text x="480" y="481" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">2026-04</text></g>
+<text x="468" y="525" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">WEEK</text>
+<rect x="468" y="544" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip15)"><text x="480" y="557" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">2026-W16</text></g>
+<text x="468" y="601" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">NUMBER</text>
+<rect x="468" y="620" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(148, 163, 184)" stroke-width="1"/>
+<g clip-path="url(#clip16)"><text x="480" y="632" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">42</text></g>
+</svg>
