@@ -322,7 +322,12 @@ function extractSelectGeometry(
 
   const { quad, localWidth, localHeight } = geometry;
   const cs = getComputedStyle(select);
-  const boxStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_SURFACE_COLOR, DEFAULT_BORDER_COLOR, 4);
+  const boxStyle = getControlBoxStyle(
+    shouldUseFallbackControlFill(cs) ? { ...node.extractedStyle, fill: undefined } : node.extractedStyle,
+    DEFAULT_SURFACE_COLOR,
+    DEFAULT_BORDER_COLOR,
+    4
+  );
   const nodes: IRNode[] = [{
     type: "polygon",
     points: quad,
@@ -336,8 +341,8 @@ function extractSelectGeometry(
   const paddingLeft = Math.max(parsePx(cs.paddingLeft), 6);
   const paddingTop = Math.max(parsePx(cs.paddingTop), 4);
   const paddingBottom = Math.max(parsePx(cs.paddingBottom), paddingTop);
-  const buttonWidth = isListBox ? 0 : Math.min(Math.max(18, localHeight), Math.max(18, localWidth * 0.3));
-  const contentBox = insetRect(localWidth, localHeight, paddingLeft, paddingTop, Math.max(parsePx(cs.paddingRight), 6) + buttonWidth, paddingBottom);
+  const arrowSlotWidth = isListBox ? 0 : Math.max(18, Math.min(24, localHeight * 0.35));
+  const contentBox = insetRect(localWidth, localHeight, paddingLeft, paddingTop, Math.max(parsePx(cs.paddingRight), 6) + arrowSlotWidth, paddingBottom);
 
   if (isListBox) {
     const selectedTexts = Array.from(select.selectedOptions).map((option) => option.textContent?.trim() ?? "").filter(Boolean);
@@ -358,49 +363,28 @@ function extractSelectGeometry(
     return nodes;
   }
 
-  const buttonLeft = Math.max(0, localWidth - buttonWidth);
-  nodes.push({
-    type: "polygon",
-    points: localRectToQuad(quad, buttonLeft, 0, buttonWidth, localHeight, localWidth, localHeight),
-    style: {
-      fill: "rgb(245, 245, 245)",
-      opacity: node.extractedStyle.opacity,
-    },
-    zIndex: globalIndex + 1,
-  });
-  nodes.push({
-    type: "polyline",
-    points: [
-      mapLocalPoint(quad, buttonLeft, 1, localWidth, localHeight),
-      mapLocalPoint(quad, buttonLeft, Math.max(1, localHeight - 1), localWidth, localHeight),
-    ],
-    closed: false,
-    style: {
-      stroke: isVisibleColor(node.extractedStyle.stroke) ? node.extractedStyle.stroke : DEFAULT_BORDER_COLOR,
-      strokeWidth: "1px",
-      opacity: node.extractedStyle.opacity,
-    },
-    zIndex: globalIndex + 2,
-  });
-
   const selectedText = select.selectedOptions[0]?.textContent?.trim() ?? "";
-  const textNode = createSingleLineTextNode(selectedText, quad, localWidth, localHeight, contentBox, node.extractedStyle, cs, globalIndex + 3, "left", Math.min(lineHeight, contentBox.height));
+  const textNode = createSingleLineTextNode(selectedText, quad, localWidth, localHeight, contentBox, node.extractedStyle, cs, globalIndex + 1, "left", Math.min(lineHeight, contentBox.height));
   if (textNode) nodes.push(textNode);
 
+  const arrowSize = clamp(Math.min(fontSize * 0.55, localHeight * 0.25), 4, 8);
+  const arrowCenterX = localWidth - arrowSlotWidth / 2;
+  const arrowCenterY = localHeight / 2;
+
   nodes.push({
     type: "polyline",
     points: [
-      mapLocalPoint(quad, buttonLeft + buttonWidth * 0.3, localHeight * 0.42, localWidth, localHeight),
-      mapLocalPoint(quad, buttonLeft + buttonWidth * 0.5, localHeight * 0.58, localWidth, localHeight),
-      mapLocalPoint(quad, buttonLeft + buttonWidth * 0.7, localHeight * 0.42, localWidth, localHeight),
+      mapLocalPoint(quad, arrowCenterX - arrowSize / 2, arrowCenterY - arrowSize * 0.22, localWidth, localHeight),
+      mapLocalPoint(quad, arrowCenterX, arrowCenterY + arrowSize * 0.22, localWidth, localHeight),
+      mapLocalPoint(quad, arrowCenterX + arrowSize / 2, arrowCenterY - arrowSize * 0.22, localWidth, localHeight),
     ],
     closed: false,
     style: {
       stroke: DEFAULT_ICON_COLOR,
-      strokeWidth: `${Math.max(1.25, localHeight * 0.08)}px`,
+      strokeWidth: `${clamp(arrowSize * 0.2, 1.25, 2)}px`,
       opacity: node.extractedStyle.opacity,
     },
-    zIndex: globalIndex + 4,
+    zIndex: globalIndex + 2,
   });
 
   return nodes;
@@ -485,6 +469,16 @@ function getAccentColor(cs: CSSStyleDeclaration, colorFallback?: string): string
   if (isVisibleColor(colorFallback)) return colorFallback!;
   if (isVisibleColor(cs.color)) return cs.color;
   return DEFAULT_ACCENT_COLOR;
+}
+
+function shouldUseFallbackControlFill(cs: CSSStyleDeclaration): boolean {
+  const appearance = (
+    cs.getPropertyValue("appearance") ||
+    cs.getPropertyValue("-webkit-appearance") ||
+    cs.getPropertyValue("-moz-appearance") ||
+    ""
+  ).trim().toLowerCase();
+  return appearance !== "" && appearance !== "none";
 }
 
 function shouldUseFallbackFill(style: Style): boolean {

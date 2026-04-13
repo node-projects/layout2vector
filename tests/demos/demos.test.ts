@@ -35,6 +35,7 @@ const demoFiles = fs
 
 for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
+  const convertFormControls = name === "form-controls" || name === "form2";
 
   test(`convert demo: ${name}`, async ({ page }) => {
     // Load demo HTML
@@ -132,15 +133,15 @@ for (const demoFile of demoFiles) {
     }
 
     // Extract IR in the browser
-    const ir: IRNode[] = await page.evaluate(() => {
+    const ir: IRNode[] = await page.evaluate((shouldConvertFormControls: boolean) => {
       const root = document.getElementById("root") ?? document.body;
       return (window as any).__HC.extractIR(root, {
         boxType: "border",
         includeText: true,
         includeImages: true,
-        convertFormControls: root.id === "root" && window.location.pathname.endsWith("form-controls.html"),
+        convertFormControls: shouldConvertFormControls,
       });
-    });
+    }, convertFormControls);
     expect(ir.length).toBeGreaterThan(0);
 
     // Dump IR for specific demos

@@ -204,6 +204,7 @@ export class HTMLWriter implements Writer<string> {
         `top:${n(y)}px`,
         `width:${n(w)}px`,
         `height:${n(h)}px`,
+        "box-sizing:border-box",
       ];
 
       if (fill) css.push(`background-color:${fill}`);
