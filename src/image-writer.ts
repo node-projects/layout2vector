@@ -960,6 +960,11 @@ export class ImageWriter implements Writer<ImageResult> {
       // Skip shadows that don't match the requested phase
       if (shadow.inset !== insetOnly) continue;
       if (shadow.inset) {
+        // The inset-shadow emulation below relies on an axis-aligned inner cutout.
+        // Transformed quads leak the temporary black stencil into the clipped area,
+        // so skip inset shadows for those shapes instead of rendering artifacts.
+        if (!isAARect) continue;
+
         // Inset shadow: draw inside the shape using clipping
         ctx.save();
         // Clip to the shape
