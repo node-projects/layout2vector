@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Stacking Contexts &amp; Opacity</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin: 15px 0 8px; font-size: 18px; }
+
+    /* Overlapping z-index boxes */
+    .stacking-container {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      margin: 15px 0;
+    }
+    .box-back {
+      position: absolute;
+      top: 0; left: 0;
+      width: 150px; height: 150px;
+      background: #e53935;
+      z-index: 1;
+    }
+    .box-middle {
+      position: absolute;
+      top: 30px; left: 30px;
+      width: 150px; height: 150px;
+      background: #43a047;
+      z-index: 2;
+    }
+    .box-front {
+      position: absolute;
+      top: 60px; left: 60px;
+      width: 150px; height: 150px;
+      background: #1e88e5;
+      z-index: 3;
+    }
+
+    /* Opacity */
+    .opacity-row {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .opacity-box {
+      width: 80px; height: 80px;
+      background: #6a1b9a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    /* isolation: isolate */
+    .isolated {
+      isolation: isolate;
+      position: relative;
+      width: 200px; height: 120px;
+      background: #fff9c4;
+      border: 2px solid #f9a825;
+      margin: 12px 0;
+      padding: 10px;
+    }
+    .isolated .child-a {
+      position: absolute;
+      top: 10px; left: 10px;
+      width: 80px; height: 80px;
+      background: #ef5350;
+      z-index: 2;
+    }
+    .isolated .child-b {
+      position: absolute;
+      top: 30px; left: 30px;
+      width: 80px; height: 80px;
+      background: #42a5f5;
+      z-index: 1;
+    }
+
+    /* mix-blend-mode creates stacking context */
+    .blend-container {
+      position: relative;
+      width: 200px; height: 120px;
+      background: #ffecb3;
+      margin: 12px 0;
+    }
+    .blend-box {
+      position: absolute;
+      top: 20px; left: 20px;
+      width: 100px; height: 80px;
+      background: #e53935;
+      mix-blend-mode: multiply;
+    }
+
+    /* will-change creates stacking context */
+    .willchange-box {
+      width: 100px; height: 100px;
+      background: #00897b;
+      will-change: transform;
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* filter creates stacking context */
+    .filter-box {
+      width: 120px; height: 80px;
+      background: #5e35b1;
+      filter: blur(0px) brightness(1.1);
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    /* contain: paint */
+    .contain-paint {
+      width: 150px; height: 100px;
+      background: #0277bd;
+      contain: paint;
+      margin: 12px 0;
+      position: relative;
+      color: white;
+      padding: 10px;
+    }
+    .contain-paint .overflow-child {
+      position: absolute;
+      top: -10px; left: -10px;
+      width: 50px; height: 50px;
+      background: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Z-Index Stacking</h2>
+    <div class="stacking-container">
+      <div class="box-back">z:1</div>
+      <div class="box-middle">z:2</div>
+      <div class="box-front">z:3</div>
+    </div>
+
+    <h2>Opacity Levels</h2>
+    <div class="opacity-row">
+      <div class="opacity-box" style="opacity: 1.0;">1.0</div>
+      <div class="opacity-box" style="opacity: 0.75;">0.75</div>
+      <div class="opacity-box" style="opacity: 0.5;">0.5</div>
+      <div class="opacity-box" style="opacity: 0.25;">0.25</div>
+      <div class="opacity-box" style="opacity: 0.1;">0.1</div>
+    </div>
+
+    <h2>Isolation: Isolate</h2>
+    <div class="isolated">
+      <div class="child-a">A (z:2)</div>
+      <div class="child-b">B (z:1)</div>
+    </div>
+
+    <h2>Mix-Blend-Mode</h2>
+    <div class="blend-container">
+      <div class="blend-box">Multiply</div>
+    </div>
+
+    <h2>Will-Change</h2>
+    <div class="willchange-box">will-change</div>
+
+    <h2>Filter</h2>
+    <div class="filter-box">filtered</div>
+
+    <h2>Contain: Paint</h2>
+    <div class="contain-paint">
+      <div class="overflow-child"></div>
+      contain:paint
+    </div>
+  </div>
+</body>
+</html>

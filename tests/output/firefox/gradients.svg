@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="457" viewBox="0 0 1240 457">
+<defs>
+<linearGradient id="lg1" x1="52.5" y1="134" x2="217.5" y2="299" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(102, 126, 234)"/><stop offset="100%" stop-color="rgb(118, 75, 162)"/></linearGradient>
+<radialGradient id="rg2" cx="359.45" cy="116" r="75" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(255, 154, 158)"/><stop offset="50%" stop-color="rgb(254, 207, 239)"/><stop offset="100%" stop-color="rgb(253, 252, 251)"/></radialGradient>
+<linearGradient id="lg3" x1="675.85" y1="299" x2="689.99" y2="284.86" gradientUnits="userSpaceOnUse" spreadMethod="repeat"><stop offset="0%" stop-color="rgb(96, 109, 188)"/><stop offset="50%" stop-color="rgb(96, 109, 188)"/><stop offset="50%" stop-color="rgb(70, 82, 152)"/><stop offset="100%" stop-color="rgb(70, 82, 152)"/></linearGradient>
+<linearGradient id="lg4" x1="907.8" y1="225.5" x2="1207.8" y2="225.5" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(255, 0, 0, 0.5)"/><stop offset="100%" stop-color="rgba(0, 0, 0, 0)"/></linearGradient>
+<filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="5" dy="5" stdDeviation="7.5" flood-color="rgba(0, 0, 0, 0.3)" result="s0"/><feDropShadow dx="-2" dy="-2" stdDeviation="4" flood-color="rgba(0, 0, 0, 0.1)" result="s1"/></filter>
+<clipPath id="ic6"><rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8"/></clipPath>
+<filter id="is7" x="-50%" y="-50%" width="200%" height="200%"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="5"/><feOffset dx="3" dy="3" result="offsetblur"/><feFlood flood-color="rgba(0, 0, 0, 0.2)" result="color"/><feComposite in2="offsetblur" operator="in"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+<clipPath id="ic8"><rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8"/></clipPath>
+<filter id="is9" x="-50%" y="-50%" width="200%" height="200%"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="5"/><feOffset dx="-3" dy="-3" result="offsetblur"/><feFlood flood-color="rgba(255, 255, 255, 0.5)" result="color"/><feComposite in2="offsetblur" operator="in"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+</defs>
+<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Gradients</text>
+<rect x="10" y="176.5" width="250" height="80" rx="8" ry="8" fill="url(#lg1)"/>
+<text x="20" y="187.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Linear gradient</text>
+<rect x="284.45" y="41" width="150" height="150" rx="75" ry="75" fill="url(#rg2)"/>
+<rect x="458.9" y="41" width="150" height="150" rx="75" ry="75" fill="rgb(255, 0, 0)"/>
+<path d="M633.35,176.5 L883.35,176.5 L883.35,256.5 L633.35,256.5 Z" fill="url(#lg3)"/>
+<text x="643.35" y="187.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Repeating stripes</text>
+<path d="M907.8,175.5 L1207.8,175.5 L1207.8,275.5 L907.8,275.5 Z" fill="url(#lg4)" stroke="rgb(204, 204, 204)" stroke-width="1"/>
+<text x="918.8" y="187.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiple backgrounds</text>
+<text x="0" y="307" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Box Shadows</text>
+<rect x="20" y="356.5" width="200" height="80" rx="8" ry="8" fill="rgb(255, 255, 255)" filter="url(#ds5)"/>
+<text x="30" y="367.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Drop shadow</text>
+<rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="rgb(236, 239, 241)"/>
+<rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic6)" filter="url(#is7)"/>
+<rect x="264.45" y="356.5" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic8)" filter="url(#is9)"/>
+<text x="274.45" y="367.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Inset shadow</text>
+</svg>

@@ -1,0 +1,44 @@
+<div id="root">
+    <div id="a" bcw:visible="[[this.scaleType != 'None']]" class="flexContainer-icon" style="width: 20px; height: 20px;">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                transform="translate(0,10)" css:fill="[[this.scaleType == 'Undefined' ? 'red' : 'black']]"
+                style="fill: black;">⚖</text>
+        </svg>
+    </div>
+
+    <ui-text-block id="b" style="left:773px;top:307px;">
+        <template shadowrootmode="open" shadowrootserializable="">
+            <style>
+                :host {
+                    position: absolute;
+                    overflow: hidden;
+                    border: 1px solid black;
+                    font-size: 12px;
+                    font-family: "Segoe UI";
+                    white-space: nowrap;
+                }
+            </style>
+
+
+            <div>
+                <slot></slot>
+            </div>
+            Alte Not-Halt Mobile Panel Steckplatz<br><br>und Fördererstich AE11/AE12.<br><br>Am Pnoz gebrückt. Im
+            Programm nur noch für<br><br>Diagnose, falls sie mal ausgelöst werden!
+        </template>
+    </ui-text-block>
+
+    <svg id="c" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:763px;top:297px;">
+        <rect id="ID_211d0"
+            style="position:absolute;left:763px;top:297px;width:270px;height:172px;fill:transparent;stroke:black;stroke-width:2px;">
+        </rect>
+    </svg>
+
+    <div id="d" bcw:visible="[[this.isTelegramETEnabled]]" class="flexContainer-icon" style="max-height: 60%; width: 20px; height: 20px; position: absolute; top: 100px;">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="background-color: #6fd892;">
+            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                transform="translate(0,5)">ET</text>
+        </svg>
+    </div>
+</div>

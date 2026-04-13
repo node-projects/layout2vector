@@ -13,13 +13,13 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 5066>>
+<</Length 4043>>
 stream
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 849.5937 Td
+0 846.9682 Td
 (Text Wrapping) Tj
 ET
 Q
@@ -27,15 +27,15 @@ q
 1 0.9529 0.8784 rg
 1 0.8 0.502 RG
 0.75 w
-4.5 837.1617 m
-183 837.1617 l
-185.4853 837.1617 187.5 834.6764 187.5 832.6617 c
-187.5 757.9617 l
-187.5 755.4764 185.4853 753.4617 183 753.4617 c
-4.5 753.4617 l
-2.0147 753.4617 0 755.4764 0 757.9617 c
-0 832.6617 l
-0 835.147 2.0147 837.1617 4.5 837.1617 c
+4.5 834.1612 m
+183 834.1612 l
+185.4853 834.1612 187.5 831.6759 187.5 829.6612 c
+187.5 754.6612 l
+187.5 752.1759 185.4853 750.1612 183 750.1612 c
+4.5 750.1612 l
+2.0147 750.1612 0 752.1759 0 754.6612 c
+0 829.6612 l
+0 832.1464 2.0147 834.1612 4.5 834.1612 c
 h
 B
 Q
@@ -43,39 +43,15 @@ q
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-8.25 818.2227 Td
-(Lorem ipsum dolor sit amet,) Tj
-ET
-Q
-q
-BT
-0.2 0.2 0.2 rg
-/F2 10.5 Tf
-8.25 801.4227 Td
-(consectetur adipiscing elit. Sed do) Tj
-ET
-Q
-q
-BT
-0.2 0.2 0.2 rg
-/F2 10.5 Tf
-8.25 784.6227 Td
-(eiusmod tempor incididunt ut labore) Tj
-ET
-Q
-q
-BT
-0.2 0.2 0.2 rg
-/F2 10.5 Tf
-8.25 767.8227 Td
-(et dolore magna aliqua.) Tj
+8.25 790.2472 Td
+(Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.) Tj
 ET
 Q
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 731.3937 Td
+0 728.4682 Td
 (Font Sizes & Weights) Tj
 ET
 Q
@@ -83,7 +59,7 @@ q
 BT
 0.102 0.1373 0.4941 rg
 /F1 24 Tf
-0 698.3547 Td
+0 695.0542 Td
 (Large Bold Title) Tj
 ET
 Q
@@ -91,7 +67,7 @@ q
 BT
 0.2902 0.0784 0.549 rg
 /F2 12 Tf
-0 671.3457 Td
+0 668.4202 Td
 (Italic text content) Tj
 ET
 Q
@@ -99,7 +75,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 645.1437 Td
+0 642.2182 Td
 (Text Decorations) Tj
 ET
 Q
@@ -107,33 +83,33 @@ q
 BT
 0.7176 0.1098 0.1098 rg
 /F2 12 Tf
-0 624.8457 Td
+0 621.9202 Td
 (Underlined text) Tj
 ET
 Q
 q
 0.7176 0.1098 0.1098 RG
 0.8571 w
-0 623.0457 m 80.725 623.0457 l S
+0 620.1202 m 81 620.1202 l S
 Q
 q
 BT
 0.4588 0.4588 0.4588 rg
 /F2 12 Tf
-0 605.3457 Td
+0 602.4202 Td
 (Strikethrough text) Tj
 ET
 Q
 q
 0.4588 0.4588 0.4588 RG
 0.8571 w
-0 608.9457 m 94.075 608.9457 l S
+0 606.0202 m 93.75 606.0202 l S
 Q
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 579.1437 Td
+0 576.2182 Td
 (Text Shadow) Tj
 ET
 Q
@@ -141,7 +117,7 @@ q
 BT
 0.1176 0.5333 0.898 rg
 /F1 21 Tf
-0 551.6337 Td
+0 548.7082 Td
 (Shadow Text) Tj
 ET
 Q
@@ -149,7 +125,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 522.1437 Td
+0 519.2182 Td
 (Text Overflow) Tj
 ET
 Q
@@ -157,15 +133,15 @@ q
 0.9098 0.9176 0.9647 rg
 0 0 0 RG
 0.375 w
-3 511.2117 m
-147 511.2117 l
-148.6569 511.2117 150 509.5549 150 508.2117 c
-150 488.7117 l
-150 487.0549 148.6569 485.7117 147 485.7117 c
-3 485.7117 l
-1.3431 485.7117 0 487.0549 0 488.7117 c
-0 508.2117 l
-0 509.8686 1.3431 511.2117 3 511.2117 c
+3 507.9112 m
+147 507.9112 l
+148.6569 507.9112 150 506.2543 150 504.9112 c
+150 485.4112 l
+150 483.7543 148.6569 482.4112 147 482.4112 c
+3 482.4112 l
+1.3431 482.4112 0 483.7543 0 485.4112 c
+0 504.9112 l
+0 506.568 1.3431 507.9112 3 507.9112 c
 h
 f
 Q
@@ -173,7 +149,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-6 495.8457 Td
+6 492.9202 Td
 (This is a very long text\205) Tj
 ET
 Q
@@ -181,7 +157,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 463.6437 Td
+0 460.7182 Td
 (Text Alignment) Tj
 ET
 Q
@@ -189,10 +165,10 @@ q
 0.9098 0.9608 0.9137 rg
 0.7843 0.902 0.7882 RG
 0.75 w
-0 452.7117 m
-225 452.7117 l
-225 373.2117 l
-0 373.2117 l
+0 449.4112 m
+225 449.4112 l
+225 372.9112 l
+0 372.9112 l
 h
 B
 Q
@@ -200,7 +176,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-155.4625 432.7977 Td
+155.25 429.8722 Td
 (Right aligned) Tj
 ET
 Q
@@ -208,7 +184,7 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-78.35 417.0477 Td
+78 414.8722 Td
 (Center aligned) Tj
 ET
 Q
@@ -216,23 +192,15 @@ q
 BT
 0 0 0 rg
 /F2 10.5 Tf
-8.25 401.2977 Td
-(Justified text that spans across the full width of) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 10.5 Tf
-8.25 388.5477 Td
-(the container element here.) Tj
+8.25 393.8722 Td
+(Justified text that spans across the full width of the container element here.) Tj
 ET
 Q
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 351.1437 Td
+0 351.2182 Td
 (Multi-column Text) Tj
 ET
 Q
@@ -240,10 +208,10 @@ q
 0.9608 0.9608 0.9608 rg
 0.8667 0.8667 0.8667 RG
 0.75 w
-0 338.7117 m
-300 338.7117 l
-300 268.2117 l
-0 268.2117 l
+0 338.4112 m
+300 338.4112 l
+300 267.9112 l
+0 267.9112 l
 h
 B
 Q
@@ -251,63 +219,15 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-8.25 321.7497 Td
-(Lorem ipsum dolor sit amet,) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-8.25 308.2497 Td
-(consectetur adipiscing elit. Nulla) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-8.25 294.7497 Td
-(facilisi. Duis aute irure dolor in) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-8.25 281.2497 Td
-(reprehenderit in voluptate velit) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-157.5 321.7497 Td
-(esse cillum dolore eu fugiat nulla) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-157.5 308.2497 Td
-(pariatur. Excepteur sint occaecat) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-157.5 294.7497 Td
-(cupidatat non proident.) Tj
+8.25 301.1992 Td
+(Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.) Tj
 ET
 Q
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 246.1437 Td
+0 246.2182 Td
 (Inline Formatting) Tj
 ET
 Q
@@ -315,7 +235,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-0 221.1342 Td
+0 220.8337 Td
 (This has) Tj
 ET
 Q
@@ -323,7 +243,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-119.475 221.1342 Td
+119.25 220.8337 Td
 (and) Tj
 ET
 Q
@@ -331,7 +251,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-191.4125 221.1342 Td
+191.25 220.8337 Td
 (and) Tj
 ET
 Q
@@ -339,7 +259,7 @@ q
 BT
 0 0 0 rg
 /F2 11.25 Tf
-284.4375 221.1342 Td
+284.25 220.8337 Td
 (mixed together in a single paragraph.) Tj
 ET
 Q
@@ -347,7 +267,7 @@ q
 BT
 0.8275 0.1843 0.1843 rg
 /F2 11.25 Tf
-45.6625 221.1342 Td
+45.75 220.8337 Td
 (italic emphasis) Tj
 ET
 Q
@@ -355,7 +275,7 @@ q
 BT
 0.0824 0.3961 0.7529 rg
 /F1 11.25 Tf
-144.5125 221.1342 Td
+144.75 220.8337 Td
 (bold text) Tj
 ET
 Q
@@ -363,15 +283,15 @@ q
 0.149 0.1961 0.2196 rg
 0 0 0 RG
 0.375 w
-218.7 229.9617 m
-282.1875 229.9617 l
-283.4301 229.9617 284.4375 228.7191 284.4375 227.7117 c
-284.4375 217.9617 l
-284.4375 216.7191 283.4301 215.7117 282.1875 215.7117 c
-218.7 215.7117 l
-217.4574 215.7117 216.45 216.7191 216.45 217.9617 c
-216.45 227.7117 l
-216.45 228.9544 217.4574 229.9617 218.7 229.9617 c
+218.25 229.6612 m
+282 229.6612 l
+283.2426 229.6612 284.25 228.4185 284.25 227.4112 c
+284.25 217.6612 l
+284.25 216.4185 283.2426 215.4112 282 215.4112 c
+218.25 215.4112 l
+217.0074 215.4112 216 216.4185 216 217.6612 c
+216 227.4112 l
+216 228.6538 217.0074 229.6612 218.25 229.6612 c
 h
 f
 Q
@@ -379,7 +299,7 @@ q
 BT
 0.502 0.7961 0.7686 rg
 /F3 9.75 Tf
-220.95 221.579 Td
+220.5 221.2784 Td
 (inline code) Tj
 ET
 Q
@@ -387,7 +307,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 191.3937 Td
+0 191.4682 Td
 (Multi-column Text 2) Tj
 ET
 Q
@@ -395,10 +315,10 @@ q
 0.9608 0.9608 0.9608 rg
 0.8667 0.8667 0.8667 RG
 0.75 w
-2.4712 61.7392 m
-262.2788 211.7392 l
-297.5288 150.6844 l
-37.7212 0.6844 l
+2.4712 61.4386 m
+262.2788 211.4386 l
+297.5288 150.3838 l
+37.7212 0.3838 l
 h
 B
 Q
@@ -406,62 +326,14 @@ q
 BT
 0 0 0 rg
 /F2 9 Tf
-0.866 0.5 -0.5 0.866 18.0969 51.1747 Tm
-(Lorem ipsum dolor sit amet,) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 24.8469 39.4833 Tm
-(consectetur adipiscing elit. Nulla) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 31.5969 27.7919 Tm
-(facilisi. Duis aute irure dolor in) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 38.3469 16.1006 Tm
-(reprehenderit in voluptate velit) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 147.3512 125.7997 Tm
-(esse cillum dolore eu fugiat nulla) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 154.1012 114.1083 Tm
-(pariatur. Excepteur sint occaecat) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 9 Tf
-0.866 0.5 -0.5 0.866 160.8512 102.4169 Tm
-(cupidatat non proident.) Tj
+0.866 0.5 -0.5 0.866 27.9474 32.8615 Tm
+(Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.) Tj
 ET
 Q
 endstream
 endobj
 6 0 obj
-<</Type /Page /Parent 7 0 R /MediaBox [0 0 930.17484 860.411727] /Resources 4 0 R /Contents 5 0 R>>
+<</Type /Page /Parent 7 0 R /MediaBox [0 0 930.17484 857.411163] /Resources 4 0 R /Contents 5 0 R>>
 endobj
 7 0 obj
 <</Type /Pages /Kids [6 0 R] /Count 1>>
@@ -477,11 +349,11 @@ xref
 0000000210 00000 n 
 0000000303 00000 n 
 0000000362 00000 n 
-0000005478 00000 n 
-0000005593 00000 n 
-0000005648 00000 n 
+0000004455 00000 n 
+0000004570 00000 n 
+0000004625 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-5695
+4672
 %%EOF

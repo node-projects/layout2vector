@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1327" height="720" viewBox="0 0 1327 720">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1330" height="720" viewBox="0 0 1330 720">
 <defs>
 <radialGradient id="rg1" cx="640" cy="360" r="640" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(188, 108, 37, 0.18)"/><stop offset="32%" stop-color="rgba(0, 0, 0, 0)"/></radialGradient>
 <filter id="ds2" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="rgba(88, 68, 48, 0.14)" result="s0"/></filter>
-<clipPath id="ic3"><rect x="65" y="162" width="331.33" height="148.4" rx="18" ry="18"/></clipPath>
+<clipPath id="ic3"><rect x="65" y="162" width="331" height="148" rx="18" ry="18"/></clipPath>
 <filter id="is4" x="-50%" y="-50%" width="200%" height="200%"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="0"/><feOffset dx="0" dy="1" result="offsetblur"/><feFlood flood-color="rgba(255, 255, 255, 0.8)" result="color"/><feComposite in2="offsetblur" operator="in"/><feComposite in2="SourceAlpha" operator="in"/></filter>
 <filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="rgba(88, 68, 48, 0.14)" result="s0"/></filter>
 <filter id="ds6" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="rgba(88, 68, 48, 0.14)" result="s0"/></filter>
 </defs>
 <path d="M0,0 L1280,0 L1280,720 L0,720 Z" fill="url(#rg1)"/>
-<rect x="40" y="32" width="381.33" height="303.4" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds2)"/>
+<rect x="40" y="32" width="381" height="303" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds2)"/>
 <text x="65" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">CODE BLOCK</text>
-<text x="65" y="102.75" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Padding, indentation, and repeated spaces should</text>
-<text x="65" y="125.25" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">survive extraction and rendering.</text>
-<rect x="65" y="162" width="331.33" height="148.4" rx="18" ry="18" fill="rgb(255, 253, 248)" stroke="rgba(47, 72, 88, 0.18)" stroke-width="2"/>
-<rect x="65" y="162" width="331.33" height="148.4" rx="18" ry="18" fill="none" clip-path="url(#ic3)" filter="url(#is4)"/>
-<text x="91" y="188.05" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">function renderBlock() {</text>
-<text x="91" y="214.15" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">  const title = &quot;pre  block&quot;;</text>
-<text x="91" y="240.25" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">    return title.padEnd(14, &quot; &quot;);</text>
-<text x="91" y="266.35" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">}</text>
-<rect x="449.33" y="32" width="381.33" height="303.4" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds5)"/>
-<text x="474.33" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">ROTATED PRE</text>
-<text x="474.33" y="102.75" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">This block is transformed so Firefox uses native</text>
-<text x="474.33" y="125.25" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">line quads instead of the polyfill path.</text>
-<path d="M473.71,179.99 Q474.33,162 492.31,161.06 L787.24,145.6 Q805.21,144.66 804.58,162.65 L800.64,275.55 Q800.01,293.54 782.04,294.48 L487.11,309.93 Q469.13,310.88 469.76,292.89 Z" fill="rgb(255, 248, 239)" stroke="rgba(188, 108, 37, 0.35)" stroke-width="2"/>
-<text x="499.38" y="186.81" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,499.38,186.81)" xml:space="preserve">if (line.startsWith(&quot;  &quot;)) {</text>
-<text x="498.47" y="212.99" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,498.47,212.99)" xml:space="preserve">  rows.push(line);</text>
-<text x="497.56" y="239.17" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,497.56,239.17)" xml:space="preserve">    render(&quot;keep  spaces&quot;);</text>
-<text x="496.64" y="265.36" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,496.64,265.36)" xml:space="preserve">}</text>
-<rect x="858.67" y="32" width="381.33" height="303.4" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds6)"/>
-<text x="883.67" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">SCALED NOTES</text>
-<text x="883.67" y="102.75" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Columns rely on fixed-width spacing and should</text>
-<text x="883.67" y="125.25" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">keep their alignment.</text>
-<path d="M891.04,191.99 Q891.67,174 909.66,174.63 L1214.74,185.28 Q1232.73,185.91 1232.1,203.9 L1228.96,293.81 Q1228.34,311.8 1210.35,311.17 L905.26,300.52 Q887.27,299.89 887.9,281.9 Z" fill="rgb(255, 250, 242)" stroke="rgba(127, 85, 57, 0.35)" stroke-width="2"/>
-<text x="917.48" y="202.02" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,917.48,202.02)" xml:space="preserve">column A    column B    column C</text>
-<text x="916.55" y="228.89" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,916.55,228.89)" xml:space="preserve">alpha 01    beta  02    gamma 03</text>
-<text x="915.61" y="255.75" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,915.61,255.75)" xml:space="preserve">  keep this padding -&gt;   exactly here</text>
+<text x="65" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Padding, indentation, and repeated spaces should survive extraction and rendering.</text>
+<rect x="65" y="162" width="331" height="148" rx="18" ry="18" fill="rgb(255, 253, 248)" stroke="rgba(47, 72, 88, 0.18)" stroke-width="2"/>
+<rect x="65" y="162" width="331" height="148" rx="18" ry="18" fill="none" clip-path="url(#ic3)" filter="url(#is4)"/>
+<text x="91" y="227" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" xml:space="preserve">function renderBlock() {
+  const title = &quot;pre  block&quot;;
+    return title.padEnd(14, &quot; &quot;);
+}</text>
+<rect x="449" y="32" width="381" height="303" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds5)"/>
+<text x="474" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">ROTATED PRE</text>
+<text x="474" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">This block is transformed so Firefox uses native line quads instead of the polyfill path.</text>
+<path d="M473.37,179.99 Q474,162 491.98,161.06 L786.57,145.62 Q804.55,144.68 803.92,162.67 L799.99,275.16 Q799.36,293.15 781.39,294.09 L486.79,309.53 Q468.82,310.48 469.44,292.49 Z" fill="rgb(255, 248, 239)" stroke="rgba(188, 108, 37, 0.35)" stroke-width="2"/>
+<text x="497.76" y="225.98" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(-3,497.76,225.98)" xml:space="preserve">if (line.startsWith(&quot;  &quot;)) {
+  rows.push(line);
+    render(&quot;keep  spaces&quot;);
+}</text>
+<rect x="859" y="32" width="381" height="303" rx="24" ry="24" fill="rgba(255, 252, 247, 0.92)" stroke="rgba(47, 72, 88, 0.16)" stroke-width="1" filter="url(#ds6)"/>
+<text x="884" y="59" fill="rgb(124, 79, 42)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Georgia">SCALED NOTES</text>
+<text x="884" y="113.5" fill="rgb(82, 96, 109)" dominant-baseline="text-before-edge" font-size="15px" font-family="Georgia">Columns rely on fixed-width spacing and should keep their alignment.</text>
+<path d="M891.37,191.99 Q892,174 909.99,174.63 L1214.73,185.27 Q1232.72,185.9 1232.09,203.89 L1228.96,293.49 Q1228.34,311.48 1210.35,310.85 L905.6,300.21 Q887.61,299.58 888.24,281.59 Z" fill="rgb(255, 250, 242)" stroke="rgba(127, 85, 57, 0.35)" stroke-width="2"/>
+<text x="916.9" y="228.6" fill="rgb(16, 42, 67)" dominant-baseline="text-before-edge" font-size="18px" font-family="Courier New" transform="rotate(2,916.9,228.6)" xml:space="preserve">column A    column B    column C
+alpha 01    beta  02    gamma 03
+  keep this padding -&gt;   exactly here</text>
 </svg>

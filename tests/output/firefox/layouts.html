@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Flexbox &amp; Grid Layout</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin: 15px 0 10px; font-size: 18px; }
+
+    /* Flexbox */
+    .flex-row {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .flex-item {
+      padding: 12px;
+      border-radius: 6px;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .flex-1 { flex: 1; background: #e53935; }
+    .flex-2 { flex: 2; background: #1e88e5; }
+    .flex-3 { flex: 1; background: #43a047; }
+
+    .flex-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 200px;
+      margin: 10px 0;
+    }
+    .flex-col-item {
+      padding: 10px;
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .flex-wrap-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 300px;
+      margin: 10px 0;
+    }
+    .flex-wrap-item {
+      width: 80px;
+      height: 50px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+    }
+
+    .flex-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 250px;
+      height: 100px;
+      background: #263238;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .flex-center-inner {
+      padding: 10px 20px;
+      background: #ffab40;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Grid */
+    .grid-basic {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 60px 60px;
+      gap: 8px;
+      width: 350px;
+      margin: 10px 0;
+    }
+    .grid-item {
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .grid-complex {
+      display: grid;
+      grid-template-columns: 100px 1fr 80px;
+      grid-template-rows: 40px auto 40px;
+      grid-template-areas:
+        "header header header"
+        "sidebar main aside"
+        "footer footer footer";
+      gap: 6px;
+      width: 400px;
+      height: 200px;
+      margin: 10px 0;
+    }
+    .g-header  { grid-area: header;  background: #5c6bc0; }
+    .g-sidebar { grid-area: sidebar; background: #26a69a; }
+    .g-main    { grid-area: main;    background: #ef5350; }
+    .g-aside   { grid-area: aside;   background: #ff7043; }
+    .g-footer  { grid-area: footer;  background: #78909c; }
+    .grid-complex > div {
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .grid-auto {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 6px;
+      width: 350px;
+      margin: 10px 0;
+    }
+    .grid-auto-item {
+      height: 50px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Flexbox Row</h2>
+    <div class="flex-row" style="width: 400px;">
+      <div class="flex-item flex-1">1x</div>
+      <div class="flex-item flex-2">2x</div>
+      <div class="flex-item flex-3">1x</div>
+    </div>
+
+    <h2>Flexbox Column</h2>
+    <div class="flex-column">
+      <div class="flex-col-item" style="background:#e91e63;">Item A</div>
+      <div class="flex-col-item" style="background:#9c27b0;">Item B</div>
+      <div class="flex-col-item" style="background:#673ab7;">Item C</div>
+    </div>
+
+    <h2>Flexbox Wrap</h2>
+    <div class="flex-wrap-container">
+      <div class="flex-wrap-item" style="background:#f44336;">1</div>
+      <div class="flex-wrap-item" style="background:#e91e63;">2</div>
+      <div class="flex-wrap-item" style="background:#9c27b0;">3</div>
+      <div class="flex-wrap-item" style="background:#673ab7;">4</div>
+      <div class="flex-wrap-item" style="background:#3f51b5;">5</div>
+      <div class="flex-wrap-item" style="background:#2196f3;">6</div>
+      <div class="flex-wrap-item" style="background:#009688;">7</div>
+    </div>
+
+    <h2>Centered Content</h2>
+    <div class="flex-center">
+      <div class="flex-center-inner">Centered!</div>
+    </div>
+
+    <h2>Grid Basic</h2>
+    <div class="grid-basic">
+      <div class="grid-item" style="background:#f44336;">1</div>
+      <div class="grid-item" style="background:#e91e63;">2</div>
+      <div class="grid-item" style="background:#9c27b0;">3</div>
+      <div class="grid-item" style="background:#673ab7;">4</div>
+      <div class="grid-item" style="background:#3f51b5;">5</div>
+      <div class="grid-item" style="background:#2196f3;">6</div>
+    </div>
+
+    <h2>Grid Named Areas (Holy Grail Layout)</h2>
+    <div class="grid-complex">
+      <div class="g-header">Header</div>
+      <div class="g-sidebar">Side</div>
+      <div class="g-main">Main Content</div>
+      <div class="g-aside">Aside</div>
+      <div class="g-footer">Footer</div>
+    </div>
+
+    <h2>Grid Auto-fill</h2>
+    <div class="grid-auto">
+      <div class="grid-auto-item" style="background:#00bcd4;">A</div>
+      <div class="grid-auto-item" style="background:#009688;">B</div>
+      <div class="grid-auto-item" style="background:#4caf50;">C</div>
+      <div class="grid-auto-item" style="background:#8bc34a;">D</div>
+      <div class="grid-auto-item" style="background:#cddc39;">E</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Form Controls</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #1d2736;
+    }
+    h1 {
+      margin: 0 0 20px;
+      font-size: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 18px;
+      max-width: 880px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d7deea;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(14, 23, 38, 0.06);
+    }
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 16px;
+    }
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .field:last-child {
+      margin-bottom: 0;
+    }
+    label,
+    .inline-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #4b5a70;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    input,
+    textarea,
+    select,
+    progress {
+      width: 100%;
+      font: inherit;
+    }
+    input,
+    textarea,
+    select {
+      padding: 10px 12px;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+    }
+    textarea {
+      min-height: 88px;
+      resize: none;
+    }
+    select {
+      padding-right: 40px;
+    }
+    .inline-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .inline-group:last-child {
+      margin-bottom: 0;
+    }
+    .inline-group input[type="checkbox"],
+    .inline-group input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #0f62fe;
+    }
+    progress {
+      height: 18px;
+      accent-color: #0f62fe;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>Native Form Controls</h1>
+    <div class="grid">
+      <section class="card">
+        <h2>Value Fields</h2>
+        <div class="field">
+          <label for="name">Text Input</label>
+          <input id="name" type="text" value="Alice Johnson">
+        </div>
+        <div class="field">
+          <label for="notes">Textarea</label>
+          <textarea id="notes">First line
+Second line
+Third line</textarea>
+        </div>
+        <div class="field">
+          <label for="priority">Select</label>
+          <select id="priority">
+            <option>Low</option>
+            <option selected>Normal</option>
+            <option>High</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>State Fields</h2>
+        <div class="inline-group">
+          <input id="done" type="checkbox" checked>
+          <span class="inline-label">Checked checkbox</span>
+        </div>
+        <div class="inline-group">
+          <input id="mixed" type="checkbox">
+          <span class="inline-label">Indeterminate checkbox</span>
+        </div>
+        <div class="inline-group">
+          <input id="choice" type="radio" checked>
+          <span class="inline-label">Selected radio button</span>
+        </div>
+        <div class="field">
+          <label for="completion">Progress</label>
+          <progress id="completion" value="72" max="100"></progress>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Date &amp; Time</h2>
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" value="2026-04-13">
+        </div>
+        <div class="field">
+          <label for="time">Time</label>
+          <input id="time" type="time" value="14:35">
+        </div>
+        <div class="field">
+          <label for="datetime">Datetime</label>
+          <input id="datetime" type="datetime-local" value="2026-04-13T14:35">
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Additional Inputs</h2>
+        <div class="field">
+          <label for="month">Month</label>
+          <input id="month" type="month" value="2026-04">
+        </div>
+        <div class="field">
+          <label for="week">Week</label>
+          <input id="week" type="week" value="2026-W16">
+        </div>
+        <div class="field">
+          <label for="amount">Number</label>
+          <input id="amount" type="number" value="42">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("mixed").indeterminate = true;
+  </script>
+</body>
+</html>

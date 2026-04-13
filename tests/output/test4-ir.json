@@ -24,7 +24,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -82,7 +82,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -140,7 +140,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -177,28 +177,28 @@
     "type": "text",
     "quad": [
       {
-        "x": 0.6500008679926523,
-        "y": -5.5166649984816445
+        "x": 0.6484375,
+        "y": -1.53125
       },
       {
-        "x": 19.349999620765438,
-        "y": -5.5166649984816445
+        "x": 19.6484375,
+        "y": -1.53125
       },
       {
-        "x": 19.349999620765438,
-        "y": 21.48333235209185
+        "x": 19.6484375,
+        "y": 20.46875
       },
       {
-        "x": 0.6500008679926523,
-        "y": 21.48333235209185
+        "x": 0.6484375,
+        "y": 20.46875
       }
     ],
     "text": "⚖",
     "style": {
       "fill": "rgb(0, 0, 0)",
-      "strokeWidth": "0.20000000298023224px",
-      "fontSize": "20.000000298023224px",
-      "fontFamily": "serif",
+      "strokeWidth": "0.2px",
+      "fontSize": "20px",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -207,7 +207,7 @@
       "textTransform": "none",
       "textShadow": "none",
       "lineHeight": "normal",
-      "whiteSpace": "normal",
+      "whiteSpace": "nowrap",
       "opacity": 1,
       "borderTopColor": "rgb(0, 0, 0)",
       "borderRightColor": "rgb(0, 0, 0)",
@@ -239,11 +239,11 @@
         "y": 299
       },
       {
-        "x": 1011.5833129882812,
+        "x": 1012,
         "y": 299
       },
       {
-        "x": 1011.5833129882812,
+        "x": 1012,
         "y": 413
       },
       {
@@ -297,11 +297,11 @@
         "y": 300
       },
       {
-        "x": 965.316650390625,
+        "x": 965,
         "y": 300
       },
       {
-        "x": 965.316650390625,
+        "x": 965,
         "y": 316
       },
       {
@@ -356,11 +356,11 @@
         "y": 332
       },
       {
-        "x": 923.38330078125,
+        "x": 923,
         "y": 332
       },
       {
-        "x": 923.38330078125,
+        "x": 923,
         "y": 348
       },
       {
@@ -415,11 +415,11 @@
         "y": 364
       },
       {
-        "x": 1010.5833129882812,
+        "x": 1011,
         "y": 364
       },
       {
-        "x": 1010.5833129882812,
+        "x": 1011,
         "y": 380
       },
       {
@@ -474,11 +474,11 @@
         "y": 396
       },
       {
-        "x": 982.1666870117188,
+        "x": 982,
         "y": 396
       },
       {
-        "x": 982.1666870117188,
+        "x": 982,
         "y": 412
       },
       {
@@ -529,20 +529,20 @@
     "type": "polygon",
     "points": [
       {
-        "x": 755,
-        "y": 289
+        "x": 763,
+        "y": 297
       },
       {
-        "x": 1055,
-        "y": 289
+        "x": 1063,
+        "y": 297
       },
       {
-        "x": 1055,
-        "y": 439
+        "x": 1063,
+        "y": 447
       },
       {
-        "x": 755,
-        "y": 439
+        "x": 763,
+        "y": 447
       }
     ],
     "style": {
@@ -550,7 +550,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -608,7 +608,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "2px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgba(0, 0, 0, 0)",
@@ -666,7 +666,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -724,7 +724,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "serif",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -761,28 +761,28 @@
     "type": "text",
     "quad": [
       {
-        "x": 2.6666674057642723,
-        "y": 94.70000078827144
+        "x": 1.6640625,
+        "y": 94.6875
       },
       {
-        "x": 17.333333273728684,
-        "y": 94.70000078827144
+        "x": 17.994140625,
+        "y": 94.6875
       },
       {
-        "x": 17.333333273728684,
-        "y": 108.69999947100877
+        "x": 17.994140625,
+        "y": 108.6875
       },
       {
-        "x": 2.6666674057642723,
-        "y": 108.69999947100877
+        "x": 1.6640625,
+        "y": 108.6875
       }
     ],
     "text": "ET",
     "style": {
       "fill": "rgb(0, 0, 0)",
-      "strokeWidth": "0.20000000298023224px",
-      "fontSize": "12.000000178813934px",
-      "fontFamily": "serif",
+      "strokeWidth": "0.2px",
+      "fontSize": "12px",
+      "fontFamily": "\"Times New Roman\"",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -791,7 +791,7 @@
       "textTransform": "none",
       "textShadow": "none",
       "lineHeight": "normal",
-      "whiteSpace": "normal",
+      "whiteSpace": "nowrap",
       "opacity": 1,
       "borderTopColor": "rgb(0, 0, 0)",
       "borderRightColor": "rgb(0, 0, 0)",

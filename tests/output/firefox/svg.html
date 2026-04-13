@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: SVG Elements</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>SVG Shapes</h2>
+    <svg width="600" height="500" xmlns="http://www.w3.org/2000/svg" style="border: 1px solid #ccc;">
+      <!-- Rectangle -->
+      <rect x="20" y="20" width="120" height="60" fill="#e53935" stroke="#b71c1c" stroke-width="2" rx="8" ry="8" />
+
+      <!-- Circle -->
+      <circle cx="250" cy="50" r="40" fill="#1e88e5" stroke="#0d47a1" stroke-width="2" />
+
+      <!-- Ellipse -->
+      <ellipse cx="400" cy="50" rx="60" ry="35" fill="#43a047" stroke="#1b5e20" stroke-width="2" />
+
+      <!-- Line -->
+      <line x1="20" y1="120" x2="180" y2="120" stroke="#ff9800" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Polyline -->
+      <polyline points="200,100 230,140 260,105 290,145 320,100" fill="none" stroke="#9c27b0" stroke-width="2" />
+
+      <!-- Polygon (star) -->
+      <polygon points="430,90 445,130 490,130 455,155 465,195 430,170 395,195 405,155 370,130 415,130"
+               fill="#fdd835" stroke="#f57f17" stroke-width="2" />
+
+      <!-- Path: cubic bezier -->
+      <path d="M 20,200 C 50,160 100,240 150,200 S 250,160 280,200"
+            fill="none" stroke="#00bcd4" stroke-width="3" />
+
+      <!-- Path: quadratic bezier -->
+      <path d="M 300,200 Q 350,150 400,200 T 500,200"
+            fill="none" stroke="#e91e63" stroke-width="2" />
+
+      <!-- Path: arc -->
+      <path d="M 20,280 A 50 50 0 1 1 120,280" fill="rgba(76,175,80,0.3)" stroke="#4caf50" stroke-width="2" />
+
+      <!-- Nested group with transforms -->
+      <g transform="translate(200, 260)">
+        <rect x="0" y="0" width="80" height="50" fill="#ff7043" rx="5" />
+        <text x="10" y="30" font-size="14" fill="white" font-weight="bold">Group</text>
+        <g transform="rotate(15, 40, 25)">
+          <rect x="90" y="5" width="40" height="40" fill="#5c6bc0" />
+        </g>
+      </g>
+
+      <!-- Text elements -->
+      <text x="20" y="370" font-size="24" font-weight="bold" fill="#333">SVG Text</text>
+      <text x="20" y="400" font-size="14" fill="#666" font-style="italic">Italic smaller text</text>
+
+      <!-- Gradient fill -->
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#667eea" />
+          <stop offset="100%" style="stop-color:#764ba2" />
+        </linearGradient>
+        <radialGradient id="grad2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color:#ff6b6b" />
+          <stop offset="100%" style="stop-color:#feca57" />
+        </radialGradient>
+      </defs>
+      <rect x="20" y="420" width="150" height="50" fill="url(#grad1)" rx="10" />
+      <circle cx="280" cy="445" r="30" fill="url(#grad2)" />
+
+      <!-- Transparent / semi-transparent -->
+      <rect x="350" y="300" width="100" height="80" fill="rgba(33,150,243,0.5)" stroke="#1565c0" stroke-width="1" />
+      <rect x="380" y="320" width="100" height="80" fill="rgba(244,67,54,0.5)" stroke="#c62828" stroke-width="1" />
+
+      <!-- Dashed stroke -->
+      <rect x="350" y="420" width="120" height="50" fill="none" stroke="#795548" stroke-width="2" stroke-dasharray="8,4" />
+    </svg>
+  </div>
+</body>
+</html>

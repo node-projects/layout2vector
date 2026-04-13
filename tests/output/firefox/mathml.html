@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: "Times New Roman", serif;
+    font-size: 20px;
+    padding: 20px;
+    color: #222;
+  }
+  .example {
+    margin: 15px 0;
+    padding: 12px;
+    border: 1px solid #bbb;
+    background: #fafafa;
+  }
+  h2 { margin-top: 0; color: #333; }
+  h3 { margin: 4px 0 8px; font-size: 16px; color: #555; }
+  math { font-size: 22px; }
+</style>
+</head>
+<body>
+  <h2>MathML Examples</h2>
+
+  <div class="example">
+    <h3>Simple Fraction</h3>
+    <math>
+      <mfrac>
+        <mn>1</mn>
+        <mn>2</mn>
+      </mfrac>
+      <mo>+</mo>
+      <mfrac>
+        <mn>3</mn>
+        <mn>4</mn>
+      </mfrac>
+      <mo>=</mo>
+      <mfrac>
+        <mn>5</mn>
+        <mn>4</mn>
+      </mfrac>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Quadratic Formula</h3>
+    <math>
+      <mi>x</mi>
+      <mo>=</mo>
+      <mfrac>
+        <mrow>
+          <mo>−</mo><mi>b</mi>
+          <mo>±</mo>
+          <msqrt>
+            <msup><mi>b</mi><mn>2</mn></msup>
+            <mo>−</mo>
+            <mn>4</mn><mi>a</mi><mi>c</mi>
+          </msqrt>
+        </mrow>
+        <mrow>
+          <mn>2</mn><mi>a</mi>
+        </mrow>
+      </mfrac>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Summation</h3>
+    <math>
+      <munderover>
+        <mo>∑</mo>
+        <mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow>
+        <mi>n</mi>
+      </munderover>
+      <msup><mi>i</mi><mn>2</mn></msup>
+      <mo>=</mo>
+      <mfrac>
+        <mrow>
+          <mi>n</mi>
+          <mo>(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo>)</mo>
+          <mo>(</mo><mn>2</mn><mi>n</mi><mo>+</mo><mn>1</mn><mo>)</mo>
+        </mrow>
+        <mn>6</mn>
+      </mfrac>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Matrix</h3>
+    <math>
+      <mrow>
+        <mo>[</mo>
+        <mtable>
+          <mtr>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mn>1</mn></mtd>
+          </mtr>
+        </mtable>
+        <mo>]</mo>
+      </mrow>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Integral</h3>
+    <math>
+      <msubsup>
+        <mo>∫</mo>
+        <mn>0</mn>
+        <mi>∞</mi>
+      </msubsup>
+      <msup>
+        <mi>e</mi>
+        <mrow><mo>−</mo><mi>x</mi></mrow>
+      </msup>
+      <mi>d</mi><mi>x</mi>
+      <mo>=</mo>
+      <mn>1</mn>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Superscript &amp; Subscript</h3>
+    <math>
+      <msup>
+        <mi>a</mi>
+        <mn>2</mn>
+      </msup>
+      <mo>+</mo>
+      <msup>
+        <mi>b</mi>
+        <mn>2</mn>
+      </msup>
+      <mo>=</mo>
+      <msup>
+        <mi>c</mi>
+        <mn>2</mn>
+      </msup>
+    </math>
+    <span style="margin-left: 40px;"></span>
+    <math>
+      <msub>
+        <mi>H</mi>
+        <mn>2</mn>
+      </msub>
+      <mi>O</mi>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Square Root</h3>
+    <math>
+      <msqrt>
+        <msup><mi>a</mi><mn>2</mn></msup>
+        <mo>+</mo>
+        <msup><mi>b</mi><mn>2</mn></msup>
+      </msqrt>
+      <mo>=</mo>
+      <mi>c</mi>
+    </math>
+  </div>
+
+  <div class="example">
+    <h3>Nested Fractions</h3>
+    <math>
+      <mfrac>
+        <mn>1</mn>
+        <mrow>
+          <mn>1</mn>
+          <mo>+</mo>
+          <mfrac>
+            <mn>1</mn>
+            <mrow>
+              <mn>2</mn>
+              <mo>+</mo>
+              <mfrac>
+                <mn>1</mn>
+                <mn>3</mn>
+              </mfrac>
+            </mrow>
+          </mfrac>
+        </mrow>
+      </mfrac>
+    </math>
+  </div>
+</body>
+</html>

@@ -1,0 +1,818 @@
+[
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 1264,
+        "y": 0
+      },
+      {
+        "x": 1264,
+        "y": 20
+      },
+      {
+        "x": 0,
+        "y": 20
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 0
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 20,
+        "y": 0
+      },
+      {
+        "x": 20,
+        "y": 20
+      },
+      {
+        "x": 0,
+        "y": 20
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 1
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 0,
+        "y": 0
+      },
+      {
+        "x": 20,
+        "y": 0
+      },
+      {
+        "x": 20,
+        "y": 20
+      },
+      {
+        "x": 0,
+        "y": 20
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 2
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 0.6500008679926523,
+        "y": -5.5166649984816445
+      },
+      {
+        "x": 19.349999620765438,
+        "y": -5.5166649984816445
+      },
+      {
+        "x": 19.349999620765438,
+        "y": 21.48333235209185
+      },
+      {
+        "x": 0.6500008679926523,
+        "y": 21.48333235209185
+      }
+    ],
+    "text": "⚖",
+    "style": {
+      "fill": "rgb(0, 0, 0)",
+      "strokeWidth": "0.20000000298023224px",
+      "fontSize": "20.000000298023224px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "matrix(1, 0, 0, 1, 0, 10)",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 765,
+        "y": 299
+      },
+      {
+        "x": 1011.5833129882812,
+        "y": 299
+      },
+      {
+        "x": 1011.5833129882812,
+        "y": 413
+      },
+      {
+        "x": 765,
+        "y": 413
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "1px",
+      "fontSize": "12px",
+      "fontFamily": "\"Segoe UI\"",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "nowrap",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "1px",
+      "borderRightWidth": "1px",
+      "borderBottomWidth": "1px",
+      "borderLeftWidth": "1px",
+      "borderTopStyle": "solid",
+      "borderRightStyle": "solid",
+      "borderBottomStyle": "solid",
+      "borderLeftStyle": "solid",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 766,
+        "y": 300
+      },
+      {
+        "x": 965.316650390625,
+        "y": 300
+      },
+      {
+        "x": 965.316650390625,
+        "y": 316
+      },
+      {
+        "x": 766,
+        "y": 316
+      }
+    ],
+    "text": "Alte Not-Halt Mobile Panel Steckplatz",
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "1px",
+      "fontSize": "12px",
+      "fontFamily": "\"Segoe UI\"",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "nowrap",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "1px",
+      "borderRightWidth": "1px",
+      "borderBottomWidth": "1px",
+      "borderLeftWidth": "1px",
+      "borderTopStyle": "solid",
+      "borderRightStyle": "solid",
+      "borderBottomStyle": "solid",
+      "borderLeftStyle": "solid",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 766,
+        "y": 332
+      },
+      {
+        "x": 923.38330078125,
+        "y": 332
+      },
+      {
+        "x": 923.38330078125,
+        "y": 348
+      },
+      {
+        "x": 766,
+        "y": 348
+      }
+    ],
+    "text": "und Fördererstich AE11/AE12.",
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "1px",
+      "fontSize": "12px",
+      "fontFamily": "\"Segoe UI\"",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "nowrap",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "1px",
+      "borderRightWidth": "1px",
+      "borderBottomWidth": "1px",
+      "borderLeftWidth": "1px",
+      "borderTopStyle": "solid",
+      "borderRightStyle": "solid",
+      "borderBottomStyle": "solid",
+      "borderLeftStyle": "solid",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 766,
+        "y": 364
+      },
+      {
+        "x": 1010.5833129882812,
+        "y": 364
+      },
+      {
+        "x": 1010.5833129882812,
+        "y": 380
+      },
+      {
+        "x": 766,
+        "y": 380
+      }
+    ],
+    "text": "Am Pnoz gebrückt. Im Programm nur noch für",
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "1px",
+      "fontSize": "12px",
+      "fontFamily": "\"Segoe UI\"",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "nowrap",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "1px",
+      "borderRightWidth": "1px",
+      "borderBottomWidth": "1px",
+      "borderLeftWidth": "1px",
+      "borderTopStyle": "solid",
+      "borderRightStyle": "solid",
+      "borderBottomStyle": "solid",
+      "borderLeftStyle": "solid",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 766,
+        "y": 396
+      },
+      {
+        "x": 982.1666870117188,
+        "y": 396
+      },
+      {
+        "x": 982.1666870117188,
+        "y": 412
+      },
+      {
+        "x": 766,
+        "y": 412
+      }
+    ],
+    "text": "Diagnose, falls sie mal ausgelöst werden!",
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "1px",
+      "fontSize": "12px",
+      "fontFamily": "\"Segoe UI\"",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "nowrap",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "1px",
+      "borderRightWidth": "1px",
+      "borderBottomWidth": "1px",
+      "borderLeftWidth": "1px",
+      "borderTopStyle": "solid",
+      "borderRightStyle": "solid",
+      "borderBottomStyle": "solid",
+      "borderLeftStyle": "solid",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 4
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 755,
+        "y": 289
+      },
+      {
+        "x": 1055,
+        "y": 289
+      },
+      {
+        "x": 1055,
+        "y": 439
+      },
+      {
+        "x": 755,
+        "y": 439
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 17
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 755,
+        "y": 289
+      },
+      {
+        "x": 1025,
+        "y": 289
+      },
+      {
+        "x": 1025,
+        "y": 461
+      },
+      {
+        "x": 755,
+        "y": 461
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "2px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgba(0, 0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 19
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 0,
+        "y": 92
+      },
+      {
+        "x": 20,
+        "y": 92
+      },
+      {
+        "x": 20,
+        "y": 112
+      },
+      {
+        "x": 0,
+        "y": 112
+      }
+    ],
+    "style": {
+      "fill": "rgba(0, 0, 0, 0)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 19
+  },
+  {
+    "type": "polygon",
+    "points": [
+      {
+        "x": 0,
+        "y": 92
+      },
+      {
+        "x": 20,
+        "y": 92
+      },
+      {
+        "x": 20,
+        "y": 112
+      },
+      {
+        "x": 0,
+        "y": 112
+      }
+    ],
+    "style": {
+      "fill": "rgb(111, 216, 146)",
+      "stroke": "rgb(0, 0, 0)",
+      "strokeWidth": "0px",
+      "fontSize": "16px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "none",
+      "overflow": "hidden",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 20
+  },
+  {
+    "type": "text",
+    "quad": [
+      {
+        "x": 2.6666674057642723,
+        "y": 94.70000078827144
+      },
+      {
+        "x": 17.333333273728684,
+        "y": 94.70000078827144
+      },
+      {
+        "x": 17.333333273728684,
+        "y": 108.69999947100877
+      },
+      {
+        "x": 2.6666674057642723,
+        "y": 108.69999947100877
+      }
+    ],
+    "text": "ET",
+    "style": {
+      "fill": "rgb(0, 0, 0)",
+      "strokeWidth": "0.20000000298023224px",
+      "fontSize": "12.000000178813934px",
+      "fontFamily": "serif",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "color": "rgb(0, 0, 0)",
+      "textDecoration": "none",
+      "textAlign": "start",
+      "textTransform": "none",
+      "textShadow": "none",
+      "lineHeight": "normal",
+      "whiteSpace": "normal",
+      "opacity": 1,
+      "borderTopColor": "rgb(0, 0, 0)",
+      "borderRightColor": "rgb(0, 0, 0)",
+      "borderBottomColor": "rgb(0, 0, 0)",
+      "borderLeftColor": "rgb(0, 0, 0)",
+      "borderTopWidth": "0px",
+      "borderRightWidth": "0px",
+      "borderBottomWidth": "0px",
+      "borderLeftWidth": "0px",
+      "borderTopStyle": "none",
+      "borderRightStyle": "none",
+      "borderBottomStyle": "none",
+      "borderLeftStyle": "none",
+      "borderRadius": "0px",
+      "backgroundImage": "none",
+      "boxShadow": "none",
+      "transform": "matrix(1, 0, 0, 1, 0, 5)",
+      "overflow": "visible",
+      "textOverflow": "clip",
+      "imageRendering": "auto"
+    },
+    "zIndex": 22
+  }
+]

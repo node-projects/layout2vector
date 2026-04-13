@@ -1,0 +1,735 @@
+<div id="root">
+    <ui-place activate-data-conditions="" id="id-OzDyNt"
+        style="width:88px;height:130px;position:absolute;left:30px;top:217px;"><template shadowrootmode="open"
+            shadowrootserializable="">
+            <style>
+                :host {
+                    position: absolute;
+                    border: 1px solid black;
+                    background-color: white;
+                    height: 130px;
+                    width: 88px;
+                    display: block;
+                }
+
+                #root {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    display: grid;
+                    overflow: hidden;
+                    grid-template-columns: 1% 24% 25% 25% 24% 1%;
+                    grid-template-rows: 1% 7% 10% 7% 1% 1% 13% 5% 15% 5% 15% 5% 15%;
+                    grid-template-areas:
+                        ". . . . . ."
+                        ". . . group group ."
+                        ". objectPlaceName objectPlaceName objectPlaceName objectPlaceName ."
+                        ". msgPointName msgPointName msgPointName msgPointName ."
+                        ". . . . . ."
+                        ". . . . . ."
+                        ". . . . dataBlockNumber ."
+                        ". . . . . ."
+                        ". symbols symbols symbols symbols ."
+                        ". . . . . ."
+                        ". telegrams telegrams telegrams telegrams ."
+                        ". . . . . ."
+                        "aisle1 aisle1 aisle1 aisle3 aisle3 aisle3";
+                }
+
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+
+                img {
+                    height: 100%;
+                    width: 100%;
+                    object-fit: contain;
+                }
+
+                div {
+                    text-align: center;
+                }
+
+                #root .flexContainer {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: nowrap;
+                    box-sizing: border-box;
+                }
+
+                .flexContainer .flexContainer-icon {
+                    flex: 0 1 auto;
+                    width: auto;
+                    max-height: 100%;
+                    min-width: 0;
+                    aspect-ratio: 1 / 1;
+                    justify-content: center;
+                }
+
+                #root .topLayer {
+                    z-index: 2;
+                    opacity: 0.3;
+                }
+
+                img {
+                    pointer-events: none;
+                }
+            </style>
+            <div id="root">
+                <div style="grid-area: 1 / 1 / 6 / -1; background: transparent;"
+                    css:background="[[this.isMessagePoint ? '#6fd892' : 'transparent']]"></div>
+                <svg style="grid-area: group;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMid meet">
+                    <text x="100" y="50" text-anchor="end" dominant-baseline="middle" font-size="80"></text>
+                </svg>
+                <svg style="grid-area: objectPlaceName;" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                    <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80"
+                        font-weight="bold"></text>
+                </svg>
+                <svg style="grid-area: msgPointName;" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                    <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80"
+                        font-weight="bold"></text>
+                </svg>
+                <svg style="grid-area: dataBlockNumber;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax meet">
+                    <text x="100" y="50" text-anchor="end" font-size="60" font-weight="bold">0</text>
+                </svg>
+                <div bcw:visible="[[this.aisle1 != 'none']]" class="flexContainer"
+                    style="grid-area: aisle1; display: none;" css:background-color="[[this._getAisleColor('aisle1')]]">
+                    <div class="flexContainer-icon">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">1=</text>
+                        </svg>
+                    </div>
+                    <div class="flexContainer-icon" bcw:visible="[[this._getAisleImage('aisle1') != null]]">
+                        <img .src="[[this._getAisleImage('aisle1')]]" src="">
+                    </div>
+                    <div class="flexContainer-icon">
+                        <svg bcw:visible="[[this.engineTypeAxis1 == 'Movimot_D']]" viewBox="0 0 100 100"
+                            preserveAspectRatio="xMidYMid meet" style="display: none;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">0,5</text>
+                        </svg>
+                    </div>
+                </div>
+                <div bcw:visible="[[this.aisle3 != 'none']]" class="flexContainer"
+                    style="grid-area: aisle3; display: none;" css:background-color="[[this._getAisleColor('aisle3')]]">
+                    <div class="flexContainer-icon">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">3=</text>
+                        </svg>
+                    </div>
+                    <div class="flexContainer-icon" bcw:visible="[[this._getAisleImage('aisle3') != null]]">
+                        <img .src="[[this._getAisleImage('aisle3')]]" src="">
+                    </div>
+                    <div class="flexContainer-icon">
+                        <svg bcw:visible="[[this.engineTypeAxis3 == 'Movimot_D']]" viewBox="0 0 100 100"
+                            preserveAspectRatio="xMidYMid meet" style="display: none;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">0,5</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flexContainer" style="grid-area: symbols; justify-content: center;">
+                    <div bcw:visible="[[this.placeType != 'Default']]" class="flexContainer-icon"
+                        style="display: none;">
+                        <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                lengthAdjust="spacingAndGlyphs" textLength="120" transform="translate(0,10)"></text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.aisle4 != 'none']]" class="flexContainer-icon" style="display: none;">
+                        
+                    </div>
+                    <div bcw:visible="[[this.aisle5 != 'none']]" class="flexContainer-icon" style="display: none;">
+                        
+                    </div>
+                    <div bcw:visible="[[this.isLifting]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">å</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.hasMiddlePosition]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80">|</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isLifting]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10) rotate(180 40 40)">å</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTurntable]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">[</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isWrapping]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">¥</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isStacker]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100" transform="translate(0,10)">⏫</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isDestacker]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100" transform="translate(0,10)">⏬</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.keepPlaceFree]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)"></text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.directionBit]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                transform="translate(0,10)">R</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.intoSystem]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100">📥</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.outOfSystem]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100">📤</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.scaleType != 'None']]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                transform="translate(0,10)"
+                                css:fill="[[this.scaleType == 'Undefined' ? 'red' : 'black']]"
+                                style="fill: black;">⚖</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flexContainer" style="grid-area: telegrams; gap: 1px;">
+                    <div bcw:visible="[[this.isTelegramTREnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TR</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTOEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TO</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramETEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ET</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTGEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TG</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramEGEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">EG</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTDEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TD</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramEDEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ED</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTCEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TC</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramSAEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">SA</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramOCEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">OC</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramSTEnabled === 'true' || this.isTelegramSTEnabled === 'false']]"
+                        class="flexContainer-icon" style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            css:background="[[this.isTelegramSTEnabled === 'true'? '#6fd892' : 'red']]"
+                            style="background: red;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ST</text>
+                        </svg>
+                    </div>
+                </div>
+                <div bcw:visible="[[this.activateDataConditions]]" class="topLayer"
+                    style="grid-column: 1 / 3; grid-row: 1 / 6;">
+                    <img
+                        src="./data.png">
+                </div>
+                <div bcw:visible="[[this.activateInitialization]]" class="topLayer"
+                    style="grid-area: 1 / 1 / 6 / 3; opacity: 0.6; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                            transform="rotate(-90,50,50)" font-weight="bold">INIT</text>
+                    </svg>
+                </div>
+                <div bcw:visible="[[this.isBoxConveyor]]" class="topLayer"
+                    style="grid-area: 6 / 1 / 13 / -1; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="45"
+                            transform="rotate(-45,50,50)" font-weight="bold">BOX</text>
+                    </svg>
+                </div>
+                <div bcw:visible="[[this.ignorePlace]]" class="topLayer"
+                    style="grid-area: 6 / 1 / 13 / -1; opacity: 0.6; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="30"
+                            transform="rotate(-45,50,50)" font-weight="bold">Ignored</text>
+                    </svg>
+                </div>
+            </div>
+            <slot></slot>
+        </template></ui-place>
+    <ui-place activate-data-conditions="" id="id-nbMrdc"
+        style="width:88px;height:130px;position:absolute;left:157px;top:217px;"><template shadowrootmode="open"
+            shadowrootserializable="">
+            <style>
+                :host {
+                    position: absolute;
+                    border: 1px solid black;
+                    background-color: white;
+                    height: 130px;
+                    width: 88px;
+                    display: block;
+                }
+
+                #root {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    display: grid;
+                    overflow: hidden;
+                    grid-template-columns: 1% 24% 25% 25% 24% 1%;
+                    grid-template-rows: 1% 7% 10% 7% 1% 1% 13% 5% 15% 5% 15% 5% 15%;
+                    grid-template-areas:
+                        ". . . . . ."
+                        ". . . group group ."
+                        ". objectPlaceName objectPlaceName objectPlaceName objectPlaceName ."
+                        ". msgPointName msgPointName msgPointName msgPointName ."
+                        ". . . . . ."
+                        ". . . . . ."
+                        ". . . . dataBlockNumber ."
+                        ". . . . . ."
+                        ". symbols symbols symbols symbols ."
+                        ". . . . . ."
+                        ". telegrams telegrams telegrams telegrams ."
+                        ". . . . . ."
+                        "aisle1 aisle1 aisle1 aisle3 aisle3 aisle3";
+                }
+
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+
+                img {
+                    height: 100%;
+                    width: 100%;
+                    object-fit: contain;
+                }
+
+                div {
+                    text-align: center;
+                }
+
+                #root .flexContainer {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: nowrap;
+                    box-sizing: border-box;
+                }
+
+                .flexContainer .flexContainer-icon {
+                    flex: 0 1 auto;
+                    width: auto;
+                    max-height: 100%;
+                    min-width: 0;
+                    aspect-ratio: 1 / 1;
+                    justify-content: center;
+                }
+
+                #root .topLayer {
+                    z-index: 2;
+                    opacity: 0.3;
+                }
+
+                img {
+                    pointer-events: none;
+                }
+            </style>
+            <div id="root">
+                <div style="grid-area: 1 / 1 / 6 / -1; background: transparent;"
+                    css:background="[[this.isMessagePoint ? '#6fd892' : 'transparent']]"></div>
+                <svg style="grid-area: group;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMid meet">
+                    <text x="100" y="50" text-anchor="end" dominant-baseline="middle" font-size="80"></text>
+                </svg>
+                <svg style="grid-area: objectPlaceName;" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                    <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80"
+                        font-weight="bold"></text>
+                </svg>
+                <svg style="grid-area: msgPointName;" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                    <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80"
+                        font-weight="bold"></text>
+                </svg>
+                <svg style="grid-area: dataBlockNumber;" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax meet">
+                    <text x="100" y="50" text-anchor="end" font-size="60" font-weight="bold">0</text>
+                </svg>
+                <div bcw:visible="[[this.aisle1 != 'none']]" class="flexContainer"
+                    style="grid-area: aisle1; display: none;" css:background-color="[[this._getAisleColor('aisle1')]]">
+                    <div class="flexContainer-icon">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">1=</text>
+                        </svg>
+                    </div>
+                    <div class="flexContainer-icon" bcw:visible="[[this._getAisleImage('aisle1') != null]]">
+                        <img .src="[[this._getAisleImage('aisle1')]]" src="">
+                    </div>
+                    <div class="flexContainer-icon">
+                        <svg bcw:visible="[[this.engineTypeAxis1 == 'Movimot_D']]" viewBox="0 0 100 100"
+                            preserveAspectRatio="xMidYMid meet" style="display: none;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">0,5</text>
+                        </svg>
+                    </div>
+                </div>
+                <div bcw:visible="[[this.aisle3 != 'none']]" class="flexContainer"
+                    style="grid-area: aisle3; display: none;" css:background-color="[[this._getAisleColor('aisle3')]]">
+                    <div class="flexContainer-icon">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">3=</text>
+                        </svg>
+                    </div>
+                    <div class="flexContainer-icon" bcw:visible="[[this._getAisleImage('aisle3') != null]]">
+                        <img .src="[[this._getAisleImage('aisle3')]]" src="">
+                    </div>
+                    <div class="flexContainer-icon">
+                        <svg bcw:visible="[[this.engineTypeAxis3 == 'Movimot_D']]" viewBox="0 0 100 100"
+                            preserveAspectRatio="xMidYMid meet" style="display: none;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">0,5</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flexContainer" style="grid-area: symbols; justify-content: center;">
+                    <div bcw:visible="[[this.placeType != 'Default']]" class="flexContainer-icon"
+                        style="display: none;">
+                        <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                lengthAdjust="spacingAndGlyphs" textLength="120" transform="translate(0,10)"></text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.aisle4 != 'none']]" class="flexContainer-icon" style="display: none;">
+                       
+                    </div>
+                    <div bcw:visible="[[this.aisle5 != 'none']]" class="flexContainer-icon" style="display: none;">
+                       
+                    </div>
+                    <div bcw:visible="[[this.isLifting]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">å</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.hasMiddlePosition]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="80">|</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isLifting]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10) rotate(180 40 40)">å</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTurntable]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">[</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isWrapping]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)">¥</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isStacker]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100" transform="translate(0,10)">⏫</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isDestacker]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100" transform="translate(0,10)">⏬</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.keepPlaceFree]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-family="Wingdings"
+                                font-size="100" transform="translate(0,10)"></text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.directionBit]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                transform="translate(0,10)">R</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.intoSystem]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100">📥</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.outOfSystem]]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle"
+                                font-family="Segoe UI Symbol" font-size="100">📤</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.scaleType != 'None']]" class="flexContainer-icon" style="display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="100"
+                                transform="translate(0,10)"
+                                css:fill="[[this.scaleType == 'Undefined' ? 'red' : 'black']]"
+                                style="fill: black;">⚖</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flexContainer" style="grid-area: telegrams; gap: 1px;">
+                    <div bcw:visible="[[this.isTelegramTREnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TR</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTOEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TO</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramETEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ET</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTGEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TG</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramEGEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">EG</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTDEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TD</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramEDEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ED</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramTCEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">TC</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramSAEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">SA</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramOCEnabled]]" class="flexContainer-icon"
+                        style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            style="background-color: #6fd892;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">OC</text>
+                        </svg>
+                    </div>
+                    <div bcw:visible="[[this.isTelegramSTEnabled === 'true' || this.isTelegramSTEnabled === 'false']]"
+                        class="flexContainer-icon" style="max-height: 60%; display: none;">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+                            css:background="[[this.isTelegramSTEnabled === 'true'? '#6fd892' : 'red']]"
+                            style="background: red;">
+                            <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                                transform="translate(0,5)">ST</text>
+                        </svg>
+                    </div>
+                </div>
+                <div bcw:visible="[[this.activateDataConditions]]" class="topLayer"
+                    style="grid-column: 1 / 3; grid-row: 1 / 6;">
+                    <img
+                        src="./data.png">
+                </div>
+                <div bcw:visible="[[this.activateInitialization]]" class="topLayer"
+                    style="grid-area: 1 / 1 / 6 / 3; opacity: 0.6; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="60"
+                            transform="rotate(-90,50,50)" font-weight="bold">INIT</text>
+                    </svg>
+                </div>
+                <div bcw:visible="[[this.isBoxConveyor]]" class="topLayer"
+                    style="grid-area: 6 / 1 / 13 / -1; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="45"
+                            transform="rotate(-45,50,50)" font-weight="bold">BOX</text>
+                    </svg>
+                </div>
+                <div bcw:visible="[[this.ignorePlace]]" class="topLayer"
+                    style="grid-area: 6 / 1 / 13 / -1; opacity: 0.6; display: none;">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+                        <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" font-size="30"
+                            transform="rotate(-45,50,50)" font-weight="bold">Ignored</text>
+                    </svg>
+                </div>
+            </div>
+            <slot></slot>
+        </template></ui-place>
+    <ui-move source="id-OzDyNt" source-connector="right" destination="id-nbMrdc" destination-connector="left"><template
+            shadowrootmode="open" shadowrootserializable="">
+            <style>
+                :host {
+                    display: block;
+                    pointer-events: none;
+                    position: absolute;
+                    overflow: visible;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
+
+                svg {
+                    left: 0px;
+                    top: 0px;
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                    overflow: visible;
+                    position: absolute;
+                    stroke: black;
+                    stroke-width: 2px;
+                    fill: none;
+                }
+
+                svg path.clicklayer {
+                    stroke-width: 10px;
+                    pointer-events: auto;
+                    stroke: transparent;
+                }
+
+                @container style(--ts-view-showmoves: 0) {
+                    svg {
+                        display: none;
+                    }
+                }
+            </style>
+            <svg id="svg">
+                <defs>
+                    <marker id="arrowhead" viewBox="0 -5 10 10" refX="10" refY="0" markerWidth="6" markerHeight="6"
+                        orient="auto">
+                        <path d="M0,-5L10,0L0,5" fill="black" style="pointer-events: visiblePainted;"></path>
+                    </marker>
+                </defs>
+                <path class="clicklayer" d="M 103 282 Q  137.5 297, 172 282"></path>
+                <path d="M 103 282 Q  137.5 297, 172 282" marker-end="url(#arrowhead)"></path>
+            </svg>
+        </template></ui-move>
+</div>

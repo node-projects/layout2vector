@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="413" viewBox="0 0 1264 413">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1272" height="704" viewBox="0 0 1272 704">
 <defs>
-<clipPath id="clip1"><rect x="765" y="299" width="246.58" height="114"/></clipPath>
+<clipPath id="clip1"><rect x="773" y="307" width="246.69" height="114"/></clipPath>
 </defs>
-<text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">Alte Not-Halt Mobile Panel Steckplatz</text>
-<text x="0" y="37" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">und F&#xF6;rdererstich AE11/AE12.</text>
-<text x="0" y="73" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text>
-<text x="0" y="109" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">Diagnose, falls sie mal ausgel&#xF6;st werden!</text>
-<path d="M765,299 L1011.58,299 L1011.58,413 L765,413 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
-<g clip-path="url(#clip1)"><text x="766" y="302" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text></g>
-<g clip-path="url(#clip1)"><text x="766" y="334" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und F&#xF6;rdererstich AE11/AE12.</text></g>
-<g clip-path="url(#clip1)"><text x="766" y="366" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text></g>
-<g clip-path="url(#clip1)"><text x="766" y="398" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgel&#xF6;st werden!</text></g>
+<text x="8" y="8.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">Alte Not-Halt Mobile Panel Steckplatz</text>
+<text x="8" y="44.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">und F&#xF6;rdererstich AE11/AE12.</text>
+<text x="8" y="80.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text>
+<text x="8" y="116.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Times New Roman">Diagnose, falls sie mal ausgel&#xF6;st werden!</text>
+<path d="M773,307 L1020,307 L1020,421 L773,421 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<g clip-path="url(#clip1)"><text x="774" y="310" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="342" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und F&#xF6;rdererstich AE11/AE12.</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="374" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="406" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgel&#xF6;st werden!</text></g>
 </svg>

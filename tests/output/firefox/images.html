@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Images</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; font-size: 18px; }
+    h3 { margin: 16px 0 8px; font-size: 14px; color: #555; }
+    .section { margin-bottom: 24px; }
+    .row { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #fafafa; }
+    .card img { display: block; margin-bottom: 6px; }
+    .label { font-size: 11px; color: #888; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h2>Image Extraction Demo</h2>
+
+    <!-- Section 1: SVG data URL images (base64) -->
+    <div class="section">
+      <h3>SVG Data URLs (base64) — converted to vector geometry</h3>
+      <div class="row">
+        <div class="card">
+          <img
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0iI2U1MzkzNSIvPjwvc3ZnPg=="
+            width="80" height="80"
+            alt="Red circle SVG"
+          />
+          <span class="label">Circle (base64 SVG)</span>
+        </div>
+        <div class="card">
+          <img
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgODAiPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIGZpbGw9IiMxZTg4ZTUiIHJ4PSIxMCIvPjx0ZXh0IHg9IjYwIiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMTYiPkhlbGxvPC90ZXh0Pjwvc3ZnPg=="
+            width="120" height="80"
+            alt="Blue rect with text SVG"
+          />
+          <span class="label">Rect + text (base64 SVG)</span>
+        </div>
+        <div class="card">
+          <img
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cG9seWdvbiBwb2ludHM9IjUwLDUgOTUsNDAgODAsOTUgMjAsOTUgNSw0MCIgZmlsbD0iIzQzYTA0NyIgc3Ryb2tlPSIjMWI1ZTIwIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4="
+            width="80" height="80"
+            alt="Green pentagon SVG"
+          />
+          <span class="label">Pentagon (base64 SVG)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: SVG data URL images (URL-encoded) -->
+    <div class="section">
+      <h3>SVG Data URLs (URL-encoded) — converted to vector geometry</h3>
+      <div class="row">
+        <div class="card">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cellipse cx='50' cy='50' rx='45' ry='30' fill='%23ff9800'/%3E%3C/svg%3E"
+            width="100" height="70"
+            alt="Orange ellipse SVG"
+          />
+          <span class="label">Ellipse (URL-encoded SVG)</span>
+        </div>
+        <div class="card">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cline x1='10' y1='10' x2='90' y2='90' stroke='%239c27b0' stroke-width='4'/%3E%3Cline x1='90' y1='10' x2='10' y2='90' stroke='%239c27b0' stroke-width='4'/%3E%3C/svg%3E"
+            width="80" height="80"
+            alt="Purple X SVG"
+          />
+          <span class="label">X lines (URL-encoded SVG)</span>
+        </div>
+        <div class="card">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60'%3E%3Crect width='120' height='60' fill='%2300bcd4' rx='30'/%3E%3C/svg%3E"
+            width="120" height="60"
+            alt="Teal pill shape SVG"
+          />
+          <span class="label">Pill shape (URL-encoded SVG)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Raster data URLs (JPEG, PNG) -->
+    <div class="section">
+      <h3>Raster Data URLs — embedded as image nodes</h3>
+      <div class="row">
+        <div class="card">
+          <!-- Tiny 2x2 red/blue checkerboard PNG -->
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2P4z8Dwn4EBFAAAfwQF/THRmXcAAAAASUVORK5CYII="
+            width="80" height="80"
+            style="image-rendering: pixelated;"
+            alt="2x2 pixel PNG"
+          />
+          <span class="label">Tiny PNG (data URL)</span>
+        </div>
+        <div class="card">
+          <!-- 1x1 red JPEG -->
+          <img
+            src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k="
+            width="80" height="80"
+            alt="1x1 JPEG"
+          />
+          <span class="label">JPEG (data URL)</span>
+        </div>
+        <div class="card">
+          <!-- Small gradient PNG (4x4) -->
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAALUlEQVQIW2NkYPj/n4EBCBgZGUGMf//+MTAxAAUYGBj+MzIyMIBEmBjAEgwMAHPpCAtXDLvmAAAAAElFTkSuQmCC"
+            width="80" height="80"
+            style="image-rendering: pixelated;"
+            alt="4x4 gradient PNG"
+          />
+          <span class="label">Gradient PNG (data URL)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: External URLs -->
+    <div class="section">
+      <h3>External URLs — fetched and embedded</h3>
+      <div class="row">
+        <div class="card">
+          <!-- Uses a well-known public domain SVG placeholder -->
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Bitmap_VS_SVG.svg"
+            width="150" height="100"
+            alt="External SVG"
+            crossorigin="anonymous"
+          />
+          <span class="label">External SVG (wikipedia)</span>
+        </div>
+        <div class="card">
+          <!-- Placeholder PNG image -->
+          <img
+            src="https://via.placeholder.com/100x80/4CAF50/ffffff?text=PNG"
+            width="100" height="80"
+            alt="External PNG"
+            crossorigin="anonymous"
+          />
+          <span class="label">External PNG (placeholder)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: CSS background-image url() -->
+    <div class="section">
+      <h3>CSS background-image url() — extracted as image nodes</h3>
+      <div class="row">
+        <div class="card">
+          <div
+            style="width:80px;height:80px;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2P4z8Dwn4EBFAAAfwQF/THRmXcAAAAASUVORK5CYII=');background-size:cover;image-rendering:pixelated;"
+          ></div>
+          <span class="label">PNG bg-image (data URL)</span>
+        </div>
+        <div class="card">
+          <div
+            style="width:100px;height:80px;background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 80%27%3E%3Crect width=%27100%27 height=%2780%27 fill=%27%23e91e63%27 rx=%2710%27/%3E%3Ccircle cx=%2750%27 cy=%2740%27 r=%2725%27 fill=%27white%27/%3E%3C/svg%3E');background-size:cover;"
+          ></div>
+          <span class="label">SVG bg-image (vector)</span>
+        </div>
+        <div class="card">
+          <div
+            style="width:80px;height:80px;background-image:url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=');background-size:cover;"
+          ></div>
+          <span class="label">JPEG bg-image (data URL)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Mixed content -->
+    <div class="section">
+      <h3>Mixed: Images alongside HTML and inline SVG</h3>
+      <div class="row">
+        <div class="card" style="background: #e3f2fd;">
+          <div style="width: 100px; height: 40px; background: linear-gradient(135deg, #1a237e, #3949ab); border-radius: 6px; margin-bottom: 8px;"></div>
+          <img
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCA2MCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjYzYyODI4Ii8+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjAiIGZpbGw9IiNmZmYiLz48L3N2Zz4="
+            width="60" height="60"
+            alt="SVG icon"
+          />
+          <span class="label">HTML gradient + SVG img</span>
+        </div>
+        <div class="card" style="background: #fff3e0;">
+          <svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
+            <rect width="80" height="40" fill="#ff6f00" rx="8"/>
+            <text x="40" y="25" text-anchor="middle" fill="white" font-size="12">Inline</text>
+          </svg>
+          <img
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAALUlEQVQIW2NkYPj/n4EBCBgZGUGMf//+MTAxAAUYGBj+MzIyMIBEmBjAEgwMAHPpCAtXDLvmAAAAAElFTkSuQmCC"
+            width="80" height="40"
+            style="margin-top: 8px; image-rendering: pixelated;"
+            alt="Raster below inline SVG"
+          />
+          <span class="label">Inline SVG + raster img</span>
+        </div>
+        <div class="card" style="background: #f3e5f5;">
+          <p style="font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #4a148c;">Caption</p>
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50'%3E%3Crect width='100' height='50' fill='%237b1fa2'/%3E%3Ccircle cx='25' cy='25' r='15' fill='%23e1bee7'/%3E%3Ccircle cx='75' cy='25' r='15' fill='%23ce93d8'/%3E%3C/svg%3E"
+            width="100" height="50"
+            alt="Two circles SVG"
+          />
+          <span class="label">Text + SVG img</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
