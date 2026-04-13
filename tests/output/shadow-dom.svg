@@ -11,7 +11,7 @@
 <g clip-path="url(#clip3)"><path d="M0,31 L280,31 L280,84 L0,84 Z" fill="url(#lg2)"/></g>
 <g clip-path="url(#clip3)"><text x="16" y="48" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Shadow Card Title</text></g>
 <g clip-path="url(#clip3)"><text x="16" y="134.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This content is inside a declarative shadow DOM. It demonstrates encapsulated styling and layout extraction.</text></g>
-<g clip-path="url(#clip3)"><path d="M0,200 L280,200 L280,239 L0,239 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(136, 136, 136) rgb(136, 136, 136)" stroke-width="1"/></g>
+<g clip-path="url(#clip3)"><path d="M0,200 L280,200 L280,239 L0,239 Z" fill="rgb(245, 245, 245)"/></g>
 <g clip-path="url(#clip3)"><text x="16" y="214" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Footer text</text></g>
 <rect x="0" y="263" width="151" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)" filter="url(#ds4)"/>
 <text x="24" y="274" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="14px" font-family="Arial">Shadow Button</text>

@@ -50,6 +50,7 @@ export type Style = {
   overflow?: string;
   textOverflow?: string;
   imageRendering?: string;
+  clipPath?: string;
   /** Clip boundary from an ancestor with overflow:hidden + border-radius (absolute page coords). */
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 };

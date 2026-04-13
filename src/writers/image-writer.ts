@@ -226,6 +226,39 @@ interface PendingImage {
   style: Style;
 }
 
+type Bounds = { x: number; y: number; w: number; h: number };
+
+function quadBounds(quad: Quad): Bounds {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const point of quad) {
+    if (point.x < minX) minX = point.x;
+    if (point.y < minY) minY = point.y;
+    if (point.x > maxX) maxX = point.x;
+    if (point.y > maxY) maxY = point.y;
+  }
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
+function parseClipLength(token: string, reference: number): number {
+  const value = token.trim().toLowerCase();
+  if (!value) return 0;
+  if (value.endsWith("%")) {
+    return (parseFloat(value) / 100) * reference;
+  }
+  const numeric = parseFloat(value);
+  return Number.isNaN(numeric) ? 0 : numeric;
+}
+
+function expandInsetValues(values: string[]): [string, string, string, string] {
+  if (values.length === 1) return [values[0], values[0], values[0], values[0]];
+  if (values.length === 2) return [values[0], values[1], values[0], values[1]];
+  if (values.length === 3) return [values[0], values[1], values[2], values[1]];
+  return [values[0], values[1], values[2], values[3]];
+}
+
 // ── Image Result ────────────────────────────────────────────────────
 
 /**
@@ -262,26 +295,8 @@ export class ImageResult {
     ctx.save();
 
     // Apply clip bounds from ancestor with overflow:hidden
-    const clip = img.style.clipBounds;
-    if (clip) {
-      ctx.beginPath();
-      if (clip.radius > 0) {
-        const r = Math.min(clip.radius, clip.w / 2, clip.h / 2);
-        ctx.moveTo(clip.x + r, clip.y);
-        ctx.lineTo(clip.x + clip.w - r, clip.y);
-        ctx.arcTo(clip.x + clip.w, clip.y, clip.x + clip.w, clip.y + r, r);
-        ctx.lineTo(clip.x + clip.w, clip.y + clip.h - r);
-        ctx.arcTo(clip.x + clip.w, clip.y + clip.h, clip.x + clip.w - r, clip.y + clip.h, r);
-        ctx.lineTo(clip.x + r, clip.y + clip.h);
-        ctx.arcTo(clip.x, clip.y + clip.h, clip.x, clip.y + clip.h - r, r);
-        ctx.lineTo(clip.x, clip.y + r);
-        ctx.arcTo(clip.x, clip.y, clip.x + r, clip.y, r);
-        ctx.closePath();
-      } else {
-        ctx.rect(clip.x, clip.y, clip.w, clip.h);
-      }
-      ctx.clip();
-    }
+    this.applyClipBounds(ctx, img.style);
+    this.applyClipPath(ctx, quadBounds(img.quad), img.style);
 
     if (img.style.opacity !== undefined && img.style.opacity < 1) {
       ctx.globalAlpha = img.style.opacity;
@@ -314,6 +329,134 @@ export class ImageResult {
     ctx.restore();
   }
 
+  private applyClipBounds(ctx: CanvasRenderingContext2D, style: Style): void {
+    const clip = style.clipBounds;
+    if (!clip) return;
+    ctx.beginPath();
+    if (clip.radius > 0) {
+      this.traceRoundedRect(ctx, clip.x, clip.y, clip.w, clip.h, Math.min(clip.radius, clip.w / 2, clip.h / 2));
+    } else {
+      ctx.rect(clip.x, clip.y, clip.w, clip.h);
+    }
+    ctx.clip();
+  }
+
+  private applyClipPath(ctx: CanvasRenderingContext2D, bounds: Bounds, style: Style): void {
+    const clipPath = style.clipPath?.trim();
+    if (!clipPath || clipPath === "none") return;
+
+    const fillRule = this.traceClipPath(ctx, clipPath, bounds);
+    if (fillRule) ctx.clip(fillRule);
+  }
+
+  private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {
+    const inset = clipPath.match(/^inset\((.+)\)$/i);
+    if (inset) {
+      const [rawInsets, rawRound] = inset[1].split(/\s+round\s+/i, 2);
+      const values = rawInsets.trim().split(/\s+/).filter(Boolean);
+      if (values.length === 0 || values.length > 4) return null;
+
+      const [topToken, rightToken, bottomToken, leftToken] = expandInsetValues(values);
+      const top = parseClipLength(topToken, bounds.h);
+      const right = parseClipLength(rightToken, bounds.w);
+      const bottom = parseClipLength(bottomToken, bounds.h);
+      const left = parseClipLength(leftToken, bounds.w);
+      const x = bounds.x + left;
+      const y = bounds.y + top;
+      const w = Math.max(0, bounds.w - left - right);
+      const h = Math.max(0, bounds.h - top - bottom);
+      const radius = rawRound ? parseClipLength(rawRound.trim().split(/\s+/)[0], Math.min(bounds.w, bounds.h)) : 0;
+
+      ctx.beginPath();
+      if (radius > 0) {
+        this.traceRoundedRect(ctx, x, y, w, h, radius);
+      } else {
+        ctx.rect(x, y, w, h);
+      }
+      return "nonzero";
+    }
+
+    const circle = clipPath.match(/^circle\((.+)\)$/i);
+    if (circle) {
+      const [radiusToken, centerToken] = circle[1].split(/\s+at\s+/i, 2);
+      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
+      if (center.length !== 2) return null;
+      const cx = bounds.x + parseClipLength(center[0], bounds.w);
+      const cy = bounds.y + parseClipLength(center[1], bounds.h);
+      const radius = parseClipLength(radiusToken.trim(), Math.min(bounds.w, bounds.h));
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, radius, radius, 0, 0, Math.PI * 2);
+      return "nonzero";
+    }
+
+    const ellipse = clipPath.match(/^ellipse\((.+)\)$/i);
+    if (ellipse) {
+      const [radiiToken, centerToken] = ellipse[1].split(/\s+at\s+/i, 2);
+      const radii = radiiToken.trim().split(/\s+/).filter(Boolean);
+      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
+      if (radii.length !== 2 || center.length !== 2) return null;
+      const rx = parseClipLength(radii[0], bounds.w);
+      const ry = parseClipLength(radii[1], bounds.h);
+      const cx = bounds.x + parseClipLength(center[0], bounds.w);
+      const cy = bounds.y + parseClipLength(center[1], bounds.h);
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      return "nonzero";
+    }
+
+    const polygon = clipPath.match(/^polygon\((.+)\)$/i);
+    if (polygon) {
+      const parts = polygon[1].split(",").map((part) => part.trim()).filter(Boolean);
+      if (parts.length < 3) return null;
+
+      let fillRule: CanvasFillRule = "nonzero";
+      if (parts[0] === "evenodd" || parts[0] === "nonzero") {
+        fillRule = parts.shift() as CanvasFillRule;
+      }
+      if (parts.length < 3) return null;
+
+      const points = parts
+        .map((part) => part.split(/\s+/).filter(Boolean))
+        .filter((coords) => coords.length >= 2)
+        .map((coords) => ({
+          x: bounds.x + parseClipLength(coords[0], bounds.w),
+          y: bounds.y + parseClipLength(coords[1], bounds.h),
+        }));
+      if (points.length < 3) return null;
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      ctx.closePath();
+      return fillRule;
+    }
+
+    return null;
+  }
+
+  private traceRoundedRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    r: number,
+  ): void {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
   /**
    * Get the image as a data URL string.
    * @param mimeType  Output format: "image/png" (default), "image/jpeg", or "image/webp".
@@ -336,6 +479,10 @@ export class ImageResult {
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return bytes;
   }
+
+  getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
 }
 
 // ── Image Writer ────────────────────────────────────────────────────
@@ -346,6 +493,8 @@ export type ImageWriterOptions = {
   width: number;
   /** Canvas height in CSS pixels. */
   height: number;
+  /** Optional existing canvas to render into. */
+  canvas?: HTMLCanvasElement;
   /** Device pixel ratio / resolution multiplier. */
   scale?: number;
   /** Scale factor applied to width and height. */
@@ -358,6 +507,7 @@ export class ImageWriter implements Writer<ImageResult> {
   private width: number;
   private height: number;
   private scale: number;
+  private targetCanvas?: HTMLCanvasElement;
   private pendingImages: PendingImage[] = [];
 
   /**
@@ -372,6 +522,7 @@ export class ImageWriter implements Writer<ImageResult> {
       this.width = optionsOrWidth.width * z;
       this.height = optionsOrWidth.height * z;
       this.scale = optionsOrWidth.scale ?? 1;
+      this.targetCanvas = optionsOrWidth.canvas;
     } else {
       const z = zoom ?? 1;
       this.width = optionsOrWidth * z;
@@ -384,14 +535,12 @@ export class ImageWriter implements Writer<ImageResult> {
     const w = Math.ceil(this.width * this.scale);
     const h = Math.ceil(this.height * this.scale);
 
-    this.canvas = document.createElement("canvas");
+    this.canvas = this.targetCanvas ?? document.createElement("canvas");
     this.canvas.width = w;
     this.canvas.height = h;
 
     this.ctx = this.canvas.getContext("2d")!;
-    if (this.scale !== 1) {
-      this.ctx.scale(this.scale, this.scale);
-    }
+    this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
     this.pendingImages = [];
 
     // White background
@@ -408,6 +557,7 @@ export class ImageWriter implements Writer<ImageResult> {
     const ctx = this.ctx;
     ctx.save();
     this.applyClipBounds(ctx, style);
+    this.applyClipPath(ctx, quadBounds(points), style);
     this.applyOpacity(ctx, style);
 
     // Draw outer (drop) shadows before the shape
@@ -471,6 +621,8 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const ctx = this.ctx;
     ctx.save();
+    this.applyClipBounds(ctx, style);
+    this.applyClipPath(ctx, this.computeBoundingBox(points), style);
     this.applyOpacity(ctx, style);
 
     ctx.beginPath();
@@ -504,6 +656,7 @@ export class ImageWriter implements Writer<ImageResult> {
     const ctx = this.ctx;
     ctx.save();
     this.applyClipBounds(ctx, style);
+    this.applyClipPath(ctx, quadBounds(quad), style);
     this.applyOpacity(ctx, style);
 
     // Compute font size from quad height
@@ -564,7 +717,7 @@ export class ImageWriter implements Writer<ImageResult> {
     ctx.restore();
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, _rgbData?: number[]): Promise<void> {
     this.pendingImages.push({ quad, dataUrl, width, height, style });
   }
 
@@ -591,6 +744,101 @@ export class ImageWriter implements Writer<ImageResult> {
       ctx.rect(clip.x, clip.y, clip.w, clip.h);
     }
     ctx.clip();
+  }
+
+  private applyClipPath(ctx: CanvasRenderingContext2D, bounds: Bounds, style: Style): void {
+    const clipPath = style.clipPath?.trim();
+    if (!clipPath || clipPath === "none") return;
+
+    const fillRule = this.traceClipPath(ctx, clipPath, bounds);
+    if (fillRule) ctx.clip(fillRule);
+  }
+
+  private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {
+    const inset = clipPath.match(/^inset\((.+)\)$/i);
+    if (inset) {
+      const [rawInsets, rawRound] = inset[1].split(/\s+round\s+/i, 2);
+      const values = rawInsets.trim().split(/\s+/).filter(Boolean);
+      if (values.length === 0 || values.length > 4) return null;
+
+      const [topToken, rightToken, bottomToken, leftToken] = expandInsetValues(values);
+      const top = parseClipLength(topToken, bounds.h);
+      const right = parseClipLength(rightToken, bounds.w);
+      const bottom = parseClipLength(bottomToken, bounds.h);
+      const left = parseClipLength(leftToken, bounds.w);
+      const x = bounds.x + left;
+      const y = bounds.y + top;
+      const w = Math.max(0, bounds.w - left - right);
+      const h = Math.max(0, bounds.h - top - bottom);
+      const radius = rawRound ? parseClipLength(rawRound.trim().split(/\s+/)[0], Math.min(bounds.w, bounds.h)) : 0;
+
+      ctx.beginPath();
+      if (radius > 0) {
+        this.traceRoundedRect(ctx, x, y, w, h, radius);
+      } else {
+        ctx.rect(x, y, w, h);
+      }
+      return "nonzero";
+    }
+
+    const circle = clipPath.match(/^circle\((.+)\)$/i);
+    if (circle) {
+      const [radiusToken, centerToken] = circle[1].split(/\s+at\s+/i, 2);
+      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
+      if (center.length !== 2) return null;
+      const cx = bounds.x + parseClipLength(center[0], bounds.w);
+      const cy = bounds.y + parseClipLength(center[1], bounds.h);
+      const radius = parseClipLength(radiusToken.trim(), Math.min(bounds.w, bounds.h));
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, radius, radius, 0, 0, Math.PI * 2);
+      return "nonzero";
+    }
+
+    const ellipse = clipPath.match(/^ellipse\((.+)\)$/i);
+    if (ellipse) {
+      const [radiiToken, centerToken] = ellipse[1].split(/\s+at\s+/i, 2);
+      const radii = radiiToken.trim().split(/\s+/).filter(Boolean);
+      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
+      if (radii.length !== 2 || center.length !== 2) return null;
+      const rx = parseClipLength(radii[0], bounds.w);
+      const ry = parseClipLength(radii[1], bounds.h);
+      const cx = bounds.x + parseClipLength(center[0], bounds.w);
+      const cy = bounds.y + parseClipLength(center[1], bounds.h);
+
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+      return "nonzero";
+    }
+
+    const polygon = clipPath.match(/^polygon\((.+)\)$/i);
+    if (polygon) {
+      const parts = polygon[1].split(",").map((part) => part.trim()).filter(Boolean);
+      if (parts.length < 3) return null;
+
+      let fillRule: CanvasFillRule = "nonzero";
+      if (parts[0] === "evenodd" || parts[0] === "nonzero") {
+        fillRule = parts.shift() as CanvasFillRule;
+      }
+      if (parts.length < 3) return null;
+
+      const points = parts
+        .map((part) => part.split(/\s+/).filter(Boolean))
+        .filter((coords) => coords.length >= 2)
+        .map((coords) => ({
+          x: bounds.x + parseClipLength(coords[0], bounds.w),
+          y: bounds.y + parseClipLength(coords[1], bounds.h),
+        }));
+      if (points.length < 3) return null;
+
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+      ctx.closePath();
+      return fillRule;
+    }
+
+    return null;
   }
 
   private fillAndStroke(

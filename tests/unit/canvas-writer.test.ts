@@ -1,0 +1,99 @@
+import { test, expect } from "@playwright/test";
+import { setupPage } from "../helpers.js";
+
+function expectMostlyRed(pixel: number[]): void {
+  expect(pixel[0]).toBeGreaterThan(180);
+  expect(pixel[1]).toBeLessThan(80);
+  expect(pixel[2]).toBeLessThan(80);
+  expect(pixel[3]).toBeGreaterThan(200);
+}
+
+function expectMostlyWhite(pixel: number[]): void {
+  expect(pixel[0]).toBeGreaterThan(220);
+  expect(pixel[1]).toBeGreaterThan(220);
+  expect(pixel[2]).toBeGreaterThan(220);
+  expect(pixel[3]).toBeGreaterThan(200);
+}
+
+test.describe("CanvasWriter", () => {
+  test("renders IR directly to an HTML canvas", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:40px;height:20px;background:#ff0000;"></div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: false,
+      });
+      const writer = new (window as any).__HC.CanvasWriter({ width: 40, height: 20 });
+      const canvas = await (window as any).__HC.renderIR(ir, writer);
+      const pixel = Array.from(canvas.getContext("2d")!.getImageData(20, 10, 1, 1).data);
+      return { width: canvas.width, height: canvas.height, pixel };
+    });
+
+    expect(result.width).toBe(40);
+    expect(result.height).toBe(20);
+    expectMostlyRed(result.pixel);
+  });
+
+  const clipCases = [
+    {
+      name: "inset()",
+      clipPath: "inset(20px 10px 30px 40px round 8px)",
+      inside: [50, 30],
+      outside: [5, 5],
+    },
+    {
+      name: "circle()",
+      clipPath: "circle(30px at 50px 50px)",
+      inside: [50, 50],
+      outside: [10, 10],
+    },
+    {
+      name: "ellipse()",
+      clipPath: "ellipse(20px 30px at 50px 50px)",
+      inside: [50, 50],
+      outside: [10, 10],
+    },
+    {
+      name: "polygon()",
+      clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
+      inside: [50, 80],
+      outside: [10, 10],
+    },
+  ] as const;
+
+  for (const clipCase of clipCases) {
+    test(`applies ${clipCase.name} clip-path when rendering to canvas`, async ({ page }) => {
+      await setupPage(
+        page,
+        `<html><body style="margin:0;padding:0;">
+          <div id="target" style="width:100px;height:100px;background:#ff0000;clip-path:${clipCase.clipPath};"></div>
+        </body></html>`
+      );
+
+      const result = await page.evaluate(async ({ inside, outside }) => {
+        const el = document.getElementById("target")!;
+        const ir = await (window as any).__HC.extractIR(el, {
+          boxType: "border",
+          includeText: false,
+        });
+        const writer = new (window as any).__HC.CanvasWriter({ width: 100, height: 100 });
+        const canvas = await (window as any).__HC.renderIR(ir, writer);
+        const ctx = canvas.getContext("2d")!;
+        return {
+          inside: Array.from(ctx.getImageData(inside[0], inside[1], 1, 1).data),
+          outside: Array.from(ctx.getImageData(outside[0], outside[1], 1, 1).data),
+        };
+      }, { inside: clipCase.inside, outside: clipCase.outside });
+
+      expectMostlyRed(result.inside);
+      expectMostlyWhite(result.outside);
+    });
+  }
+});

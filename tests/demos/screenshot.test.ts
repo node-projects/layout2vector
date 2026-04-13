@@ -24,7 +24,12 @@ test("generate HTML and PDF previews", async ({ page }) => {
     const htmlUrl = pathToFileURL(path.join(outputDir, htmlFile)).href;
 
     await page.goto(htmlUrl, { waitUntil: "load" });
-    await page.waitForLoadState("networkidle");
+    await page.evaluate(async () => {
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+    });
+    await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), { timeout: 10000 });
     // Firefox treats file:// body as hidden; skip visibility check there
     const isFirefox = page.context().browser()?.browserType().name() === "firefox";
     if (!isFirefox) {

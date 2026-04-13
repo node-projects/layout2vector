@@ -29,13 +29,13 @@ This matrix lists the concrete output formats discussed in this comparison.
 | WEBP | Yes | Yes | Yes | html2canvas and html2canvas-pro can export WEBP where the browser canvas implementation supports it. |
 | SVG | Yes | No | No | Native writer in `layout2vector`. |
 | HTML | Yes | No | No | Native writer in `layout2vector`. |
-| Canvas object | No | Yes | Yes | This is the primary result type for html2canvas and html2canvas-pro, even though it is not itself a file format. |
+| Canvas object | Yes | Yes | Yes | `layout2vector` now exposes a native `CanvasWriter` that returns an `HTMLCanvasElement`. |
 
 | Capability | layout2vector | html2canvas | html2canvas-pro | Notes |
 | --- | --- | --- | --- | --- |
 | Core rendering model | Structured DOM -> IR -> writer pipeline | DOM -> canvas reconstruction | DOM -> canvas reconstruction | `layout2vector` exposes typed IR nodes and writer backends. Both html2canvas projects document canvas screenshot generation rather than structured export. |
 | Requires a temporary cloned document/container | No | Yes | Yes | html2canvas exposes clone-oriented options such as `onclone` and `removeContainer`. html2canvas-pro stays clone-based and adds `iframeContainer` plus document-cloner fixes for edge cases. |
-| Built-in output formats | DXF, EMF, PDF, PNG, JPEG, WEBP, SVG, HTML | `HTMLCanvasElement` output | `HTMLCanvasElement` output | See the output-format matrix above for the per-format breakdown, including DWG as an explicit unsupported row. |
+| Built-in output formats | DXF, EMF, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | See the output-format matrix above for the per-format breakdown, including DWG as an explicit unsupported row. |
 | Structured IR / custom backends | Yes | No | No | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. |
 | Keeps text as text/vector objects | Yes | No | No | html2canvas tools rasterize text into a canvas. `layout2vector` preserves text nodes for text-capable writers. |
 | Open Shadow DOM | Yes | Not documented | Yes | `layout2vector` traverses open Shadow DOM. html2canvas-pro documents automatic Shadow DOM handling and `iframeContainer`. |
@@ -48,9 +48,9 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Box shadow | Yes | No | No | Both upstream feature pages explicitly list `box-shadow` as unsupported. `layout2vector` implements box-shadow handling in multiple writers. |
 | Text shadow | Yes | Yes | Yes | html2canvas and html2canvas-pro list `text-shadow` support. `layout2vector` carries `textShadow` through supported writers. |
 | `image-rendering` / pixelated image export | Yes | Not documented | Yes | html2canvas-pro explicitly supports CSS `image-rendering` and global image smoothing controls. `layout2vector` preserves `imageRendering` and disables smoothing when requested. |
-| Modern CSS color functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`) | Not documented | No | Yes | html2canvas-pro explicitly advertises these as a differentiator. `layout2vector` does not currently document this as a guaranteed feature. |
-| `object-fit` on `<img>` | Not documented | No | Yes | html2canvas-pro explicitly advertises `object-fit` support. I did not find a corresponding public claim for `layout2vector`. |
-| CSS `clip-path` shapes | Partial | Not documented | Yes | `layout2vector` supports rectangular clip bounds and rounded-rect clipping, but does not document general arbitrary CSS `clip-path` shape support. html2canvas-pro documents `inset()`, `circle()`, `ellipse()`, `polygon()`, and `path()`. |
+| Modern CSS color functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`) | Partial | No | Yes | `layout2vector` now has tested parsing for `color(srgb ...)`, `lab()`, `lch()`, `oklab()`, and `oklch()`. Broader `color()` profiles such as `display-p3` are still not covered. |
+| `object-fit` on `<img>` | Partial | No | Yes | `layout2vector` has direct test coverage for `contain`, `cover`, and `scale-down` on extracted `<img>` content. Custom `object-position` handling is still not explicitly covered. |
+| CSS `clip-path` shapes | Partial | Not documented | Yes | `layout2vector` now has tested canvas/image support for `inset()`, `circle()`, `ellipse()`, and `polygon()`. `path()` and more complex nested clip composition are still missing. |
 | Form controls as value-aware export | Yes | No | No | `layout2vector` can synthesize native controls into IR that preserves visible values and states across writers. html2canvas tools may paint controls into pixels, but they do not expose a structured form-control export model. |
 | MathML-specific handling | Yes | Not documented | Not documented | `layout2vector` has a MathML extractor for browser-rendered MathML features. |
 | SVG markers (`marker-start`, `marker-mid`, `marker-end`) | Yes | Not documented | Not documented | `layout2vector` has explicit SVG marker extraction and tests. |
@@ -88,8 +88,14 @@ Internal project sources used for this comparison:
 - [src/writers/image-writer.ts](./src/writers/image-writer.ts)
 - [src/writers/pdf-writer.ts](./src/writers/pdf-writer.ts)
 - [src/writers/svg-writer.ts](./src/writers/svg-writer.ts)
+- [src/writers/shared/css-color.ts](./src/writers/shared/css-color.ts)
 - [tests/ui/rendering.test.ts](./tests/ui/rendering.test.ts)
+- [src/writers/canvas-writer.ts](./src/writers/canvas-writer.ts)
+- [tests/unit/canvas-writer.test.ts](./tests/unit/canvas-writer.test.ts)
+- [tests/unit/css-color.test.ts](./tests/unit/css-color.test.ts)
 - [tests/unit/form-controls.test.ts](./tests/unit/form-controls.test.ts)
+- [tests/unit/image-extractor.test.ts](./tests/unit/image-extractor.test.ts)
+- [tests/unit/png-writer.test.ts](./tests/unit/png-writer.test.ts)
 - [tests/unit/svg-markers.test.ts](./tests/unit/svg-markers.test.ts)
 
 External sources reviewed on 2026-04-13:

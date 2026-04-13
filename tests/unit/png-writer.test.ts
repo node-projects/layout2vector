@@ -214,4 +214,76 @@ test.describe("PNG Writer Output", () => {
 
     expect(result).toMatch(/^data:image\/png;base64,/);
   });
+
+  test("renders object-fit: cover by cropping source image edges", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:100px;height:100px;object-fit:cover;display:block;" />
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const img = document.getElementById("target") as HTMLImageElement;
+      const source = document.createElement("canvas");
+      source.width = 200;
+      source.height = 100;
+      const sourceCtx = source.getContext("2d")!;
+      sourceCtx.fillStyle = "#ff0000";
+      sourceCtx.fillRect(0, 0, 200, 100);
+      sourceCtx.fillStyle = "#00ff00";
+      sourceCtx.fillRect(0, 0, 25, 100);
+      sourceCtx.fillStyle = "#0000ff";
+      sourceCtx.fillRect(175, 0, 25, 100);
+      img.src = source.toDataURL("image/png");
+
+      await new Promise<void>((resolve) => {
+        if (img.complete && img.naturalWidth > 0) {
+          resolve();
+          return;
+        }
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      });
+
+      const ir = await (window as any).__HC.extractIR(img, {
+        includeImages: true,
+        includeText: false,
+      });
+      const writer = new (window as any).__HC.PNGWriter(100, 100);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
+      await pngResult.finalize();
+
+      const outImg = new Image();
+      outImg.src = pngResult.toDataURL();
+      await new Promise<void>((resolve) => {
+        if (outImg.complete && outImg.naturalWidth > 0) {
+          resolve();
+          return;
+        }
+        outImg.onload = () => resolve();
+        outImg.onerror = () => resolve();
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 100;
+      canvas.height = 100;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(outImg, 0, 0);
+
+      const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
+      return {
+        left: sample(5, 50),
+        center: sample(50, 50),
+        right: sample(95, 50),
+      };
+    });
+
+    for (const pixel of [result.left, result.center, result.right]) {
+      expect(pixel[0]).toBeGreaterThan(160);
+      expect(pixel[1]).toBeLessThan(110);
+      expect(pixel[2]).toBeLessThan(110);
+      expect(pixel[3]).toBeGreaterThan(200);
+    }
+  });
 });

@@ -81,6 +81,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "extractors/mathml-extractor.js",
       "pipeline.js",
       "writers/image-writer.js",
+      "writers/canvas-writer.js",
     ];
 
     const modules: string[] = [];
@@ -117,6 +118,7 @@ window.__HC = {
   isMathMLRoot,
   isMathMLElement,
   extractMathMLFeatures,
+  CanvasWriter,
   PNGWriter: ImageWriter,
   PNGResult: ImageResult,
   ImageWriter,

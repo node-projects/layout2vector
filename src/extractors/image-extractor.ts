@@ -574,11 +574,12 @@ export function extractImageGeometry(
   const quad = getElementQuad(el);
   if (!quad) return [];
 
-  // Adjust quad for object-fit: contain/cover
-  const adjustedQuad = adjustQuadForObjectFit(el, quad);
+  // Adjust geometry and source sampling for object-fit / object-position.
+  const objectFitPlan = getObjectFitPlan(el, quad);
+  const adjustedQuad = objectFitPlan.quad;
 
   // Try converting SVG images to vector geometry
-  if (isSvgSource(src)) {
+  if (isSvgSource(src) && !objectFitPlan.sourceRect) {
     const svgContent = extractSvgContent(src);
     if (svgContent) {
       const svgNodes = convertSvgToGeometry(svgContent, el, adjustedQuad, globalIndex, options);
@@ -598,7 +599,10 @@ export function extractImageGeometry(
   let rgbData: number[] | undefined;
 
   // Check cache for previously rasterized result of the same source at same dimensions
-  const imgCacheKey = `img|${src.length}|${renderW}|${renderH}|${src.slice(0, 100)}`;
+  const cropKey = objectFitPlan.sourceRect
+    ? `${objectFitPlan.sourceRect.x.toFixed(3)}|${objectFitPlan.sourceRect.y.toFixed(3)}|${objectFitPlan.sourceRect.width.toFixed(3)}|${objectFitPlan.sourceRect.height.toFixed(3)}`
+    : "full";
+  const imgCacheKey = `img|${src.length}|${renderW}|${renderH}|${cropKey}|${src.slice(0, 100)}`;
   const cachedImg = imageDataCache.get(imgCacheKey);
   if (cachedImg !== undefined) {
     if (cachedImg === null) return []; // previously determined to be transparent/empty
@@ -631,7 +635,7 @@ export function extractImageGeometry(
       // First draw without white background to check for transparency
       // (only when the browser actually decoded the image — natW > 0)
       if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(drawEl, 0, 0, renderW, renderH);
+      drawObjectFitImage(ctx, drawEl, renderW, renderH, objectFitPlan.sourceRect);
 
       if (natW > 0 && natH > 0) {
         // Check if the image has any visible (non-transparent) content
@@ -652,7 +656,7 @@ export function extractImageGeometry(
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, renderW, renderH);
       if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(drawEl, 0, 0, renderW, renderH);
+      drawObjectFitImage(ctx, drawEl, renderW, renderH, objectFitPlan.sourceRect);
 
       // Check if drawImage actually produced content (Firefox headless bug:
       // data URL PNGs may not render to canvas at all)
@@ -716,7 +720,7 @@ export function extractImageGeometry(
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, renderW, renderH);
             if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(tmpCanvas, 0, 0, renderW, renderH);
+            drawObjectFitImage(ctx, tmpCanvas, renderW, renderH, objectFitPlan.sourceRect);
             dataUrl = canvas.toDataURL("image/jpeg", 0.92);
             // Extract raw RGB for PDF at render size
             const pixels = renderW * renderH;
@@ -769,61 +773,147 @@ export function extractImageGeometry(
   }];
 }
 
+type ObjectFitPlan = {
+  quad: Quad;
+  sourceRect?: { x: number; y: number; width: number; height: number };
+};
+
 /**
- * Adjust a quad for CSS object-fit: contain.
- * When object-fit: contain is set, the image is scaled to fit within the
- * element box while maintaining aspect ratio, centered in the box.
+ * The extracted image geometry can differ from the element box when object-fit
+ * does not stretch the content, and some modes also require source cropping.
  */
-function adjustQuadForObjectFit(el: HTMLImageElement, quad: Quad): Quad {
-  const objectFit = getComputedStyle(el).objectFit;
-  if (objectFit !== "contain" && objectFit !== "scale-down") return quad;
+function getObjectFitPlan(el: HTMLImageElement, quad: Quad): ObjectFitPlan {
+  const computedStyle = getComputedStyle(el);
+  const objectFit = computedStyle.objectFit;
 
   const natW = el.naturalWidth;
   const natH = el.naturalHeight;
-  if (!natW || !natH) return quad;
+  if (!natW || !natH) return { quad };
 
-  // Compute the element box dimensions from the quad edges
   const boxW = Math.sqrt((quad[1].x - quad[0].x) ** 2 + (quad[1].y - quad[0].y) ** 2);
   const boxH = Math.sqrt((quad[3].x - quad[0].x) ** 2 + (quad[3].y - quad[0].y) ** 2);
-  if (boxW === 0 || boxH === 0) return quad;
+  if (boxW === 0 || boxH === 0) return { quad };
 
+  const objectPosition = parseObjectPosition(computedStyle.objectPosition);
   const imgAspect = natW / natH;
   const boxAspect = boxW / boxH;
 
-  // If aspect ratios match closely, no adjustment needed
-  if (Math.abs(imgAspect - boxAspect) < 0.01) return quad;
+  if (objectFit === "cover") {
+    if (Math.abs(imgAspect - boxAspect) < 0.01) return { quad };
 
-  // Compute the fitted image size
-  let fitW: number, fitH: number;
-  if (imgAspect > boxAspect) {
-    // Image is wider than box: fit width, shrink height
-    fitW = boxW;
-    fitH = boxW / imgAspect;
-  } else {
-    // Image is taller than box: fit height, shrink width
-    fitH = boxH;
-    fitW = boxH * imgAspect;
+    if (imgAspect > boxAspect) {
+      const cropWidth = natH * boxAspect;
+      const cropX = (natW - cropWidth) * objectPosition.x;
+      return {
+        quad,
+        sourceRect: { x: cropX, y: 0, width: cropWidth, height: natH },
+      };
+    }
+
+    const cropHeight = natW / boxAspect;
+    const cropY = (natH - cropHeight) * objectPosition.y;
+    return {
+      quad,
+      sourceRect: { x: 0, y: cropY, width: natW, height: cropHeight },
+    };
   }
 
-  // Compute centering offsets as fractions
-  const offsetU = (boxW - fitW) / (2 * boxW); // fraction along top edge
-  const offsetV = (boxH - fitH) / (2 * boxH); // fraction along left edge
-  const endU = 1 - offsetU;
-  const endV = 1 - offsetV;
+  if (objectFit === "contain") {
+    return {
+      quad: fitQuadWithinBox(quad, boxW, boxH, natW, natH, objectPosition),
+    };
+  }
 
-  // Interpolate quad corners to get the fitted sub-quad
-  // quad: [topLeft, topRight, bottomRight, bottomLeft]
+  if (objectFit === "scale-down") {
+    if (natW <= boxW && natH <= boxH) {
+      return {
+        quad: placeQuadInsideBox(quad, boxW, boxH, natW, natH, objectPosition),
+      };
+    }
+
+    return {
+      quad: fitQuadWithinBox(quad, boxW, boxH, natW, natH, objectPosition),
+    };
+  }
+
+  return { quad };
+}
+
+function parseObjectPosition(value: string): { x: number; y: number } {
+  const tokens = value.trim().split(/\s+/).filter(Boolean);
+  const xToken = tokens[0] ?? "50%";
+  const yToken = tokens[1] ?? "50%";
+
+  return {
+    x: parseObjectPositionToken(xToken),
+    y: parseObjectPositionToken(yToken),
+  };
+}
+
+function parseObjectPositionToken(token: string): number {
+  const value = token.toLowerCase();
+  if (value === "left" || value === "top") return 0;
+  if (value === "center") return 0.5;
+  if (value === "right" || value === "bottom") return 1;
+  if (value.endsWith("%")) {
+    const percent = parseFloat(value);
+    return Number.isNaN(percent) ? 0.5 : Math.max(0, Math.min(1, percent / 100));
+  }
+  return 0.5;
+}
+
+function fitQuadWithinBox(
+  quad: Quad,
+  boxW: number,
+  boxH: number,
+  natW: number,
+  natH: number,
+  objectPosition: { x: number; y: number }
+): Quad {
+  const scale = Math.min(boxW / natW, boxH / natH);
+  return placeQuadInsideBox(quad, boxW, boxH, natW * scale, natH * scale, objectPosition);
+}
+
+function placeQuadInsideBox(
+  quad: Quad,
+  boxW: number,
+  boxH: number,
+  renderW: number,
+  renderH: number,
+  objectPosition: { x: number; y: number }
+): Quad {
+  const offsetX = (boxW - renderW) * objectPosition.x;
+  const offsetY = (boxH - renderH) * objectPosition.y;
+  return subQuad(quad, offsetX / boxW, offsetY / boxH, (offsetX + renderW) / boxW, (offsetY + renderH) / boxH);
+}
+
+function subQuad(quad: Quad, startU: number, startV: number, endU: number, endV: number): Quad {
   const lerp = (a: { x: number; y: number }, b: { x: number; y: number }, t: number) => ({
     x: a.x + (b.x - a.x) * t,
     y: a.y + (b.y - a.y) * t,
   });
 
-  const tl = lerp(lerp(quad[0], quad[1], offsetU), lerp(quad[3], quad[2], offsetU), offsetV);
-  const tr = lerp(lerp(quad[0], quad[1], endU), lerp(quad[3], quad[2], endU), offsetV);
+  const tl = lerp(lerp(quad[0], quad[1], startU), lerp(quad[3], quad[2], startU), startV);
+  const tr = lerp(lerp(quad[0], quad[1], endU), lerp(quad[3], quad[2], endU), startV);
   const br = lerp(lerp(quad[0], quad[1], endU), lerp(quad[3], quad[2], endU), endV);
-  const bl = lerp(lerp(quad[0], quad[1], offsetU), lerp(quad[3], quad[2], offsetU), endV);
+  const bl = lerp(lerp(quad[0], quad[1], startU), lerp(quad[3], quad[2], startU), endV);
 
   return [tl, tr, br, bl] as Quad;
+}
+
+function drawObjectFitImage(
+  ctx: CanvasRenderingContext2D,
+  source: CanvasImageSource,
+  renderW: number,
+  renderH: number,
+  sourceRect?: { x: number; y: number; width: number; height: number }
+): void {
+  if (sourceRect) {
+    ctx.drawImage(source, sourceRect.x, sourceRect.y, sourceRect.width, sourceRect.height, 0, 0, renderW, renderH);
+    return;
+  }
+
+  ctx.drawImage(source, 0, 0, renderW, renderH);
 }
 
 /**

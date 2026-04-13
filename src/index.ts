@@ -36,6 +36,7 @@ export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./extracto
 export { DXFWriter, type DXFWriterOptions } from "./writers/dxf-writer.js";
 export { EMFWriter, type EMFWriterOptions } from "./writers/emf-writer.js";
 export { PDFWriter, type PDFWriterOptions } from "./writers/pdf-writer.js";
+export { CanvasWriter, type CanvasWriterOptions } from "./writers/canvas-writer.js";
 export { ImageWriter, ImageResult, type ImageWriterOptions } from "./writers/image-writer.js";
 /** @deprecated Use ImageWriter/ImageResult/ImageWriterOptions instead. */
 export { PNGWriter, PNGResult, type PNGWriterOptions } from "./writers/png-writer.js";

@@ -92,6 +92,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     overflow: cs.overflowX || undefined,
     textOverflow: cs.textOverflow || undefined,
     imageRendering: cs.imageRendering || undefined,
+    clipPath: cs.clipPath && cs.clipPath !== "none" ? cs.clipPath : undefined,
   };
 }
 

@@ -19,6 +19,24 @@ const SVG_RECT_DATA_URL =
   "data:image/svg+xml," +
   encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50"><rect width="100" height="50" fill="blue"/></svg>');
 
+async function setGeneratedRasterImage(page: Page, sourceWidth: number, sourceHeight: number): Promise<void> {
+  await page.evaluate(({ sourceWidth, sourceHeight }) => {
+    const img = document.getElementById("target") as HTMLImageElement;
+    const canvas = document.createElement("canvas");
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#ff0000";
+    ctx.fillRect(0, 0, sourceWidth, sourceHeight);
+    img.src = canvas.toDataURL("image/png");
+  }, { sourceWidth, sourceHeight });
+
+  await page.waitForFunction(() => {
+    const img = document.getElementById("target") as HTMLImageElement | null;
+    return !!img && img.complete && img.naturalWidth > 0;
+  });
+}
+
 test.describe("Image Extraction", () => {
   test("extracts raster image (JPEG data URL) as image IR node", async ({ page }) => {
     await setupPage(
@@ -202,6 +220,59 @@ test.describe("Image Extraction", () => {
 
     const imageNodes = ir.filter((n: any) => n.type === "image");
     expect(imageNodes.length).toBe(2);
+  });
+
+  test("fits object-fit: contain images inside the element box", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:100px;height:100px;object-fit:contain;display:block;" />
+      </body></html>`
+    );
+    await setGeneratedRasterImage(page, 200, 100);
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+
+    const [tl, tr, _br, bl] = imageNode.quad;
+    expect(tr.x - tl.x).toBeCloseTo(100, 0);
+    expect(bl.y - tl.y).toBeCloseTo(50, 0);
+    expect(tl.y).toBeCloseTo(25, 0);
+  });
+
+  test("keeps object-fit: scale-down images at intrinsic size instead of upscaling", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:100px;height:100px;object-fit:scale-down;display:block;" />
+      </body></html>`
+    );
+    await setGeneratedRasterImage(page, 40, 20);
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+
+    const [tl, tr, _br, bl] = imageNode.quad;
+    expect(tr.x - tl.x).toBeCloseTo(40, 0);
+    expect(bl.y - tl.y).toBeCloseTo(20, 0);
+    expect(tl.x).toBeCloseTo(30, 0);
+    expect(tl.y).toBeCloseTo(40, 0);
   });
 
   test("image IR node has correct structure", async ({ page }) => {

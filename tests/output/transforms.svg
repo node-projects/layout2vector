@@ -12,7 +12,7 @@
 <text x="95.5" y="96.98" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(15,95.5,96.98)">Translated + Rotated</text>
 <path d="M53.27,237.56 L158.24,245.64 L158.24,318.36 L53.27,326.44 Z" fill="rgb(123, 31, 162)"/>
 <text x="63.76" y="250.91" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial" transform="rotate(3.3,63.76,250.91)">3D perspective</text>
-<path d="M260.44,234.08 L358.92,251.44 L341.56,349.92 L243.08,332.56 Z" fill="rgba(0, 150, 136, 0.3)" stroke="rgb(0, 150, 136)" stroke-width="2"/>
+<path d="M260.44,234.08 L358.92,251.44 L341.56,349.92 L243.08,332.56 Z" fill="none" stroke="rgb(0, 150, 136)" stroke-width="2"/>
 <path d="M300.55,243.66 L338.86,275.8 L306.72,314.1 L268.41,281.96 Z" fill="rgb(0, 150, 136)"/>
 <path d="M282.9,82.71 Q279.48,73.31 288.87,69.89 L360.29,43.9 Q369.69,40.48 373.11,49.87 L399.1,121.29 Q402.52,130.69 393.13,134.11 L321.71,160.1 Q312.31,163.52 308.89,154.13 Z" fill="url(#lg1)"/>
 </svg>

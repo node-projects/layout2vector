@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Clip Path</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; }
+    #root { padding: 24px; }
+    h1 { margin: 0 0 10px; font-size: 22px; }
+    p { margin: 0 0 18px; color: #475569; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 20px; }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    .shape {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #ef4444, #f59e0b);
+      border: 4px solid rgba(15, 23, 42, 0.1);
+    }
+    .photo {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      display: block;
+      object-fit: cover;
+      border: 4px solid rgba(15, 23, 42, 0.1);
+    }
+    .label { margin-top: 12px; text-align: center; font-size: 14px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>Clip Path Shapes</h1>
+    <p>This demo covers inset(), circle(), ellipse(), and polygon() clipping on both filled boxes and images.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="shape" style="clip-path: inset(18px 24px 28px 20px round 18px);"></div>
+        <div class="label">Inset</div>
+      </div>
+
+      <div class="card">
+        <div class="shape" style="clip-path: circle(40% at 50% 50%); background: linear-gradient(180deg, #3b82f6, #22c55e);"></div>
+        <div class="label">Circle</div>
+      </div>
+
+      <div class="card">
+        <img class="photo" src="./Rollers.png" alt="Ellipse clipped photo" style="clip-path: ellipse(38% 48% at 50% 50%);">
+        <div class="label">Ellipse</div>
+      </div>
+
+      <div class="card">
+        <img class="photo" src="./Chains.png" alt="Polygon clipped photo" style="clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);">
+        <div class="label">Polygon</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

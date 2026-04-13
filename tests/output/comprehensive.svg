@@ -17,7 +17,7 @@
 <g clip-path="url(#clip3)"><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/></g>
 <g clip-path="url(#clip3)"><text x="21" y="18" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text></g>
 <g clip-path="url(#clip3)"><text x="21" y="96.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders, border-radius, box-shadow, and typography in a realistic component layout.</text></g>
-<g clip-path="url(#clip3)"><path d="M1,165 L319,165 L319,225 L1,225 Z" fill="rgb(245, 245, 245)" stroke="rgb(224, 224, 224) rgb(0, 0, 0) rgb(0, 0, 0)" stroke-width="1"/></g>
+<g clip-path="url(#clip3)"><path d="M1,165 L319,165 L319,225 L1,225 Z" fill="rgb(245, 245, 245)"/></g>
 <g clip-path="url(#clip3)"><rect x="21" y="178" width="75" height="35" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
 <g clip-path="url(#clip3)"><text x="37" y="189" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Accept</text></g>
 <g clip-path="url(#clip3)"><rect x="106" y="178" width="79" height="35" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/></g>
