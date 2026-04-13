@@ -393,7 +393,7 @@ line three</pre>
     }
   });
 
-  test("renders vertical text when character measurement is enabled", async ({ page }) => {
+  test("renders vertical text when pretext measurement is enabled", async ({ page }) => {
     await setupPage(
       page,
       `<html><body style="margin:0;padding:12px;background:white;">
@@ -420,6 +420,6 @@ line three</pre>
 
     expect(result.dataUrl).toMatch(/^data:image\/png;base64,/);
     expect(result.textNodes.join("")).toBe("VERTICAL");
-    expect(result.textNodes.length).toBe("VERTICAL".length);
+    expect(result.textNodes.length).toBeGreaterThanOrEqual(1);
   });
 });

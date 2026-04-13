@@ -150,6 +150,7 @@ for (const demoFile of demoFiles) {
         includeImages: true,
         convertFormControls: shouldConvertFormControls,
         walkIframes: shouldWalkIframes,
+        textMeasurement: "auto",
       });
     }, { shouldConvertFormControls: convertFormControls, shouldWalkIframes: walkIframes });
     expect(ir.length).toBeGreaterThan(0);

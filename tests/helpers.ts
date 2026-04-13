@@ -6,6 +6,7 @@ import { type Page } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildSync } from "esbuild";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -132,6 +133,25 @@ window.__HC = {
   }
 
   await page.addScriptTag({ content: script });
+
+  // Inject @chenglou/pretext for pretext text measurement mode
+  const pretextEntry = path.resolve(
+    __dirname, "..", "node_modules", "@chenglou", "pretext", "dist", "layout.js"
+  );
+  if (fs.existsSync(pretextEntry)) {
+    const pretextResult = buildSync({
+      entryPoints: [pretextEntry],
+      bundle: true,
+      write: false,
+      format: "iife",
+      globalName: "__pretextBundle",
+      platform: "browser",
+    });
+    const pretextScript = pretextResult.outputFiles[0].text;
+    await page.addScriptTag({
+      content: `${pretextScript}\nwindow.__pretext = __pretextBundle;`,
+    });
+  }
 }
 
 /**

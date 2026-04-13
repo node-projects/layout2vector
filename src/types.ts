@@ -80,7 +80,7 @@ export type Style = {
 };
 
 /** Controls how text is split into IR text nodes during extraction. */
-export type TextMeasurementMode = "line" | "character" | "auto";
+export type TextMeasurementMode = "line" | "pretext" | "auto";
 
 /** Intermediate representation node. */
 export type IRNode =
@@ -124,9 +124,10 @@ export type Options = {
   includeInvisible?: boolean;
   /**
    * Controls text extraction granularity.
-   * - `line`: one IR text node per visual line (default)
-   * - `character`: one IR text node per measured grapheme cluster
-   * - `auto`: switch to grapheme measurement only for non-default writing-mode or direction
+   * - `line`: one IR text node per visual line (default), uses browser getBoxQuads
+   * - `pretext`: uses @chenglou/pretext for accurate text measurement and layout,
+   *   supports all writing modes (horizontal-tb, vertical-rl, vertical-lr, sideways-rl, sideways-lr)
+   * - `auto`: uses `line` for horizontal-tb with ltr direction, `pretext` for all other writing modes
    */
   textMeasurement?: TextMeasurementMode;
   /**

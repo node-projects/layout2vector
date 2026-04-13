@@ -72,7 +72,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // then the SVG subtree on top. The HTML box must come first so
       // the SVG content paints over it (correct paint order).
       if (isSVGRoot(el)) {
-        const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+        const htmlNodes = await extractHTMLGeometry(node, globalIndex, options);
         transformIRGeometry(htmlNodes, node.coordinateTransform);
         irNodes.push(...htmlNodes);
         globalIndex += htmlNodes.length || 1;
@@ -105,7 +105,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       }
 
       // HTML element extraction
-      const htmlNodes = extractHTMLGeometry(node, globalIndex, options);
+      const htmlNodes = await extractHTMLGeometry(node, globalIndex, options);
       transformIRGeometry(htmlNodes, node.coordinateTransform);
       irNodes.push(...htmlNodes);
       globalIndex += htmlNodes.length || 1;

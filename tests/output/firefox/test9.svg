@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
+<path d="M44,99 L147,99 L147,154 L44,154 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="45" y="101" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">abcdef</text>
+<path d="M185,82 L288,82 L288,137 L185,137 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="286.4" y="82" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(90,286.4,82)" xml:space="preserve">abcdef</text>
+<path d="M398,170 L501,170 L501,376 L398,376 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="499.4" y="333.37" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(90,499.4,333.37)" xml:space="preserve">abcdef</text>
+<path d="M403,87 L506,87 L506,142 L403,142 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="463.37" y="88.6" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" xml:space="preserve">abcdef</text>
+<path d="M228,233 L331,233 L331,288 L228,288 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="329.4" y="233" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(90,329.4,233)" xml:space="preserve">abcdef</text>
+<path d="M201,329 L304,329 L304,456 L201,456 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="202.6" y="456" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(-90,202.6,456)" xml:space="preserve">abcdef</text>
+<path d="M342,394 L445,394 L445,521 L342,521 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="343.6" y="436.63" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(-90,343.6,436.63)" xml:space="preserve">abcdef</text>
+<path d="M98,228 L201,228 L201,331 L98,331 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="115.6" y="228" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(90,115.6,228)" xml:space="preserve">abcdef</text>
+<path d="M40,381 L143,381 L143,484 L40,484 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<text x="57.6" y="441.37" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif" transform="rotate(90,57.6,441.37)" xml:space="preserve">abcdef</text>
+</svg>

@@ -108,7 +108,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
-| `textMeasurement` | `"line" \| "character" \| "auto"` | `"line"` | Text extraction granularity. `auto` keeps the fast line mode for normal text and switches to grapheme measurement only when non-default `writing-mode` or `direction` is present. |
+| `textMeasurement` | `"line" \| "pretext" \| "auto"` | `"line"` | Text extraction granularity. `pretext` uses `@chenglou/pretext` for accurate text measurement and layout, supporting all writing modes (vertical-rl, vertical-lr, sideways-rl, sideways-lr). `auto` keeps the fast line mode for normal text and switches to pretext only when non-default `writing-mode` or `direction` is present. Requires `@chenglou/pretext` to be installed when using `pretext` or `auto` with non-standard writing modes. |
 | `walkIframes` | `boolean` | `false` | Traverse same-origin iframe documents and merge their content into the same IR paint order |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 | `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |

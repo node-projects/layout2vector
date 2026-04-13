@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "4.8.0",
+  "version": "4.9.0",
   "description": "DOM → Geometry → DXF/PDF/PNG library",
   "repository": {
     "type": "git",
@@ -32,14 +32,23 @@
     "test:ui": "npx playwright test --project=ui",
     "test:demos": "npx playwright test --project=demos",
     "prepublishOnly": "npm run build && npm run bundle",
-    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --platform=neutral --bundle --outfile=./dist/index-min.js"
+    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --external:@chenglou/pretext --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
     "@node-projects/acad-ts": "^1.1.0",
     "@tarikjabiri/dxf": "^2.8.9",
     "esbuild": "^0.28.0"
   },
+  "peerDependencies": {
+    "@chenglou/pretext": "^0.0.5"
+  },
+  "peerDependenciesMeta": {
+    "@chenglou/pretext": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@chenglou/pretext": "^0.0.5",
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
     "get-box-quads-polyfill": "^4.29.0",

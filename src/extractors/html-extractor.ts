@@ -35,11 +35,11 @@ function isStretchedMathOperator(el: Element): boolean {
  * Extract geometry from an HTML element using getBoxQuads.
  * Returns IR nodes for the element's box and its text nodes.
  */
-export function extractHTMLGeometry(
+export async function extractHTMLGeometry(
   node: StackingNode,
   globalIndex: number,
   options: Options
-): IRNode[] {
+): Promise<IRNode[]> {
   const el = node.element;
   const results: IRNode[] = [];
 
@@ -72,7 +72,7 @@ export function extractHTMLGeometry(
       // handled by the MathML extractor with correct stretched dimensions.
       if (isStretchedMathOperator(el)) continue;
 
-      const textIR = extractTextNode(textNode, el, node.extractedStyle, globalIndex, options);
+      const textIR = await extractTextNode(textNode, el, node.extractedStyle, globalIndex, options);
       results.push(...textIR);
     }
   }
@@ -96,7 +96,7 @@ function extractTextNode(
   parentStyle: Style,
   globalIndex: number,
   options: Options,
-): IRNode[] {
+): IRNode[] | Promise<IRNode[]> {
   const results: IRNode[] = [];
   const fullText = textNode.textContent ?? "";
   if (preservesWhitespace(parentStyle)) {
@@ -105,8 +105,8 @@ function extractTextNode(
     return results;
   }
 
-  if (resolveTextMeasurementMode(parentStyle, options) === "character") {
-    return extractCharacterTextNodes(textNode, parentStyle, globalIndex);
+  if (resolveTextMeasurementMode(parentStyle, options) === "pretext") {
+    return extractTextNodeWithPretext(textNode, parentEl, parentStyle, globalIndex);
   }
 
   // Get all quads (one per line fragment) using getBoxQuads.
@@ -177,35 +177,6 @@ function extractTextNode(
   return results;
 }
 
-function extractCharacterTextNodes(
-  textNode: Text,
-  parentStyle: Style,
-  globalIndex: number,
-): IRNode[] {
-  const measuredCharacters = getTextNodeCharacterQuads(textNode, parentStyle);
-  if (measuredCharacters.length === 0) return [];
-
-  const results: IRNode[] = [];
-  for (const character of measuredCharacters) {
-    results.push({
-      type: "text",
-      quad: character.quad,
-      text: character.text,
-      style: {
-        ...parentStyle,
-        direction: undefined,
-        writingMode: undefined,
-        textAlign: undefined,
-        textIndent: undefined,
-        whiteSpace: "pre",
-      },
-      zIndex: globalIndex,
-    });
-  }
-
-  return results;
-}
-
 /**
  * Get all quads for a text node via getBoxQuads() called directly on the
  * Text node. Returns one quad per line fragment.
@@ -215,105 +186,185 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   return getNodeQuads(textNode, "border");
 }
 
-function getTextNodeCharacterQuads(
+// --- Pretext-based text measurement ---
+
+let _pretextModule: { prepareWithSegments: any; layoutWithLines: any } | null = null;
+
+async function loadPretextModule(): Promise<{ prepareWithSegments: any; layoutWithLines: any }> {
+  if (_pretextModule) return _pretextModule;
+  if (typeof globalThis !== 'undefined' && (globalThis as any).__pretext) {
+    _pretextModule = (globalThis as any).__pretext;
+    return _pretextModule!;
+  }
+  try {
+    _pretextModule = await import('@chenglou/pretext');
+    return _pretextModule!;
+  } catch {
+    throw new Error(
+      'textMeasurement "pretext" requires @chenglou/pretext. Install it: npm install @chenglou/pretext'
+    );
+  }
+}
+
+function buildCanvasFontString(cs: CSSStyleDeclaration): string {
+  const parts: string[] = [];
+  if (cs.fontStyle && cs.fontStyle !== 'normal') parts.push(cs.fontStyle);
+  if (cs.fontWeight && cs.fontWeight !== '400' && cs.fontWeight !== 'normal') parts.push(cs.fontWeight);
+  parts.push(cs.fontSize || '16px');
+  parts.push(cs.fontFamily || 'sans-serif');
+  return parts.join(' ');
+}
+
+async function extractTextNodeWithPretext(
   textNode: Text,
+  parentEl: Element,
   parentStyle: Style,
-): Array<{ text: string; quad: Quad }> {
-  const sourceText = textNode.textContent ?? "";
-  const sourceSegments = segmentTextForMeasurement(sourceText);
-  if (sourceSegments.length === 0) return [];
+  globalIndex: number,
+): Promise<IRNode[]> {
+  const fullText = textNode.textContent ?? "";
+  const normalizedText = normalizeWhitespaceAwareText(fullText, parentStyle);
+  if (!normalizedText) return [];
 
-  const displaySegments = getDisplayedTextSegments(sourceText, sourceSegments, parentStyle.textTransform);
-  const range = document.createRange();
-  const measured: Array<{ text: string; quad: Quad }> = [];
-  let startOffset = 0;
+  const text = applyTextTransform(normalizedText, parentStyle.textTransform);
+  if (!text) return [];
 
-  for (let index = 0; index < sourceSegments.length; index++) {
-    const segment = sourceSegments[index];
-    const text = displaySegments[index] ?? segment;
-    const endOffset = startOffset + segment.length;
+  const cs = getComputedStyle(parentEl);
+  const fontSize = parseFloat(cs.fontSize) || 16;
+  const lhVal = parseFloat(cs.lineHeight);
+  const lineHeight = isNaN(lhVal) ? fontSize * 1.2 : lhVal;
+  const font = buildCanvasFontString(cs);
+  const writingMode = cs.writingMode || 'horizontal-tb';
+  const direction = cs.direction || 'ltr';
 
-    if (text.length > 0 && segment !== "\r" && segment !== "\n") {
-      range.setStart(textNode, startOffset);
-      range.setEnd(textNode, endOffset);
-      const rect = getFirstVisibleClientRect(range);
-      if (rect) {
-        measured.push({ text, quad: rectToQuad(rect) });
+  const parentRect = parentEl.getBoundingClientRect();
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const padT = parseFloat(cs.paddingTop) || 0;
+  const padB = parseFloat(cs.paddingBottom) || 0;
+  const cx = parentRect.left + padL;
+  const cy = parentRect.top + padT;
+  const cw = parentRect.width - padL - padR;
+  const ch = parentRect.height - padT - padB;
+
+  const outputStyle: Style = {
+    ...parentStyle,
+    direction: undefined,
+    writingMode: undefined,
+    textAlign: undefined,
+    textIndent: undefined,
+    whiteSpace: "pre",
+  };
+
+  const { prepareWithSegments, layoutWithLines } = await loadPretextModule();
+  const whiteSpaceOpt = preservesWhitespace(parentStyle) ? { whiteSpace: 'pre-wrap' as const } : undefined;
+  const results: IRNode[] = [];
+
+  if (writingMode === 'horizontal-tb') {
+    const prepared = prepareWithSegments(text, font, whiteSpaceOpt);
+    const { lines } = layoutWithLines(prepared, cw, lineHeight);
+
+    for (let i = 0; i < lines.length; i++) {
+      const lineText = lines[i].text;
+      if (!lineText.trim()) continue;
+
+      const y = cy + i * lineHeight;
+      let x = cx;
+      const lw = lines[i].width;
+      const align = cs.textAlign;
+
+      if (direction === 'rtl') {
+        if (!align || align === 'start' || align === 'right') x += cw - lw;
+        else if (align === 'center') x += (cw - lw) / 2;
+      } else {
+        if (align === 'right' || align === 'end') x += cw - lw;
+        else if (align === 'center') x += (cw - lw) / 2;
       }
-    }
+      if (i === 0) x += parseFloat(cs.textIndent) || 0;
 
-    startOffset = endOffset;
+      const quad: Quad = [
+        { x, y },
+        { x: x + lw, y },
+        { x: x + lw, y: y + lineHeight },
+        { x, y: y + lineHeight },
+      ];
+      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
+    }
+    return results;
   }
 
-  return measured;
-}
+  // For vertical and sideways modes, use the container height as the inline dimension.
+  // Pretext measures text horizontally; we use the measured width as the inline extent
+  // and swap axes when positioning.
+  const prepared = prepareWithSegments(text, font, whiteSpaceOpt);
+  const { lines } = layoutWithLines(prepared, ch, lineHeight);
 
-function getFirstVisibleClientRect(range: Range): DOMRect | null {
-  const rects = Array.from(range.getClientRects());
-  let bestRect: DOMRect | null = null;
-  let bestArea = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const lineText = lines[i].text;
+    if (!lineText.trim()) continue;
+    const lw = lines[i].width;
 
-  for (const rect of rects) {
-    const area = rect.width * rect.height;
-    if (area <= 0) continue;
-    if (area > bestArea) {
-      bestArea = area;
-      bestRect = rect;
+    if (writingMode === 'vertical-rl' || writingMode === 'vertical-lr' || writingMode === 'sideways-rl') {
+      // CW rotation (+90°): Latin characters rotated 90° clockwise, inline flows top→bottom
+      // vertical-rl / sideways-rl: columns flow right→left
+      // vertical-lr: columns flow left→right
+      const colX = writingMode === 'vertical-lr'
+        ? cx + i * lineHeight
+        : cx + cw - (i + 1) * lineHeight;
+
+      // LTR: text starts at top (inline-start); RTL: text bottom-aligned (inline-start at bottom)
+      const colY = direction === 'rtl' ? cy + ch - lw : cy;
+
+      const quad: Quad = [
+        { x: colX + lineHeight, y: colY },
+        { x: colX + lineHeight, y: colY + lw },
+        { x: colX, y: colY + lw },
+        { x: colX, y: colY },
+      ];
+      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
+
+    } else if (writingMode === 'sideways-lr') {
+      // CCW rotation (-90°): characters rotated 90° counter-clockwise, inline flows bottom→top
+      // Columns flow left→right
+      const colX = cx + i * lineHeight;
+
+      let quad: Quad;
+      if (direction === 'rtl') {
+        // RTL reverses inline direction: text block top-aligned
+        quad = [
+          { x: colX, y: cy + lw },
+          { x: colX, y: cy },
+          { x: colX + lineHeight, y: cy },
+          { x: colX + lineHeight, y: cy + lw },
+        ];
+      } else {
+        // LTR: text block bottom-aligned
+        quad = [
+          { x: colX, y: cy + ch },
+          { x: colX, y: cy + ch - lw },
+          { x: colX + lineHeight, y: cy + ch - lw },
+          { x: colX + lineHeight, y: cy + ch },
+        ];
+      }
+      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
     }
   }
 
-  return bestRect;
+  return results;
 }
 
-function rectToQuad(rect: DOMRect): Quad {
-  return [
-    { x: rect.left, y: rect.top },
-    { x: rect.right, y: rect.top },
-    { x: rect.right, y: rect.bottom },
-    { x: rect.left, y: rect.bottom },
-  ];
-}
-
-function resolveTextMeasurementMode(style: Style, options: Options): "line" | "character" {
+function resolveTextMeasurementMode(style: Style, options: Options): "line" | "pretext" {
   const mode = options.textMeasurement ?? "line";
-  if (mode === "character") return "character";
-  if (mode === "auto" && needsCharacterMeasurement(style)) return "character";
+  if (mode === "pretext") return "pretext";
+  if (mode === "auto" && needsPretextMeasurement(style)) return "pretext";
   return "line";
 }
 
-function needsCharacterMeasurement(style: Style): boolean {
+function needsPretextMeasurement(style: Style): boolean {
   const direction = style.direction?.trim().toLowerCase();
   if (direction && direction !== "ltr") return true;
 
   const writingMode = style.writingMode?.trim().toLowerCase();
   return !!writingMode && writingMode !== "horizontal-tb";
-}
-
-function segmentTextForMeasurement(text: string): string[] {
-  const Segmenter = typeof Intl !== "undefined" ? (Intl as typeof Intl & {
-    Segmenter?: new (locales?: string | string[], options?: { granularity: "grapheme" }) => {
-      segment(input: string): Iterable<{ segment: string }>;
-    };
-  }).Segmenter : undefined;
-
-  if (Segmenter) {
-    const segmenter = new Segmenter(undefined, { granularity: "grapheme" });
-    return Array.from(segmenter.segment(text), ({ segment }) => segment);
-  }
-
-  return Array.from(text);
-}
-
-function getDisplayedTextSegments(
-  sourceText: string,
-  sourceSegments: string[],
-  textTransform: string | undefined,
-): string[] {
-  if (!textTransform) return sourceSegments;
-
-  const transformedSegments = segmentTextForMeasurement(applyTextTransform(sourceText, textTransform));
-  if (transformedSegments.length === sourceSegments.length) return transformedSegments;
-  return sourceSegments.map((segment) => applyTextTransform(segment, textTransform));
 }
 
 function applyTextTransform(text: string, textTransform: string | undefined): string {

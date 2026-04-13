@@ -168,7 +168,7 @@ test.describe("HTML Geometry Extraction", () => {
     expect(Math.abs(summary.rotatedAngle)).toBeGreaterThan(0.03);
   });
 
-  test("textMeasurement auto only expands text when writing mode or direction need it", async ({ page }) => {
+  test("textMeasurement auto uses pretext for non-standard writing modes", async ({ page }) => {
     await setupPage(
       page,
       `<html><body style="margin:0;padding:24px;font-family:'Segoe UI',sans-serif;">
@@ -192,7 +192,7 @@ test.describe("HTML Geometry Extraction", () => {
       const explicitIr = await extract(document.getElementById("normal"), {
         boxType: "border",
         includeText: true,
-        textMeasurement: "character",
+        textMeasurement: "pretext",
       });
 
       const toTextSummary = (ir: any[]) => ir
@@ -214,14 +214,16 @@ test.describe("HTML Geometry Extraction", () => {
     expect(summary.normal).toHaveLength(1);
     expect(summary.normal[0].text).toBe("Normal flow");
 
+    // Pretext mode produces line-level text nodes (not per-character)
+    expect(summary.vertical.length).toBeGreaterThanOrEqual(1);
     expect(summary.vertical.map((node: any) => node.text).join("")).toBe("VERTICAL");
-    expect(summary.vertical.length).toBe("VERTICAL".length);
     expect(summary.vertical.every((node: any) => node.whiteSpace === "pre")).toBe(true);
     expect(summary.vertical.every((node: any) => node.writingMode === null)).toBe(true);
     expect(summary.vertical.every((node: any) => node.direction === null)).toBe(true);
 
+    // Explicit pretext mode for normal text
+    expect(summary.explicit.length).toBeGreaterThanOrEqual(1);
     expect(summary.explicit.map((node: any) => node.text).join("")).toBe("Normal flow");
-    expect(summary.explicit.length).toBeGreaterThan(1);
     expect(summary.explicit.every((node: any) => node.whiteSpace === "pre")).toBe(true);
   });
 });
