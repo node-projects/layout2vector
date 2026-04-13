@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "4.6.1",
+  "version": "4.7.0",
   "description": "DOM → Geometry → DXF/PDF/PNG library",
   "repository": {
     "type": "git",

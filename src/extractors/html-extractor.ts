@@ -226,24 +226,26 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   parent.insertBefore(span, textNode);
   span.appendChild(textNode);
 
-  let quads: Quad[];
-  if (isSlottedInShadowDOM) {
-    const r = span.getBoundingClientRect();
-    quads = (r.width === 0 && r.height === 0) ? [] : [[
-      { x: r.left, y: r.top },
-      { x: r.right, y: r.top },
-      { x: r.right, y: r.bottom },
-      { x: r.left, y: r.bottom },
-    ]];
-  } else {
-    quads = getElementQuads(span, "border");
+  try {
+    let quads: Quad[];
+    if (isSlottedInShadowDOM) {
+      const r = span.getBoundingClientRect();
+      quads = (r.width === 0 && r.height === 0) ? [] : [[
+        { x: r.left, y: r.top },
+        { x: r.right, y: r.top },
+        { x: r.right, y: r.bottom },
+        { x: r.left, y: r.bottom },
+      ]];
+    } else {
+      quads = getElementQuads(span, "border");
+    }
+
+    return quads;
+  } finally {
+    // Restore original DOM structure
+    parent.insertBefore(textNode, span);
+    parent.removeChild(span);
   }
-
-  // Restore original DOM structure
-  parent.insertBefore(textNode, span);
-  parent.removeChild(span);
-
-  return quads;
 }
 
 function getTextNodeCharacterQuads(
@@ -383,6 +385,7 @@ function getPreformattedLineQuads(textNode: Text, parent: Node): Quad[] {
     }
   }
 
+  const tempNodes = Array.from(fragment.childNodes);
   parent.replaceChild(marker, textNode);
   marker.parentNode!.insertBefore(fragment, marker);
 
@@ -394,6 +397,7 @@ function getPreformattedLineQuads(textNode: Text, parent: Node): Quad[] {
     }
     return quads;
   } finally {
+    for (const n of tempNodes) n.parentNode?.removeChild(n);
     marker.parentNode!.insertBefore(textNode, marker);
     marker.parentNode!.removeChild(marker);
   }
