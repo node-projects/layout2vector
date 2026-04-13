@@ -2,12 +2,13 @@ import type { IRNode, Options, Point, Quad, Style } from "../types.js";
 import type { StackingNode } from "../traversal.js";
 import { getElementQuad, quadSize } from "../geometry.js";
 
-const DEFAULT_ACCENT_COLOR = "rgb(0, 117, 255)";
+const DEFAULT_ACCENT_COLOR = "rgb(0, 120, 212)";
 const DEFAULT_BORDER_COLOR = "rgb(118, 118, 118)";
 const DEFAULT_SURFACE_COLOR = "rgb(255, 255, 255)";
 const DEFAULT_BUTTON_COLOR = "rgb(239, 239, 239)";
 const DEFAULT_PROGRESS_TRACK = "rgb(232, 232, 232)";
 const DEFAULT_ICON_COLOR = "rgb(80, 80, 80)";
+const DEFAULT_FORM_RADIUS_PX = 2;
 
 const TEXT_LIKE_INPUT_TYPES = new Set([
   "text",
@@ -115,7 +116,7 @@ function extractCheckboxGeometry(
     fill: checked || indeterminate ? accentColor : DEFAULT_SURFACE_COLOR,
     stroke: checked || indeterminate ? accentColor : DEFAULT_BORDER_COLOR,
     strokeWidth: normalizeStrokeWidth(node.extractedStyle.strokeWidth, 1.5),
-    borderRadius: hasMeaningfulRadius(node.extractedStyle.borderRadius) ? node.extractedStyle.borderRadius : "3px",
+    borderRadius: hasMeaningfulRadius(node.extractedStyle.borderRadius) ? node.extractedStyle.borderRadius : `${DEFAULT_FORM_RADIUS_PX}px`,
   } satisfies Style;
 
   nodes.push({
@@ -237,7 +238,7 @@ function extractSingleLineControlGeometry(
 
   const { quad, localWidth, localHeight } = geometry;
   const cs = getComputedStyle(el);
-  const boxStyle = getControlBoxStyle(node.extractedStyle, fillFallback, DEFAULT_BORDER_COLOR, 4);
+  const boxStyle = getControlBoxStyle(node.extractedStyle, fillFallback, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
   const fontSize = getFontSize(node.extractedStyle, cs);
   const lineHeight = Math.min(getLineHeight(node.extractedStyle, cs, fontSize), localHeight);
   const paddingX = Math.max(parsePx(cs.paddingLeft), align === "center" ? 8 : 6);
@@ -269,7 +270,7 @@ function extractTextAreaGeometry(
 
   const { quad, localWidth, localHeight } = geometry;
   const cs = getComputedStyle(textarea);
-  const boxStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_SURFACE_COLOR, DEFAULT_BORDER_COLOR, 4);
+  const boxStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_SURFACE_COLOR, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
   const fontSize = getFontSize(node.extractedStyle, cs);
   const lineHeight = Math.max(1, getLineHeight(node.extractedStyle, cs, fontSize));
   const paddingLeft = Math.max(parsePx(cs.paddingLeft), 6);
@@ -326,7 +327,7 @@ function extractSelectGeometry(
     shouldUseFallbackControlFill(cs) ? { ...node.extractedStyle, fill: undefined } : node.extractedStyle,
     DEFAULT_SURFACE_COLOR,
     DEFAULT_BORDER_COLOR,
-    4
+    DEFAULT_FORM_RADIUS_PX
   );
   const nodes: IRNode[] = [{
     type: "polygon",
@@ -466,6 +467,7 @@ function getControlBoxStyle(
 function getAccentColor(cs: CSSStyleDeclaration, colorFallback?: string): string {
   const accent = (cs.getPropertyValue("accent-color") || "").trim();
   if (accent && accent !== "auto") return accent;
+  if (shouldUseFallbackControlFill(cs)) return DEFAULT_ACCENT_COLOR;
   if (isVisibleColor(colorFallback)) return colorFallback!;
   if (isVisibleColor(cs.color)) return cs.color;
   return DEFAULT_ACCENT_COLOR;

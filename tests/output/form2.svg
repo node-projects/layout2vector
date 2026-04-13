@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="733" height="484" viewBox="0 0 733 484">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="704" viewBox="0 0 1264 704">
 <defs>
-<clipPath id="clip1"><rect x="68" y="205" width="182" height="15.6"/></clipPath>
-<clipPath id="clip2"><rect x="409.99" y="50" width="152.69" height="14"/></clipPath>
+<clipPath id="clip1"><rect x="68" y="204" width="182" height="16"/></clipPath>
+<clipPath id="clip2"><rect x="410" y="50" width="165" height="13"/></clipPath>
 </defs>
-<path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(233, 233, 237)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
-<text x="142.58" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">Button</text>
-<rect x="62" y="112" width="200" height="88" rx="4" ry="4" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
+<path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+<text x="143" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>
+<rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>
 <path d="M246.33,154.39 L250,157.61 L253.67,154.39" fill="none" stroke="rgb(80, 80, 80)" stroke-width="1.47"/>
-<rect x="62" y="201" width="194" height="175" rx="4" ry="4" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
-<g clip-path="url(#clip1)"><text x="68" y="206.3" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">dewweefee</text></g>
-<rect x="118" y="425" width="59" height="59" rx="3" ry="3" fill="rgb(0, 0, 0)" stroke="rgb(0, 0, 0)" stroke-width="1.5"/>
+<rect x="62" y="200" width="194" height="175" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>
+<g clip-path="url(#clip1)"><text x="68" y="205.33" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="monospace" xml:space="preserve">dewweefee</text></g>
+<rect x="118" y="425" width="59" height="59" rx="2" ry="2" fill="rgb(0, 120, 212)" stroke="rgb(0, 120, 212)" stroke-width="1.5"/>
 <path d="M130.98,456.86 L142.78,468.66 L164.02,442.7" fill="none" stroke="rgb(255, 255, 255)" stroke-width="8.26"/>
-<rect x="62" y="381" width="211" height="21" rx="4" ry="4" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
-<rect x="404" y="46" width="164.67" height="22" rx="4" ry="4" fill="rgb(255, 255, 255)" stroke="rgb(143, 143, 157)" stroke-width="2"/>
-<g clip-path="url(#clip2)"><text x="409.99" y="50.33" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">mnnmnmnm</text></g>
+<rect x="62" y="381" width="164" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="2"/>
+<rect x="404" y="46" width="177" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="2"/>
+<g clip-path="url(#clip2)"><text x="410" y="50" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">mnnmnmnm</text></g>
 <path d="M404,82 L733,82 L733,311 L404,311 Z" fill="rgba(194, 31, 31, 0.52)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
-<text x="405" y="84" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
-<text x="405" y="99" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
-<text x="405" y="114" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf</text>
-<text x="405" y="129" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfsdfddsfdfssddfs</text>
+<text x="405" y="106.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd
+    dsfdfs.  dfddsf
+    sdf
+    dsfdfsdfddsfdfssddfs
+</text>
 </svg>

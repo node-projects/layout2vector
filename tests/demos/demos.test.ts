@@ -37,7 +37,12 @@ for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
   const convertFormControls = name === "form-controls" || name === "form2";
 
-  test(`convert demo: ${name}`, async ({ page }) => {
+  test(`convert demo: ${name}`, async ({ page, browserName }) => {
+    const projectOutputDir = browserName === "chromium" ? outputDir : path.join(outputDir, browserName);
+    if (!fs.existsSync(projectOutputDir)) {
+      fs.mkdirSync(projectOutputDir, { recursive: true });
+    }
+
     // Load demo HTML
     const htmlContent = fs.readFileSync(
       path.join(demosDir, demoFile),
@@ -49,9 +54,9 @@ for (const demoFile of demoFiles) {
     await page.goto(fileUrl, { waitUntil: "load" });
 
     // Copy HTML to output dir (and any referenced subdirectories)
-    fs.writeFileSync(path.join(outputDir, demoFile), htmlContent, "utf-8");
+    fs.writeFileSync(path.join(projectOutputDir, demoFile), htmlContent, "utf-8");
     const svgsDir = path.join(demosDir, "svgs");
-    const svgsOutDir = path.join(outputDir, "svgs");
+    const svgsOutDir = path.join(projectOutputDir, "svgs");
     if (fs.existsSync(svgsDir) && !fs.existsSync(svgsOutDir)) {
       fs.cpSync(svgsDir, svgsOutDir, { recursive: true });
     }
@@ -60,7 +65,7 @@ for (const demoFile of demoFiles) {
     for (const file of fs.readdirSync(demosDir)) {
       if (file.endsWith(".png")) {
         const src = path.join(demosDir, file);
-        const dest = path.join(outputDir, file);
+        const dest = path.join(projectOutputDir, file);
         if (!fs.existsSync(dest)) {
           fs.copyFileSync(src, dest);
         }
@@ -146,7 +151,7 @@ for (const demoFile of demoFiles) {
 
     // Dump IR for specific demos
     if (name === "comprehensive" || name === "images" || name === "test4") {
-      const irPath = path.join(outputDir, `${name}-ir.json`);
+      const irPath = path.join(projectOutputDir, `${name}-ir.json`);
       fs.writeFileSync(irPath, JSON.stringify(ir, null, 2), "utf-8");
     }
 
@@ -171,12 +176,12 @@ for (const demoFile of demoFiles) {
     expect(dxfContent).toBeTruthy();
     expect(dxfContent.length).toBeGreaterThan(100);
 
-    const dxfPath = path.join(outputDir, `${name}.dxf`);
+    const dxfPath = path.join(projectOutputDir, `${name}.dxf`);
     fs.writeFileSync(dxfPath, dxfContent, "utf-8");
 
     // Save DXF image files alongside the DXF (referenced by IMAGE entities)
     for (const [relPath, imageDataUrl] of dxfWriter.imageFiles) {
-      const imgPath = path.join(outputDir, relPath);
+      const imgPath = path.join(projectOutputDir, relPath);
       const imgDir = path.dirname(imgPath);
       if (!fs.existsSync(imgDir)) fs.mkdirSync(imgDir, { recursive: true });
       const base64Match = imageDataUrl.match(/^data:[^;]+;base64,(.+)$/);
@@ -195,7 +200,7 @@ for (const demoFile of demoFiles) {
         const fontData = fs.readFileSync(path.join(demosDir, file));
         customFonts.set(fontFamily, new Uint8Array(fontData));
         // Also copy font file to output dir
-        const dest = path.join(outputDir, file);
+        const dest = path.join(projectOutputDir, file);
         if (!fs.existsSync(dest)) fs.copyFileSync(path.join(demosDir, file), dest);
       }
     }
@@ -245,7 +250,7 @@ for (const demoFile of demoFiles) {
 
     await pdfDoc.finalize();
     const pdfBuffer = pdfDoc.toBytes();
-    const pdfPath = path.join(outputDir, `${name}.pdf`);
+    const pdfPath = path.join(projectOutputDir, `${name}.pdf`);
     fs.writeFileSync(pdfPath, pdfBuffer);
 
     // --- PNG output ---
@@ -253,7 +258,7 @@ for (const demoFile of demoFiles) {
     // Firefox blocks toDataURL on file:// origins (security restriction), so
     // we wrap this step in try/catch and skip PNG output when it fails.
     let pngStat: fs.Stats | null = null;
-    const pngPath = path.join(outputDir, `${name}.png`);
+    const pngPath = path.join(projectOutputDir, `${name}.png`);
     try {
       const pngDataUrl: string = await page.evaluate(async (irNodes) => {
         let maxX = 0, maxY = 0;
@@ -289,7 +294,7 @@ for (const demoFile of demoFiles) {
     expect(svgContent).toBeTruthy();
     expect(svgContent.length).toBeGreaterThan(100);
 
-    const svgPath = path.join(outputDir, `${name}.svg`);
+    const svgPath = path.join(projectOutputDir, `${name}.svg`);
     fs.writeFileSync(svgPath, svgContent, "utf-8");
 
     // --- HTML output ---
@@ -298,7 +303,7 @@ for (const demoFile of demoFiles) {
     expect(htmlContent2).toBeTruthy();
     expect(htmlContent2.length).toBeGreaterThan(100);
 
-    const htmlOutPath = path.join(outputDir, `${name}-ir.html`);
+    const htmlOutPath = path.join(projectOutputDir, `${name}-ir.html`);
     fs.writeFileSync(htmlOutPath, htmlContent2, "utf-8");
 
     // --- EMF output ---
@@ -306,7 +311,7 @@ for (const demoFile of demoFiles) {
     const emfBytes = await renderIR(ir, emfWriter);
     expect(emfBytes).toBeInstanceOf(Uint8Array);
     expect(emfBytes.length).toBeGreaterThan(80);
-    const emfPath = path.join(outputDir, `${name}.emf`);
+    const emfPath = path.join(projectOutputDir, `${name}.emf`);
     fs.writeFileSync(emfPath, emfBytes);
 
     // Verify files are non-empty
