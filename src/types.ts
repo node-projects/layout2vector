@@ -31,7 +31,23 @@ export type Style = {
   textTransform?: string;
   textShadow?: string;
   lineHeight?: string;
+  letterSpacing?: string;
+  wordSpacing?: string;
+  textIndent?: string;
   whiteSpace?: string;
+  wordBreak?: string;
+  overflowWrap?: string;
+
+  direction?: string;
+  writingMode?: string;
+
+  outlineColor?: string;
+  outlineWidth?: string;
+  outlineStyle?: string;
+  outlineOffset?: string;
+  filter?: string;
+  mixBlendMode?: string;
+  mask?: string;
 
   opacity?: number;
   zIndex?: number;

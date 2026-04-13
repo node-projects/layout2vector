@@ -1,0 +1,142 @@
+import { expect, test } from "@playwright/test";
+import { setupPage } from "../helpers.js";
+import { renderIR } from "../../src/pipeline.js";
+import { HTMLWriter } from "../../src/writers/html-writer.js";
+import type { IRNode, Quad } from "../../src/types.js";
+
+test.describe("CSS property support", () => {
+  test("extractIR carries requested visual and text styles", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;background:#f7f1e8;">
+        <div id="visual" style="width:180px;height:120px;background:linear-gradient(135deg, rgb(255, 202, 58), rgb(251, 133, 0));outline:4px dashed rgb(2, 48, 71);outline-offset:8px;filter:drop-shadow(0 12px 20px rgba(2, 48, 71, 0.35));mix-blend-mode:multiply;mask:radial-gradient(circle at 35% 35%, rgb(0, 0, 0) 0 38%, rgba(0, 0, 0, 0) 60%) center / 100% 100% no-repeat;-webkit-mask:radial-gradient(circle at 35% 35%, rgb(0, 0, 0) 0 38%, rgba(0, 0, 0, 0) 60%) center / 100% 100% no-repeat;transform:rotate(-6deg) skewX(-8deg);transform-origin:top left;"></div>
+        <p id="text" style="margin:48px 0 0;width:240px;color:rgb(108, 24, 48);font-family:Georgia, 'Times New Roman', serif;font-size:29px;font-weight:700;font-style:italic;line-height:44px;letter-spacing:2px;word-spacing:6px;text-align:justify;text-decoration:underline;text-transform:uppercase;text-indent:48px;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;">styled
+text withlongtoken</p>
+        <p id="ellipsis" style="margin:24px 0 0;width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">This is intentionally much longer than the card width.</p>
+        <div id="vertical" style="margin-top:24px;height:180px;width:88px;color:rgb(38, 70, 83);font:600 24px/1.2 'Segoe UI', sans-serif;direction:rtl;writing-mode:vertical-rl;transform:rotate(4deg);transform-origin:top left;">RTL FLOW</div>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const visualIr = await extract(document.getElementById("visual"), { boxType: "border", includeText: false });
+      const textIr = await extract(document.getElementById("text"), { boxType: "border", includeText: true });
+      const ellipsisIr = await extract(document.getElementById("ellipsis"), { boxType: "border", includeText: true });
+      const verticalIr = await extract(document.getElementById("vertical"), { boxType: "border", includeText: true });
+
+      const visualNode = visualIr.find((node: any) => node.type === "polygon");
+      const textNode = textIr.find((node: any) => node.type === "text");
+      const ellipsisNode = ellipsisIr.find((node: any) => node.type === "text");
+      const verticalNode = verticalIr.find((node: any) => node.type === "text");
+
+      return {
+        visualStyle: visualNode?.style,
+        textStyle: textNode?.style,
+        ellipsisStyle: ellipsisNode?.style,
+        verticalStyle: verticalNode?.style,
+      };
+    });
+
+    expect(summary.visualStyle.outlineWidth).toBe("4px");
+    expect(summary.visualStyle.outlineOffset).toBe("8px");
+    expect(summary.visualStyle.filter).toContain("drop-shadow");
+    expect(summary.visualStyle.mixBlendMode).toBe("multiply");
+    expect(summary.visualStyle.mask).toBeTruthy();
+
+    expect(summary.textStyle.color).toBe("rgb(108, 24, 48)");
+    expect(summary.textStyle.fontSize).toBe("29px");
+    expect(summary.textStyle.fontWeight).toBe("700");
+    expect(summary.textStyle.fontStyle).toBe("italic");
+    expect(summary.textStyle.lineHeight).toBe("44px");
+    expect(summary.textStyle.letterSpacing).toBe("2px");
+    expect(summary.textStyle.wordSpacing).toBe("6px");
+    expect(summary.textStyle.textAlign).toBe("justify");
+    expect(summary.textStyle.textDecoration).toContain("underline");
+    expect(summary.textStyle.textTransform).toBe("uppercase");
+    expect(summary.textStyle.textIndent).toBe("48px");
+    expect(summary.textStyle.whiteSpace).toBe("pre-wrap");
+    expect(summary.textStyle.wordBreak).toBe("break-word");
+    expect(summary.textStyle.overflowWrap).toBe("anywhere");
+
+    expect(summary.ellipsisStyle.textOverflow).toBe("ellipsis");
+    expect(summary.ellipsisStyle.whiteSpace).toBe("nowrap");
+    expect(summary.verticalStyle.direction).toBe("rtl");
+    expect(summary.verticalStyle.writingMode).toBe("vertical-rl");
+  });
+
+  test("HTML writer emits carried CSS properties for transformed boxes and text", async () => {
+    const polygonPoints: Quad = [
+      { x: 24, y: 18 },
+      { x: 176, y: 34 },
+      { x: 156, y: 146 },
+      { x: 4, y: 130 },
+    ];
+    const textQuad: Quad = [
+      { x: 28, y: 170 },
+      { x: 188, y: 170 },
+      { x: 188, y: 214 },
+      { x: 28, y: 214 },
+    ];
+
+    const nodes: IRNode[] = [
+      {
+        type: "polygon",
+        points: polygonPoints,
+        style: {
+          fill: "rgb(255, 244, 214)",
+          borderRadius: "18px",
+          outlineColor: "rgb(10, 20, 30)",
+          outlineWidth: "4px",
+          outlineStyle: "dashed",
+          outlineOffset: "6px",
+          filter: "blur(1px)",
+          mixBlendMode: "multiply",
+          mask: "radial-gradient(circle, rgb(0, 0, 0) 55%, rgba(0, 0, 0, 0) 72%)",
+        },
+        zIndex: 0,
+      },
+      {
+        type: "text",
+        quad: textQuad,
+        text: "Styled preview",
+        style: {
+          color: "rgb(12, 34, 56)",
+          fontFamily: "Georgia, serif",
+          fontSize: "28px",
+          fontWeight: "700",
+          fontStyle: "italic",
+          lineHeight: "36px",
+          letterSpacing: "2px",
+          wordSpacing: "4px",
+          textDecoration: "underline",
+          whiteSpace: "pre",
+          direction: "rtl",
+          writingMode: "vertical-rl",
+          filter: "grayscale(1)",
+          mixBlendMode: "screen",
+          mask: "linear-gradient(rgb(0, 0, 0), rgba(0, 0, 0, 0.25))",
+        },
+        zIndex: 1,
+      },
+    ];
+
+    const writer = new HTMLWriter({ width: 240, height: 240 });
+    const html = await renderIR(nodes, writer);
+
+    expect(html).toContain("transform:matrix(");
+    expect(html).toContain("outline:4px dashed rgb(10, 20, 30)");
+    expect(html).toContain("outline-offset:6px");
+    expect(html).toContain("filter:blur(1px)");
+    expect(html).toContain("mix-blend-mode:multiply");
+    expect(html).toContain("mask:radial-gradient");
+    expect(html).toContain("-webkit-mask:radial-gradient");
+
+    expect(html).toContain("letter-spacing:2px");
+    expect(html).toContain("word-spacing:4px");
+    expect(html).toContain("writing-mode:vertical-rl");
+    expect(html).toContain("direction:rtl");
+    expect(html).toContain("filter:grayscale(1)");
+    expect(html).toContain("mix-blend-mode:screen");
+    expect(html).toContain("-webkit-mask:linear-gradient");
+  });
+});

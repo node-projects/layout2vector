@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Property Support Demo</title>
+  <style>
+    :root {
+      color-scheme: only light;
+      --paper: #f7f0e4;
+      --ink: #16324f;
+      --accent: #c1121f;
+      --gold: #fcbf49;
+      --teal: #1f7a8c;
+      --plum: #6a1b4d;
+      --sand: rgba(255, 248, 232, 0.86);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(252, 191, 73, 0.3), transparent 28%),
+        radial-gradient(circle at 80% 8%, rgba(193, 18, 31, 0.18), transparent 24%),
+        linear-gradient(160deg, #f4ece1 0%, #f8f4eb 52%, #efe3d3 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    #root {
+      width: 1440px;
+      min-height: 1560px;
+      margin: 0 auto;
+      padding: 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 36px;
+      align-items: start;
+      margin-bottom: 44px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font: 800 70px/0.95 Georgia, "Times New Roman", serif;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #8f1027;
+      max-width: 9ch;
+    }
+
+    .title-block p {
+      margin: 18px 0 0;
+      max-width: 34rem;
+      font: 500 22px/1.55 "Aptos", "Segoe UI", sans-serif;
+      color: rgba(22, 50, 79, 0.78);
+    }
+
+    .badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      align-content: start;
+    }
+
+    .badge {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      outline: 2px solid rgba(22, 50, 79, 0.18);
+      outline-offset: 4px;
+      font: 700 14px/1 "Segoe UI", sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel {
+      position: relative;
+      margin-bottom: 34px;
+      padding: 28px;
+      border-radius: 28px;
+      background: var(--sand);
+      box-shadow: 0 24px 60px rgba(56, 39, 23, 0.1);
+      backdrop-filter: blur(8px);
+    }
+
+    .panel h2 {
+      margin: 0 0 20px;
+      font: 700 30px/1.1 Georgia, serif;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .visual-stage {
+      position: relative;
+      height: 360px;
+      overflow: visible;
+      background:
+        linear-gradient(90deg, rgba(31, 122, 140, 0.08), rgba(31, 122, 140, 0.08)) 0 0 / 100% 100% no-repeat,
+        linear-gradient(0deg, rgba(22, 50, 79, 0.08), rgba(22, 50, 79, 0.08)) 50% 0 / 1px 100% no-repeat,
+        linear-gradient(90deg, rgba(22, 50, 79, 0.08), rgba(22, 50, 79, 0.08)) 0 50% / 100% 1px no-repeat;
+      border-radius: 24px;
+    }
+
+    .visual-card {
+      position: absolute;
+      border-radius: 28px;
+      color: white;
+      display: grid;
+      place-items: end start;
+      padding: 24px;
+      font: 800 28px/1 Georgia, serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .outline-filter {
+      left: 46px;
+      top: 56px;
+      width: 260px;
+      height: 164px;
+      background: linear-gradient(135deg, #ffca3a, #fb8500 70%);
+      outline: 6px dashed #023047;
+      outline-offset: 12px;
+      filter: drop-shadow(0 18px 28px rgba(2, 48, 71, 0.28)) saturate(1.18);
+      transform: rotate(-8deg) skewX(-10deg);
+      transform-origin: top left;
+    }
+
+    .blend-base {
+      left: 388px;
+      top: 86px;
+      width: 240px;
+      height: 150px;
+      background: linear-gradient(160deg, #118ab2, #073b4c);
+      transform: rotate(-5deg);
+      transform-origin: top left;
+    }
+
+    .blend-overlay {
+      left: 486px;
+      top: 116px;
+      width: 250px;
+      height: 160px;
+      background: linear-gradient(140deg, rgba(193, 18, 31, 0.94), rgba(250, 159, 66, 0.88));
+      mix-blend-mode: multiply;
+      filter: contrast(1.15);
+      transform: rotate(10deg) skewY(-8deg);
+      transform-origin: top left;
+    }
+
+    .mask-card {
+      left: 840px;
+      top: 54px;
+      width: 290px;
+      height: 210px;
+      background:
+        radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.92), transparent 20%),
+        linear-gradient(135deg, #1d3557, #6a1b4d 58%, #f4a261);
+      mask: radial-gradient(circle at 50% 50%, rgb(0, 0, 0) 0 52%, rgba(0, 0, 0, 0) 66%) center / 100% 100% no-repeat;
+      -webkit-mask: radial-gradient(circle at 50% 50%, rgb(0, 0, 0) 0 52%, rgba(0, 0, 0, 0) 66%) center / 100% 100% no-repeat;
+      outline: 5px solid rgba(22, 50, 79, 0.28);
+      outline-offset: 8px;
+      transform: rotate(7deg) skewX(6deg);
+      transform-origin: top left;
+    }
+
+    .mask-card span {
+      max-width: 7ch;
+    }
+
+    .text-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .text-card {
+      position: relative;
+      border-radius: 24px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.7);
+      min-height: 220px;
+      overflow: hidden;
+    }
+
+    .text-card h3 {
+      margin: 0 0 12px;
+      font: 700 14px/1 "Segoe UI", sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(22, 50, 79, 0.6);
+    }
+
+    .rich-copy {
+      margin: 0;
+      width: 420px;
+      color: var(--plum);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 30px;
+      font-weight: 700;
+      font-style: italic;
+      line-height: 46px;
+      letter-spacing: 2px;
+      word-spacing: 7px;
+      text-align: justify;
+      text-decoration: underline wavy rgba(252, 191, 73, 0.95) 2px;
+      text-transform: uppercase;
+      text-indent: 64px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      transform: rotate(-3deg);
+      transform-origin: top left;
+    }
+
+    .overflow-copy {
+      margin: 0;
+      width: 300px;
+      padding-top: 12px;
+      color: #264653;
+      font: 600 22px/1.45 "Segoe UI", sans-serif;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      transform: rotate(2deg);
+      transform-origin: top left;
+    }
+
+    .ellipsis-copy {
+      margin: 18px 0 0;
+      width: 310px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: #7f5539;
+      font: 700 22px/1.2 "Segoe UI", sans-serif;
+      filter: contrast(1.08);
+      transform: rotate(4deg);
+      transform-origin: top left;
+    }
+
+    .direction-card {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .vertical-copy {
+      height: 250px;
+      margin: 0;
+      padding: 16px 0;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(17, 138, 178, 0.14), rgba(193, 18, 31, 0.18));
+      color: #16324f;
+      font: 700 26px/1.1 "Segoe UI", sans-serif;
+      direction: rtl;
+      writing-mode: vertical-rl;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      transform: rotate(6deg);
+      transform-origin: top left;
+    }
+
+    .pre-copy {
+      margin: 0;
+      color: #3d405b;
+      font: 600 18px/1.55 "Courier New", monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <section class="hero">
+      <div class="title-block">
+        <h1>CSS Property Support</h1>
+        <p>A focused demo for visual and text properties, including transformed boxes, mixed compositing, masking, ellipsis, vertical writing, and whitespace-sensitive text.</p>
+      </div>
+      <div class="badge-strip">
+        <div class="badge">outline</div>
+        <div class="badge">filter</div>
+        <div class="badge">mix-blend-mode</div>
+        <div class="badge">mask</div>
+        <div class="badge">writing-mode</div>
+        <div class="badge">text-overflow</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Visual Properties</h2>
+      <div class="visual-stage">
+        <div class="visual-card outline-filter">Outline + Filter</div>
+        <div class="visual-card blend-base">Base Layer</div>
+        <div class="visual-card blend-overlay">Blend</div>
+        <div class="visual-card mask-card"><span>Masked</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Text Properties</h2>
+      <div class="text-grid">
+        <div class="text-card">
+          <h3>Typography Stack</h3>
+          <p class="rich-copy">museum copy
+leans into rhythm and spacing</p>
+          <p class="ellipsis-copy">This sentence intentionally keeps going until the browser has to replace the tail with an ellipsis.</p>
+        </div>
+        <div class="text-card">
+          <h3>Wrapping and Direction</h3>
+          <p class="overflow-copy">WrapThisAbsurdlyLongTokenWithoutAnyMercyBecauseWordBreakAndOverflowWrapShouldStillPreserveTheLayout.</p>
+          <div class="direction-card">
+            <p class="vertical-copy">RTL Flow</p>
+            <pre class="pre-copy">white-space: pre-wrap
+keeps   deliberate gaps
+and carries line breaks forward.</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

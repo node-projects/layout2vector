@@ -363,6 +363,12 @@ function isVisibleColor(color: string | undefined): boolean {
   return true;
 }
 
+function hasVisibleOutline(style: IRNode["style"]): boolean {
+  if (!style.outlineWidth || parseFloat(style.outlineWidth) <= 0) return false;
+  if (!style.outlineStyle || style.outlineStyle === "none") return false;
+  return isVisibleColor(style.outlineColor ?? style.color ?? style.stroke ?? style.fill);
+}
+
 /**
  * Check whether an IR node contributes any visible output.
  * Filters out empty polygons/polylines with no fill, no stroke, no box-shadow, and no gradient.
@@ -373,6 +379,7 @@ function isVisibleNode(node: IRNode): boolean {
       const s = node.style;
       if (isVisibleColor(s.fill)) return true;
       if (isVisibleColor(s.stroke) && s.strokeWidth && parseFloat(s.strokeWidth) > 0) return true;
+      if (hasVisibleOutline(s)) return true;
       if (s.boxShadow && s.boxShadow !== "none") return true;
       // Check for gradient or url() background
       if (s.backgroundImage && s.backgroundImage !== "none") return true;

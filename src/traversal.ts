@@ -46,6 +46,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
   let fill: string | undefined = bgColor || cs.fill || undefined;
   const bgImage = cs.backgroundImage;
   const bgImageVal = bgImage || undefined;
+  const maskVal = cs.getPropertyValue("mask") || cs.getPropertyValue("-webkit-mask") || undefined;
 
   // If backgroundColor is transparent but there's a gradient, extract its first color
   if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImageVal && bgImageVal !== "none") {
@@ -76,7 +77,23 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     textTransform: cs.textTransform || undefined,
     textShadow: cs.textShadow || undefined,
     lineHeight: cs.lineHeight || undefined,
+    letterSpacing: cs.letterSpacing || undefined,
+    wordSpacing: cs.wordSpacing || undefined,
+    textIndent: cs.textIndent || undefined,
     whiteSpace: cs.whiteSpace || undefined,
+    wordBreak: cs.wordBreak || undefined,
+    overflowWrap: cs.overflowWrap || undefined,
+
+    direction: cs.direction || undefined,
+    writingMode: cs.writingMode || undefined,
+
+    outlineColor: cs.outlineColor || undefined,
+    outlineWidth: cs.outlineWidth || undefined,
+    outlineStyle: cs.outlineStyle || undefined,
+    outlineOffset: cs.outlineOffset || undefined,
+    filter: cs.filter && cs.filter !== "none" ? cs.filter : undefined,
+    mixBlendMode: cs.mixBlendMode && cs.mixBlendMode !== "normal" ? cs.mixBlendMode : undefined,
+    mask: maskVal && maskVal !== "none" ? maskVal : undefined,
 
     opacity,
     zIndex,

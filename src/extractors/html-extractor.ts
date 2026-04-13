@@ -154,7 +154,8 @@ function extractTextNode(
     // Multi-line: use per-line quads from getBoxQuads (transform-aware)
     const N = allQuads.length;
     for (let i = 0; i < N; i++) {
-      let text = normalizeWhitespaceAwareText(i < lineTexts.length ? lineTexts[i] : "", parentStyle);
+      let text = normalizeWhitespaceAwareText(i < lineTexts.length ? lineTexts[i] : "", parentStyle)
+        .replace(/[\r\n]+$/g, "");
       if (text.length === 0) continue;
 
       if (parentStyle.textTransform) {
@@ -167,11 +168,18 @@ function extractTextNode(
         }
       }
 
+      const lineStyle: Style = {
+        ...parentStyle,
+        textAlign: undefined,
+        textIndent: undefined,
+        whiteSpace: preservesWhitespace(parentStyle) ? "pre" : "nowrap",
+      };
+
       results.push({
         type: "text",
         quad: allQuads[i],
         text,
-        style: parentStyle,
+        style: lineStyle,
         zIndex: globalIndex,
       });
     }

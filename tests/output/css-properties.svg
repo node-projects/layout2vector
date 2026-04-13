@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="1619" viewBox="0 0 1440 1619">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="24" stdDeviation="30" flood-color="rgba(56, 39, 23, 0.1)" result="s0"/></filter>
+<linearGradient id="lg2" x1="84" y1="715" x2="1356" y2="715" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(31, 122, 140, 0.08)"/><stop offset="100%" stop-color="rgba(31, 122, 140, 0.08)"/></linearGradient>
+<linearGradient id="lg3" x1="146.95" y1="532.05" x2="358.9" y2="744" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(255, 202, 58)"/><stop offset="70%" stop-color="rgb(251, 133, 0)"/></linearGradient>
+<linearGradient id="lg4" x1="553.55" y1="570.4" x2="629.54" y2="779.19" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(17, 138, 178)"/><stop offset="100%" stop-color="rgb(7, 59, 76)"/></linearGradient>
+<linearGradient id="lg5" x1="577.45" y1="621.43" x2="759.28" y2="838.13" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(193, 18, 31, 0.94)"/><stop offset="100%" stop-color="rgba(250, 159, 66, 0.88)"/></linearGradient>
+<radialGradient id="rg6" cx="1064.23" cy="694.56" r="143.92" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(255, 255, 255, 0.92)"/><stop offset="20%" stop-color="rgba(0, 0, 0, 0)"/></radialGradient>
+<filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="24" stdDeviation="30" flood-color="rgba(56, 39, 23, 0.1)" result="s0"/></filter>
+<clipPath id="clip8" clipPathUnits="userSpaceOnUse"><rect x="84" y="1037.88" width="715.3" height="256.39" rx="24" ry="24"/></clipPath>
+<clipPath id="clip9" clipPathUnits="userSpaceOnUse"><rect x="827.3" y="1037.88" width="528.7" height="463.56" rx="24" ry="24"/></clipPath>
+<linearGradient id="lg10" x1="894.48" y1="1228" x2="894.48" y2="1476.63" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(17, 138, 178, 0.14)"/><stop offset="100%" stop-color="rgba(193, 18, 31, 0.18)"/></linearGradient>
+</defs>
+<text x="56" y="120" fill="rgb(143, 16, 39)" dominant-baseline="text-before-edge" font-weight="800" font-size="70px" font-family="Georgia">CSS PROPERTY SUPPORT</text>
+<text x="56" y="331" fill="#000000" dominant-baseline="text-before-edge" font-weight="500" font-size="22px" font-family="Aptos">A focused demo for visual and text properties, including transformed boxes, mixed compositing, masking, ellipsis, vertical writing, and whitespace-sensitive text.</text>
+<rect x="885" y="56" width="107" height="38" rx="19" ry="19" fill="none"/>
+<text x="903" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">OUTLINE</text>
+<rect x="1004" y="56" width="89" height="38" rx="19" ry="19" fill="none"/>
+<text x="1022" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">FILTER</text>
+<rect x="1104" y="56" width="185" height="38" rx="19" ry="19" fill="none"/>
+<text x="1122" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">MIX-BLEND-MODE</text>
+<rect x="1301" y="56" width="83" height="38" rx="19" ry="19" fill="none"/>
+<text x="1319" y="67.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">MASK</text>
+<rect x="1035" y="106" width="165" height="38" rx="19" ry="19" fill="none"/>
+<text x="1053" y="117.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRITING-MODE</text>
+<rect x="1212" y="106" width="172" height="38" rx="19" ry="19" fill="none"/>
+<text x="1230" y="117.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">TEXT-OVERFLOW</text>
+<rect x="56" y="454" width="1328" height="469" rx="28" ry="28" fill="none" filter="url(#ds1)"/>
+<text x="84" y="483.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">VISUAL PROPERTIES</text>
+<rect x="84" y="535" width="1272" height="360" rx="24" ry="24" fill="url(#lg2)"/>
+<path d="M129.02,618.98 Q130,591 157.73,587.1 L359.74,558.71 Q387.47,554.82 386.49,582.8 L382.64,693.26 Q381.66,721.24 353.93,725.14 L151.92,753.53 Q124.19,757.43 125.17,729.45 Z" fill="url(#lg3)"/>
+<text x="150.29" y="687.33" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-8,150.29,687.33)">OUTLINE + FILTER</text>
+<path d="M474.44,648.89 Q472,621 499.89,618.56 L683.19,602.52 Q711.09,600.08 713.53,627.98 L721.72,721.62 Q724.16,749.51 696.27,751.95 L512.97,767.99 Q485.07,770.43 482.63,742.54 Z" fill="url(#lg4)"/>
+<text x="503.23" y="702.59" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(-5,503.23,702.59)">BASE LAYER</text>
+<path d="M565.14,678.57 Q570,651 597.98,651.98 L794.32,658.83 Q822.3,659.81 817.44,687.39 L799.38,789.81 Q794.52,817.38 766.54,816.4 L570.2,809.55 Q542.22,808.57 547.08,780.99 Z" fill="url(#lg5)"/>
+<text x="575.47" y="758.21" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(2,575.47,758.21)">BLEND</text>
+<path d="M923.51,617 Q924,589 951.79,592.41 L1184.05,620.93 Q1211.84,624.34 1211.35,652.34 L1208.64,807.47 Q1208.15,835.47 1180.36,832.06 L948.11,803.54 Q920.31,800.13 920.8,772.13 Z" fill="url(#rg6)"/>
+<text x="945.05" y="750.85" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Georgia" transform="rotate(7,945.05,750.85)">MASKED</text>
+<rect x="56" y="957" width="1328" height="573" rx="28" ry="28" fill="none" filter="url(#ds7)"/>
+<text x="84" y="986.5" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Georgia">TEXT PROPERTIES</text>
+<rect x="84" y="1038" width="715" height="256" rx="24" ry="24" fill="none"/>
+<g clip-path="url(#clip8)"><text x="108" y="1061.5" fill="#000000" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">TYPOGRAPHY STACK</text></g>
+<g clip-path="url(#clip8)"><text x="174.71" y="1138.08" fill="rgb(106, 27, 77)" dominant-baseline="text-before-edge" font-style="italic" font-weight="700" font-size="30px" font-family="Georgia" transform="rotate(-3,174.71,1138.08)" xml:space="preserve" text-decoration="underline" textLength="437" lengthAdjust="spacing">MUSEUM COPY
+LEANS INTO RHYTHM AND SPACING</text></g>
+<g clip-path="url(#clip8)"><text x="107.86" y="1246" fill="rgb(127, 85, 57)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Segoe UI" transform="rotate(4,107.86,1246)">This sentence intentionally&#x2026;</text></g>
+<rect x="827" y="1038" width="529" height="464" rx="24" ry="24" fill="none"/>
+<g clip-path="url(#clip9)"><text x="851" y="1061.5" fill="#000000" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Segoe UI">WRAPPING AND DIRECTION</text></g>
+<g clip-path="url(#clip9)"><text x="848.77" y="1151.96" fill="rgb(38, 70, 83)" dominant-baseline="text-before-edge" font-weight="600" font-size="22px" font-family="Segoe UI" transform="rotate(2,848.77,1151.96)">WrapThisAbsurdlyLongTokenWithoutAnyMercyBecauseWordBreakAndOverflowWrapShouldStillPreserveTheLayout.</text></g>
+<g clip-path="url(#clip9)"><path d="M849.12,1245.9 Q851,1228 868.9,1229.88 L972.33,1240.75 Q990.23,1242.63 988.35,1260.54 L965.98,1473.36 Q964.1,1491.26 946.2,1489.38 L842.77,1478.51 Q824.87,1476.63 826.75,1458.73 Z" fill="url(#lg10)"/></g>
+<g clip-path="url(#clip9)"><text x="947.64" y="1351.28" fill="rgb(22, 50, 79)" dominant-baseline="text-before-edge" font-weight="700" font-size="26px" font-family="Segoe UI" transform="rotate(6,947.64,1351.28)">RTL FLOW</text></g>
+<g clip-path="url(#clip9)"><text x="1011" y="1343" fill="rgb(61, 64, 91)" dominant-baseline="text-before-edge" font-weight="600" font-size="18px" font-family="Courier New" xml:space="preserve">white-space: pre-wrap
+keeps   deliberate gaps
+and carries line breaks forward.</text></g>
+</svg>

@@ -81,6 +81,114 @@ function dataUrlToExtension(dataUrl: string): string {
   return "jpg";
 }
 
+type RenderedOutline = {
+  color: string;
+  width: string;
+  style: string;
+  offset?: string;
+};
+
+type QuadTransform = {
+  width: number;
+  height: number;
+  matrix: string;
+};
+
+function pushCss(css: string[], name: string, value: string | undefined): void {
+  if (!value) return;
+  css.push(`${name}:${escHtml(value)}`);
+}
+
+function getVisibleOutline(style: Style): RenderedOutline | null {
+  if (!style.outlineWidth || parseFloat(style.outlineWidth) <= 0) return null;
+  if (!style.outlineStyle || style.outlineStyle === "none") return null;
+
+  const color = getVisibleCssColorString(style.outlineColor ?? style.color ?? style.stroke ?? style.fill);
+  if (!color) return null;
+
+  return {
+    color,
+    width: style.outlineWidth,
+    style: style.outlineStyle,
+    offset: style.outlineOffset,
+  };
+}
+
+function appendEffectCss(css: string[], style: Style, includeOutline = true): void {
+  if (includeOutline) {
+    const outline = getVisibleOutline(style);
+    if (outline) {
+      css.push(`outline:${escHtml(outline.width)} ${escHtml(outline.style)} ${escHtml(outline.color)}`);
+      if (outline.offset && outline.offset !== "0px") {
+        pushCss(css, "outline-offset", outline.offset);
+      }
+    }
+  }
+
+  pushCss(css, "filter", style.filter);
+  pushCss(css, "mix-blend-mode", style.mixBlendMode);
+  if (style.mask) {
+    pushCss(css, "mask", style.mask);
+    pushCss(css, "-webkit-mask", style.mask);
+  }
+}
+
+function appendTextCss(css: string[], style: Style, preserveWhitespace: boolean): void {
+  const whiteSpace = style.whiteSpace
+    ? style.whiteSpace
+    : preserveWhitespace
+      ? "pre"
+      : "normal";
+  pushCss(css, "white-space", whiteSpace);
+
+  if (style.lineHeight && style.lineHeight !== "normal") {
+    pushCss(css, "line-height", style.lineHeight);
+  }
+  if (style.letterSpacing && style.letterSpacing !== "normal") {
+    pushCss(css, "letter-spacing", style.letterSpacing);
+  }
+  if (style.wordSpacing && style.wordSpacing !== "normal" && style.wordSpacing !== "0px") {
+    pushCss(css, "word-spacing", style.wordSpacing);
+  }
+  if (style.textDecoration && style.textDecoration !== "none") {
+    pushCss(css, "text-decoration", style.textDecoration);
+  }
+  if (style.textIndent && style.textIndent !== "0px") {
+    pushCss(css, "text-indent", style.textIndent);
+  }
+  if (style.textAlign && style.textAlign !== "start") {
+    pushCss(css, "text-align", style.textAlign);
+  }
+  if (style.wordBreak && style.wordBreak !== "normal") {
+    pushCss(css, "word-break", style.wordBreak);
+  }
+  if (style.overflowWrap && style.overflowWrap !== "normal") {
+    pushCss(css, "overflow-wrap", style.overflowWrap);
+  }
+  if (style.direction && style.direction !== "ltr") {
+    pushCss(css, "direction", style.direction);
+  }
+  if (style.writingMode && style.writingMode !== "horizontal-tb") {
+    pushCss(css, "writing-mode", style.writingMode);
+  }
+}
+
+function getQuadTransform(points: Quad): QuadTransform | null {
+  const dx = points[1].x - points[0].x;
+  const dy = points[1].y - points[0].y;
+  const ldx = points[3].x - points[0].x;
+  const ldy = points[3].y - points[0].y;
+  const width = Math.hypot(dx, dy);
+  const height = Math.hypot(ldx, ldy);
+  if (width <= 0 || height <= 0) return null;
+
+  return {
+    width,
+    height,
+    matrix: `matrix(${n(dx / width)},${n(dy / width)},${n(ldx / height)},${n(ldy / height)},${n(points[0].x)},${n(points[0].y)})`,
+  };
+}
+
 // ── HTML Writer ─────────────────────────────────────────────────────
 
 /** Image handling mode for the HTML writer. */
@@ -227,11 +335,12 @@ export class HTMLWriter implements Writer<string> {
   async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
+    const outline = getVisibleOutline(style);
     // Only output gradients in background-image; url() images are handled by drawImage
     const bgImage = style.backgroundImage && style.backgroundImage !== "none"
       ? style.backgroundImage : undefined;
     const hasGradient = bgImage && !(/url\s*\(/.test(bgImage));
-    if (!fill && !stroke && !style.boxShadow && !hasGradient) return;
+    if (!fill && !stroke && !outline && !style.boxShadow && !hasGradient) return;
 
     const opacity = style.opacity;
 
@@ -259,22 +368,33 @@ export class HTMLWriter implements Writer<string> {
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
+      appendEffectCss(css, style);
 
       this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style, clipBounds));
     } else {
-      // Non-axis-aligned quad → use inline SVG
-      // Calculate edge lengths for border-radius resolution
-      const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
-      const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
-      const radius = parseMinDimensionBorderRadius(style.borderRadius, edgeW, edgeH);
-      const d = radius > 0 ? roundedQuadToSvgPath(points, radius) : quadToSvgPath(points);
-      const svgAttrs: string[] = [];
-      if (fill) svgAttrs.push(`fill="${escHtml(fill)}"`);
-      else svgAttrs.push(`fill="none"`);
-      if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);
-      if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
+      const transform = getQuadTransform(points);
+      if (!transform) return;
 
-      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, clipBounds));
+      const css: string[] = [
+        "position:absolute",
+        "left:0",
+        "top:0",
+        `width:${n(transform.width)}px`,
+        `height:${n(transform.height)}px`,
+        "box-sizing:border-box",
+        "transform-origin:0 0",
+        `transform:${transform.matrix}`,
+      ];
+
+      if (fill) css.push(`background-color:${fill}`);
+      if (hasGradient) css.push(`background-image:${bgImage}`);
+      if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
+      if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
+      if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
+      if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
+      appendEffectCss(css, style);
+
+      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style, clipBounds));
     }
   }
 
@@ -312,8 +432,9 @@ export class HTMLWriter implements Writer<string> {
 
     const fontWeight = style.fontWeight ?? "normal";
     const fontStyle = style.fontStyle ?? "normal";
-    const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "sans-serif";
+    const fontFamily = style.fontFamily?.trim() || "sans-serif";
     const textColor = getVisibleCssColorString(style.color) ?? getVisibleCssColorString(style.fill) ?? "black";
+    const usesVerticalWriting = !!style.writingMode && style.writingMode !== "horizontal-tb";
 
     // Compute half-leading: the line box (quad) is taller than the em square by the leading.
     // We offset by half the leading so text sits at the correct position.
@@ -326,25 +447,42 @@ export class HTMLWriter implements Writer<string> {
     const angleDeg = angle * (180 / Math.PI);
 
     if (Math.abs(angleDeg) > 0.5) {
-      // Rotated text → use SVG text element for precise positioning
-      // Position at the em-square top (quad[0] offset by halfLeading toward quad[3])
-      const t = quadHeight > 0 ? halfLeading / quadHeight : 0;
-      const x = quad[0].x + (quad[3].x - quad[0].x) * t;
-      const y = quad[0].y + (quad[3].y - quad[0].y) * t;
+      const transform = getQuadTransform(quad);
+      if (!transform) return;
 
-      const attrs: string[] = [];
-      attrs.push(`x="${n(x)}" y="${n(y)}"`);
-      attrs.push(`fill="${escHtml(textColor)}"`);
-      attrs.push(`dominant-baseline="text-before-edge"`);
-      if (fontStyle !== "normal") attrs.push(`font-style="${fontStyle}"`);
-      if (fontWeight !== "normal" && fontWeight !== "400") attrs.push(`font-weight="${fontWeight}"`);
-      attrs.push(`font-size="${n(fontSize)}px"`);
-      attrs.push(`font-family="${escHtml(fontFamily)}"`);
-      attrs.push(`transform="rotate(${n(angleDeg)},${n(x)},${n(y)})"`);
-      if (opacity !== undefined && opacity < 1) attrs.push(`opacity="${n(opacity)}"`);
-      if (preserveWhitespace) attrs.push(`xml:space="preserve"`);
+      const css: string[] = [
+        "position:absolute",
+        "left:0",
+        "top:0",
+        `width:${n(transform.width)}px`,
+        usesVerticalWriting
+          ? `height:${n(transform.height)}px`
+          : `min-height:${n(transform.height)}px`,
+        "box-sizing:border-box",
+        "transform-origin:0 0",
+        `transform:${transform.matrix}`,
+        `font-size:${n(fontSize)}px`,
+        `font-family:${escHtml(fontFamily)}`,
+        `color:${textColor}`,
+      ];
 
-      this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><text ${attrs.join(" ")}>${escHtml(sanitized)}</text></svg>`, style, getQuadBounds(quad)));
+      if (!usesVerticalWriting && halfLeading > 0) {
+        css.push(`padding-top:${n(halfLeading)}px`);
+      }
+      if (fontWeight !== "normal" && fontWeight !== "400") css.push(`font-weight:${fontWeight}`);
+      if (fontStyle !== "normal") css.push(`font-style:${fontStyle}`);
+      if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
+      appendTextCss(css, style, preserveWhitespace);
+
+      if (style.textShadow && style.textShadow !== "none") {
+        css.push(`text-shadow:${style.textShadow}`);
+      }
+      if (style.textAlign === "justify") {
+        css.push("text-align:justify");
+        css.push("text-align-last:justify");
+      }
+
+      this.elements.push(this.applyClip(`<div style="${css.join(";")}">${escHtml(sanitized)}</div>`, style, getQuadBounds(quad)));
     } else {
       // Axis-aligned text → use a positioned span
       const css: string[] = [
@@ -354,17 +492,14 @@ export class HTMLWriter implements Writer<string> {
         `font-size:${n(fontSize)}px`,
         `font-family:${escHtml(fontFamily)}`,
         `color:${textColor}`,
-        preserveWhitespace ? "white-space:pre" : "white-space:nowrap",
         "line-height:1",
       ];
 
       if (fontWeight !== "normal" && fontWeight !== "400") css.push(`font-weight:${fontWeight}`);
       if (fontStyle !== "normal") css.push(`font-style:${fontStyle}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
+      appendTextCss(css, style, preserveWhitespace);
 
-      if (style.textDecoration && style.textDecoration !== "none") {
-        css.push(`text-decoration:${style.textDecoration}`);
-      }
       if (style.textShadow && style.textShadow !== "none") {
         css.push(`text-shadow:${style.textShadow}`);
       }
@@ -384,35 +519,34 @@ export class HTMLWriter implements Writer<string> {
   }
 
   async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
-    const dx = quad[1].x - quad[0].x;
-    const dy = quad[1].y - quad[0].y;
-    const topEdge = Math.sqrt(dx * dx + dy * dy);
-    const ldx = quad[3].x - quad[0].x;
-    const ldy = quad[3].y - quad[0].y;
-    const leftEdge = Math.sqrt(ldx * ldx + ldy * ldy);
-    if (topEdge <= 0 || leftEdge <= 0) return;
+    const transform = getQuadTransform(quad);
+    if (!transform) return;
 
-    const angle = Math.atan2(dy, dx);
-    const angleDeg = angle * (180 / Math.PI);
     const opacity = style.opacity;
+    const outline = getVisibleOutline(style);
 
     const css: string[] = [
       "position:absolute",
-      `left:${n(quad[0].x)}px`,
-      `top:${n(quad[0].y)}px`,
-      `width:${n(topEdge)}px`,
-      `height:${n(leftEdge)}px`,
+      "left:0",
+      "top:0",
+      `width:${n(transform.width)}px`,
+      `height:${n(transform.height)}px`,
+      "transform-origin:0 0",
+      `transform:${transform.matrix}`,
     ];
 
-    if (Math.abs(angleDeg) > 0.5) {
-      css.push(`transform:rotate(${n(angleDeg)}deg)`);
-      css.push("transform-origin:top left");
-    }
     if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
     const ir = style.imageRendering;
     if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
       css.push("image-rendering:pixelated");
     }
+    if (outline) {
+      css.push(`outline:${escHtml(outline.width)} ${escHtml(outline.style)} ${escHtml(outline.color)}`);
+      if (outline.offset && outline.offset !== "0px") {
+        pushCss(css, "outline-offset", outline.offset);
+      }
+    }
+    appendEffectCss(css, style, false);
 
     if (this.imageMode.type === "css") {
       const className = this.getCssImageClass(dataUrl);

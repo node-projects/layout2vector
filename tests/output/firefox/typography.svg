@@ -24,8 +24,8 @@
 <path d="M0,543.6 L300,543.6 L300,649.6 L0,649.6 Z" fill="rgb(232, 245, 233)" stroke="rgb(200, 230, 201)" stroke-width="1"/>
 <text x="207.28" y="560.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Right aligned</text>
 <text x="104.47" y="581.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Center aligned</text>
-<text x="11" y="602.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial" textLength="300" lengthAdjust="spacing">Justified text that spans across the full width of</text>
-<text x="11" y="619.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial" textLength="170.38" lengthAdjust="spacing">the container element here.</text>
+<text x="11" y="602.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">Justified text that spans across the full width of</text>
+<text x="11" y="619.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">the container element here.</text>
 <text x="0" y="666.1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Multi-column Text</text>
 <path d="M0,695.6 L400,695.6 L400,789.6 L0,789.6 Z" fill="rgb(245, 245, 245)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
 <text x="11" y="709.6" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Lorem ipsum dolor sit amet,</text>
