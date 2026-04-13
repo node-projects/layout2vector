@@ -318,6 +318,14 @@ export class DWGWriter implements Writer<Uint8Array> {
     await ensureAcadLoaded();
     const doc = await this.builder.end();
 
+    // DWG stores angles in radians, but the shared builder stores degrees (for DXF).
+    // Convert text rotation from degrees to radians before DWG serialization.
+    for (const entity of doc.modelSpace.entities) {
+      if (entity instanceof TextEntity!) {
+        entity.rotation = entity.rotation * (Math.PI / 180);
+      }
+    }
+
     // Estimate a generous buffer size for the DWG output
     const buffer = new ArrayBuffer(10 * 1024 * 1024);
     const writer = new DwgWriter!(buffer, doc);
