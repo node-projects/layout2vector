@@ -68,6 +68,10 @@ export async function injectLibrary(page: Page): Promise<void> {
     // Use compiled JS from dist
     const files = [
       "types.js",
+      "css-color.js",
+      "gradient-utils.js",
+      "text-whitespace.js",
+      "writer-utils.js",
       "geometry.js",
       "traversal.js",
       "form-controls.js",

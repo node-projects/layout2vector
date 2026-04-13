@@ -36,7 +36,10 @@ async function ensureDxfLoaded() {
   }
 }
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { cssColorToTrueColor } from "./css-color.js";
 import { roundedQuadPath } from "./geometry.js";
+import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
+import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./writer-utils.js";
 
 /** Determine file extension from a data URL MIME type. */
 function dataUrlToExtension(dataUrl: string): string {
@@ -53,98 +56,6 @@ function dataUrlToExtension(dataUrl: string): string {
   return "jpg";
 }
 
-/** Color conversion cache to avoid repeated regex parsing. */
-const hexColorCache = new Map<string, string | undefined>();
-
-/** Parse a CSS color, returning hex and alpha. Returns undefined for invisible colors. */
-function cssColorToHex(color: string | undefined): string | undefined {
-  if (!color || color === "transparent" || color === "none") return undefined;
-  const cached = hexColorCache.get(color);
-  if (cached !== undefined) return cached;
-  const result = cssColorToHexUncached(color);
-  // Limit cache size to prevent unbounded memory growth
-  if (hexColorCache.size > 2000) hexColorCache.clear();
-  hexColorCache.set(color, result);
-  return result;
-}
-
-function cssColorToHexUncached(color: string): string | undefined {
-  // Handle hex colors
-  if (color.startsWith("#")) {
-    // Normalize #rgb to #rrggbb
-    if (color.length === 4) {
-      const r = color[1], g = color[2], b = color[3];
-      return `#${r}${r}${g}${g}${b}${b}`;
-    }
-    // #rrggbbaa — check alpha
-    if (color.length === 9) {
-      const alpha = parseInt(color.slice(7, 9), 16);
-      if (alpha === 0) return undefined;
-    }
-    return color.substring(0, 7);
-  }
-
-  // Handle rgb/rgba
-  const rgbMatch = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (rgbMatch) {
-    // Check alpha channel
-    if (rgbMatch[4] !== undefined && parseFloat(rgbMatch[4]) <= 0) {
-      return undefined; // fully transparent
-    }
-    const r = parseInt(rgbMatch[1]).toString(16).padStart(2, "0");
-    const g = parseInt(rgbMatch[2]).toString(16).padStart(2, "0");
-    const b = parseInt(rgbMatch[3]).toString(16).padStart(2, "0");
-    return `#${r}${g}${b}`;
-  }
-
-  return undefined;
-}
-
-function preservesWhitespace(style: Style): boolean {
-  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
-}
-
-function normalizeTextForRendering(text: string, style: Style): string {
-  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
-  return text.replace(/\s+/g, " ").trim();
-}
-
-/**
- * Convert a hex color string to a DXF trueColor integer.
- * DXF group 420 requires a 24-bit decimal integer: (R << 16) | (G << 8) | B
- */
-function hexToTrueColor(hex: string): number {
-  const stripped = hex.startsWith("#") ? hex.slice(1) : hex;
-  return parseInt(stripped, 16);
-}
-
-/** Get trueColor integer from a CSS color, or undefined if invisible. */
-function getTrueColor(color: string | undefined): number | undefined {
-  const hex = cssColorToHex(color);
-  if (!hex) return undefined;
-  return hexToTrueColor(hex);
-}
-
-/** Check if stroke is visible (has color and non-zero width). */
-function hasVisibleStroke(style: Style): boolean {
-  const strokeHex = cssColorToHex(style.stroke);
-  if (!strokeHex) return false;
-  const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
-  return strokeWidth > 0;
-}
-
-/** Parse border-radius to a radius value in pixels. */
-function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): number {
-  if (!borderRadius || borderRadius === "0px") return 0;
-  const val = parseFloat(borderRadius);
-  if (isNaN(val) || val <= 0) return 0;
-  if (borderRadius.includes("%")) {
-    // Resolve percentage against element dimensions (average of width/height for uniform radius)
-    const avgDim = ((elWidth ?? 0) + (elHeight ?? 0)) / 2;
-    return avgDim > 0 ? avgDim * val / 100 : val;
-  }
-  return val;
-}
 
 /** Generate arc points for a rounded corner. */
 function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAngle: number, segments: number): { x: number; y: number }[] {
@@ -154,17 +65,6 @@ function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAng
     pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
   }
   return pts;
-}
-
-/** Check if a quad is an axis-aligned rectangle. */
-function isAxisAlignedRect(points: [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }, { x: number; y: number }]): boolean {
-  const eps = 0.5;
-  return (
-    Math.abs(points[0].y - points[1].y) < eps &&
-    Math.abs(points[2].y - points[3].y) < eps &&
-    Math.abs(points[0].x - points[3].x) < eps &&
-    Math.abs(points[1].x - points[2].x) < eps
-  );
 }
 
 /** Options for the DXF writer. */
@@ -259,12 +159,13 @@ export class DXFWriter implements Writer<string> {
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
-    const trueColor = getTrueColor(style.stroke) ?? getTrueColor(style.fill);
-    const fillVisible = cssColorToHex(style.fill) !== undefined;
-    const strokeVisible = hasVisibleStroke(style);
+    const fillColor = cssColorToTrueColor(style.fill);
+    const stroke = getVisibleStroke(style, cssColorToTrueColor);
+    const trueColor = stroke?.color ?? fillColor;
+    const fillVisible = fillColor !== undefined;
 
     // Skip fully transparent elements
-    if (!fillVisible && !strokeVisible) return;
+    if (!fillVisible && !stroke) return;
 
     const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
 
@@ -332,7 +233,7 @@ export class DXFWriter implements Writer<string> {
         }
       }
       if (fillVisible) {
-        const fillColor2 = getTrueColor(style.fill);
+        const fillColor2 = cssColorToTrueColor(style.fill);
         if (fillColor2 !== undefined) this.addSolidHatch(verts, fillColor2);
       }
       const dxfVerts = verts.map(p => ({ point: point2d!(p.x, this.flipY(p.y)) }));
@@ -354,13 +255,13 @@ export class DXFWriter implements Writer<string> {
   }
 
   async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
-    const fillColor = getTrueColor(style.fill);
-    const strokeColor = getTrueColor(style.stroke);
-    const fillVisible = cssColorToHex(style.fill) !== undefined;
-    const strokeVisible = hasVisibleStroke(style);
+    const fillColor = cssColorToTrueColor(style.fill);
+    const stroke = getVisibleStroke(style, cssColorToTrueColor);
+    const strokeColor = stroke?.color;
+    const fillVisible = fillColor !== undefined;
 
     // Skip fully transparent elements
-    if (!fillVisible && !strokeVisible) return;
+    if (!fillVisible && !stroke) return;
 
     // Solid fill via HATCH for closed shapes with a visible fill
     if (closed && fillVisible && fillColor !== undefined && points.length >= 3) {
@@ -385,7 +286,7 @@ export class DXFWriter implements Writer<string> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = normalizeTextForRendering(text, style);
+    const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
 
     // Compute rotation angle from quad top edge (topLeft → topRight)
@@ -414,7 +315,7 @@ export class DXFWriter implements Writer<string> {
     };
 
     // Text color: prefer style.color (CSS color), then style.fill
-    const trueColor = getTrueColor(style.color) ?? getTrueColor(style.fill);
+    const trueColor = cssColorToTrueColor(style.color) ?? cssColorToTrueColor(style.fill);
     const opts: Record<string, any> = {};
     if (trueColor !== undefined) opts.trueColor = String(trueColor);
     if (Math.abs(angleDeg) > 0.1) opts.rotation = angleDeg;

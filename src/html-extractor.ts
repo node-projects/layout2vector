@@ -6,6 +6,7 @@ import type { StackingNode } from "./traversal.js";
 import { isSVGElement } from "./traversal.js";
 import { getElementQuads } from "./geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
+import { normalizeWhitespaceAwareText, preservesWhitespace } from "./text-whitespace.js";
 
 /** Characters that MathML stretches vertically. */
 const STRETCHY_MO_CHARS = new Set([
@@ -120,7 +121,7 @@ function extractTextNode(
 
   if (effectiveLineCount === 1) {
     // Single line: use the first quad directly
-    let text = normalizeExtractedText(lineTexts[0], parentStyle);
+    let text = normalizeWhitespaceAwareText(lineTexts[0], parentStyle);
     if (text.length === 0) return results;
 
     if (parentStyle.textTransform) {
@@ -153,7 +154,7 @@ function extractTextNode(
     // Multi-line: use per-line quads from getBoxQuads (transform-aware)
     const N = allQuads.length;
     for (let i = 0; i < N; i++) {
-      let text = normalizeExtractedText(i < lineTexts.length ? lineTexts[i] : "", parentStyle);
+      let text = normalizeWhitespaceAwareText(i < lineTexts.length ? lineTexts[i] : "", parentStyle);
       if (text.length === 0) continue;
 
       if (parentStyle.textTransform) {
@@ -340,17 +341,6 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   lines.push(text.substring(lineStart));
 
   return lines;
-}
-
-function preservesWhitespace(style: Style): boolean {
-  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
-}
-
-function normalizeExtractedText(text: string, style: Style): string {
-  if (preservesWhitespace(style)) {
-    return text.replace(/\r\n?/g, "\n");
-  }
-  return text.replace(/\s+/g, " ").trim();
 }
 
 function splitPreformattedTextBySourceLines(textNode: Text, expectedLines: number): string[] | null {

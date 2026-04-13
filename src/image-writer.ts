@@ -9,65 +9,13 @@
  * Requires a Canvas-capable environment (browser with document.createElement).
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { getVisibleCssColorString } from "./css-color.js";
+import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./gradient-utils.js";
 import { roundedQuadPath } from "./geometry.js";
+import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
+import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
-
-function parseColor(color: string | undefined): string | null {
-  if (!color || color === "transparent" || color === "none") return null;
-  // Check for fully transparent rgba
-  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (m && m[4] !== undefined && parseFloat(m[4]) <= 0) return null;
-  // Check for fully transparent hex (#rrggbbaa)
-  if (color.startsWith("#") && color.length === 9) {
-    const alpha = parseInt(color.slice(7, 9), 16);
-    if (alpha === 0) return null;
-  }
-  return color;
-}
-
-function hasVisibleStroke(style: Style): { color: string; width: number } | null {
-  const color = parseColor(style.stroke);
-  if (!color) return null;
-  const width = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
-  if (width <= 0) return null;
-  return { color, width };
-}
-
-function parseBorderRadius(borderRadius: string | undefined, w?: number, h?: number): number {
-  if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return 0;
-  const raw = borderRadius.split(/\s+/)[0];
-  if (!raw) return 0;
-  if (raw.endsWith("%")) {
-    const pct = parseFloat(raw);
-    if (isNaN(pct) || pct <= 0) return 0;
-    // CSS border-radius %: resolved against the corresponding dimension
-    // For a single value, use the smaller of width/height
-    const ref = (w !== undefined && h !== undefined) ? Math.min(w, h) : 0;
-    return (pct / 100) * ref;
-  }
-  const val = parseFloat(raw);
-  return !isNaN(val) && val > 0 ? val : 0;
-}
-
-function isAxisAlignedRect(points: Quad): boolean {
-  const eps = 0.5;
-  return (
-    Math.abs(points[0].y - points[1].y) < eps &&
-    Math.abs(points[2].y - points[3].y) < eps &&
-    Math.abs(points[0].x - points[3].x) < eps &&
-    Math.abs(points[1].x - points[2].x) < eps
-  );
-}
-
-function preservesWhitespace(style: Style): boolean {
-  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
-}
-
-function normalizeTextForRendering(text: string, style: Style): string {
-  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
-  return text.replace(/\s+/g, " ").trim();
-}
 
 // ── Gradient parsing ────────────────────────────────────────────────
 
@@ -77,33 +25,9 @@ interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boo
 interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
-function parseGradientAngle(dirStr: string): number {
-  dirStr = dirStr.trim();
-  const degMatch = dirStr.match(/^([\d.]+)deg$/);
-  if (degMatch) return parseFloat(degMatch[1]);
-  const radMatch = dirStr.match(/^([\d.]+)rad$/);
-  if (radMatch) return parseFloat(radMatch[1]) * (180 / Math.PI);
-  const turnMatch = dirStr.match(/^([\d.]+)turn$/);
-  if (turnMatch) return parseFloat(turnMatch[1]) * 360;
-  const dirMap: Record<string, number> = {
-    "to top": 0, "to right": 90, "to bottom": 180, "to left": 270,
-    "to top right": 45, "to right top": 45, "to bottom right": 135, "to right bottom": 135,
-    "to bottom left": 225, "to left bottom": 225, "to top left": 315, "to left top": 315,
-  };
-  return dirMap[dirStr] ?? 180;
-}
-
 function parseColorStops(argsStr: string): GradientStop[] {
   const stops: GradientStop[] = [];
-  const parts: string[] = [];
-  let depth = 0, current = "";
-  for (const ch of argsStr) {
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (ch === "," && depth === 0) { parts.push(current.trim()); current = ""; continue; }
-    current += ch;
-  }
-  if (current.trim()) parts.push(current.trim());
+  const parts = splitTopLevelCommaSeparated(argsStr);
 
   for (const part of parts) {
     const percentMatch = part.match(/([\d.]+)%\s*$/);
@@ -152,17 +76,6 @@ function parseColorStops(argsStr: string): GradientStop[] {
   return stops;
 }
 
-function extractFirstGradient(bgImage: string): string | null {
-  const match = bgImage.match(/(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/);
-  if (!match || match.index === undefined) return null;
-  let depth = 0, start = match.index;
-  for (let i = start; i < bgImage.length; i++) {
-    if (bgImage[i] === "(") depth++;
-    else if (bgImage[i] === ")") { depth--; if (depth === 0) return bgImage.slice(start, i + 1); }
-  }
-  return null;
-}
-
 /** Extract ALL gradient strings from a backgroundImage value (CSS layer order: first = top). */
 function extractAllGradients(bgImage: string): string[] {
   const gradients: string[] = [];
@@ -195,11 +108,7 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   if (linearMatch) {
     const repeating = !!linearMatch[1];
     const inner = linearMatch[2];
-    let depth = 0, splitIdx = -1;
-    for (let i = 0; i < inner.length; i++) {
-      if (inner[i] === "(") depth++; else if (inner[i] === ")") depth--;
-      else if (inner[i] === "," && depth === 0) { splitIdx = i; break; }
-    }
+    const splitIdx = findFirstTopLevelComma(inner);
     let angleDeg = 180, stopsStr = inner;
     if (splitIdx >= 0) {
       const firstPart = inner.slice(0, splitIdx).trim();
@@ -232,13 +141,8 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
       const val = parseFloat(fromMatch[1]);
       const unit = fromMatch[2].toLowerCase();
       fromAngleDeg = unit === "rad" ? val * (180 / Math.PI) : unit === "turn" ? val * 360 : val;
-      // Find the comma after the "from" part
-      let depth = 0;
-      for (let i = 0; i < inner.length; i++) {
-        if (inner[i] === "(") depth++;
-        else if (inner[i] === ")") depth--;
-        else if (inner[i] === "," && depth === 0) { stopsStr = inner.slice(i + 1); break; }
-      }
+      const splitIdx = findFirstTopLevelComma(inner);
+      if (splitIdx >= 0) stopsStr = inner.slice(splitIdx + 1);
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
@@ -496,8 +400,8 @@ export class ImageWriter implements Writer<ImageResult> {
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
-    const fill = parseColor(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const fill = getVisibleCssColorString(style.fill);
+    const stroke = getVisibleStroke(style, getVisibleCssColorString);
 
     if (!fill && !stroke && !style.boxShadow) return;
 
@@ -560,8 +464,8 @@ export class ImageWriter implements Writer<ImageResult> {
   async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
 
-    const fill = parseColor(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const fill = getVisibleCssColorString(style.fill);
+    const stroke = getVisibleStroke(style, getVisibleCssColorString);
 
     if (!fill && !stroke) return;
 
@@ -594,7 +498,7 @@ export class ImageWriter implements Writer<ImageResult> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = normalizeTextForRendering(text, style);
+    const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
 
     const ctx = this.ctx;
@@ -622,7 +526,7 @@ export class ImageWriter implements Writer<ImageResult> {
     ctx.font = fontParts.join(" ");
 
     // Text color
-    const textColor = parseColor(style.color) ?? parseColor(style.fill) ?? "#000000";
+    const textColor = getVisibleCssColorString(style.color) ?? getVisibleCssColorString(style.fill) ?? "#000000";
     ctx.fillStyle = textColor;
 
     // Compute rotation from quad top edge
@@ -1134,7 +1038,7 @@ export class ImageWriter implements Writer<ImageResult> {
     ];
 
     for (const side of sides) {
-      const color = parseColor(side.color);
+      const color = getVisibleCssColorString(side.color);
       const w = side.width ? parseFloat(side.width) : 0;
       if (!color || w <= 0 || !side.borderStyle || side.borderStyle === "none" || side.borderStyle === "hidden") continue;
 

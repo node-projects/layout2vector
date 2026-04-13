@@ -3,61 +3,12 @@
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { getVisibleCssColorString } from "./css-color.js";
 import { roundedQuadPath } from "./geometry.js";
+import { normalizeWhitespaceAwareText, preservesWhitespace } from "./text-whitespace.js";
+import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
-
-function parseColor(color: string | undefined): string | null {
-  if (!color || color === "transparent" || color === "none") return null;
-  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (m && m[4] !== undefined && parseFloat(m[4]) <= 0) return null;
-  if (color.startsWith("#") && color.length === 9) {
-    const alpha = parseInt(color.slice(7, 9), 16);
-    if (alpha === 0) return null;
-  }
-  return color;
-}
-
-function hasVisibleStroke(style: Style): { color: string; width: number } | null {
-  const color = parseColor(style.stroke);
-  if (!color) return null;
-  const width = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
-  if (width <= 0) return null;
-  return { color, width };
-}
-
-function isAxisAlignedRect(points: Quad): boolean {
-  const eps = 0.5;
-  return (
-    Math.abs(points[0].y - points[1].y) < eps &&
-    Math.abs(points[2].y - points[3].y) < eps &&
-    Math.abs(points[0].x - points[3].x) < eps &&
-    Math.abs(points[1].x - points[2].x) < eps
-  );
-}
-
-function preservesWhitespace(style: Style): boolean {
-  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
-}
-
-function normalizeTextForRendering(text: string, style: Style): string {
-  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
-  return text.replace(/\s+/g, " ").trim();
-}
-
-function parseBorderRadiusValue(borderRadius: string | undefined, w?: number, h?: number): number {
-  if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return 0;
-  const raw = borderRadius.split(/\s+/)[0];
-  if (!raw) return 0;
-  if (raw.endsWith("%")) {
-    const pct = parseFloat(raw);
-    if (isNaN(pct) || pct <= 0) return 0;
-    const ref = (w !== undefined && h !== undefined) ? Math.min(w, h) : 0;
-    return (pct / 100) * ref;
-  }
-  const val = parseFloat(raw);
-  return !isNaN(val) && val > 0 ? val : 0;
-}
 
 /** Escape text for use inside HTML. Non-ASCII chars are encoded as numeric entities for encoding safety. */
 function escHtml(s: string): string {
@@ -80,11 +31,6 @@ function escHtml(s: string): string {
     }
   }
   return out;
-}
-
-/** Format a number, trimming trailing zeros. */
-function n(v: number): string {
-  return +v.toFixed(2) + "";
 }
 
 /** Build an SVG polygon path string from quad points. */
@@ -235,8 +181,8 @@ export class HTMLWriter implements Writer<string> {
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
-    const fill = parseColor(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const fill = getVisibleCssColorString(style.fill);
+    const stroke = getVisibleStroke(style, getVisibleCssColorString);
     // Only output gradients in background-image; url() images are handled by drawImage
     const bgImage = style.backgroundImage && style.backgroundImage !== "none"
       ? style.backgroundImage : undefined;
@@ -273,7 +219,7 @@ export class HTMLWriter implements Writer<string> {
       // Calculate edge lengths for border-radius resolution
       const edgeW = Math.sqrt((points[1].x - points[0].x) ** 2 + (points[1].y - points[0].y) ** 2);
       const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
-      const radius = parseBorderRadiusValue(style.borderRadius, edgeW, edgeH);
+      const radius = parseMinDimensionBorderRadius(style.borderRadius, edgeW, edgeH);
       const d = radius > 0 ? roundedQuadToSvgPath(points, radius) : quadToSvgPath(points);
       const svgAttrs: string[] = [];
       if (fill) svgAttrs.push(`fill="${escHtml(fill)}"`);
@@ -287,8 +233,8 @@ export class HTMLWriter implements Writer<string> {
 
   async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
     if (points.length < 2) return;
-    const fill = parseColor(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const fill = getVisibleCssColorString(style.fill);
+    const stroke = getVisibleStroke(style, getVisibleCssColorString);
     if (!fill && !stroke) return;
 
     const opacity = style.opacity;
@@ -305,7 +251,7 @@ export class HTMLWriter implements Writer<string> {
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     const preserveWhitespace = preservesWhitespace(style);
-    const sanitized = normalizeTextForRendering(text, style);
+    const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
 
     const opacity = style.opacity;
@@ -320,7 +266,7 @@ export class HTMLWriter implements Writer<string> {
     const fontWeight = style.fontWeight ?? "normal";
     const fontStyle = style.fontStyle ?? "normal";
     const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "sans-serif";
-    const textColor = parseColor(style.color) ?? parseColor(style.fill) ?? "black";
+    const textColor = getVisibleCssColorString(style.color) ?? getVisibleCssColorString(style.fill) ?? "black";
 
     // Compute half-leading: the line box (quad) is taller than the em square by the leading.
     // We offset by half the leading so text sits at the correct position.

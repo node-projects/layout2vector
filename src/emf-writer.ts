@@ -8,77 +8,11 @@
  * Reference: [MS-EMF] Enhanced Metafile Format specification.
  */
 import type { Point, Quad, Style, Writer } from "./types.js";
+import { cssColorToColorRef } from "./css-color.js";
+import { normalizeWhitespaceAwareText } from "./text-whitespace.js";
+import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
-
-/** Parse a CSS color to an COLORREF value (0x00BBGGRR). Returns null for transparent. */
-function cssColorToColorRef(color: string | undefined): number | null {
-  if (!color || color === "transparent" || color === "none") return null;
-
-  if (color.startsWith("#")) {
-    let hex = color.slice(1);
-    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    if (hex.length === 8) {
-      const alpha = parseInt(hex.slice(6, 8), 16);
-      if (alpha === 0) return null;
-      hex = hex.slice(0, 6);
-    }
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    return r | (g << 8) | (b << 16);
-  }
-
-  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (m) {
-    if (m[4] !== undefined && parseFloat(m[4]) <= 0) return null;
-    const r = parseInt(m[1]);
-    const g = parseInt(m[2]);
-    const b = parseInt(m[3]);
-    return r | (g << 8) | (b << 16);
-  }
-
-  return null;
-}
-
-function hasVisibleStroke(style: Style): { color: number; width: number } | null {
-  const col = cssColorToColorRef(style.stroke);
-  if (col === null) return null;
-  const w = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
-  if (w <= 0) return null;
-  return { color: col, width: w };
-}
-
-function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): number {
-  if (!borderRadius || borderRadius === "0px") return 0;
-  const val = parseFloat(borderRadius);
-  if (isNaN(val) || val <= 0) return 0;
-  if (borderRadius.includes("%")) {
-    const avgDim = ((elWidth ?? 0) + (elHeight ?? 0)) / 2;
-    return avgDim > 0 ? avgDim * val / 100 : val;
-  }
-  return val;
-}
-
-function isAxisAlignedRect(points: Quad): boolean {
-  const eps = 0.5;
-  return (
-    Math.abs(points[0].y - points[1].y) < eps &&
-    Math.abs(points[2].y - points[3].y) < eps &&
-    Math.abs(points[0].x - points[3].x) < eps &&
-    Math.abs(points[1].x - points[2].x) < eps
-  );
-}
-
-function preservesWhitespace(style: Style): boolean {
-  return style.whiteSpace === "pre" || style.whiteSpace === "pre-wrap" || style.whiteSpace === "break-spaces";
-}
-
-function normalizeTextForRendering(text: string, style: Style): string {
-  if (preservesWhitespace(style)) return text.replace(/\r\n?/g, "\n");
-  return text.replace(/\s+/g, " ").trim();
-}
-
 // ── EMF Binary Helpers ──────────────────────────────────────────────
 
 /** EMF record type constants. */
@@ -284,7 +218,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (style.opacity !== undefined && style.opacity <= 0) return;
 
     const fillColor = cssColorToColorRef(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const stroke = getVisibleStroke(style, cssColorToColorRef);
 
     // Check for per-side borders
     if (this.hasMixedBorders(style)) {
@@ -373,7 +307,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (style.opacity !== undefined && style.opacity <= 0) return;
 
     const fillColor = cssColorToColorRef(style.fill);
-    const stroke = hasVisibleStroke(style);
+    const stroke = getVisibleStroke(style, cssColorToColorRef);
     if (fillColor === null && !stroke) return;
 
     this.saveState();
@@ -426,7 +360,7 @@ export class EMFWriter implements Writer<Uint8Array> {
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = normalizeTextForRendering(text, style);
+    const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
     if (style.opacity !== undefined && style.opacity <= 0) return;
 

@@ -19,44 +19,14 @@ import {
   PdfPage,
   PdfPages,
 } from "./pdf-objects.js";
+import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./css-color.js";
+import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./gradient-utils.js";
 import { parseTTF, type ParsedTTF } from "./ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "./types.js";
 import { roundedQuadPath } from "./geometry.js";
+import { isAxisAlignedRect } from "./writer-utils.js";
 
 // ── Shared helpers ──────────────────────────────────────────────────
-
-interface ParsedColor { r: number; g: number; b: number; a: number; }
-
-/** Color parsing cache to avoid repeated regex matching. */
-const colorCache = new Map<string, ParsedColor | null>();
-
-function parseColor(color: string | undefined): ParsedColor | null {
-  if (!color || color === "transparent" || color === "none") return null;
-  const cached = colorCache.get(color);
-  if (cached !== undefined) return cached;
-  const result = parseColorUncached(color);
-  // Limit cache size to prevent unbounded memory growth
-  if (colorCache.size > 2000) colorCache.clear();
-  colorCache.set(color, result);
-  return result;
-}
-
-function parseColorUncached(color: string): ParsedColor | null {
-  if (color.startsWith("#")) {
-    let hex = color.slice(1);
-    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    const a = hex.length >= 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
-    return { r: parseInt(hex.slice(0, 2), 16), g: parseInt(hex.slice(2, 4), 16), b: parseInt(hex.slice(4, 6), 16), a };
-  }
-  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)/);
-  if (m) return { r: parseInt(m[1]), g: parseInt(m[2]), b: parseInt(m[3]), a: m[4] !== undefined ? parseFloat(m[4]) : 1 };
-  return null;
-}
-
-function parseVisibleColor(color: string | undefined): ParsedColor | null {
-  const c = parseColor(color);
-  return c && c.a > 0 ? c : null;
-}
 
 function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): { rx: number; ry: number } | null {
   if (!borderRadius || borderRadius === "0px") return null;
@@ -69,16 +39,6 @@ function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, e
     ry = (elHeight ?? 0) * ry / 100 || ry;
   }
   return { rx, ry };
-}
-
-function isAxisAlignedRect(points: Quad): boolean {
-  const eps = 0.5;
-  return (
-    Math.abs(points[0].y - points[1].y) < eps &&
-    Math.abs(points[2].y - points[3].y) < eps &&
-    Math.abs(points[0].x - points[3].x) < eps &&
-    Math.abs(points[1].x - points[2].x) < eps
-  );
 }
 
 function parseFontSize(fontSize: string | undefined): number {
@@ -237,33 +197,9 @@ interface RadialGradient { type: "radial"; stops: GradientStop[]; }
 interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
-function parseGradientAngle(dirStr: string): number {
-  dirStr = dirStr.trim();
-  const degMatch = dirStr.match(/^([\d.]+)deg$/);
-  if (degMatch) return parseFloat(degMatch[1]);
-  const radMatch = dirStr.match(/^([\d.]+)rad$/);
-  if (radMatch) return parseFloat(radMatch[1]) * (180 / Math.PI);
-  const turnMatch = dirStr.match(/^([\d.]+)turn$/);
-  if (turnMatch) return parseFloat(turnMatch[1]) * 360;
-  const dirMap: Record<string, number> = {
-    "to top": 0, "to right": 90, "to bottom": 180, "to left": 270,
-    "to top right": 45, "to right top": 45, "to bottom right": 135, "to right bottom": 135,
-    "to bottom left": 225, "to left bottom": 225, "to top left": 315, "to left top": 315,
-  };
-  return dirMap[dirStr] ?? 180;
-}
-
 function parseColorStops(argsStr: string): GradientStop[] {
   const stops: GradientStop[] = [];
-  const parts: string[] = [];
-  let depth = 0, current = "";
-  for (const ch of argsStr) {
-    if (ch === "(") depth++;
-    else if (ch === ")") depth--;
-    else if (ch === "," && depth === 0) { parts.push(current.trim()); current = ""; continue; }
-    current += ch;
-  }
-  if (current.trim()) parts.push(current.trim());
+  const parts = splitTopLevelCommaSeparated(argsStr);
 
   for (const part of parts) {
     const percentMatch = part.match(/([\d.]+)%\s*$/);
@@ -301,17 +237,6 @@ function parseColorStops(argsStr: string): GradientStop[] {
   return stops;
 }
 
-function extractFirstGradient(bgImage: string): string | null {
-  const match = bgImage.match(/(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/);
-  if (!match || match.index === undefined) return null;
-  let depth = 0, start = match.index;
-  for (let i = start; i < bgImage.length; i++) {
-    if (bgImage[i] === "(") depth++;
-    else if (bgImage[i] === ")") { depth--; if (depth === 0) return bgImage.slice(start, i + 1); }
-  }
-  return null;
-}
-
 function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   if (!bgImage || bgImage === "none") return null;
   const gradientStr = extractFirstGradient(bgImage);
@@ -320,11 +245,7 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   const linearMatch = gradientStr.match(/^(?:repeating-)?linear-gradient\((.+)\)$/);
   if (linearMatch) {
     const inner = linearMatch[1];
-    let depth = 0, splitIdx = -1;
-    for (let i = 0; i < inner.length; i++) {
-      if (inner[i] === "(") depth++; else if (inner[i] === ")") depth--;
-      else if (inner[i] === "," && depth === 0) { splitIdx = i; break; }
-    }
+    const splitIdx = findFirstTopLevelComma(inner);
     let angleDeg = 180, stopsStr = inner;
     if (splitIdx >= 0) {
       const firstPart = inner.slice(0, splitIdx).trim();
