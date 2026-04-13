@@ -35,13 +35,13 @@
     "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
-    "@node-projects/acad-ts": "^1.0.0",
+    "@node-projects/acad-ts": "^1.1.0",
     "@tarikjabiri/dxf": "^2.8.9",
     "esbuild": "^0.28.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "get-box-quads-polyfill": "^4.29.0",
     "typescript": "^6.0.2"
   }
