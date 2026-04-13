@@ -167,4 +167,61 @@ test.describe("HTML Geometry Extraction", () => {
     expect(summary.plainPaddingX).toBeGreaterThan(20);
     expect(Math.abs(summary.rotatedAngle)).toBeGreaterThan(0.03);
   });
+
+  test("textMeasurement auto only expands text when writing mode or direction need it", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;font-family:'Segoe UI',sans-serif;">
+        <p id="normal" style="margin:0 0 24px;font-size:24px;">Normal flow</p>
+        <div id="vertical" style="height:220px;width:88px;font-size:24px;line-height:1.2;direction:rtl;writing-mode:vertical-rl;">VERTICAL</div>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const normalIr = await extract(document.getElementById("normal"), {
+        boxType: "border",
+        includeText: true,
+        textMeasurement: "auto",
+      });
+      const verticalIr = await extract(document.getElementById("vertical"), {
+        boxType: "border",
+        includeText: true,
+        textMeasurement: "auto",
+      });
+      const explicitIr = await extract(document.getElementById("normal"), {
+        boxType: "border",
+        includeText: true,
+        textMeasurement: "character",
+      });
+
+      const toTextSummary = (ir: any[]) => ir
+        .filter((node) => node.type === "text")
+        .map((node) => ({
+          text: node.text,
+          whiteSpace: node.style.whiteSpace ?? null,
+          writingMode: node.style.writingMode ?? null,
+          direction: node.style.direction ?? null,
+        }));
+
+      return {
+        normal: toTextSummary(normalIr),
+        vertical: toTextSummary(verticalIr),
+        explicit: toTextSummary(explicitIr),
+      };
+    });
+
+    expect(summary.normal).toHaveLength(1);
+    expect(summary.normal[0].text).toBe("Normal flow");
+
+    expect(summary.vertical.map((node: any) => node.text).join("")).toBe("VERTICAL");
+    expect(summary.vertical.length).toBe("VERTICAL".length);
+    expect(summary.vertical.every((node: any) => node.whiteSpace === "pre")).toBe(true);
+    expect(summary.vertical.every((node: any) => node.writingMode === null)).toBe(true);
+    expect(summary.vertical.every((node: any) => node.direction === null)).toBe(true);
+
+    expect(summary.explicit.map((node: any) => node.text).join("")).toBe("Normal flow");
+    expect(summary.explicit.length).toBeGreaterThan(1);
+    expect(summary.explicit.every((node: any) => node.whiteSpace === "pre")).toBe(true);
+  });
 });

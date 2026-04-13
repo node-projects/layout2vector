@@ -79,6 +79,9 @@ export type Style = {
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 };
 
+/** Controls how text is split into IR text nodes during extraction. */
+export type TextMeasurementMode = "line" | "character" | "auto";
+
 /** Intermediate representation node. */
 export type IRNode =
   | {
@@ -119,6 +122,13 @@ export type Options = {
   includeText?: boolean;
   includeImages?: boolean;
   includeInvisible?: boolean;
+  /**
+   * Controls text extraction granularity.
+   * - `line`: one IR text node per visual line (default)
+   * - `character`: one IR text node per measured grapheme cluster
+   * - `auto`: switch to grapheme measurement only for non-default writing-mode or direction
+   */
+  textMeasurement?: TextMeasurementMode;
   /**
    * When true, same-origin iframe documents are traversed and extracted as part
    * of the parent tree. Cross-origin or not-yet-loaded iframes are skipped.

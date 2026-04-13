@@ -286,4 +286,34 @@ test.describe("PNG Writer Output", () => {
       expect(pixel[3]).toBeGreaterThan(200);
     }
   });
+
+  test("renders vertical text when character measurement is enabled", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:12px;background:white;">
+        <div id="target" style="height:220px;width:96px;color:rgb(23, 63, 95);font:700 24px/1.2 'Segoe UI', sans-serif;direction:rtl;writing-mode:vertical-rl;">VERTICAL</div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+        textMeasurement: "auto",
+      });
+      const writer = new (window as any).__HC.PNGWriter(120, 240);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
+      await pngResult.finalize();
+
+      return {
+        dataUrl: pngResult.toDataURL(),
+        textNodes: ir.filter((node: any) => node.type === "text").map((node: any) => node.text),
+      };
+    });
+
+    expect(result.dataUrl).toMatch(/^data:image\/png;base64,/);
+    expect(result.textNodes.join("")).toBe("VERTICAL");
+    expect(result.textNodes.length).toBe("VERTICAL".length);
+  });
 });

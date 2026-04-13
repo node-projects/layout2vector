@@ -6,7 +6,7 @@
  */
 
 // Core types
-export type { Point, Quad, Style, IRNode, Options, Writer } from "./types.js";
+export type { Point, Quad, Style, IRNode, Options, Writer, TextMeasurementMode } from "./types.js";
 
 // Pipeline
 export { extractIR, renderIR } from "./pipeline.js";

@@ -173,6 +173,15 @@ function appendTextCss(css: string[], style: Style, preserveWhitespace: boolean)
   }
 }
 
+function appendTextEffectsCss(css: string[], style: Style): void {
+  pushCss(css, "filter", style.filter);
+  pushCss(css, "mix-blend-mode", style.mixBlendMode);
+  if (style.mask) {
+    pushCss(css, "mask", style.mask);
+    pushCss(css, "-webkit-mask", style.mask);
+  }
+}
+
 function getQuadTransform(points: Quad): QuadTransform | null {
   const dx = points[1].x - points[0].x;
   const dy = points[1].y - points[0].y;
@@ -473,6 +482,7 @@ export class HTMLWriter implements Writer<string> {
       if (fontStyle !== "normal") css.push(`font-style:${fontStyle}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendTextCss(css, style, preserveWhitespace);
+      appendTextEffectsCss(css, style);
 
       if (style.textShadow && style.textShadow !== "none") {
         css.push(`text-shadow:${style.textShadow}`);
@@ -499,6 +509,7 @@ export class HTMLWriter implements Writer<string> {
       if (fontStyle !== "normal") css.push(`font-style:${fontStyle}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendTextCss(css, style, preserveWhitespace);
+      appendTextEffectsCss(css, style);
 
       if (style.textShadow && style.textShadow !== "none") {
         css.push(`text-shadow:${style.textShadow}`);

@@ -485,6 +485,13 @@ export class SVGWriter implements Writer<string> {
     if (preserveWhitespace) {
       attrs.push(`xml:space="preserve"`);
     }
+    if (style.direction && style.direction !== "ltr") {
+      attrs.push(`direction="${escXml(style.direction)}"`);
+      attrs.push(`unicode-bidi="embed"`);
+    }
+    if (style.writingMode && style.writingMode !== "horizontal-tb") {
+      attrs.push(`writing-mode="${escXml(style.writingMode)}"`);
+    }
 
     // Text shadow
     let shadowFilterId: string | undefined;

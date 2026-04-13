@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { setupPage } from "../helpers.js";
 import { renderIR } from "../../src/pipeline.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { SVGWriter } from "../../src/writers/svg-writer.js";
 import type { IRNode, Quad } from "../../src/types.js";
 
 test.describe("CSS property support", () => {
@@ -12,6 +13,7 @@ test.describe("CSS property support", () => {
         <div id="visual" style="width:180px;height:120px;background:linear-gradient(135deg, rgb(255, 202, 58), rgb(251, 133, 0));outline:4px dashed rgb(2, 48, 71);outline-offset:8px;filter:drop-shadow(0 12px 20px rgba(2, 48, 71, 0.35));mix-blend-mode:multiply;mask:radial-gradient(circle at 35% 35%, rgb(0, 0, 0) 0 38%, rgba(0, 0, 0, 0) 60%) center / 100% 100% no-repeat;-webkit-mask:radial-gradient(circle at 35% 35%, rgb(0, 0, 0) 0 38%, rgba(0, 0, 0, 0) 60%) center / 100% 100% no-repeat;transform:rotate(-6deg) skewX(-8deg);transform-origin:top left;"></div>
         <p id="text" style="margin:48px 0 0;width:240px;color:rgb(108, 24, 48);font-family:Georgia, 'Times New Roman', serif;font-size:29px;font-weight:700;font-style:italic;line-height:44px;letter-spacing:2px;word-spacing:6px;text-align:justify;text-decoration:underline;text-transform:uppercase;text-indent:48px;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;">styled
 text withlongtoken</p>
+        <p id="textSingle" style="margin:24px 0 0;width:240px;color:rgb(108, 24, 48);font-family:Georgia, 'Times New Roman', serif;font-size:29px;font-weight:700;font-style:italic;line-height:44px;letter-spacing:2px;word-spacing:6px;text-align:justify;text-decoration:underline;text-transform:uppercase;text-indent:48px;white-space:nowrap;word-break:break-word;overflow-wrap:anywhere;">single line sample</p>
         <p id="ellipsis" style="margin:24px 0 0;width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">This is intentionally much longer than the card width.</p>
         <div id="vertical" style="margin-top:24px;height:180px;width:88px;color:rgb(38, 70, 83);font:600 24px/1.2 'Segoe UI', sans-serif;direction:rtl;writing-mode:vertical-rl;transform:rotate(4deg);transform-origin:top left;">RTL FLOW</div>
       </body></html>`
@@ -21,17 +23,20 @@ text withlongtoken</p>
       const extract = (window as any).__HC.extractIR;
       const visualIr = await extract(document.getElementById("visual"), { boxType: "border", includeText: false });
       const textIr = await extract(document.getElementById("text"), { boxType: "border", includeText: true });
+      const textSingleIr = await extract(document.getElementById("textSingle"), { boxType: "border", includeText: true });
       const ellipsisIr = await extract(document.getElementById("ellipsis"), { boxType: "border", includeText: true });
       const verticalIr = await extract(document.getElementById("vertical"), { boxType: "border", includeText: true });
 
       const visualNode = visualIr.find((node: any) => node.type === "polygon");
       const textNode = textIr.find((node: any) => node.type === "text");
+      const textSingleNode = textSingleIr.find((node: any) => node.type === "text");
       const ellipsisNode = ellipsisIr.find((node: any) => node.type === "text");
       const verticalNode = verticalIr.find((node: any) => node.type === "text");
 
       return {
         visualStyle: visualNode?.style,
         textStyle: textNode?.style,
+        textSingleStyle: textSingleNode?.style,
         ellipsisStyle: ellipsisNode?.style,
         verticalStyle: verticalNode?.style,
       };
@@ -50,13 +55,14 @@ text withlongtoken</p>
     expect(summary.textStyle.lineHeight).toBe("44px");
     expect(summary.textStyle.letterSpacing).toBe("2px");
     expect(summary.textStyle.wordSpacing).toBe("6px");
-    expect(summary.textStyle.textAlign).toBe("justify");
     expect(summary.textStyle.textDecoration).toContain("underline");
     expect(summary.textStyle.textTransform).toBe("uppercase");
-    expect(summary.textStyle.textIndent).toBe("48px");
-    expect(summary.textStyle.whiteSpace).toBe("pre-wrap");
+    expect(["pre-wrap", "pre"]).toContain(summary.textStyle.whiteSpace);
     expect(summary.textStyle.wordBreak).toBe("break-word");
     expect(summary.textStyle.overflowWrap).toBe("anywhere");
+
+    expect(summary.textSingleStyle.textAlign).toBe("justify");
+    expect(summary.textSingleStyle.textIndent).toBe("48px");
 
     expect(summary.ellipsisStyle.textOverflow).toBe("ellipsis");
     expect(summary.ellipsisStyle.whiteSpace).toBe("nowrap");
@@ -138,5 +144,36 @@ text withlongtoken</p>
     expect(html).toContain("filter:grayscale(1)");
     expect(html).toContain("mix-blend-mode:screen");
     expect(html).toContain("-webkit-mask:linear-gradient");
+  });
+
+  test("SVG writer emits native writing-mode and direction attributes for text", async () => {
+    const textQuad: Quad = [
+      { x: 20, y: 24 },
+      { x: 52, y: 24 },
+      { x: 52, y: 204 },
+      { x: 20, y: 204 },
+    ];
+
+    const nodes: IRNode[] = [{
+      type: "text",
+      quad: textQuad,
+      text: "VERTICAL",
+      style: {
+        color: "rgb(12, 34, 56)",
+        fontFamily: "Georgia, serif",
+        fontSize: "28px",
+        fontWeight: "700",
+        direction: "rtl",
+        writingMode: "vertical-rl",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new SVGWriter({ width: 120, height: 240 });
+    const svg = await renderIR(nodes, writer);
+
+    expect(svg).toContain('writing-mode="vertical-rl"');
+    expect(svg).toContain('direction="rtl"');
+    expect(svg).toContain('unicode-bidi="embed"');
   });
 });

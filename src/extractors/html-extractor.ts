@@ -72,7 +72,7 @@ export function extractHTMLGeometry(
       // handled by the MathML extractor with correct stretched dimensions.
       if (isStretchedMathOperator(el)) continue;
 
-      const textIR = extractTextNode(textNode, el, node.extractedStyle, globalIndex);
+      const textIR = extractTextNode(textNode, el, node.extractedStyle, globalIndex, options);
       results.push(...textIR);
     }
   }
@@ -94,7 +94,8 @@ function extractTextNode(
   textNode: Text,
   parentEl: Element,
   parentStyle: Style,
-  globalIndex: number
+  globalIndex: number,
+  options: Options,
 ): IRNode[] {
   const results: IRNode[] = [];
   const fullText = textNode.textContent ?? "";
@@ -102,6 +103,10 @@ function extractTextNode(
     if (fullText.length === 0) return results;
   } else if (!fullText.trim()) {
     return results;
+  }
+
+  if (resolveTextMeasurementMode(parentStyle, options) === "character") {
+    return extractCharacterTextNodes(textNode, parentStyle, globalIndex);
   }
 
   // Get all quads (one per line fragment) using getBoxQuads.
@@ -124,15 +129,7 @@ function extractTextNode(
     let text = normalizeWhitespaceAwareText(lineTexts[0], parentStyle);
     if (text.length === 0) return results;
 
-    if (parentStyle.textTransform) {
-      switch (parentStyle.textTransform) {
-        case "uppercase": text = text.toUpperCase(); break;
-        case "lowercase": text = text.toLowerCase(); break;
-        case "capitalize":
-          text = text.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-          break;
-      }
-    }
+    text = applyTextTransform(text, parentStyle.textTransform);
 
     // Handle text overflow clipping
     let finalQuad = allQuads[0];
@@ -158,15 +155,7 @@ function extractTextNode(
         .replace(/[\r\n]+$/g, "");
       if (text.length === 0) continue;
 
-      if (parentStyle.textTransform) {
-        switch (parentStyle.textTransform) {
-          case "uppercase": text = text.toUpperCase(); break;
-          case "lowercase": text = text.toLowerCase(); break;
-          case "capitalize":
-            text = text.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-            break;
-        }
-      }
+      text = applyTextTransform(text, parentStyle.textTransform);
 
       const lineStyle: Style = {
         ...parentStyle,
@@ -183,6 +172,35 @@ function extractTextNode(
         zIndex: globalIndex,
       });
     }
+  }
+
+  return results;
+}
+
+function extractCharacterTextNodes(
+  textNode: Text,
+  parentStyle: Style,
+  globalIndex: number,
+): IRNode[] {
+  const measuredCharacters = getTextNodeCharacterQuads(textNode, parentStyle);
+  if (measuredCharacters.length === 0) return [];
+
+  const results: IRNode[] = [];
+  for (const character of measuredCharacters) {
+    results.push({
+      type: "text",
+      quad: character.quad,
+      text: character.text,
+      style: {
+        ...parentStyle,
+        direction: undefined,
+        writingMode: undefined,
+        textAlign: undefined,
+        textIndent: undefined,
+        whiteSpace: "pre",
+      },
+      zIndex: globalIndex,
+    });
   }
 
   return results;
@@ -226,6 +244,120 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   parent.removeChild(span);
 
   return quads;
+}
+
+function getTextNodeCharacterQuads(
+  textNode: Text,
+  parentStyle: Style,
+): Array<{ text: string; quad: Quad }> {
+  const sourceText = textNode.textContent ?? "";
+  const sourceSegments = segmentTextForMeasurement(sourceText);
+  if (sourceSegments.length === 0) return [];
+
+  const displaySegments = getDisplayedTextSegments(sourceText, sourceSegments, parentStyle.textTransform);
+  const range = document.createRange();
+  const measured: Array<{ text: string; quad: Quad }> = [];
+  let startOffset = 0;
+
+  for (let index = 0; index < sourceSegments.length; index++) {
+    const segment = sourceSegments[index];
+    const text = displaySegments[index] ?? segment;
+    const endOffset = startOffset + segment.length;
+
+    if (text.length > 0 && segment !== "\r" && segment !== "\n") {
+      range.setStart(textNode, startOffset);
+      range.setEnd(textNode, endOffset);
+      const rect = getFirstVisibleClientRect(range);
+      if (rect) {
+        measured.push({ text, quad: rectToQuad(rect) });
+      }
+    }
+
+    startOffset = endOffset;
+  }
+
+  return measured;
+}
+
+function getFirstVisibleClientRect(range: Range): DOMRect | null {
+  const rects = Array.from(range.getClientRects());
+  let bestRect: DOMRect | null = null;
+  let bestArea = 0;
+
+  for (const rect of rects) {
+    const area = rect.width * rect.height;
+    if (area <= 0) continue;
+    if (area > bestArea) {
+      bestArea = area;
+      bestRect = rect;
+    }
+  }
+
+  return bestRect;
+}
+
+function rectToQuad(rect: DOMRect): Quad {
+  return [
+    { x: rect.left, y: rect.top },
+    { x: rect.right, y: rect.top },
+    { x: rect.right, y: rect.bottom },
+    { x: rect.left, y: rect.bottom },
+  ];
+}
+
+function resolveTextMeasurementMode(style: Style, options: Options): "line" | "character" {
+  const mode = options.textMeasurement ?? "line";
+  if (mode === "character") return "character";
+  if (mode === "auto" && needsCharacterMeasurement(style)) return "character";
+  return "line";
+}
+
+function needsCharacterMeasurement(style: Style): boolean {
+  const direction = style.direction?.trim().toLowerCase();
+  if (direction && direction !== "ltr") return true;
+
+  const writingMode = style.writingMode?.trim().toLowerCase();
+  return !!writingMode && writingMode !== "horizontal-tb";
+}
+
+function segmentTextForMeasurement(text: string): string[] {
+  const Segmenter = typeof Intl !== "undefined" ? (Intl as typeof Intl & {
+    Segmenter?: new (locales?: string | string[], options?: { granularity: "grapheme" }) => {
+      segment(input: string): Iterable<{ segment: string }>;
+    };
+  }).Segmenter : undefined;
+
+  if (Segmenter) {
+    const segmenter = new Segmenter(undefined, { granularity: "grapheme" });
+    return Array.from(segmenter.segment(text), ({ segment }) => segment);
+  }
+
+  return Array.from(text);
+}
+
+function getDisplayedTextSegments(
+  sourceText: string,
+  sourceSegments: string[],
+  textTransform: string | undefined,
+): string[] {
+  if (!textTransform) return sourceSegments;
+
+  const transformedSegments = segmentTextForMeasurement(applyTextTransform(sourceText, textTransform));
+  if (transformedSegments.length === sourceSegments.length) return transformedSegments;
+  return sourceSegments.map((segment) => applyTextTransform(segment, textTransform));
+}
+
+function applyTextTransform(text: string, textTransform: string | undefined): string {
+  switch (textTransform) {
+    case "uppercase":
+      return text.toUpperCase();
+    case "lowercase":
+      return text.toLowerCase();
+    case "capitalize":
+      return text.replace(/(^|\s)\S/g, (char) => char.toUpperCase());
+    default:
+      return text;
+  }
 }
 
 function getPreformattedLineQuads(textNode: Text, parent: Node): Quad[] {
