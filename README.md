@@ -12,7 +12,7 @@ layout2vector works in three stages:
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
 3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
-For a feature-by-feature comparison with html2canvas and html2canvas-pro, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
+For a feature-by-feature comparison with html2canvas, html2canvas-pro, and SnapDOM, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
 
 ## Installation
 
