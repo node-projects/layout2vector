@@ -14,6 +14,7 @@ import { extractHTMLGeometry } from "./extractors/html-extractor.js";
 import { extractSVGSubtree } from "./extractors/svg-extractor.js";
 import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
 import { isMathMLRoot, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
+import { extractPseudoElements } from "./extractors/pseudo-extractor.js";
 import { getElementOrigin } from "./geometry.js";
 
 /**
@@ -109,6 +110,14 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       transformIRGeometry(htmlNodes, node.coordinateTransform);
       irNodes.push(...htmlNodes);
       globalIndex += htmlNodes.length || 1;
+
+      // ::before / ::after pseudo-element extraction
+      if (options.includePseudoElements !== false) {
+        const pseudoNodes = extractPseudoElements(el, node.extractedStyle, globalIndex, options);
+        transformIRGeometry(pseudoNodes, node.coordinateTransform);
+        irNodes.push(...pseudoNodes);
+        globalIndex += pseudoNodes.length;
+      }
 
       // Image element extraction (on top of HTML geometry)
       if (options.includeImages && isImageElement(el)) {

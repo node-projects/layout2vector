@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    margin: 0;
+  }
+
+  h2, h3 { margin-top: 24px; margin-bottom: 8px; }
+
+  /* --- 1. Simple ::before arrow --- */
+  .before-simple::before {
+    content: "\2192\00a0";
+    color: #e74c3c;
+    font-weight: bold;
+  }
+
+  /* --- 2. Simple ::after checkmark --- */
+  .after-simple::after {
+    content: " \2713";
+    color: #27ae60;
+    font-weight: bold;
+  }
+
+  /* --- 3. Styled inline-block pseudo --- */
+  .styled-before::before {
+    content: "NOTE";
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 2px 8px;
+    margin-right: 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  /* --- 4. CSS counter() – numbered list --- */
+  .counter-list {
+    list-style: none;
+    counter-reset: item;
+    padding-left: 0;
+  }
+  .counter-list li {
+    counter-increment: item;
+    margin-bottom: 4px;
+  }
+  .counter-list li::before {
+    content: counter(item) ". ";
+    font-weight: bold;
+    color: #2c3e50;
+  }
+
+  /* --- 5. CSS counters() – nested numbering --- */
+  .nested-counters {
+    counter-reset: section;
+    list-style: none;
+    padding-left: 0;
+  }
+  .nested-counters > li {
+    counter-increment: section;
+    margin-bottom: 4px;
+  }
+  .nested-counters > li::before {
+    content: counters(section, ".") " ";
+    font-weight: bold;
+    color: #8e44ad;
+  }
+  .nested-counters ol {
+    counter-reset: section;
+    list-style: none;
+    padding-left: 24px;
+  }
+  .nested-counters ol li {
+    counter-increment: section;
+    margin-bottom: 4px;
+  }
+  .nested-counters ol li::before {
+    content: counters(section, ".") " ";
+    font-weight: bold;
+    color: #8e44ad;
+  }
+
+  /* --- 6. Quote marks via open-quote / close-quote --- */
+  .quote-example {
+    quotes: "\00ab" "\00bb";
+  }
+  .quote-example::before {
+    content: open-quote;
+    color: #e67e22;
+    font-size: 1.2em;
+  }
+  .quote-example::after {
+    content: close-quote;
+    color: #e67e22;
+    font-size: 1.2em;
+  }
+
+  /* --- 7. attr() function --- */
+  .attr-example::after {
+    content: " [" attr(data-label) "]";
+    color: #7f8c8d;
+    font-style: italic;
+  }
+
+  /* --- 8. Decorative empty pseudo-elements --- */
+  .decorated {
+    position: relative;
+    padding: 10px 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    margin: 10px 0;
+  }
+  .decorated::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #e74c3c;
+    margin-bottom: 8px;
+  }
+  .decorated::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #3498db;
+    margin-top: 8px;
+  }
+
+  /* --- 9. Transformed parent with pseudo-element --- */
+  .transformed {
+    transform: rotate(3deg);
+    display: inline-block;
+    padding: 10px 16px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    margin: 20px;
+  }
+  .transformed::before {
+    content: "\26a0\00a0";
+    color: #856404;
+  }
+
+  /* --- 10. Chapter counter with text prefix --- */
+  .chapter-list {
+    counter-reset: chapter;
+  }
+  .chapter {
+    counter-increment: chapter;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+  .chapter::before {
+    content: "Chapter " counter(chapter) ": ";
+    font-weight: bold;
+    color: #1a5276;
+  }
+
+  /* --- 11. Both ::before and ::after on same element --- */
+  .both-pseudo {
+    padding: 6px 12px;
+    background: #eaf2f8;
+    border: 1px solid #aed6f1;
+    display: inline-block;
+    margin: 4px 0;
+  }
+  .both-pseudo::before {
+    content: "\25b6\00a0";
+    color: #2980b9;
+  }
+  .both-pseudo::after {
+    content: "\00a0\25c0";
+    color: #2980b9;
+  }
+</style>
+</head>
+<body id="root">
+
+<h2>Pseudo-Elements &amp; Counters Demo</h2>
+
+<!-- 1. Simple ::before -->
+<h3>Simple ::before</h3>
+<div class="before-simple">This has an arrow before</div>
+<div class="before-simple">Another item with arrow</div>
+
+<!-- 2. Simple ::after -->
+<h3>Simple ::after</h3>
+<div class="after-simple">Task completed</div>
+<div class="after-simple">Another task done</div>
+
+<!-- 3. Styled block pseudo -->
+<h3>Styled Pseudo-Element</h3>
+<div class="styled-before">This is an important notice</div>
+
+<!-- 4. Counter list -->
+<h3>counter() – Numbered List</h3>
+<ul class="counter-list">
+  <li>First item</li>
+  <li>Second item</li>
+  <li>Third item</li>
+  <li>Fourth item</li>
+</ul>
+
+<!-- 5. Nested counters -->
+<h3>counters() – Nested Numbering</h3>
+<ol class="nested-counters">
+  <li>Introduction
+    <ol>
+      <li>Background</li>
+      <li>Motivation</li>
+    </ol>
+  </li>
+  <li>Methods
+    <ol>
+      <li>Data Collection</li>
+      <li>Analysis</li>
+      <li>Validation</li>
+    </ol>
+  </li>
+  <li>Results</li>
+</ol>
+
+<!-- 6. Quote marks -->
+<h3>open-quote / close-quote</h3>
+<p class="quote-example">This text has fancy quote marks</p>
+
+<!-- 7. attr() function -->
+<h3>attr() Function</h3>
+<span class="attr-example" data-label="important">This shows an attribute value</span>
+
+<br><br>
+
+<!-- 8. Decorative pseudo-elements (empty content) -->
+<h3>Decorative Pseudo-Elements</h3>
+<div class="decorated">A card with a decorative top bar and bottom line</div>
+
+<!-- 9. Transformed parent with pseudo -->
+<h3>Transformed Element</h3>
+<div class="transformed">Warning: tilted element</div>
+
+<br><br>
+
+<!-- 10. Chapter counter -->
+<h3>Chapter Numbering</h3>
+<div class="chapter-list">
+  <div class="chapter">Getting Started</div>
+  <div class="chapter">Installation Guide</div>
+  <div class="chapter">Configuration</div>
+</div>
+
+<!-- 11. Both ::before and ::after -->
+<h3>Both ::before &amp; ::after</h3>
+<div class="both-pseudo">Surrounded content</div>
+<br>
+<div class="both-pseudo">Another surrounded item</div>
+
+</body>
+</html>

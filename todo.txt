@@ -4,3 +4,14 @@ GetBoxQuads does not return a transformation Matrix for rotation.... For text ne
 But it can be calculated from 2 points
 
 -update readme about embeding fonts to pdf
+
+
+
+- border corner shape.
+  round, scoop, bevel, notch, square, squircle, superellipse()
+- line-clamp css property (for text)
+
+create a demo html with the features in tests/demos
+implement it and test but with firefox, cause only firefox has native box quads api (if we need it).
+Use box getBoxQuads API when you need positions and it's possible, so also transformed elements work.
+Update readme/feature md files after finish if needed

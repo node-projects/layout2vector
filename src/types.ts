@@ -173,6 +173,14 @@ export type Options = {
    * Defaults to false.
    */
   convertFormControls?: boolean;
+  /**
+   * When true, ::before and ::after pseudo-elements with generated content
+   * (including counter(), counters(), attr(), and string literals) are
+   * extracted into the IR as polygon and text nodes.
+   * Requires a browser that resolves counter values in getComputedStyle
+   * (Firefox).  Defaults to true.
+   */
+  includePseudoElements?: boolean;
 };
 
 /** Writer interface for output generation. */
