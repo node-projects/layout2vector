@@ -84,8 +84,8 @@ const dwgBytes = await renderIR(ir, dwgWriter); // Uint8Array → save as .dwg f
 
 // 10. Render to DXF via acad-ts (alternative DXF writer)
 const acadDxfWriter = new AcadDXFWriter({ maxY: document.documentElement.scrollHeight });
-const acadDxfString = await renderIR(ir, acadDxfWriter);
-// acadDxfString is a complete .dxf file as a string
+const acadDxfBytes = await renderIR(ir, acadDxfWriter);
+// acadDxfBytes is a complete .dxf file as a Uint8Array
 
 ```
 
@@ -187,7 +187,7 @@ type AcadDXFWriterOptions = {
 new AcadDXFWriter(options?: AcadDXFWriterOptions)
 ```
 
-An alternative DXF writer that uses `@node-projects/acad-ts` instead of `@tarikjabiri/dxf`. Produces a DXF string with the same entity types as `DWGWriter`:
+An alternative DXF writer that uses `@node-projects/acad-ts` instead of `@tarikjabiri/dxf`. Produces a `Uint8Array` containing ASCII DXF bytes with the same entity types as `DWGWriter`:
 
 - Polygons → closed `LWPOLYLINE` entities with optional solid `HATCH` fill
 - Polylines → `LWPOLYLINE` entities (open or closed)

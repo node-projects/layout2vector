@@ -73,6 +73,31 @@ function cssToAcadColor(color: string | undefined): InstanceType<typeof ColorTyp
   return new Color!(parsed.r, parsed.g, parsed.b);
 }
 
+function toNearestAcadIndexColor(color: InstanceType<typeof ColorType>): InstanceType<typeof ColorType> {
+  if (!color.isTrueColor) return color;
+
+  const [r, g, b] = color.getRgb();
+  let bestIndex = 7;
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (let index = 1; index <= 255; index++) {
+    const rgb = Color!.getIndexRGB(index);
+    if (!rgb) continue;
+
+    const dr = r - rgb[0];
+    const dg = g - rgb[1];
+    const db = b - rgb[2];
+    const distance = dr * dr + dg * dg + db * db;
+
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = index;
+    }
+  }
+
+  return new Color!(bestIndex);
+}
+
 /** Generate arc points for a rounded corner. */
 function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAngle: number, segments: number): { x: number; y: number }[] {
   const pts: { x: number; y: number }[] = [];
@@ -105,12 +130,12 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
   constructor(options?: AcadWriterOptions) {
     const z = options?.zoom ?? 1;
     this.maxY = (options?.maxY ?? 1000) * z;
-    this.acadVersion = options?.acadVersion ?? ACadVersion?.AC1018;
+    this.acadVersion = options?.acadVersion;
   }
 
   async begin(): Promise<void> {
     await ensureAcadLoaded();
-    this.doc = new CadDocument!(this.acadVersion!);
+    this.doc = new CadDocument!(this.acadVersion ?? ACadVersion!.AC1018);
     this.doc.createDefaults();
   }
 
@@ -125,7 +150,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     const poly = new LwPolyline!(xyVerts);
     poly.isClosed = closed;
     if (color) poly.color = color;
-    this.doc.modelSpace.entities.add(poly);
+    this.doc.modelSpace!.entities.add(poly);
   }
 
   /** Add a solid-filled HATCH for the given vertices. */
@@ -142,7 +167,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
 
     const path = new HatchBoundaryPath!([boundaryEdge]);
     hatch.paths.push(path);
-    this.doc.modelSpace.entities.add(hatch);
+    this.doc.modelSpace!.entities.add(hatch);
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -267,7 +292,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     if (Math.abs(angleDeg) > 0.1) entity.rotation = angleDeg;
     if (textColor) entity.color = textColor;
 
-    this.doc.modelSpace.entities.add(entity);
+    this.doc.modelSpace!.entities.add(entity);
   }
 
   async drawImage(_quad: Quad, _dataUrl: string, _width: number, _height: number, _style: Style): Promise<void> {
@@ -320,9 +345,12 @@ export class DWGWriter implements Writer<Uint8Array> {
 
     // DWG stores angles in radians, but the shared builder stores degrees (for DXF).
     // Convert text rotation from degrees to radians before DWG serialization.
-    for (const entity of doc.modelSpace.entities) {
+    for (const entity of doc.modelSpace!.entities) {
       if (entity instanceof TextEntity!) {
         entity.rotation = entity.rotation * (Math.PI / 180);
+      } else if (entity instanceof Hatch! && entity.color.isTrueColor) {
+        // Some DWG viewers ignore true-color solid hatch fills but accept indexed hatch colors.
+        entity.color = toNearestAcadIndexColor(entity.color);
       }
     }
 
@@ -339,12 +367,42 @@ export class DWGWriter implements Writer<Uint8Array> {
 /** Options for the acad-ts based DXF writer. */
 export type AcadDXFWriterOptions = AcadWriterOptions;
 
+function trimTrailingZeros(buffer: Uint8Array): Uint8Array {
+  let end = buffer.length;
+  while (end > 0 && buffer[end - 1] === 0) {
+    end--;
+  }
+  return buffer.slice(0, end);
+}
+
+async function writeAcadDxfBytes(doc: InstanceType<typeof CadDocumentType>): Promise<Uint8Array> {
+  let bufferSize = 2 * 1024 * 1024;
+
+  while (true) {
+    const buffer = new Uint8Array(bufferSize);
+    const writer = new AcadDxfWriter!(buffer, doc);
+
+    try {
+      writer.Write();
+      return trimTrailingZeros(buffer);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("DXF output buffer is too small")) {
+        bufferSize *= 2;
+        continue;
+      }
+      throw error;
+    } finally {
+      writer.Dispose();
+    }
+  }
+}
+
 /**
  * DXF Writer using @node-projects/acad-ts.
- * Maps IR nodes to a CadDocument and serializes to DXF ASCII format.
+ * Maps IR nodes to a CadDocument and serializes to DXF ASCII bytes.
  * This is an alternative to the existing DXFWriter (which uses @tarikjabiri/dxf).
  */
-export class AcadDXFWriter implements Writer<string> {
+export class AcadDXFWriter implements Writer<Uint8Array> {
   private builder: AcadDocumentBuilder;
 
   constructor(options?: AcadDXFWriterOptions) {
@@ -371,18 +429,9 @@ export class AcadDXFWriter implements Writer<string> {
     await this.builder.drawImage(quad, dataUrl, width, height, style);
   }
 
-  async end(): Promise<string> {
+  async end(): Promise<Uint8Array> {
     await ensureAcadLoaded();
     const doc = await this.builder.end();
-
-    // Collect DXF output as text
-    let result = "";
-    const target = {
-      write(value: string) { result += value; },
-    };
-    const writer = new AcadDxfWriter!(target, doc);
-    writer.Write();
-    writer.Dispose();
-    return result;
+    return writeAcadDxfBytes(doc);
   }
 }
