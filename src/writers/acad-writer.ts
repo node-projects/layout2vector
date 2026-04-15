@@ -183,7 +183,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     const dxfElH = Math.abs(points[3].y - points[0].y);
     const radius = parseBorderRadius(style.borderRadius, dxfElW, dxfElH);
 
-    if (radius > 0 && isAxisAlignedRect(points)) {
+    if (radius > 0 && isAxisAlignedRect(points) && !style.cornerShapes) {
       const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
       const w = Math.abs(points[1].x - points[0].x);
@@ -207,8 +207,8 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
       return;
     }
 
-    if (radius > 0 && !isAxisAlignedRect(points)) {
-      const segs = roundedQuadPath(points, radius);
+    if (radius > 0 && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+      const segs = roundedQuadPath(points, radius, style.cornerShapes);
       const verts: { x: number; y: number }[] = [];
       for (const s of segs) {
         if (s.type === "M" || s.type === "L") {

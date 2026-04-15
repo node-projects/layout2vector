@@ -607,7 +607,7 @@ export class ImageWriter implements Writer<ImageResult> {
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
     const radius = parseMinDimensionBorderRadius(style.borderRadius, w, h);
-    if (radius > 0 && isAxisAlignedRect(points)) {
+    if (radius > 0 && isAxisAlignedRect(points) && !style.cornerShapes) {
       this.drawRoundedRect(points, radius, fill, stroke, style);
       // Draw inset shadows after fill
       this.drawBoxShadows(ctx, points, style, true);
@@ -621,7 +621,7 @@ export class ImageWriter implements Writer<ImageResult> {
       const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
       const r = parseMinDimensionBorderRadius(style.borderRadius, edgeW, edgeH);
       if (r > 0) {
-        const segs = roundedQuadPath(points, r);
+        const segs = roundedQuadPath(points, r, style.cornerShapes);
         ctx.beginPath();
         for (const s of segs) {
           switch (s.type) {

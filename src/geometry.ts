@@ -185,13 +185,19 @@ function domQuadToQuad(dq: DOMQuad): Quad {
  * Returns an array of {type, x, y} segments for building SVG/Canvas/PDF paths.
  *
  * Segment types: 'M' (moveTo), 'L' (lineTo), 'Q' (quadratic bezier: cx, cy, then endX, endY)
+ *
+ * When cornerShapes is provided, each corner uses a superellipse curve.
+ * K values: 1=round (default circle), 2=squircle, 0=bevel, -1=scoop, ±Infinity=square/notch.
  */
 export type PathSegment =
   | { type: "M"; x: number; y: number }
   | { type: "L"; x: number; y: number }
   | { type: "Q"; cx: number; cy: number; x: number; y: number };
 
-export function roundedQuadPath(points: Quad, radius: number): PathSegment[] {
+/** Number of line segments used to approximate each superellipse corner. */
+const SE_SAMPLES = 8;
+
+export function roundedQuadPath(points: Quad, radius: number, cornerShapes?: [number, number, number, number]): PathSegment[] {
   const N = 4;
   const segments: PathSegment[] = [];
 
@@ -211,25 +217,72 @@ export function roundedQuadPath(points: Quad, radius: number): PathSegment[] {
     const curr = points[i];
     const next = points[(i + 1) % N];
     const r = radii[i];
+    const K = cornerShapes ? cornerShapes[i] : 1;
 
     const toPrevLen = Math.sqrt((prev.x - curr.x) ** 2 + (prev.y - curr.y) ** 2);
     const toNextLen = Math.sqrt((next.x - curr.x) ** 2 + (next.y - curr.y) ** 2);
 
+    // Unit vectors from corner toward arc endpoints
+    const uHatX = (prev.x - curr.x) / toPrevLen;
+    const uHatY = (prev.y - curr.y) / toPrevLen;
+    const vHatX = (next.x - curr.x) / toNextLen;
+    const vHatY = (next.y - curr.y) / toNextLen;
+
     // Point where the arc starts (on the edge from prev to curr, near curr)
-    const arcStartX = curr.x + (prev.x - curr.x) / toPrevLen * r;
-    const arcStartY = curr.y + (prev.y - curr.y) / toPrevLen * r;
-    // Point where the arc ends (on the edge from curr to next, near curr)
-    const arcEndX = curr.x + (next.x - curr.x) / toNextLen * r;
-    const arcEndY = curr.y + (next.y - curr.y) / toNextLen * r;
+    const arcStartX = curr.x + uHatX * r;
+    const arcStartY = curr.y + uHatY * r;
 
     if (i === 0) {
       segments.push({ type: "M", x: arcStartX, y: arcStartY });
     } else {
       segments.push({ type: "L", x: arcStartX, y: arcStartY });
     }
-    // Quadratic bezier through the original corner point
-    segments.push({ type: "Q", cx: curr.x, cy: curr.y, x: arcEndX, y: arcEndY });
+
+    if (K === 1 && !cornerShapes) {
+      // Default round: quadratic Bézier through the corner (original behavior)
+      const arcEndX = curr.x + vHatX * r;
+      const arcEndY = curr.y + vHatY * r;
+      segments.push({ type: "Q", cx: curr.x, cy: curr.y, x: arcEndX, y: arcEndY });
+    } else if (K >= 10) {
+      // Square: go through the corner vertex (effectively no rounding)
+      segments.push({ type: "L", x: curr.x, y: curr.y });
+      segments.push({ type: "L", x: curr.x + vHatX * r, y: curr.y + vHatY * r });
+    } else if (K <= -10) {
+      // Notch: two straight lines through the mirror point (R,R) in local coords
+      const mirrorX = curr.x + uHatX * r + vHatX * r;
+      const mirrorY = curr.y + uHatY * r + vHatY * r;
+      segments.push({ type: "L", x: mirrorX, y: mirrorY });
+      segments.push({ type: "L", x: curr.x + vHatX * r, y: curr.y + vHatY * r });
+    } else {
+      // General superellipse: sample the curve
+      const invK = 1 / Math.abs(K || 0.001);
+      const halfPi = Math.PI / 2;
+      for (let s = 1; s <= SE_SAMPLES; s++) {
+        const t = s / SE_SAMPLES;
+        const theta = halfPi * t;
+        const sinT = Math.sin(theta);
+        const cosT = Math.cos(theta);
+        let u: number, v: number;
+        if (K > 0) {
+          // Convex: curve inscribed in corner (round, squircle, etc.)
+          u = r * (1 - Math.pow(sinT, invK));
+          v = r * (1 - Math.pow(cosT, invK));
+        } else if (K === 0) {
+          // Bevel: straight line
+          u = r * (1 - t);
+          v = r * t;
+        } else {
+          // Concave: curve reflected across bevel line (scoop, etc.)
+          u = r * Math.pow(cosT, invK);
+          v = r * Math.pow(sinT, invK);
+        }
+        const px = curr.x + uHatX * u + vHatX * v;
+        const py = curr.y + uHatY * u + vHatY * v;
+        segments.push({ type: "L", x: px, y: py });
+      }
+    }
   }
 
   return segments;
 }
+

@@ -62,7 +62,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
   const zIndexStr = cs.zIndex;
   const zIndex = zIndexStr && zIndexStr !== "auto" ? parseInt(zIndexStr, 10) : undefined;
 
-  return {
+  const result: Style = {
     fill,
     stroke: cs.borderColor || cs.stroke || undefined,
     strokeWidth: cs.borderWidth || cs.strokeWidth || undefined,
@@ -120,6 +120,48 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     imageRendering: cs.imageRendering || undefined,
     clipPath: cs.clipPath && cs.clipPath !== "none" ? cs.clipPath : undefined,
   };
+
+  // Read corner-shape per-corner values if supported
+  const csTL = cs.getPropertyValue("corner-top-left-shape");
+  const csTR = cs.getPropertyValue("corner-top-right-shape");
+  const csBR = cs.getPropertyValue("corner-bottom-right-shape");
+  const csBL = cs.getPropertyValue("corner-bottom-left-shape");
+  if (csTL || csTR || csBR || csBL) {
+    const shapes: [number, number, number, number] = [
+      parseCornerShapeValue(csTL),
+      parseCornerShapeValue(csTR),
+      parseCornerShapeValue(csBR),
+      parseCornerShapeValue(csBL),
+    ];
+    if (shapes.some(k => k !== 1)) {
+      result.cornerShapes = shapes;
+    }
+  }
+
+  return result;
+}
+
+/** Parse a single computed corner-shape value (e.g. "superellipse(2)") to its K number. */
+function parseCornerShapeValue(v: string): number {
+  if (!v) return 1;
+  const trimmed = v.trim();
+  if (!trimmed || trimmed === "round") return 1;
+  const m = trimmed.match(/superellipse\(([^)]+)\)/);
+  if (m) {
+    const val = m[1].trim();
+    if (val === "infinity") return Infinity;
+    if (val === "-infinity") return -Infinity;
+    const n = parseFloat(val);
+    return isNaN(n) ? 1 : n;
+  }
+  switch (trimmed) {
+    case "bevel": return 0;
+    case "scoop": return -1;
+    case "notch": return -Infinity;
+    case "square": return Infinity;
+    case "squircle": return 2;
+    default: return 1;
+  }
 }
 
 /** Check if an element is visible. */

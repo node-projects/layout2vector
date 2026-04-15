@@ -498,6 +498,7 @@ import {
 ### CSS Support
 - Stacking contexts: `z-index`, `opacity`, `transform`, `filter`, `perspective`, `mix-blend-mode`, `will-change`, `contain:paint`, `isolation:isolate`
 - Border-radius (rendered as rounded rectangles in PDF, arc-approximated polylines in DXF)
+- `corner-shape` / `superellipse()` — all keyword values (`round`, `scoop`, `bevel`, `notch`, `square`, `squircle`) and arbitrary `superellipse(K)` values are extracted per-corner and rendered as superellipse curves in all vector/raster writers (Chrome 139+)
 - Background colors, border colors, font properties
 - CSS transforms reflected in quad geometry (via `getBoxQuads`)
 - `::before` / `::after` pseudo-elements with generated content (string literals, `counter()`, `counters()`, `attr()`, `open-quote`/`close-quote`)

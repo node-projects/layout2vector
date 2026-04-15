@@ -366,7 +366,7 @@ export class SVGWriter implements Writer<string> {
 
     const opacity = (style.opacity !== undefined && style.opacity < 1) ? style.opacity : undefined;
 
-    if (radius > 0 && isAxisAlignedRect(points)) {
+    if (radius > 0 && isAxisAlignedRect(points) && !style.cornerShapes) {
       const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
       const r = Math.min(radius, w / 2, h / 2);
@@ -389,8 +389,8 @@ export class SVGWriter implements Writer<string> {
     const edgeH = Math.sqrt((points[3].x - points[0].x) ** 2 + (points[3].y - points[0].y) ** 2);
     const nonAlignedRadius = parseBorderRadius(style.borderRadius, edgeW, edgeH);
     let pathD: string;
-    if (nonAlignedRadius > 0 && !isAxisAlignedRect(points)) {
-      const segs = roundedQuadPath(points, nonAlignedRadius);
+    if (nonAlignedRadius > 0 && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+      const segs = roundedQuadPath(points, nonAlignedRadius, style.cornerShapes);
       pathD = segs.map(s => {
         switch (s.type) {
           case "M": return `M${n(s.x)},${n(s.y)}`;

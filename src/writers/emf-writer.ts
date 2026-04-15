@@ -12,6 +12,7 @@ import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { cssColorToColorRef } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
 import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
+import { roundedQuadPath } from "../geometry.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
 // ── EMF Binary Helpers ──────────────────────────────────────────────
@@ -265,7 +266,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     const radius = parseBorderRadius(style.borderRadius, emfElW, emfElH);
 
     // Rounded rectangle
-    if (radius > 0 && isAxisAlignedRect(points)) {
+    if (radius > 0 && isAxisAlignedRect(points) && !style.cornerShapes) {
       const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
       const w = Math.abs(points[1].x - points[0].x);
@@ -281,6 +282,48 @@ export class EMFWriter implements Writer<Uint8Array> {
         Math.round(x), Math.round(y),
         Math.round(x + w), Math.round(y + h),
         Math.round(r * 2), Math.round(r * 2)
+      ));
+
+      this.deleteObject(brushHandle);
+      this.deleteObject(penHandle);
+      this.restoreState();
+      return;
+    }
+
+    // Rounded quad (non-axis-aligned, or axis-aligned with corner-shape)
+    if (radius > 0 && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+      const segs = roundedQuadPath(points, radius, style.cornerShapes);
+      const verts: { x: number; y: number }[] = [];
+      for (const s of segs) {
+        if (s.type === "M" || s.type === "L") {
+          verts.push({ x: s.x, y: s.y });
+        } else if (s.type === "Q") {
+          const prev = verts[verts.length - 1];
+          if (prev) {
+            for (let t = 0.25; t <= 1; t += 0.25) {
+              const u = 1 - t;
+              verts.push({
+                x: u * u * prev.x + 2 * u * t * s.cx + t * t * s.x,
+                y: u * u * prev.y + 2 * u * t * s.cy + t * t * s.y,
+              });
+            }
+          }
+        }
+      }
+
+      const brushHandle = this.createBrush(fillColor);
+      const penHandle = this.createPen(stroke);
+      this.selectObject(brushHandle);
+      this.selectObject(penHandle);
+
+      const emfBounds = this.computeBoundsFromPoints(verts);
+      const ptData = int16Array(
+        ...verts.flatMap(p => [Math.round(p.x), Math.round(p.y)])
+      );
+      this.records.writeRecord(EMR.POLYGON16, concat(
+        int32Array(emfBounds.left, emfBounds.top, emfBounds.right, emfBounds.bottom),
+        uint32Array(verts.length),
+        ptData
       ));
 
       this.deleteObject(brushHandle);

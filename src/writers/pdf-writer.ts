@@ -915,7 +915,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const elW = Math.abs(points[1].x - points[0].x);
     const elH = Math.abs(points[3].y - points[0].y);
     const radius = parseBorderRadius(style.borderRadius, elW, elH);
-    if (radius && isAxisAlignedRect(points)) {
+    if (radius && isAxisAlignedRect(points) && !style.cornerShapes) {
       const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
       const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
       const w = pxToPt(elW);
@@ -923,10 +923,10 @@ export class PDFWriter implements Writer<PdfDocument> {
       const rx = pxToPt(Math.min(radius.rx, elW / 2));
       const ry = pxToPt(Math.min(radius.ry, elH / 2));
       this.emitRoundedRectPath(left, top, w, h, rx, ry);
-    } else if (radius && !isAxisAlignedRect(points)) {
-      // Non-axis-aligned quad with border-radius: use rounded quad path
+    } else if (radius && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+      // Non-axis-aligned quad (or axis-aligned with corner-shape) with border-radius
       const r = Math.min(radius.rx, radius.ry);
-      const segs = roundedQuadPath(points, r);
+      const segs = roundedQuadPath(points, r, style.cornerShapes);
       for (const s of segs) {
         switch (s.type) {
           case "M":

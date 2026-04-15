@@ -66,6 +66,8 @@ export type Style = {
   borderLeftStyle?: string;
 
   borderRadius?: string;
+  /** Per-corner superellipse K values [TL, TR, BR, BL] from CSS corner-shape. */
+  cornerShapes?: [number, number, number, number];
   backgroundImage?: string;
   boxShadow?: string;
   transform?: string;

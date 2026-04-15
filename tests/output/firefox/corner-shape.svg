@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1240" height="540" viewBox="0 0 1240 540">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="4" dy="4" stdDeviation="6" flood-color="rgba(0, 0, 0, 0.3)" result="s0"/></filter>
+</defs>
+<rect x="20" y="20" width="200" height="140" rx="30" ry="30" fill="rgb(66, 133, 244)"/>
+<text x="99.37" y="74.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Round</text>
+<text x="94.32" y="91.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(default)</text>
+<rect x="250" y="20" width="200" height="140" rx="30" ry="30" fill="rgb(234, 67, 53)"/>
+<text x="330.15" y="74.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Scoop</text>
+<text x="319.27" y="91.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(concave)</text>
+<rect x="480" y="20" width="200" height="140" rx="30" ry="30" fill="rgb(251, 188, 5)"/>
+<text x="562.48" y="74.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Bevel</text>
+<text x="548.87" y="91.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(diagonal)</text>
+<rect x="710" y="20" width="200" height="140" rx="30" ry="30" fill="rgb(52, 168, 83)"/>
+<text x="791.72" y="74.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Notch</text>
+<text x="778.1" y="91.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(inward V)</text>
+<rect x="940" y="20" width="200" height="140" rx="30" ry="30" fill="rgb(156, 39, 176)"/>
+<text x="1017.42" y="74.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Square</text>
+<text x="996.03" y="91.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(sharp corner)</text>
+<rect x="20" y="190" width="200" height="140" rx="40" ry="40" fill="rgb(255, 111, 0)"/>
+<text x="94.7" y="244.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Squircle</text>
+<text x="92.38" y="261.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(smooth)</text>
+<rect x="250" y="190" width="200" height="140" rx="35" ry="35" fill="rgb(0, 188, 212)"/>
+<text x="298.25" y="253" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">superellipse(0.5)</text>
+<rect x="480" y="190" width="200" height="140" rx="40" ry="40" fill="rgb(96, 125, 139)"/>
+<text x="561.32" y="236" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Mixed</text>
+<text x="520.1" y="253" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">TL:scoop TR:round</text>
+<text x="522.03" y="270" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">BR:bevel BL:notch</text>
+<rect x="710" y="190" width="220" height="160" rx="50" ry="50" fill="rgb(233, 30, 99)"/>
+<text x="780.32" y="254.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Large Scoop</text>
+<text x="779.15" y="271.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(50px radius)</text>
+<rect x="960" y="190" width="206" height="146" rx="30" ry="30" fill="rgb(243, 229, 245)" stroke="rgb(156, 39, 176)" stroke-width="3"/>
+<text x="1037.7" y="247.5" fill="rgb(156, 39, 176)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Squircle</text>
+<text x="1035.95" y="264.5" fill="rgb(156, 39, 176)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">+ Border</text>
+<rect x="20" y="380" width="200" height="140" rx="25" ry="25" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
+<text x="102.48" y="434.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Bevel</text>
+<text x="88.67" y="451.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">+ Shadow</text>
+<rect x="250" y="380" width="200" height="140" rx="30" ry="30" fill="rgb(121, 85, 72)"/>
+<text x="301.75" y="443" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">superellipse(-2)</text>
+<rect x="480" y="380" width="200" height="140" rx="30" ry="30" fill="rgb(63, 81, 181)"/>
+<text x="534.08" y="443" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">superellipse(5)</text>
+</svg>

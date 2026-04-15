@@ -11,6 +11,19 @@ import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinD
 
 // ── Color helpers ───────────────────────────────────────────────────
 
+/** Convert cornerShapes K-value tuple to a CSS corner-shape value string. */
+function cornerShapesToCss(shapes: [number, number, number, number]): string {
+  return shapes.map(k => {
+    if (k === Infinity || k >= 10) return "square";
+    if (k === -Infinity || k <= -10) return "notch";
+    if (k === 2) return "squircle";
+    if (k === 1) return "round";
+    if (k === 0) return "bevel";
+    if (k === -1) return "scoop";
+    return `superellipse(${k})`;
+  }).join(" ");
+}
+
 /** Escape text for use inside HTML. Non-ASCII chars are encoded as numeric entities for encoding safety. */
 function escHtml(s: string): string {
   let out = "";
@@ -375,6 +388,7 @@ export class HTMLWriter implements Writer<string> {
       if (hasGradient) css.push(`background-image:${bgImage}`);
       if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
+      if (style.cornerShapes) css.push(`corner-shape:${cornerShapesToCss(style.cornerShapes)}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);
@@ -399,6 +413,7 @@ export class HTMLWriter implements Writer<string> {
       if (hasGradient) css.push(`background-image:${bgImage}`);
       if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
+      if (style.cornerShapes) css.push(`corner-shape:${cornerShapesToCss(style.cornerShapes)}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Corner Shape Demo</title>
+<style>
+  body { margin: 20px; font-family: sans-serif; background: #f5f5f5; }
+  #root { display: flex; flex-wrap: wrap; gap: 30px; padding: 20px; }
+  .box {
+    width: 180px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    padding: 10px;
+  }
+
+  /* 1. Round (default) */
+  .round {
+    background: #4285f4;
+    border-radius: 30px;
+    corner-shape: round;
+    color: white;
+  }
+
+  /* 2. Scoop (concave) */
+  .scoop {
+    background: #ea4335;
+    border-radius: 30px;
+    corner-shape: scoop;
+    color: white;
+  }
+
+  /* 3. Bevel (straight diagonal) */
+  .bevel {
+    background: #fbbc05;
+    border-radius: 30px;
+    corner-shape: bevel;
+    color: #333;
+  }
+
+  /* 4. Notch (sharp inward V) */
+  .notch {
+    background: #34a853;
+    border-radius: 30px;
+    corner-shape: notch;
+    color: white;
+  }
+
+  /* 5. Square (removes rounding) */
+  .square {
+    background: #9c27b0;
+    border-radius: 30px;
+    corner-shape: square;
+    color: white;
+  }
+
+  /* 6. Squircle (smoother than round) */
+  .squircle {
+    background: #ff6f00;
+    border-radius: 40px;
+    corner-shape: squircle;
+    color: white;
+  }
+
+  /* 7. Superellipse with custom value */
+  .superellipse-custom {
+    background: #00bcd4;
+    border-radius: 35px;
+    corner-shape: superellipse(0.5);
+    color: white;
+  }
+
+  /* 8. Mixed corners: different shape per corner */
+  .mixed {
+    background: #607d8b;
+    border-radius: 40px;
+    corner-top-left-shape: scoop;
+    corner-top-right-shape: round;
+    corner-bottom-right-shape: bevel;
+    corner-bottom-left-shape: notch;
+    color: white;
+  }
+
+  /* 9. Large radius scoop */
+  .large-scoop {
+    background: #e91e63;
+    border-radius: 50px;
+    corner-shape: scoop;
+    color: white;
+    width: 200px;
+    height: 140px;
+  }
+
+  /* 10. Squircle with border */
+  .squircle-border {
+    background: #f3e5f5;
+    border: 3px solid #9c27b0;
+    border-radius: 30px;
+    corner-shape: squircle;
+    color: #9c27b0;
+  }
+
+  /* 11. Bevel with box-shadow */
+  .bevel-shadow {
+    background: white;
+    border-radius: 25px;
+    corner-shape: bevel;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+    color: #333;
+  }
+
+  /* 12. Superellipse negative (between scoop and notch) */
+  .superellipse-neg {
+    background: #795548;
+    border-radius: 30px;
+    corner-shape: superellipse(-2);
+    color: white;
+  }
+
+  /* 13. Superellipse high positive (between squircle and square) */
+  .superellipse-high {
+    background: #3f51b5;
+    border-radius: 30px;
+    corner-shape: superellipse(5);
+    color: white;
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="box round">Round<br>(default)</div>
+  <div class="box scoop">Scoop<br>(concave)</div>
+  <div class="box bevel">Bevel<br>(diagonal)</div>
+  <div class="box notch">Notch<br>(inward V)</div>
+  <div class="box square">Square<br>(sharp corner)</div>
+  <div class="box squircle">Squircle<br>(smooth)</div>
+  <div class="box superellipse-custom">superellipse(0.5)</div>
+  <div class="box mixed">Mixed<br>TL:scoop TR:round<br>BR:bevel BL:notch</div>
+  <div class="box large-scoop">Large Scoop<br>(50px radius)</div>
+  <div class="box squircle-border">Squircle<br>+ Border</div>
+  <div class="box bevel-shadow">Bevel<br>+ Shadow</div>
+  <div class="box superellipse-neg">superellipse(-2)</div>
+  <div class="box superellipse-high">superellipse(5)</div>
+</div>
+</body>
+</html>
