@@ -330,11 +330,11 @@ for (const demoFile of demoFiles) {
 
     // --- Acad DXF output ---
     const acadDxfWriter = new AcadDXFWriter({ maxY: viewport.height });
-    const acadDxfContent = await renderIR(ir, acadDxfWriter);
-    expect(acadDxfContent).toBeTruthy();
-    expect(acadDxfContent.length).toBeGreaterThan(100);
+    const acadDxfBytes = await renderIR(ir, acadDxfWriter);
+    expect(acadDxfBytes).toBeInstanceOf(Uint8Array);
+    expect(acadDxfBytes.length).toBeGreaterThan(100);
     const acadDxfPath = path.join(projectOutputDir, `${name}-acad.dxf`);
-    fs.writeFileSync(acadDxfPath, acadDxfContent, "utf-8");
+    fs.writeFileSync(acadDxfPath, acadDxfBytes);
 
     // Verify files are non-empty
     const dxfStat = fs.statSync(dxfPath);

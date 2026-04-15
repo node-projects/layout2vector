@@ -2,6 +2,158 @@
 SECTION
   2
 HEADER
+  9
+$ANGBASE
+ 50
+0.0
+  9
+$ANGDIR
+ 70
+1
+  9
+$AUNITS
+ 70
+0
+  9
+$AUPREC
+ 70
+0
+  9
+$ATTMODE
+ 70
+1
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$TDCREATE
+ 40
+2461146.9541178704239428
+  9
+$CECOLOR
+ 62
+256
+  9
+$CELTSCALE
+ 40
+1.0
+  9
+$CELWEIGHT
+370
+-1
+  9
+$CLAYER
+  8
+0
+  9
+$CELTYPE
+  6
+ByLayer
+  9
+$CMLJUST
+ 70
+0
+  9
+$CMLSCALE
+ 40
+20.0
+  9
+$CMLSTYLE
+  2
+Standard
+  9
+$DIMSTYLE
+  2
+Standard
+  9
+$LWDISPLAY
+290
+0
+  9
+$EXTNAMES
+290
+1
+  9
+$HANDSEED
+  5
+6F
+  9
+$INSUNITS
+ 70
+0
+  9
+$LUNITS
+ 70
+2
+  9
+$LUPREC
+ 70
+4
+  9
+$LTSCALE
+ 40
+1.0
+  9
+$MIRRTEXT
+ 70
+0
+  9
+$INSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$SPLINESEGS
+ 70
+8
+  9
+$PSLTSCALE
+ 70
+1
+  9
+$PDMODE
+ 70
+0
+  9
+$PDSIZE
+ 40
+0.0
+  9
+$PLINEGEN
+ 70
+0
+  9
+$TEXTSIZE
+ 40
+0.2
+  9
+$TEXTSTYLE
+  7
+Standard
+  9
+$TDINDWG
+ 40
+0.0
+  9
+$TDUCREATE
+ 40
+2461146.9541178704239428
+  9
+$TDUUPDATE
+ 40
+2461146.9541178704239428
+  9
+$TDUPDATE
+ 40
+2461146.9541178704239428
+  9
+$ACADVER
+  1
+AC1018
   0
 ENDSEC
   0
@@ -18,6 +170,8 @@ AcDbDictionaryWithDefault
 ObjectDBX Classes
  90
 32768
+ 91
+0
 280
 0
 281
@@ -31,6 +185,8 @@ AcDbPlaceHolder
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -46,6 +202,8 @@ AcDbLayout
 ObjectDBX Classes
  90
 0
+ 91
+0
 280
 0
 281
@@ -59,6 +217,8 @@ AcDbDictionaryVar
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -74,6 +234,8 @@ AcDbTableStyle
 ObjectDBX Classes
  90
 4095
+ 91
+0
 280
 0
 281
@@ -88,6 +250,8 @@ AcDbMaterial
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -102,6 +266,8 @@ AcDbVisualStyle
 ObjectDBX Classes
  90
 4095
+ 91
+0
 280
 0
 281
@@ -116,6 +282,8 @@ AcDbScale
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -130,6 +298,8 @@ AcDbMLeaderStyle
 ObjectDBX Classes
  90
 4095
+ 91
+0
 280
 0
 281
@@ -144,6 +314,8 @@ AcDbCellStyleMap
 ObjectDBX Classes
  90
 1152
+ 91
+0
 280
 0
 281
@@ -158,6 +330,8 @@ ExAcXREFPanelObject
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -172,6 +346,8 @@ AcDbImpNonPersistentObjectsCollection
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -185,6 +361,8 @@ AcDbLayerIndex
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -200,6 +378,8 @@ AcDbSpatialIndex
 ObjectDBX Classes
  90
 0
+ 91
+0
 280
 0
 281
@@ -214,6 +394,8 @@ AcDbIdBuffer
 ObjectDBX Classes
  90
 32768
+ 91
+0
 280
 0
 281
@@ -228,6 +410,8 @@ AcDbSectionViewStyle
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -242,6 +426,8 @@ AcDbDetailViewStyle
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -255,6 +441,8 @@ AcDbSubDMesh
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -270,6 +458,8 @@ AcDbSortentsTable
 ObjectDBX Classes
  90
 0
+ 91
+0
 280
 0
 281
@@ -284,6 +474,8 @@ AcDbTextObjectContextData
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -298,6 +490,8 @@ AcDbWipeout
 WipeOut
  90
 32895
+ 91
+0
 280
 0
 281
@@ -312,6 +506,8 @@ AcDbWipeoutVariables
 WipeOut
  90
 32768
+ 91
+0
 280
 0
 281
@@ -325,6 +521,8 @@ AcDbDimAssoc
   3
 AcDbDimAssoc
  90
+0
+ 91
 0
 280
 0
@@ -340,6 +538,8 @@ AcDbTable
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -354,6 +554,8 @@ AcDbTableContent
 ObjectDBX Classes
  90
 1152
+ 91
+0
 280
 0
 281
@@ -368,6 +570,8 @@ AcDbTableGeometry
 ObjectDBX Classes
  90
 1152
+ 91
+0
 280
 0
 281
@@ -382,6 +586,8 @@ AcDbRasterImage
 ISM
  90
 32895
+ 91
+0
 280
 0
 281
@@ -395,6 +601,8 @@ AcDbRasterImageDef
   3
 ISM
  90
+0
+ 91
 0
 280
 0
@@ -410,6 +618,8 @@ AcDbRasterImageDefReactor
 ISM
  90
 1
+ 91
+0
 280
 0
 281
@@ -423,6 +633,8 @@ AcDbColor
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -438,6 +650,8 @@ AcDbGeoData
 ObjectDBX Classes
  90
 4095
+ 91
+0
 280
 0
 281
@@ -452,6 +666,8 @@ AcDbMLeader
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -466,6 +682,8 @@ AcDbPdfReference
 ObjectDBX Classes
  90
 4095
+ 91
+0
 280
 0
 281
@@ -480,6 +698,8 @@ AcDbPdfDefinition
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -493,6 +713,8 @@ AcDbRasterVariables
   3
 ISM
  90
+0
+ 91
 0
 280
 0
@@ -508,6 +730,8 @@ AcDbSpatialFilter
 ObjectDBX Classes
  90
 0
+ 91
+0
 280
 0
 281
@@ -522,6 +746,8 @@ AcDbMLeaderObjectContextData
 ObjectDBX Classes
  90
 1025
+ 91
+0
 280
 0
 281
@@ -535,6 +761,8 @@ AcDbPlotSettings
   3
 ObjectDBX Classes
  90
+0
+ 91
 0
 280
 0
@@ -550,6 +778,8 @@ AcDbField
 ObjectDBX Classes
  90
 1152
+ 91
+0
 280
 0
 281
@@ -564,6 +794,8 @@ AcDbFieldList
 ObjectDBX Classes
  90
 1152
+ 91
+0
 280
 0
 281
@@ -578,6 +810,8 @@ AcDbMTextAttributeObjectContextData
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -592,6 +826,8 @@ AcDbBlkRefObjectContextData
 ObjectDBX Classes
  90
 1153
+ 91
+0
 280
 0
 281
@@ -607,7 +843,7 @@ TABLE
   2
 VPORT
   5
-A
+18
 330
 0
 100
@@ -617,9 +853,9 @@ AcDbSymbolTable
   0
 VPORT
   5
-18
+26
 330
-A
+18
 100
 AcDbSymbolTableRecord
 100
@@ -679,7 +915,7 @@ TABLE
   2
 LTYPE
   5
-6
+14
 330
 0
 100
@@ -689,9 +925,9 @@ AcDbSymbolTable
   0
 LTYPE
   5
-B
+19
 330
-6
+14
 100
 AcDbSymbolTableRecord
 100
@@ -709,9 +945,9 @@ ByLayer
   0
 LTYPE
   5
-C
+1A
 330
-6
+14
 100
 AcDbSymbolTableRecord
 100
@@ -729,9 +965,9 @@ ByBlock
   0
 LTYPE
   5
-D
+1B
 330
-6
+14
 100
 AcDbSymbolTableRecord
 100
@@ -753,7 +989,7 @@ TABLE
   2
 LAYER
   5
-5
+13
 330
 0
 100
@@ -763,9 +999,9 @@ AcDbSymbolTable
   0
 LAYER
   5
-E
+1C
 330
-5
+13
 100
 AcDbSymbolTableRecord
 100
@@ -791,7 +1027,7 @@ TABLE
   2
 STYLE
   5
-7
+15
 330
 0
 100
@@ -801,9 +1037,9 @@ AcDbSymbolTable
   0
 STYLE
   5
-15
+23
 330
-7
+15
 100
 AcDbSymbolTableRecord
 100
@@ -829,7 +1065,7 @@ TABLE
   2
 VIEW
   5
-9
+17
 330
 0
 100
@@ -843,7 +1079,7 @@ TABLE
   2
 UCS
   5
-8
+16
 330
 0
 100
@@ -857,7 +1093,7 @@ TABLE
   2
 APPID
   5
-2
+10
 330
 0
 100
@@ -867,9 +1103,9 @@ AcDbSymbolTable
   0
 APPID
   5
-17
+25
 330
-2
+10
 100
 AcDbSymbolTableRecord
 100
@@ -885,7 +1121,7 @@ TABLE
   2
 DIMSTYLE
   5
-4
+12
 330
 0
 100
@@ -897,9 +1133,9 @@ AcDbDimStyleTable
   0
 DIMSTYLE
 105
-16
+24
 330
-4
+12
 100
 AcDbSymbolTableRecord
 100
@@ -933,7 +1169,7 @@ Standard
  49
 1.0
  50
-0.7853981633974483
+45.0
  70
 0
  90
@@ -1047,7 +1283,7 @@ TABLE
   2
 BLOCK_RECORD
   5
-3
+11
 330
 0
 100
@@ -1057,9 +1293,9 @@ AcDbSymbolTable
   0
 BLOCK_RECORD
   5
-F
+1D
 330
-3
+11
 100
 AcDbSymbolTableRecord
 100
@@ -1067,6 +1303,8 @@ AcDbBlockTableRecord
   2
 *Model_Space
  70
+0
+340
 0
  70
 0
@@ -1077,9 +1315,9 @@ AcDbBlockTableRecord
   0
 BLOCK_RECORD
   5
-12
+20
 330
-3
+11
 100
 AcDbSymbolTableRecord
 100
@@ -1087,6 +1325,8 @@ AcDbBlockTableRecord
   2
 *Paper_Space
  70
+0
+340
 0
  70
 0
@@ -1105,9 +1345,9 @@ BLOCKS
   0
 BLOCK
   5
-10
+1E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1119,6 +1359,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -1139,9 +1381,9 @@ AcDbBlockBegin
   0
 ENDBLK
   5
-11
+1F
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1151,9 +1393,9 @@ AcDbBlockEnd
   0
 BLOCK
   5
-13
+21
 330
-12
+20
 100
 AcDbEntity
   8
@@ -1166,6 +1408,8 @@ ByLayer
 1.0
  60
 0
+ 67
+1
 370
 -1
 100
@@ -1185,9 +1429,9 @@ AcDbBlockBegin
   0
 ENDBLK
   5
-14
+22
 330
-12
+20
 100
 AcDbEntity
   8
@@ -1203,9 +1447,9 @@ ENTITIES
   0
 TEXT
   5
-19
+27
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1217,6 +1461,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -1265,9 +1511,9 @@ AcDbText
   0
 HATCH
   5
-1A
+28
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1279,6 +1525,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -1485,9 +1733,9 @@ SOLID
   0
 LWPOLYLINE
   5
-1B
+29
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1499,6 +1747,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -1933,9 +2183,9 @@ AcDbPolyline
   0
 TEXT
   5
-1C
+2A
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -1947,6 +2197,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -1995,9 +2247,9 @@ AcDbText
   0
 TEXT
   5
-1D
+2B
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2009,6 +2261,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -2057,9 +2311,9 @@ AcDbText
   0
 HATCH
   5
-1E
+2C
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2071,6 +2325,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -2277,9 +2533,9 @@ SOLID
   0
 LWPOLYLINE
   5
-1F
+2D
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2291,6 +2547,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -2725,9 +2983,9 @@ AcDbPolyline
   0
 TEXT
   5
-20
+2E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2739,6 +2997,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -2787,9 +3047,9 @@ AcDbText
   0
 TEXT
   5
-21
+2F
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2801,6 +3061,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -2849,9 +3111,9 @@ AcDbText
   0
 HATCH
   5
-22
+30
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -2863,6 +3125,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3069,9 +3333,9 @@ SOLID
   0
 LWPOLYLINE
   5
-23
+31
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3083,6 +3347,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3517,9 +3783,9 @@ AcDbPolyline
   0
 TEXT
   5
-24
+32
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3531,6 +3797,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3579,9 +3847,9 @@ AcDbText
   0
 TEXT
   5
-25
+33
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3593,6 +3861,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3641,9 +3911,9 @@ AcDbText
   0
 TEXT
   5
-26
+34
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3655,6 +3925,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3703,9 +3975,9 @@ AcDbText
   0
 TEXT
   5
-27
+35
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3717,6 +3989,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3765,9 +4039,9 @@ AcDbText
   0
 HATCH
   5
-28
+36
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3779,6 +4053,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -3985,9 +4261,9 @@ SOLID
   0
 LWPOLYLINE
   5
-29
+37
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -3999,6 +4275,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -4433,9 +4711,9 @@ AcDbPolyline
   0
 TEXT
   5
-2A
+38
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -4447,6 +4725,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -4495,9 +4775,9 @@ AcDbText
   0
 LWPOLYLINE
   5
-2B
+39
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -4509,6 +4789,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -4563,9 +4845,9 @@ AcDbPolyline
   0
 HATCH
   5
-2C
+3A
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -4577,6 +4859,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -4783,9 +5067,9 @@ SOLID
   0
 LWPOLYLINE
   5
-2D
+3B
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -4797,6 +5081,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -5231,9 +5517,9 @@ AcDbPolyline
   0
 TEXT
   5
-2E
+3C
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -5245,6 +5531,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -5293,9 +5581,9 @@ AcDbText
   0
 HATCH
   5
-2F
+3D
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -5307,6 +5595,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -5513,9 +5803,9 @@ SOLID
   0
 LWPOLYLINE
   5
-30
+3E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -5527,6 +5817,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -5961,9 +6253,9 @@ AcDbPolyline
   0
 LWPOLYLINE
   5
-31
+3F
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -5975,6 +6267,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6029,9 +6323,9 @@ AcDbPolyline
   0
 TEXT
   5
-32
+40
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6043,6 +6337,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6091,9 +6387,9 @@ AcDbText
   0
 HATCH
   5
-33
+41
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6105,6 +6401,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6311,9 +6609,9 @@ SOLID
   0
 LWPOLYLINE
   5
-34
+42
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6325,6 +6623,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6759,9 +7059,9 @@ AcDbPolyline
   0
 HATCH
   5
-35
+43
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6773,6 +7073,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6831,9 +7133,9 @@ SOLID
   0
 LWPOLYLINE
   5
-36
+44
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6845,6 +7147,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6909,9 +7213,9 @@ AcDbPolyline
   0
 TEXT
   5
-37
+45
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6923,6 +7227,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -6971,9 +7277,9 @@ AcDbText
   0
 HATCH
   5
-38
+46
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -6985,6 +7291,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -7139,9 +7447,9 @@ SOLID
   0
 LWPOLYLINE
   5
-39
+47
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -7153,6 +7461,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -7457,9 +7767,9 @@ AcDbPolyline
   0
 HATCH
   5
-3A
+48
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -7471,6 +7781,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -7609,9 +7921,9 @@ SOLID
   0
 LWPOLYLINE
   5
-3B
+49
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -7623,6 +7935,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -7887,9 +8201,9 @@ AcDbPolyline
   0
 TEXT
   5
-3C
+4A
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -7901,6 +8215,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -7949,9 +8265,9 @@ AcDbText
   0
 TEXT
   5
-3D
+4B
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -7963,6 +8279,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -8011,9 +8329,9 @@ AcDbText
   0
 HATCH
   5
-3E
+4C
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -8025,6 +8343,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -8231,9 +8551,9 @@ SOLID
   0
 LWPOLYLINE
   5
-3F
+4D
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -8245,6 +8565,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -8679,9 +9001,9 @@ AcDbPolyline
   0
 HATCH
   5
-40
+4E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -8693,6 +9015,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -8899,9 +9223,9 @@ SOLID
   0
 LWPOLYLINE
   5
-41
+4F
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -8913,6 +9237,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -9347,9 +9673,9 @@ AcDbPolyline
   0
 TEXT
   5
-42
+50
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -9361,6 +9687,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -9409,9 +9737,9 @@ AcDbText
   0
 HATCH
   5
-43
+51
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -9423,6 +9751,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -9629,9 +9959,9 @@ SOLID
   0
 LWPOLYLINE
   5
-44
+52
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -9643,6 +9973,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10077,9 +10409,9 @@ AcDbPolyline
   0
 TEXT
   5
-45
+53
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10091,6 +10423,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10139,9 +10473,9 @@ AcDbText
   0
 TEXT
   5
-46
+54
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10153,6 +10487,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10201,9 +10537,9 @@ AcDbText
   0
 HATCH
   5
-47
+55
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10215,6 +10551,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10421,9 +10759,9 @@ SOLID
   0
 LWPOLYLINE
   5
-48
+56
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10435,6 +10773,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10869,9 +11209,9 @@ AcDbPolyline
   0
 TEXT
   5
-49
+57
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10883,6 +11223,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10931,9 +11273,9 @@ AcDbText
   0
 TEXT
   5
-4A
+58
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -10945,6 +11287,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -10993,9 +11337,9 @@ AcDbText
   0
 HATCH
   5
-4B
+59
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -11007,6 +11351,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -11213,9 +11559,9 @@ SOLID
   0
 LWPOLYLINE
   5
-4C
+5A
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -11227,6 +11573,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -11661,9 +12009,9 @@ AcDbPolyline
   0
 TEXT
   5
-4D
+5B
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -11675,6 +12023,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -11723,9 +12073,9 @@ AcDbText
   0
 TEXT
   5
-4E
+5C
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -11737,6 +12087,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -11785,9 +12137,9 @@ AcDbText
   0
 HATCH
   5
-4F
+5D
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -11799,6 +12151,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -12005,9 +12359,9 @@ SOLID
   0
 LWPOLYLINE
   5
-50
+5E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -12019,6 +12373,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -12453,9 +12809,9 @@ AcDbPolyline
   0
 TEXT
   5
-51
+5F
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -12467,6 +12823,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -12515,9 +12873,9 @@ AcDbText
   0
 HATCH
   5
-52
+60
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -12529,6 +12887,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -12735,9 +13095,9 @@ SOLID
   0
 LWPOLYLINE
   5
-53
+61
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -12749,6 +13109,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -13183,9 +13545,9 @@ AcDbPolyline
   0
 TEXT
   5
-54
+62
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -13197,6 +13559,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -13245,9 +13609,9 @@ AcDbText
   0
 TEXT
   5
-55
+63
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -13259,6 +13623,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -13307,9 +13673,9 @@ AcDbText
   0
 HATCH
   5
-56
+64
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -13321,6 +13687,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -13527,9 +13895,9 @@ SOLID
   0
 LWPOLYLINE
   5
-57
+65
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -13541,6 +13909,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -13975,9 +14345,9 @@ AcDbPolyline
   0
 TEXT
   5
-58
+66
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -13989,6 +14359,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14037,9 +14409,9 @@ AcDbText
   0
 TEXT
   5
-59
+67
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14051,6 +14423,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14099,9 +14473,9 @@ AcDbText
   0
 HATCH
   5
-5A
+68
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14113,6 +14487,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14319,9 +14695,9 @@ SOLID
   0
 LWPOLYLINE
   5
-5B
+69
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14333,6 +14709,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14767,9 +15145,9 @@ AcDbPolyline
   0
 TEXT
   5
-5C
+6A
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14781,6 +15159,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14829,9 +15209,9 @@ AcDbText
   0
 TEXT
   5
-5D
+6B
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14843,6 +15223,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -14891,9 +15273,9 @@ AcDbText
   0
 HATCH
   5
-5E
+6C
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -14905,6 +15287,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -15111,9 +15495,9 @@ SOLID
   0
 LWPOLYLINE
   5
-5F
+6D
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -15125,6 +15509,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -15559,9 +15945,9 @@ AcDbPolyline
   0
 TEXT
   5
-60
+6E
 330
-F
+1D
 100
 AcDbEntity
   8
@@ -15573,6 +15959,8 @@ ByLayer
  48
 1.0
  60
+0
+ 67
 0
 370
 -1
@@ -15639,63 +16027,63 @@ AcDbDictionary
   3
 ACAD_COLOR
 350
-0
+2
   3
 ACAD_GROUP
 350
-0
+3
   3
 ACAD_LAYOUT
 350
-0
+4
   3
 ACAD_MATERIAL
 350
-0
+5
   3
 ACAD_SORTENTS
 350
-0
+6
   3
 ACAD_MLEADERSTYLE
 350
-0
+7
   3
 ACAD_MLINESTYLE
 350
-0
+8
   3
 ACAD_TABLESTYLE
 350
-0
+9
   3
 ACAD_PLOTSETTINGS
 350
-0
+A
   3
 AcDbVariableDictionary
 350
-0
+B
   3
 ACAD_SCALELIST
 350
-0
+C
   3
 ACAD_VISUALSTYLE
 350
-0
+D
   3
 ACAD_FIELDLIST
 350
-0
+E
   3
 ACAD_IMAGE_DICT
 350
-0
+F
   0
 DICTIONARY
   5
-0
+2
 330
 1
 100
@@ -15707,7 +16095,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+3
 330
 1
 100
@@ -15719,7 +16107,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+4
 330
 1
 100
@@ -15731,7 +16119,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+5
 330
 1
 100
@@ -15743,7 +16131,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+6
 330
 1
 100
@@ -15755,7 +16143,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+7
 330
 1
 100
@@ -15767,7 +16155,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+8
 330
 1
 100
@@ -15779,7 +16167,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+9
 330
 1
 100
@@ -15791,7 +16179,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+A
 330
 1
 100
@@ -15803,7 +16191,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+B
 330
 1
 100
@@ -15815,7 +16203,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+C
 330
 1
 100
@@ -15827,7 +16215,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+D
 330
 1
 100
@@ -15839,7 +16227,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+E
 330
 1
 100
@@ -15851,7 +16239,7 @@ AcDbDictionary
   0
 DICTIONARY
   5
-0
+F
 330
 1
 100
