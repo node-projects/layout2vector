@@ -114,6 +114,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |
 | `svgToVector` | `boolean` | `false` | When true, embedded SVG images (in `<img>` tags and CSS `background-image`) are always converted to vector IR nodes (polygon, polyline, text) instead of being rasterized to bitmap image nodes. This produces resolution-independent output but may not accurately render SVGs that use fill-rule:evenodd with complex multi-subpath paths. |
 | `convertFormControls` | `boolean` | `false` | When true, native form controls are converted into synthetic IR nodes that preserve visible values and states across writers. Supported controls include checkbox, radio, text-like inputs (including date/time variants), textarea, select, and progress. |
+| `includePseudoElements` | `boolean` | `true` | When true, `::before` and `::after` pseudo-elements with generated content are extracted into the IR as polygon and text nodes. Be careful, this option modifies original DOM cause it need to create real elements for them in DOM. CSS `counter()`, `counters()`, `attr()`, `open-quote`/`close-quote`, and string literals are resolved. Best results with Firefox (native `getBoxQuads` on pseudo replacement elements). |
 
 
 **Note:**
@@ -499,6 +500,7 @@ import {
 - Border-radius (rendered as rounded rectangles in PDF, arc-approximated polylines in DXF)
 - Background colors, border colors, font properties
 - CSS transforms reflected in quad geometry (via `getBoxQuads`)
+- `::before` / `::after` pseudo-elements with generated content (string literals, `counter()`, `counters()`, `attr()`, `open-quote`/`close-quote`)
 
 ### Shadow DOM
 - Traverses open/declarative shadow roots (`element.shadowRoot`)

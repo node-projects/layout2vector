@@ -47,7 +47,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Keeps text as text/vector objects | Yes | No | No | No | html2canvas, html2canvas-pro, and SnapDOM are screenshot-oriented. `layout2vector` preserves text nodes for text-capable writers. |
 | Open Shadow DOM | Yes | Not documented | Yes | Yes | `layout2vector` traverses open Shadow DOM. html2canvas-pro documents automatic Shadow DOM handling and `iframeContainer`. SnapDOM documents Shadow DOM support in its clone flow. |
 | Same-origin iframe traversal | Partial | Not documented | Not documented | Yes | `layout2vector` can opt into live same-origin iframe walking with `walkIframes`. SnapDOM explicitly documents same-origin iframe support. Cross-origin or unavailable iframe documents are still skipped by browser constraints. |
-| Generated content (`::before` / `::after`, `counter()`, `counters()`) | No | Not documented | Not documented | Yes | I did not find pseudo-element or counter extraction in `layout2vector`. SnapDOM explicitly documents pseudo-element inlining and counter resolution. |
+| Generated content (`::before` / `::after`, `counter()`, `counters()`) | Yes | Not documented | Not documented | Yes | `layout2vector` extracts `::before`/`::after` pseudo-elements with `counter()`, `counters()`, `attr()`, and `open-quote`/`close-quote` resolution. SnapDOM explicitly documents pseudo-element inlining and counter resolution. |
 | CSS `line-clamp` | Not documented | Not documented | Not documented | Yes | SnapDOM explicitly documents `line-clamp`. I did not find an explicit public claim for the others in the reviewed material. |
 | Flexbox layouts | Yes | Yes | Yes | Not documented | html2canvas and html2canvas-pro list `flex` support. `layout2vector` has a UI test for flexbox layout extraction. |
 | Grid layouts | Yes | Not documented | Not documented | Not documented | `layout2vector` has a UI test for CSS grid. I did not find explicit upstream claims for the other tools in the reviewed material. |
@@ -84,7 +84,7 @@ That design is useful because it enables screenshot-focused features such as DOM
 
 The cost is that fidelity depends on the cloned tree reproducing enough runtime context for layout and painting to still match the live page. In practice, clone-based capture can still run into edge cases around Shadow DOM boundaries, slot distribution, scroll-dependent layout, JS-mutated state, iframe context, media state, and browser-specific `foreignObject` behavior.
 
-`layout2vector` makes the opposite trade. It walks the live rendered DOM, reads computed geometry directly, and exports from the extracted IR. That avoids a whole class of clone-synchronization bugs and makes CAD/vector/document outputs possible, but it does not currently expose the same screenshot-pipeline hook surface or generated-content handling that SnapDOM advertises.
+`layout2vector` makes the opposite trade. It walks the live rendered DOM, reads computed geometry directly, and exports from the extracted IR. That avoids a whole class of clone-synchronization bugs and makes CAD/vector/document outputs possible, but it does not currently expose the same screenshot-pipeline hook surface that SnapDOM advertises.
 
 ## Sources
 
