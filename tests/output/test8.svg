@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
-<path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)" stroke="rgb(0, 0, 0)" stroke-width="2"/>
+<g><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)"/><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/></g>
 <text x="144.72" y="80.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>
-<path d="M62,112 L262,112 L262,200 L62,200 Z" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>
-<path d="M62,200 L256,200 L256,375 L62,375 Z" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="1"/>
-<path d="M62,381 L226,381 L226,402 L62,402 Z" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="2"/>
-<path d="M407,114 L584,114 L584,135 L407,135 Z" fill="rgb(255, 255, 255)" stroke="rgb(118, 118, 118)" stroke-width="2"/>
-<path d="M407,135 L736,135 L736,364 L407,364 Z" fill="rgba(194, 31, 31, 0.52)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<g><path d="M62,112 L262,112 L262,200 L62,200 Z" fill="rgb(255, 255, 255)"/><path d="M62,112 L262,112 L262,200 L62,200 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g>
+<g><path d="M62,200 L256,200 L256,375 L62,375 Z" fill="rgb(255, 255, 255)"/><path d="M62,200 L256,200 L256,375 L62,375 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g>
+<g><path d="M62,381 L226,381 L226,402 L62,402 Z" fill="rgb(255, 255, 255)"/><path d="M62,381 L226,381 L226,402 L62,402 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g>
+<g><path d="M407,114 L584,114 L584,135 L407,135 Z" fill="rgb(255, 255, 255)"/><path d="M407,114 L584,114 L584,135 L407,135 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g>
+<g><path d="M407,135 L736,135 L736,364 L407,364 Z" fill="rgba(194, 31, 31, 0.52)"/><path d="M407,135 L736,135 L736,364 L407,364 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
 <text x="408" y="137" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
 <text x="408" y="152" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
 <text x="408" y="167" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf x</text>

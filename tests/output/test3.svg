@@ -11,10 +11,10 @@
 <path d="M170.28,120.86 L170.28,120.34 L180.73,120.34 L180.73,120.86 Z" fill="rgb(0, 0, 0)"/>
 <text x="163.95" y="79.45" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="10px" font-family="Times New Roman" transform="rotate(-90,163.95,79.45)">AAAAA</text>
 <text x="86.23" y="110" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="Wingdings">&#xE5;</text>
-<path d="M24.5,233.5 L24.5,201.5 L69.5,201.5 L69.5,233.5 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<g><path d="M24.5,233.5 L24.5,201.5 L69.5,201.5 L69.5,233.5 Z" fill="rgb(255, 255, 255)"/><path d="M24.5,233.5 L24.5,201.5 L69.5,201.5 L69.5,233.5 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
 <use href="#imgSym1" transform="translate(29.45,234.5) rotate(-90)" x="0" y="0" width="30" height="35.1"/>
 <text x="-7.77" y="185.23" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Times New Roman" transform="rotate(-90,-7.77,185.23)">=+S0001-Clv6xx</text>
-<path d="M88,129 L178,129 L178,261 L88,261 Z" fill="rgb(255, 255, 255)" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<g><path d="M88,129 L178,129 L178,261 L88,261 Z" fill="rgb(255, 255, 255)"/><path d="M88,129 L178,129 L178,261 L88,261 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
 <g clip-path="url(#clip2)"><path d="M89,130 L177,130 L177,164 L89,164 Z" fill="rgb(111, 216, 146)"/></g>
 <text x="117.53" y="140.57" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.4px" font-family="Times New Roman">AABB</text>
 <text x="171.02" y="164.96" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="Times New Roman">0</text>

@@ -16,17 +16,17 @@
 </defs>
 <text x="24" y="25.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial">Clip Path Shapes</text>
 <text x="24" y="60.5" fill="rgb(71, 85, 105)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This demo covers inset(), circle(), ellipse(), and polygon() clipping on both filled boxes and images.</text>
-<rect x="24" y="96" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
-<g clip-path="url(#clip3)"><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="url(#lg2)" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
+<g filter="url(#ds1)"><rect x="24" y="96" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)"/></g>
+<g clip-path="url(#clip3)"><g><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="rgb(239, 68, 68)"/><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="url(#lg2)"/><path d="M237,112 L417,112 L417,292 L237,292 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g></g>
 <text x="310.66" y="305" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Inset</text>
-<rect x="650" y="96" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds4)"/>
-<g clip-path="url(#clip6)"><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="url(#lg5)" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
+<g filter="url(#ds4)"><rect x="650" y="96" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)"/></g>
+<g clip-path="url(#clip6)"><g><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="rgb(59, 130, 246)"/><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="url(#lg5)"/><path d="M863,112 L1043,112 L1043,292 L863,292 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g></g>
 <text x="933.53" y="305" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Circle</text>
-<rect x="24" y="356" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds7)"/>
+<g filter="url(#ds7)"><rect x="24" y="356" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)"/></g>
 <g clip-path="url(#clip8)"><path d="M237,372 L417,372 L417,552 L237,552 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <g clip-path="url(#clip8)"><use href="#imgSym9" x="237" y="372" width="180" height="180"/></g>
 <text x="304.42" y="565" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Ellipse</text>
-<rect x="650" y="356" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)" filter="url(#ds10)"/>
+<g filter="url(#ds10)"><rect x="650" y="356" width="606" height="240" rx="18" ry="18" fill="rgb(255, 255, 255)"/></g>
 <g clip-path="url(#clip11)"><path d="M863,372 L1043,372 L1043,552 L863,552 Z" fill="none" stroke="rgba(15, 23, 42, 0.1)" stroke-width="4"/></g>
 <g clip-path="url(#clip11)"><use href="#imgSym12" x="863" y="372" width="180" height="180"/></g>
 <text x="925.38" y="565" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">Polygon</text>

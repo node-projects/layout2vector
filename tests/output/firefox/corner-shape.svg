@@ -30,10 +30,10 @@
 <rect x="710" y="190" width="220" height="160" rx="50" ry="50" fill="rgb(233, 30, 99)"/>
 <text x="780.32" y="254.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Large Scoop</text>
 <text x="779.15" y="271.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">(50px radius)</text>
-<rect x="960" y="190" width="206" height="146" rx="30" ry="30" fill="rgb(243, 229, 245)" stroke="rgb(156, 39, 176)" stroke-width="3"/>
+<g><rect x="960" y="190" width="206" height="146" rx="30" ry="30" fill="rgb(243, 229, 245)"/><rect x="960" y="190" width="206" height="146" rx="30" ry="30" fill="none" stroke="rgb(156, 39, 176)" stroke-width="3"/></g>
 <text x="1037.7" y="247.5" fill="rgb(156, 39, 176)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Squircle</text>
 <text x="1035.95" y="264.5" fill="rgb(156, 39, 176)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">+ Border</text>
-<rect x="20" y="380" width="200" height="140" rx="25" ry="25" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
+<g filter="url(#ds1)"><rect x="20" y="380" width="200" height="140" rx="25" ry="25" fill="rgb(255, 255, 255)"/></g>
 <text x="102.48" y="434.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">Bevel</text>
 <text x="88.67" y="451.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="sans-serif">+ Shadow</text>
 <rect x="250" y="380" width="200" height="140" rx="30" ry="30" fill="rgb(121, 85, 72)"/>

@@ -10,16 +10,16 @@
 <text x="0" y="252" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Opacity Levels</text>
 <rect x="0" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/>
 <text x="30.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial">1.0</text>
-<rect x="90" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.75"/>
+<g opacity="0.75"><rect x="90" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/></g>
 <text x="116.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.75">0.75</text>
-<rect x="180" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.5"/>
+<g opacity="0.5"><rect x="180" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/></g>
 <text x="210.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.5">0.5</text>
-<rect x="270" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.25"/>
+<g opacity="0.25"><rect x="270" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/></g>
 <text x="296.38" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.25">0.25</text>
-<rect x="360" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)" opacity="0.1"/>
+<g opacity="0.1"><rect x="360" y="287" width="80" height="80" rx="8" ry="8" fill="rgb(106, 27, 154)"/></g>
 <text x="390.27" y="320" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial" opacity="0.1">0.1</text>
 <text x="0" y="383" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Isolation: Isolate</text>
-<path d="M0,415 L200,415 L200,535 L0,535 Z" fill="rgb(255, 249, 196)" stroke="rgb(249, 168, 37)" stroke-width="2"/>
+<g><path d="M0,415 L200,415 L200,535 L0,535 Z" fill="rgb(255, 249, 196)"/><path d="M0,415 L200,415 L200,535 L0,535 Z" fill="none" stroke="rgb(249, 168, 37)" stroke-width="2"/></g>
 <path d="M32,447 L112,447 L112,527 L32,527 Z" fill="rgb(66, 165, 245)"/>
 <text x="32" y="447.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">B (z:1)</text>
 <path d="M12,427 L92,427 L92,507 L12,507 Z" fill="rgb(239, 83, 80)"/>

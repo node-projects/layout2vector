@@ -27,7 +27,7 @@
 <text x="48.47" y="287.53" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial" transform="rotate(30,48.47,287.53)">Hello</text>
 <text x="13.7" y="351" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Rect+text at 30deg</text>
 <path d="M139.29,304 L210,233.29 L280.71,304 L210,374.71 Z" fill="none"/>
-<path d="M178.18,272.18 L234.75,265.11 L263.03,314.61 L220.61,357.03 L171.11,328.75 Z" fill="rgb(255, 152, 0)" stroke="rgb(230, 81, 0)" stroke-width="2"/>
+<g><path d="M178.18,272.18 L234.75,265.11 L263.03,314.61 L220.61,357.03 L171.11,328.75 Z" fill="rgb(255, 152, 0)"/><path d="M178.18,272.18 L234.75,265.11 L263.03,314.61 L220.61,357.03 L171.11,328.75 Z" fill="none" stroke="rgb(230, 81, 0)" stroke-width="2"/></g>
 <text x="161.7" y="361" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="11px" font-family="Arial">Pentagon at -45deg</text>
 <path d="M368.3,235.7 L418.3,322.3 L331.7,372.3 L281.7,285.7 Z" fill="none"/>
 <path d="M372.5,342.97 L367.84,344.66 L362.5,344.79 L356.68,343.35 L350.6,340.4 L344.5,336.04 L338.61,330.46 L333.15,323.86 L328.35,316.5 L324.38,308.66 L321.39,300.63 L319.5,292.74 L318.78,285.28 L319.26,278.54 L320.93,272.78 L323.71,268.22 L327.5,265.03 L332.16,263.34 L337.5,263.21 L343.32,264.65 L349.4,267.6 L355.5,271.96 L361.39,277.54 L366.85,284.14 L371.65,291.5 L375.62,299.34 L378.61,307.37 L380.5,315.26 L381.22,322.72 L380.74,329.46 L379.07,335.22 L376.29,339.78 Z" fill="rgb(156, 39, 176)"/>

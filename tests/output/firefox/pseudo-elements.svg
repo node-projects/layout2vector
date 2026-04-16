@@ -49,12 +49,12 @@
 <text x="20" y="843" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This shows an attribute value</text>
 <text x="227.25" y="843" fill="rgb(127, 140, 141)" dominant-baseline="text-before-edge" font-style="italic" font-size="16px" font-family="Arial">[important]</text>
 <text x="20" y="903.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Decorative Pseudo-Elements</text>
-<path d="M20,934 L1260,934 L1260,996 L20,996 Z" fill="rgb(249, 249, 249)" stroke="rgb(221, 221, 221)" stroke-width="1"/>
+<g><path d="M20,934 L1260,934 L1260,996 L20,996 Z" fill="rgb(249, 249, 249)"/><path d="M20,934 L1260,934 L1260,996 L20,996 Z" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
 <text x="41" y="958" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">A card with a decorative top bar and bottom line</text>
 <path d="M41,945 L81,945 L81,949 L41,949 Z" fill="rgb(231, 76, 60)"/>
 <path d="M41,983 L1239,983 L1239,985 L41,985 Z" fill="rgb(52, 152, 219)"/>
 <text x="20" y="1021.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Transformed Element</text>
-<path d="M41.27,1064.4 L256.28,1075.66 L254.03,1118.6 L39.02,1107.34 Z" fill="rgb(255, 243, 205)" stroke="rgb(255, 193, 7)" stroke-width="1"/>
+<g><path d="M41.27,1064.4 L256.28,1075.66 L254.03,1118.6 L39.02,1107.34 Z" fill="rgb(255, 243, 205)"/><path d="M41.27,1064.4 L256.28,1075.66 L254.03,1118.6 L39.02,1107.34 Z" fill="none" stroke="rgb(255, 193, 7)" stroke-width="1"/></g>
 <text x="75.7" y="1080.72" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial" transform="rotate(3,75.7,1080.72)">Warning: tilted element</text>
 <text x="57.49" y="1079.77" fill="rgb(133, 100, 4)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial" transform="rotate(3,57.49,1079.77)">&#x26A0;</text>
 <text x="20" y="1176.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Chapter Numbering</text>
@@ -65,11 +65,11 @@
 <text x="98.38" y="1258.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">Configuration</text>
 <text x="20" y="1258.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Chapter 3:</text>
 <text x="20" y="1300.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Both ::before &amp; ::after</text>
-<path d="M20,1333 L223.05,1333 L223.05,1368 L20,1368 Z" fill="rgb(234, 242, 248)" stroke="rgb(174, 214, 241)" stroke-width="1"/>
+<g><path d="M20,1333 L223.05,1333 L223.05,1368 L20,1368 Z" fill="rgb(234, 242, 248)"/><path d="M20,1333 L223.05,1333 L223.05,1368 L20,1368 Z" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
 <text x="51.23" y="1343.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Surrounded content</text>
 <text x="33" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25B6;</text>
 <text x="191.82" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25C0;</text>
-<path d="M20,1376 L258.62,1376 L258.62,1411 L20,1411 Z" fill="rgb(234, 242, 248)" stroke="rgb(174, 214, 241)" stroke-width="1"/>
+<g><path d="M20,1376 L258.62,1376 L258.62,1411 L20,1411 Z" fill="rgb(234, 242, 248)"/><path d="M20,1376 L258.62,1376 L258.62,1411 L20,1411 Z" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
 <text x="51.23" y="1386.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Another surrounded item</text>
 <text x="33" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25B6;</text>
 <text x="227.38" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25C0;</text>

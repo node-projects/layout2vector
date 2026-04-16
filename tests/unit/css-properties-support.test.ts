@@ -226,4 +226,29 @@ text withlongtoken</p>
     expect(svg).toContain('patternContentUnits="userSpaceOnUse"');
     expect(svg).toContain("fill=\"url(#cg");
   });
+
+  test("SVG writer stacks multiple background gradients bottom-to-top", async () => {
+    const nodes: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 20, y: 20 },
+        { x: 180, y: 20 },
+        { x: 180, y: 180 },
+        { x: 20, y: 180 },
+      ],
+      style: {
+        fill: "rgb(232, 232, 232)",
+        backgroundImage: "radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 42%, rgba(0, 0, 0, 0) 43%), conic-gradient(from 210deg, rgba(15, 76, 117, 0.15) 0%, rgb(15, 76, 117) 18%, rgb(50, 130, 184) 44%, rgb(187, 225, 250) 72%, rgba(15, 76, 117, 0.15) 100%)",
+        borderRadius: "80px",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new SVGWriter({ width: 220, height: 220 });
+    const svg = await renderIR(nodes, writer);
+
+    expect(svg).toContain('<radialGradient id="rg');
+    expect(svg).toContain('<pattern id="cg');
+    expect((svg.match(/<rect /g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
 });

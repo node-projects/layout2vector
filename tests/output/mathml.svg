@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="956" viewBox="0 0 1264 956">
 <text x="28" y="29.5" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-weight="700" font-size="30px" font-family="Times New Roman">MathML Examples</text>
-<path d="M28,87 L1252,87 L1252,169 L28,169 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,87 L1252,87 L1252,169 L28,169 Z" fill="rgb(250, 250, 250)"/><path d="M28,87 L1252,87 L1252,169 L28,169 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="104.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Simple Fraction</text>
 <path d="M41,142.98 L50.81,142.98" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M72.98,142.98 L82.8,142.98" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
@@ -14,7 +14,7 @@
 <text x="89.91" y="130.5" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">=</text>
 <text x="109.44" y="129.19" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">5</text>
 <text x="109.44" y="143.38" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">4</text>
-<path d="M28,184 L1252,184 L1252,272 L28,272 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,184 L1252,184 L1252,272 L28,272 Z" fill="rgb(250, 250, 250)"/><path d="M28,184 L1252,184 L1252,272 L28,272 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="201.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Quadratic Formula</text>
 <path d="M77.36,246.14 L178.67,246.14" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M120.41,226.58 L177.67,226.58" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
@@ -32,7 +32,7 @@
 <text x="171.67" y="232.66" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">c</text>
 <text x="120.61" y="246.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">2</text>
 <text x="128.42" y="246.85" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">a</text>
-<path d="M28,287 L1252,287 L1252,375 L28,375 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,287 L1252,287 L1252,375 L28,375 Z" fill="rgb(250, 250, 250)"/><path d="M28,287 L1252,287 L1252,375 L28,375 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="304.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Summation</text>
 <path d="M141.94,346.92 L246.94,346.92" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <text x="45.66" y="334.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">&#x2211;</text>
@@ -56,7 +56,7 @@
 <text x="233.94" y="329.77" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">1</text>
 <text x="241.75" y="333.28" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">)</text>
 <text x="191.53" y="347.47" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">6</text>
-<path d="M28,390 L1252,390 L1252,520 L28,520 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,390 L1252,390 L1252,520 L28,520 Z" fill="rgb(250, 250, 250)"/><path d="M28,390 L1252,390 L1252,520 L28,520 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="407.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Matrix</text>
 <text x="42" y="462.72" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">[</text>
 <text x="58.11" y="435.41" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">1</text>
@@ -69,7 +69,7 @@
 <text x="86.7" y="485.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">0</text>
 <text x="115.3" y="485.03" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">1</text>
 <text x="135.09" y="462.72" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">]</text>
-<path d="M28,535 L1252,535 L1252,620 L28,620 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,535 L1252,535 L1252,620 L28,620 Z" fill="rgb(250, 250, 250)"/><path d="M28,535 L1252,535 L1252,620 L28,620 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="552.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Integral</text>
 <text x="45.66" y="582.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">&#x222B;</text>
 <text x="51.69" y="594.69" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">0</text>
@@ -81,7 +81,7 @@
 <text x="115.98" y="582.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">x</text>
 <text x="133.81" y="582.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">=</text>
 <text x="152.34" y="582.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">1</text>
-<path d="M28,635 L1252,635 L1252,718 L28,718 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,635 L1252,635 L1252,718 L28,718 Z" fill="rgb(250, 250, 250)"/><path d="M28,635 L1252,635 L1252,718 L28,718 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="652.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Superscript &amp; Subscript</text>
 <text x="42" y="682.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">a</text>
 <text x="54.27" y="677.96" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">2</text>
@@ -94,7 +94,7 @@
 <text x="203.5" y="682.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">H</text>
 <text x="219.53" y="692.69" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">2</text>
 <text x="231.34" y="682.59" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">O</text>
-<path d="M28,733 L1252,733 L1252,820 L28,820 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,733 L1252,733 L1252,820 L28,820 Z" fill="rgb(250, 250, 250)"/><path d="M28,733 L1252,733 L1252,820 L28,820 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="750.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Square Root</text>
 <path d="M53.06,776.27 L122.98,776.27" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
 <path d="M42.81,790.32 L45.83,801.81 L53.06,776.27" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1.32"/>
@@ -105,7 +105,7 @@
 <text x="112.17" y="778.14" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="15.62px" font-family="math">2</text>
 <text x="130.09" y="784.05" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">=</text>
 <text x="148.63" y="784.05" fill="rgb(34, 34, 34)" dominant-baseline="text-before-edge" font-size="22px" font-family="math">c</text>
-<path d="M28,835 L1252,835 L1252,930 L28,930 Z" fill="rgb(250, 250, 250)" stroke="rgb(187, 187, 187)" stroke-width="1"/>
+<g><path d="M28,835 L1252,835 L1252,930 L28,930 Z" fill="rgb(250, 250, 250)"/><path d="M28,835 L1252,835 L1252,930 L28,930 Z" fill="none" stroke="rgb(187, 187, 187)" stroke-width="1"/></g>
 <text x="41" y="852.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Times New Roman">Nested Fractions</text>
 <path d="M41,890.91 L91.34,890.91" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>
 <path d="M65.72,901.63 L90.34,901.63" fill="none" stroke="rgb(34, 34, 34)" stroke-width="1"/>

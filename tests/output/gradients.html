@@ -60,6 +60,22 @@
       border: 10px solid rgba(15, 76, 117, 0.08);
     }
 
+    .gradient-repeating-radial {
+      width: 150px; height: 150px;
+      background: repeating-radial-gradient(circle, #12355b 0%, #12355b 10%, #f4d35e 10%, #f4d35e 20%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
+    .gradient-repeating-conic {
+      width: 150px; height: 150px;
+      background: repeating-conic-gradient(from 30deg, #0b3954 0%, #0b3954 10%, #bfd7ea 10%, #bfd7ea 20%, #ff6663 20%, #ff6663 30%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
     .gradient-repeating {
       width: 250px; height: 80px;
       background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
@@ -110,6 +126,8 @@
     <div class="gradient-conic"></div>
     <div class="gradient-conic-card">Offset conic</div>
     <div class="gradient-conic-donut"></div>
+    <div class="gradient-repeating-radial"></div>
+    <div class="gradient-repeating-conic"></div>
     <div class="gradient-repeating">Repeating stripes</div>
     <div class="gradient-multi">Multiple backgrounds</div>
 

@@ -13,8 +13,8 @@
 <linearGradient id="lg10" x1="283" y1="386" x2="283" y2="496" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
 <linearGradient id="lg11" x1="620" y1="582" x2="620" y2="632" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(237, 231, 246)"/><stop offset="100%" stop-color="rgb(209, 196, 233)"/></linearGradient>
 </defs>
-<rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1" filter="url(#ds1)"/>
-<g clip-path="url(#clip3)"><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/></g>
+<g filter="url(#ds1)"><rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="rgb(255, 255, 255)"/><rect x="0" y="0" width="320" height="226" rx="12" ry="12" fill="none" stroke="rgb(224, 224, 224)" stroke-width="1"/></g>
+<g clip-path="url(#clip3)"><g><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="rgb(26, 35, 126)"/><path d="M1,1 L319,1 L319,54 L1,54 Z" fill="url(#lg2)"/></g></g>
 <g clip-path="url(#clip3)"><text x="21" y="18" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Feature Overview</text></g>
 <g clip-path="url(#clip3)"><text x="21" y="74" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This card combines gradients, borders,</text></g>
 <g clip-path="url(#clip3)"><text x="21" y="96.39" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">border-radius, box-shadow, and typography</text></g>
@@ -24,23 +24,23 @@
 <g clip-path="url(#clip3)"><text x="37" y="189" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Accept</text></g>
 <g clip-path="url(#clip3)"><rect x="106" y="178" width="79" height="35" rx="6" ry="6" fill="none" stroke="rgb(30, 136, 229)" stroke-width="2"/></g>
 <g clip-path="url(#clip3)"><text x="126" y="191" fill="rgb(30, 136, 229)" dominant-baseline="text-before-edge" font-weight="600" font-size="13px" font-family="Arial">Cancel</text></g>
-<rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<g><rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)"/><rect x="0" y="246" width="189" height="92" rx="10" ry="10" fill="none" stroke="rgb(224, 224, 224)" stroke-width="1"/></g>
 <text x="52.64" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">1,284</text>
 <text x="71.48" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">USERS</text>
-<rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<g><rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)"/><rect x="205" y="246" width="189" height="92" rx="10" ry="10" fill="none" stroke="rgb(224, 224, 224)" stroke-width="1"/></g>
 <text x="262.31" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">$34k</text>
 <text x="267.16" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">REVENUE</text>
-<rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
+<g><rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="rgb(255, 255, 255)"/><rect x="411" y="246" width="189" height="92" rx="10" ry="10" fill="none" stroke="rgb(224, 224, 224)" stroke-width="1"/></g>
 <text x="458.98" y="269" fill="rgb(26, 35, 126)" dominant-baseline="text-before-edge" font-weight="800" font-size="28px" font-family="Arial">98.6%</text>
 <text x="479.98" y="308" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">UPTIME</text>
-<rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="rgb(255, 255, 255)" stroke="rgb(224, 224, 224)" stroke-width="1"/>
-<rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="url(#lg4)"/>
-<rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="url(#lg5)"/>
-<rect x="108" y="406" width="30" height="90" rx="3" ry="3" fill="url(#lg6)"/>
-<rect x="148" y="436" width="30" height="60" rx="3" ry="3" fill="url(#lg7)"/>
-<rect x="188" y="396" width="30" height="100" rx="3" ry="3" fill="url(#lg8)"/>
-<rect x="228" y="421" width="30" height="75" rx="3" ry="3" fill="url(#lg9)"/>
-<rect x="268" y="386" width="30" height="110" rx="3" ry="3" fill="url(#lg10)"/>
+<g><rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="0" y="358" width="1240" height="158" rx="8" ry="8" fill="none" stroke="rgb(224, 224, 224)" stroke-width="1"/></g>
+<g><rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="#42a5f5"/><rect x="28" y="456" width="30" height="40" rx="3" ry="3" fill="url(#lg4)"/></g>
+<g><rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="#42a5f5"/><rect x="68" y="426" width="30" height="70" rx="3" ry="3" fill="url(#lg5)"/></g>
+<g><rect x="108" y="406" width="30" height="90" rx="3" ry="3" fill="#42a5f5"/><rect x="108" y="406" width="30" height="90" rx="3" ry="3" fill="url(#lg6)"/></g>
+<g><rect x="148" y="436" width="30" height="60" rx="3" ry="3" fill="#42a5f5"/><rect x="148" y="436" width="30" height="60" rx="3" ry="3" fill="url(#lg7)"/></g>
+<g><rect x="188" y="396" width="30" height="100" rx="3" ry="3" fill="#42a5f5"/><rect x="188" y="396" width="30" height="100" rx="3" ry="3" fill="url(#lg8)"/></g>
+<g><rect x="228" y="421" width="30" height="75" rx="3" ry="3" fill="#42a5f5"/><rect x="228" y="421" width="30" height="75" rx="3" ry="3" fill="url(#lg9)"/></g>
+<g><rect x="268" y="386" width="30" height="110" rx="3" ry="3" fill="#42a5f5"/><rect x="268" y="386" width="30" height="110" rx="3" ry="3" fill="url(#lg10)"/></g>
 <path d="M43,446 L83,416 L123,396 L163,426 L203,386 L243,411 L283,381" fill="none" stroke="rgb(229, 57, 53)" stroke-width="2"/>
 <text x="128.54" y="485.5" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="10px" font-family="Arial">Monthly Data</text>
 <rect x="0" y="536" width="64" height="26" rx="13" ry="13" fill="rgb(67, 160, 71)"/>
@@ -51,10 +51,10 @@
 <text x="174.97" y="543" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Critical</text>
 <path d="M244,549 Q245.14,536 258.19,536 L282.09,536 Q295.14,536 294,549 L294,549 Q292.86,562 279.81,562 L255.91,562 Q242.86,562 244,549 Z" fill="rgb(30, 136, 229)"/>
 <text x="257.91" y="543.02" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">Info</text>
-<rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="url(#lg11)" stroke="rgb(126, 87, 194)" stroke-width="2"/>
+<g><rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="rgb(237, 231, 246)"/><rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="url(#lg11)"/><rect x="0" y="582" width="1240" height="50" rx="10" ry="10" fill="none" stroke="rgb(126, 87, 194)" stroke-width="2"/></g>
 <text x="2" y="584.5" fill="rgb(69, 39, 160)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Shadow DOM Widget</text>
 <text x="2" y="613" fill="rgb(94, 53, 177)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">This widget lives inside a declarative shadow root with its own scoped styles, gradients, and borders.</text>
-<rect x="0" y="652" width="100" height="100" rx="50" ry="50" fill="rgb(244, 67, 54)" opacity="0.7"/>
-<rect x="40" y="672" width="100" height="100" rx="50" ry="50" fill="rgb(76, 175, 80)" opacity="0.7"/>
-<rect x="80" y="692" width="100" height="100" rx="50" ry="50" fill="rgb(33, 150, 243)" opacity="0.7"/>
+<g opacity="0.7"><rect x="0" y="652" width="100" height="100" rx="50" ry="50" fill="rgb(244, 67, 54)"/></g>
+<g opacity="0.7"><rect x="40" y="672" width="100" height="100" rx="50" ry="50" fill="rgb(76, 175, 80)"/></g>
+<g opacity="0.7"><rect x="80" y="692" width="100" height="100" rx="50" ry="50" fill="rgb(33, 150, 243)"/></g>
 </svg>

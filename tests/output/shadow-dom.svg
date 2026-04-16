@@ -7,8 +7,8 @@
 <filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0, 0, 0, 0.2)" result="s0"/></filter>
 </defs>
 <text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Declarative Shadow DOM</text>
-<rect x="0" y="31" width="280" height="208" rx="12" ry="12" fill="rgb(255, 255, 255)" filter="url(#ds1)"/>
-<g clip-path="url(#clip3)"><path d="M0,31 L280,31 L280,84 L0,84 Z" fill="url(#lg2)"/></g>
+<g filter="url(#ds1)"><rect x="0" y="31" width="280" height="208" rx="12" ry="12" fill="rgb(255, 255, 255)"/></g>
+<g clip-path="url(#clip3)"><g><path d="M0,31 L280,31 L280,84 L0,84 Z" fill="rgb(102, 126, 234)"/><path d="M0,31 L280,31 L280,84 L0,84 Z" fill="url(#lg2)"/></g></g>
 <g clip-path="url(#clip3)"><text x="16" y="48" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Shadow Card Title</text></g>
 <g clip-path="url(#clip3)"><text x="16" y="103" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">This content is inside a declarative</text></g>
 <g clip-path="url(#clip3)"><text x="16" y="124" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">shadow DOM. It demonstrates</text></g>
@@ -16,13 +16,13 @@
 <g clip-path="url(#clip3)"><text x="16" y="166" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial">extraction.</text></g>
 <g clip-path="url(#clip3)"><path d="M0,200 L280,200 L280,239 L0,239 Z" fill="rgb(245, 245, 245)"/></g>
 <g clip-path="url(#clip3)"><text x="16" y="215" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial">Footer text</text></g>
-<rect x="0" y="263" width="151" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)" filter="url(#ds4)"/>
+<g filter="url(#ds4)"><rect x="0" y="263" width="151" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
 <text x="24" y="274" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="14px" font-family="Arial">Shadow Button</text>
 <rect x="165" y="259" width="10" height="10" rx="5" ry="5" fill="rgb(76, 175, 80)"/>
 <rect x="165" y="269" width="64" height="24" rx="12" ry="12" fill="rgb(232, 245, 233)"/>
 <text x="177" y="274" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-weight="500" font-size="14px" font-family="Arial">Online</text>
-<rect x="0" y="329" width="320" height="75" rx="8" ry="8" fill="rgb(227, 242, 253)" stroke="rgb(144, 202, 249)" stroke-width="2"/>
+<g><rect x="0" y="329" width="320" height="75" rx="8" ry="8" fill="rgb(227, 242, 253)"/><rect x="0" y="329" width="320" height="75" rx="8" ry="8" fill="none" stroke="rgb(144, 202, 249)" stroke-width="2"/></g>
 <text x="2" y="331.5" fill="rgb(21, 101, 192)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Outer Shadow Root</text>
-<rect x="2" y="361" width="316" height="41" rx="6" ry="6" fill="rgb(255, 243, 224)" stroke="rgb(255, 152, 0)" stroke-width="1"/>
+<g><rect x="2" y="361" width="316" height="41" rx="6" ry="6" fill="rgb(255, 243, 224)"/><rect x="2" y="361" width="316" height="41" rx="6" ry="6" fill="none" stroke="rgb(255, 152, 0)" stroke-width="1"/></g>
 <text x="15" y="375" fill="rgb(230, 81, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">Nested inner shadow DOM content</text>
 </svg>
