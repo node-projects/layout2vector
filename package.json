@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "DOM → Geometry → DXF/PDF/PNG library",
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
     "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --external:@chenglou/pretext --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
-    "@node-projects/acad-ts": "^1.2.0",
+    "@node-projects/acad-ts": "^2.0.0",
     "@tarikjabiri/dxf": "^2.8.9",
     "esbuild": "^0.28.0"
   },

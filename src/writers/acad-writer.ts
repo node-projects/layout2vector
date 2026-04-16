@@ -158,7 +158,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     const hatch = new Hatch!();
     hatch.isSolid = true;
     hatch.patternType = HatchPatternTypeEnum!.SolidFill;
-    hatch.pattern = HatchPattern!.Solid;
+    hatch.pattern = HatchPattern!.solid;
     hatch.color = fillColor;
 
     const boundaryEdge = new HatchBoundaryPathPolyline!();
@@ -357,9 +357,9 @@ export class DWGWriter implements Writer<Uint8Array> {
     // Estimate a generous buffer size for the DWG output
     const buffer = new ArrayBuffer(10 * 1024 * 1024);
     const writer = new DwgWriter!(buffer, doc);
-    writer.Write();
+    writer.write();
     const bytesWritten = writer.bytesWritten;
-    writer.Dispose();
+    writer.dispose();
     return new Uint8Array(buffer, 0, bytesWritten);
   }
 }
@@ -383,7 +383,7 @@ async function writeAcadDxfBytes(doc: InstanceType<typeof CadDocumentType>): Pro
     const writer = new AcadDxfWriter!(buffer, doc);
 
     try {
-      writer.Write();
+      writer.write();
       return trimTrailingZeros(buffer);
     } catch (error) {
       if (error instanceof Error && error.message.includes("DXF output buffer is too small")) {
@@ -392,7 +392,7 @@ async function writeAcadDxfBytes(doc: InstanceType<typeof CadDocumentType>): Pro
       }
       throw error;
     } finally {
-      writer.Dispose();
+      writer.dispose();
     }
   }
 }
