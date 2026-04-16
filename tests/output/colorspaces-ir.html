@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; padding: 0; }
+  .ir-container { position: relative; width: 1280px; height: 1282px; overflow: hidden; }
+
+</style>
+</head>
+<body>
+<div class="ir-container">
+<span style="position:absolute;left:24px;top:25.5px;font-size:22px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">CSS Color Spaces &amp; Functions</span>
+<span style="position:absolute;left:24px;top:58px;font-size:14px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;white-space:normal;line-height:19.6px">Exercises all predefined color() profiles, plus hsl(), hwb(), lab(), lch(), oklab(), oklch().</span>
+<span style="position:absolute;left:24px;top:95px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">color() &#x2014; Predefined RGB Profiles</span>
+<div style="position:absolute;left:24px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(srgb 1 0.3 0.2);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:38px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">SRGB</span>
+<span style="position:absolute;left:38px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">color(srgb 1 0.3 0.2)</span>
+<div style="position:absolute;left:232px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(srgb-linear 1 0.1 0.05);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:246px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">SRGB-LINEAR</span>
+<span style="position:absolute;left:246px;top:179px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">color(srgb-linear 1 0.1</span>
+<span style="position:absolute;left:246px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">0.05)</span>
+<div style="position:absolute;left:439px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(display-p3 0.95 0.3 0.2);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:453px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">DISPLAY-P3</span>
+<span style="position:absolute;left:453px;top:179px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">color(display-p3 0.95 0.3</span>
+<span style="position:absolute;left:453px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">0.2)</span>
+<div style="position:absolute;left:647px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(a98-rgb 0.85 0.2 0.15);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:661px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">A98-RGB</span>
+<span style="position:absolute;left:661px;top:179px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">color(a98-rgb 0.85 0.2</span>
+<span style="position:absolute;left:661px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">0.15)</span>
+<div style="position:absolute;left:855px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(prophoto-rgb 0.7 0.2 0.1);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:869px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">PROPHOTO-RGB</span>
+<span style="position:absolute;left:869px;top:179px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">color(prophoto-rgb 0.7 0.2</span>
+<span style="position:absolute;left:869px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">0.1)</span>
+<div style="position:absolute;left:1062px;top:122px;width:194px;height:100px;box-sizing:border-box;background-color:color(rec2020 0.85 0.2 0.15);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:1076px;top:136.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">REC2020</span>
+<span style="position:absolute;left:1076px;top:179px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">color(rec2020 0.85 0.2</span>
+<span style="position:absolute;left:1076px;top:194px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:nowrap">0.15)</span>
+<span style="position:absolute;left:24px;top:243px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">color() &#x2014; XYZ Profiles</span>
+<div style="position:absolute;left:24px;top:270px;width:401px;height:100px;box-sizing:border-box;background-color:color(xyz-d65 0.41 0.21 0.02);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:38px;top:284.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">XYZ-D65</span>
+<span style="position:absolute;left:38px;top:342px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">color(xyz-d65 0.41 0.21 0.02)</span>
+<div style="position:absolute;left:439px;top:270px;width:401px;height:100px;box-sizing:border-box;background-color:color(xyz-d50 0.44 0.22 0.01);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:453px;top:284.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">XYZ-D50</span>
+<span style="position:absolute;left:453px;top:342px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">color(xyz-d50 0.44 0.22 0.01)</span>
+<div style="position:absolute;left:855px;top:270px;width:401px;height:100px;box-sizing:border-box;background-color:color(xyz-d65 0.15 0.25 0.4);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:869px;top:284.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">XYZ (ALIAS FOR XYZ-D65)</span>
+<span style="position:absolute;left:869px;top:342px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">color(xyz 0.15 0.25 0.4)</span>
+<span style="position:absolute;left:24px;top:391px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">color() with Alpha</span>
+<div style="position:absolute;left:24px;top:418px;width:110px;height:60px;box-sizing:border-box;background-color:color(display-p3 0 0.8 0.4 / 0.7);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:58.81px;top:444.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">p3 &#x3B1;=0.7</span>
+<div style="position:absolute;left:146px;top:418px;width:110px;height:60px;box-sizing:border-box;background-color:color(a98-rgb 0.5 0.1 0.9 / 0.5);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:178.05px;top:444.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">a98 &#x3B1;=0.5</span>
+<div style="position:absolute;left:268px;top:418px;width:110px;height:60px;box-sizing:border-box;background-color:color(rec2020 0.3 0.7 0.2 / 0.8);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:296.98px;top:444.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">2020 &#x3B1;=0.8</span>
+<div style="position:absolute;left:390px;top:418px;width:110px;height:60px;box-sizing:border-box;background-color:color(srgb 0.1 0.4 0.95 / 0.6);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:419.31px;top:444.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">srgb &#x3B1;=0.6</span>
+<span style="position:absolute;left:24px;top:497px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">color() with Percentage Values</span>
+<div style="position:absolute;left:24px;top:524px;width:110px;height:60px;box-sizing:border-box;background-color:color(display-p3 0.9 0.3 0.2);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:68.16px;top:550.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">p3 %</span>
+<div style="position:absolute;left:146px;top:524px;width:110px;height:60px;box-sizing:border-box;background-color:color(srgb 0.2 0.6 0.8);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:184.66px;top:550.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">srgb %</span>
+<span style="position:absolute;left:24px;top:603px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">lab() &amp; lch()</span>
+<div style="position:absolute;left:24px;top:630px;width:298px;height:100px;box-sizing:border-box;background-color:lab(54 81 70);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:38px;top:644.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">LAB()</span>
+<span style="position:absolute;left:38px;top:702px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">lab(54% 81 70)</span>
+<div style="position:absolute;left:336px;top:630px;width:298px;height:100px;box-sizing:border-box;background-color:lch(54 107 41);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:350px;top:644.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">LCH()</span>
+<span style="position:absolute;left:350px;top:702px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">lch(54% 107 41)</span>
+<div style="position:absolute;left:647px;top:630px;width:298px;height:100px;box-sizing:border-box;background-color:lab(75 -40 60);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:661px;top:644.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">LAB() GREEN-YELLOW</span>
+<span style="position:absolute;left:661px;top:702px;font-size:13px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;white-space:normal">lab(75% -40 60)</span>
+<div style="position:absolute;left:959px;top:630px;width:298px;height:100px;box-sizing:border-box;background-color:lch(65 80 290);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:973px;top:644.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">LCH() VIOLET</span>
+<span style="position:absolute;left:973px;top:702px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">lch(65% 80 290)</span>
+<span style="position:absolute;left:24px;top:751px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">oklab() &amp; oklch()</span>
+<div style="position:absolute;left:24px;top:778px;width:298px;height:100px;box-sizing:border-box;background-color:oklab(0.63 0.22 0.13);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:38px;top:792.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">OKLAB()</span>
+<span style="position:absolute;left:38px;top:850px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">oklab(0.63 0.22 0.13)</span>
+<div style="position:absolute;left:336px;top:778px;width:298px;height:100px;box-sizing:border-box;background-color:oklch(0.63 0.26 29);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:350px;top:792.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">OKLCH()</span>
+<span style="position:absolute;left:350px;top:850px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">oklch(0.63 0.26 29)</span>
+<div style="position:absolute;left:647px;top:778px;width:298px;height:100px;box-sizing:border-box;background-color:oklab(0.8 -0.1 0.1);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:661px;top:792.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">OKLAB() LIME</span>
+<span style="position:absolute;left:661px;top:850px;font-size:13px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;white-space:normal">oklab(0.80 -0.10 0.10)</span>
+<div style="position:absolute;left:959px;top:778px;width:298px;height:100px;box-sizing:border-box;background-color:oklch(0.55 0.2 270);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:973px;top:792.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">OKLCH() PURPLE</span>
+<span style="position:absolute;left:973px;top:850px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">oklch(0.55 0.20 270)</span>
+<span style="position:absolute;left:24px;top:899px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">hsl() &amp; hsla()</span>
+<div style="position:absolute;left:24px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(255, 0, 0);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:72.44px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">red</span>
+<div style="position:absolute;left:146px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(20, 184, 20);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:188.02px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">green</span>
+<div style="position:absolute;left:268px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(61, 61, 245);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:313.69px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">blue</span>
+<div style="position:absolute;left:390px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(255, 255, 0);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:430.19px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;white-space:normal">yellow</span>
+<div style="position:absolute;left:512px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgba(221, 60, 221, 0.7);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:541.47px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">magenta &#x3B1;</span>
+<div style="position:absolute;left:634px;top:926px;width:110px;height:60px;box-sizing:border-box;background-color:rgba(51, 153, 204, 0.5);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:676.61px;top:952.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">teal &#x3B1;</span>
+<span style="position:absolute;left:24px;top:1005px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">hwb()</span>
+<div style="position:absolute;left:24px;top:1032px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(255, 0, 0);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:58.98px;top:1058.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">pure red</span>
+<div style="position:absolute;left:146px;top:1032px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(26, 230, 26);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:188.02px;top:1058.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">green</span>
+<div style="position:absolute;left:268px;top:1032px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(51, 51, 204);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:313.69px;top:1058.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">blue</span>
+<div style="position:absolute;left:390px;top:1032px;width:110px;height:60px;box-sizing:border-box;background-color:rgb(230, 230, 77);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:412.16px;top:1058.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(17, 17, 17);line-height:1;font-weight:700;white-space:normal">muted yellow</span>
+<div style="position:absolute;left:512px;top:1032px;width:110px;height:60px;box-sizing:border-box;background-color:rgba(0, 179, 179, 0.8);border:2px solid rgba(0, 0, 0, 0.08);border-radius:999px"></div>
+<span style="position:absolute;left:538.41px;top:1058.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 255);line-height:1;font-weight:700;white-space:normal">dark cyan &#x3B1;</span>
+<span style="position:absolute;left:24px;top:1111px;font-size:17px;font-family:Arial, sans-serif;color:rgb(31, 41, 55);line-height:1;font-weight:700;white-space:normal">Mixed Usage</span>
+<div style="position:absolute;left:24px;top:1138px;width:298px;height:100px;box-sizing:border-box;background-color:rgb(255, 255, 255);border:4px solid color(display-p3 0.9 0.1 0.3);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:40px;top:1154.5px;font-size:11px;font-family:Arial, sans-serif;color:color(display-p3 0.6 0 0.15);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">P3 BORDER &amp; TEXT</span>
+<span style="position:absolute;left:40px;top:1208px;font-size:13px;font-family:Arial, sans-serif;color:color(display-p3 0.6 0 0.15);line-height:1;font-weight:700;white-space:normal">display-p3 on border color and text color</span>
+<div style="position:absolute;left:336px;top:1138px;width:298px;height:100px;box-sizing:border-box;background-color:oklch(0.92 0.04 90);border:3px solid oklch(0.5 0.15 30);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:351px;top:1153.5px;font-size:11px;font-family:Arial, sans-serif;color:oklch(0.3 0.1 30);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">OKLCH EVERYWHERE</span>
+<span style="position:absolute;left:351px;top:1209px;font-size:13px;font-family:Arial, sans-serif;color:oklch(0.3 0.1 30);line-height:1;font-weight:700;white-space:normal">bg + border + text all oklch</span>
+<div style="position:absolute;left:647px;top:1138px;width:298px;height:100px;box-sizing:border-box;background-color:rgb(13, 121, 230);border:3px solid lab(85 -20 50);border-radius:14px;box-shadow:rgba(0, 0, 0, 0.06) 0px 6px 16px 0px"></div>
+<span style="position:absolute;left:662px;top:1153.5px;font-size:11px;font-family:Arial, sans-serif;color:rgb(255, 255, 179);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">MIXED FUNCTIONS</span>
+<span style="position:absolute;left:662px;top:1209px;font-size:13px;font-family:Arial, sans-serif;color:rgb(255, 255, 179);line-height:1;font-weight:700;white-space:normal">hwb bg + hsl text + lab border</span>
+<div style="position:absolute;left:959px;top:1138px;width:298px;height:100px;box-sizing:border-box;background-color:color(prophoto-rgb 0.5 0.35 0.15);border:2px solid rgba(0, 0, 0, 0.12);border-radius:14px;box-shadow:color(a98-rgb 0.2 0.1 0.05 / 0.4) 0px 6px 18px 0px"></div>
+<span style="position:absolute;left:973px;top:1152.5px;font-size:11px;font-family:Arial, sans-serif;color:color(rec2020 0.95 0.95 0.85);line-height:1;font-weight:700;opacity:0.85;white-space:normal;letter-spacing:0.44px">WIDE-GAMUT TRIO</span>
+<span style="position:absolute;left:973px;top:1210px;font-size:13px;font-family:Arial, sans-serif;color:color(rec2020 0.95 0.95 0.85);line-height:1;font-weight:700;white-space:normal">prophoto bg + rec2020 text + a98 shadow</span>
+</div>
+</body>
+</html>

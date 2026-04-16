@@ -524,9 +524,12 @@ Enable with `includeImages: true`. All image preloading and embedding is now **a
 - **Shadow DOM**: background images and images in shadow roots are now fully supported and embedded.
 
 ### Color Handling
-- Parses `rgb()`, `rgba()`, hex (`#rgb`, `#rrggbb`, `#rrggbbaa`)
+- Parses `rgb()`, `rgba()`, `hsl()`, `hsla()`, `hwb()`, hex (`#rgb`, `#rrggbb`, `#rrggbbaa`)
+- `color()` function with all CSS Color Level 4 predefined profiles: `srgb`, `srgb-linear`, `display-p3`, `a98-rgb`, `prophoto-rgb`, `rec2020`, `xyz`, `xyz-d50`, `xyz-d65`
+- `lab()`, `lch()`, `oklab()`, `oklch()` perceptual color functions
 - Alpha-aware: fully transparent colors (`rgba(0,0,0,0)`) are skipped, not rendered as black
 - CSS `transparent` and `none` values handled correctly
+- All color spaces are converted to sRGB for output
 
 ## Browser Requirements
 
