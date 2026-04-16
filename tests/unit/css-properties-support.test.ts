@@ -176,4 +176,54 @@ text withlongtoken</p>
     expect(svg).toContain('direction="rtl"');
     expect(svg).toContain('unicode-bidi="embed"');
   });
+
+  test("SVG writer emits a conic-gradient pattern fallback", async () => {
+    const nodes: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 20, y: 20 },
+        { x: 180, y: 20 },
+        { x: 180, y: 140 },
+        { x: 20, y: 140 },
+      ],
+      style: {
+        fill: "rgb(255, 0, 0)",
+        backgroundImage: "conic-gradient(from 45deg, rgb(255, 0, 0) 0%, rgb(255, 255, 0) 30%, rgb(0, 128, 255) 70%, rgb(255, 0, 0) 100%)",
+        borderRadius: "24px",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new SVGWriter({ width: 220, height: 180 });
+    const svg = await renderIR(nodes, writer);
+
+    expect(svg).toContain("<pattern id=\"cg");
+    expect(svg).toContain("fill=\"url(#cg");
+    expect(svg).toContain("A");
+  });
+
+  test("SVG writer emits a repeating-conic pattern fallback", async () => {
+    const nodes: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 30, y: 20 },
+        { x: 170, y: 20 },
+        { x: 170, y: 160 },
+        { x: 30, y: 160 },
+      ],
+      style: {
+        fill: "rgb(11, 57, 84)",
+        backgroundImage: "repeating-conic-gradient(from 30deg, rgb(11, 57, 84) 0%, rgb(11, 57, 84) 10%, rgb(191, 215, 234) 10%, rgb(191, 215, 234) 20%, rgb(255, 102, 99) 20%, rgb(255, 102, 99) 30%)",
+        borderRadius: "70px",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new SVGWriter({ width: 220, height: 180 });
+    const svg = await renderIR(nodes, writer);
+
+    expect(svg).toContain('<pattern id="cg');
+    expect(svg).toContain('patternContentUnits="userSpaceOnUse"');
+    expect(svg).toContain("fill=\"url(#cg");
+  });
 });

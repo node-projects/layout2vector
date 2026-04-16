@@ -5,9 +5,9 @@
 import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
-import { getVisibleCssColorString } from "./shared/css-color.js";
+import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds, type ClipPathShape } from "./shared/clip-path.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { extractAllGradients, extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -46,8 +46,74 @@ function escXml(s: string): string {
 interface GradientStop { offset: number; color: string; }
 interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; repeating: boolean; }
 interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
-interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; }
+interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
+
+const CONIC_GRADIENT_SEGMENTS = 120;
+
+function formatCssColor(color: ParsedCssColor): string {
+  if (color.a >= 0.999) return `rgb(${color.r}, ${color.g}, ${color.b})`;
+  return `rgba(${color.r}, ${color.g}, ${color.b}, ${Number(color.a.toFixed(3))})`;
+}
+
+function interpolateConicColor(t: number, stops: GradientStop[], repeating = false): string {
+  if (stops.length === 0) return "transparent";
+
+  const parsedStops = stops
+    .map((stop) => ({ ...stop, parsed: parseCssColor(stop.color) }))
+    .filter((stop): stop is GradientStop & { parsed: ParsedCssColor } => !!stop.parsed)
+    .sort((left, right) => left.offset - right.offset);
+
+  if (parsedStops.length === 0) return stops[0].color;
+  const maxOffset = parsedStops[parsedStops.length - 1].offset;
+  if (repeating && maxOffset > 0 && maxOffset < 0.999999) {
+    t = ((t % maxOffset) + maxOffset) % maxOffset;
+  }
+  if (parsedStops.length === 1) return formatCssColor(parsedStops[0].parsed);
+  if (t <= parsedStops[0].offset) return formatCssColor(parsedStops[0].parsed);
+  if (t >= parsedStops[parsedStops.length - 1].offset) return formatCssColor(parsedStops[parsedStops.length - 1].parsed);
+
+  for (let i = 0; i < parsedStops.length - 1; i++) {
+    const start = parsedStops[i];
+    const end = parsedStops[i + 1];
+    if (t < start.offset || t > end.offset) continue;
+
+    const range = end.offset - start.offset;
+    const fraction = range > 0 ? (t - start.offset) / range : 0;
+    return formatCssColor({
+      r: Math.round(start.parsed.r + (end.parsed.r - start.parsed.r) * fraction),
+      g: Math.round(start.parsed.g + (end.parsed.g - start.parsed.g) * fraction),
+      b: Math.round(start.parsed.b + (end.parsed.b - start.parsed.b) * fraction),
+      a: start.parsed.a + (end.parsed.a - start.parsed.a) * fraction,
+    });
+  }
+
+  return formatCssColor(parsedStops[parsedStops.length - 1].parsed);
+}
+
+function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
+  if (stops.length < 2) return stops;
+
+  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
+  const period = sortedStops[sortedStops.length - 1].offset;
+  if (!(period > 0 && period < 0.999999)) return sortedStops;
+
+  const repeated: GradientStop[] = [];
+  const repetitions = Math.ceil(1 / period) + 1;
+  for (let rep = 0; rep < repetitions; rep++) {
+    const base = rep * period;
+    for (const stop of sortedStops) {
+      const offset = base + stop.offset;
+      if (offset > 1.000001) break;
+      repeated.push({ color: stop.color, offset: Math.min(offset, 1) });
+    }
+  }
+
+  if (!repeated.some((stop) => Math.abs(stop.offset - 1) < 0.000001)) {
+    repeated.push({ offset: 1, color: interpolateConicColor(1, sortedStops, true) });
+  }
+  return repeated;
+}
 
 function parseColorStops(argsStr: string): GradientStop[] {
   const stops: GradientStop[] = [];
@@ -131,9 +197,10 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     return { type: "radial", stops, repeating };
   }
 
-  const conicMatch = gradientStr.match(/^conic-gradient\((.+)\)$/);
+  const conicMatch = gradientStr.match(/^(repeating-)?conic-gradient\((.+)\)$/);
   if (conicMatch) {
-    const inner = conicMatch[1];
+    const repeating = !!conicMatch[1];
+    const inner = conicMatch[2];
     let fromAngleDeg = 0;
     let stopsStr = inner;
     const fromMatch = inner.match(/^from\s+([\d.]+)(deg|rad|turn)/i);
@@ -146,7 +213,7 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
-    return { type: "conic", fromAngleDeg, stops };
+    return { type: "conic", fromAngleDeg, stops, repeating };
   }
   return null;
 }
@@ -371,9 +438,17 @@ export class SVGWriter implements Writer<string> {
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
       const r = Math.min(radius, w / 2, h / 2);
 
-      const gradId = this.addGradientDef(style.backgroundImage, x, y, w, h);
-      const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-      this.pushElement(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>`, style, getQuadBounds(points));
+      const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w, h);
+      const element = this.buildLayeredShape(
+        (attrs) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>` ,
+        fill,
+        stroke,
+        style,
+        gradientIds,
+        filterId,
+        opacity,
+      );
+      this.pushElement(element, style, getQuadBounds(points));
 
       // Inset shadows as clipped overlays
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, r);
@@ -402,9 +477,17 @@ export class SVGWriter implements Writer<string> {
       pathD = d;
     }
 
-    const gradId = this.addGradientDef(style.backgroundImage, x, y, w || 1, h || 1);
-    const attrs = this.buildShapeAttrs(fill, stroke, style, gradId, filterId, opacity);
-    this.pushElement(`<path d="${pathD}"${attrs}/>`, style, getQuadBounds(points));
+    const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w || 1, h || 1);
+    const element = this.buildLayeredShape(
+      (attrs) => `<path d="${pathD}"${attrs}/>` ,
+      fill,
+      stroke,
+      style,
+      gradientIds,
+      filterId,
+      opacity,
+    );
+    this.pushElement(element, style, getQuadBounds(points));
 
     if (isAxisAlignedRect(points)) {
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, 0);
@@ -427,11 +510,18 @@ export class SVGWriter implements Writer<string> {
       if (p.x > maxX) maxX = p.x;
       if (p.y > maxY) maxY = p.y;
     }
-    const gradId = this.addGradientDef(style.backgroundImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
-
     const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
-    const attrs = this.buildPolylineAttrs(fill, stroke, style, gradId, opacity, closed);
-    this.pushElement(`<path d="${d}"${attrs}/>`, style, getPointBounds(points));
+    const gradientIds = this.addGradientDefs(style.backgroundImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
+    const element = this.buildLayeredShape(
+      (attrs) => `<path d="${d}"${attrs}/>` ,
+      fill,
+      stroke,
+      style,
+      gradientIds,
+      undefined,
+      opacity,
+    );
+    this.pushElement(element, style, getPointBounds(points));
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
@@ -634,6 +724,57 @@ export class SVGWriter implements Writer<string> {
     return parts.join("");
   }
 
+  private addGradientDefs(
+    backgroundImage: string | undefined,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+  ): string[] {
+    if (!backgroundImage || backgroundImage === "none") return [];
+
+    const ids: string[] = [];
+    for (const gradientString of extractAllGradients(backgroundImage)) {
+      const id = this.addGradientDef(gradientString, x, y, w, h);
+      if (id) ids.push(id);
+    }
+    return ids;
+  }
+
+  private buildLayeredShape(
+    createShape: (attrs: string) => string,
+    fill: string | null,
+    stroke: { color: string; width: number } | null,
+    style: Style,
+    gradientIds: string[],
+    filterId: string | undefined,
+    opacity: number | undefined,
+  ): string {
+    const layers: string[] = [];
+
+    if (fill) {
+      layers.push(createShape(` fill="${escXml(fill)}"`));
+    }
+    for (let index = gradientIds.length - 1; index >= 0; index--) {
+      layers.push(createShape(` fill="url(#${gradientIds[index]})"`));
+    }
+    if (stroke) {
+      const strokeParts = [` fill="none"`, ` stroke="${escXml(stroke.color)}"`, ` stroke-width="${n(stroke.width)}"`];
+      if (style.strokeDasharray && style.strokeDasharray !== "none") {
+        strokeParts.push(` stroke-dasharray="${escXml(style.strokeDasharray)}"`);
+      }
+      layers.push(createShape(strokeParts.join("")));
+    }
+
+    if (layers.length === 0) return createShape(` fill="none"`);
+
+    const groupParts: string[] = [];
+    if (filterId) groupParts.push(`filter="url(#${filterId})"`);
+    if (opacity !== undefined) groupParts.push(`opacity="${n(opacity)}"`);
+    if (layers.length === 1 && groupParts.length === 0) return layers[0];
+    return `<g${groupParts.length > 0 ? ` ${groupParts.join(" ")}` : ""}>${layers.join("")}</g>`;
+  }
+
   /** Add an SVG gradient definition and return its id, or undefined if no gradient. */
   private addGradientDef(
     backgroundImage: string | undefined,
@@ -711,8 +852,33 @@ export class SVGWriter implements Writer<string> {
       return id;
     }
 
-    // Conic gradients: SVG doesn't natively support them (fill color used as fallback)
-    return undefined;
+    const id = this.nextId("cg");
+    const radius = Math.sqrt(w * w + h * h) / 2 + 1;
+    const startAngle = ((gradient.fromAngleDeg - 90) * Math.PI) / 180;
+    const angleStep = (Math.PI * 2) / CONIC_GRADIENT_SEGMENTS;
+    const segments: string[] = [];
+    const stops = gradient.repeating ? expandRepeatingStops(gradient.stops) : gradient.stops;
+    const localCx = w / 2;
+    const localCy = h / 2;
+
+    for (let i = 0; i < CONIC_GRADIENT_SEGMENTS; i++) {
+      const angle0 = startAngle + i * angleStep;
+      const angle1 = startAngle + (i + 1) * angleStep;
+      const t = (i + 0.5) / CONIC_GRADIENT_SEGMENTS;
+      const color = interpolateConicColor(t, stops, gradient.repeating);
+      const x0 = localCx + Math.cos(angle0) * radius;
+      const y0 = localCy + Math.sin(angle0) * radius;
+      const x1 = localCx + Math.cos(angle1) * radius;
+      const y1 = localCy + Math.sin(angle1) * radius;
+      segments.push(
+        `<path d="M${n(localCx)},${n(localCy)} L${n(x0)},${n(y0)} A${n(radius)},${n(radius)} 0 0 1 ${n(x1)},${n(y1)} Z" fill="${escXml(color)}"/>`
+      );
+    }
+
+    this.defs.push(
+      `<pattern id="${id}" patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse" x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" viewBox="0 0 ${n(w)} ${n(h)}" overflow="visible">${segments.join("")}</pattern>`
+    );
+    return id;
   }
 
   /** Add a drop shadow SVG filter and return its id. */

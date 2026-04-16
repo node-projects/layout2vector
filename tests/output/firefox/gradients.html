@@ -36,6 +36,46 @@
       border-radius: 50%;
     }
 
+    .gradient-conic-card {
+      width: 220px; height: 120px;
+      background: conic-gradient(from 45deg, #ff6b6b 0%, #ffd93d 28%, #6bcB77 58%, #4d96ff 82%, #ff6b6b 100%);
+      margin: 10px 22px;
+      display: inline-block;
+      border-radius: 24px;
+      transform: rotate(-8deg);
+      transform-origin: center;
+      color: #102542;
+      padding: 14px;
+      font-weight: 700;
+    }
+
+    .gradient-conic-donut {
+      width: 180px; height: 180px;
+      background:
+        radial-gradient(circle, white 0 42%, transparent 43%),
+        conic-gradient(from 210deg, rgba(15, 76, 117, 0.15) 0%, #0f4c75 18%, #3282b8 44%, #bbe1fa 72%, rgba(15, 76, 117, 0.15) 100%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+      border: 10px solid rgba(15, 76, 117, 0.08);
+    }
+
+    .gradient-repeating-radial {
+      width: 150px; height: 150px;
+      background: repeating-radial-gradient(circle, #12355b 0%, #12355b 10%, #f4d35e 10%, #f4d35e 20%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
+    .gradient-repeating-conic {
+      width: 150px; height: 150px;
+      background: repeating-conic-gradient(from 30deg, #0b3954 0%, #0b3954 10%, #bfd7ea 10%, #bfd7ea 20%, #ff6663 20%, #ff6663 30%);
+      margin: 10px;
+      display: inline-block;
+      border-radius: 50%;
+    }
+
     .gradient-repeating {
       width: 250px; height: 80px;
       background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
@@ -84,6 +124,10 @@
     <div class="gradient-linear">Linear gradient</div>
     <div class="gradient-radial"></div>
     <div class="gradient-conic"></div>
+    <div class="gradient-conic-card">Offset conic</div>
+    <div class="gradient-conic-donut"></div>
+    <div class="gradient-repeating-radial"></div>
+    <div class="gradient-repeating-conic"></div>
     <div class="gradient-repeating">Repeating stripes</div>
     <div class="gradient-multi">Multiple backgrounds</div>
 

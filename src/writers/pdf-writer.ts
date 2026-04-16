@@ -21,7 +21,7 @@ import {
 } from "../pdf-objects.js";
 import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { extractAllGradients, extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
 import { parseTTF, type ParsedTTF } from "../ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
@@ -193,10 +193,33 @@ function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } 
 // ── Gradient parsing (identical logic to jspdf-writer) ──────────────
 
 interface GradientStop { offset: number; color: ParsedColor; }
-interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; }
-interface RadialGradient { type: "radial"; stops: GradientStop[]; }
-interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; }
+interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; repeating: boolean; }
+interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
+interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
+
+function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
+  if (stops.length < 2) return stops;
+  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
+  const period = sortedStops[sortedStops.length - 1].offset;
+  if (!(period > 0 && period < 0.999999)) return sortedStops;
+
+  const repeated: GradientStop[] = [];
+  const repetitions = Math.ceil(1 / period) + 1;
+  for (let rep = 0; rep < repetitions; rep++) {
+    const base = rep * period;
+    for (const stop of sortedStops) {
+      const offset = base + stop.offset;
+      if (offset > 1.000001) break;
+      repeated.push({ color: stop.color, offset: Math.min(offset, 1) });
+    }
+  }
+
+  if (!repeated.some((stop) => Math.abs(stop.offset - 1) < 0.000001)) {
+    repeated.push({ offset: 1, color: interpolateConicColor(1, sortedStops, true) });
+  }
+  return repeated;
+}
 
 function parseColorStops(argsStr: string): GradientStop[] {
   const stops: GradientStop[] = [];
@@ -243,9 +266,10 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   const gradientStr = extractFirstGradient(bgImage);
   if (!gradientStr) return null;
 
-  const linearMatch = gradientStr.match(/^(?:repeating-)?linear-gradient\((.+)\)$/);
+  const linearMatch = gradientStr.match(/^(repeating-)?linear-gradient\((.+)\)$/);
   if (linearMatch) {
-    const inner = linearMatch[1];
+    const repeating = !!linearMatch[1];
+    const inner = linearMatch[2];
     const splitIdx = findFirstTopLevelComma(inner);
     let angleDeg = 180, stopsStr = inner;
     if (splitIdx >= 0) {
@@ -257,19 +281,21 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
-    return { type: "linear", angleDeg, stops };
+    return { type: "linear", angleDeg, stops, repeating };
   }
 
-  const radialMatch = gradientStr.match(/^(?:repeating-)?radial-gradient\((.+)\)$/);
+  const radialMatch = gradientStr.match(/^(repeating-)?radial-gradient\((.+)\)$/);
   if (radialMatch) {
-    const stops = parseColorStops(radialMatch[1]);
+    const repeating = !!radialMatch[1];
+    const stops = parseColorStops(radialMatch[2]);
     if (stops.length < 2) return null;
-    return { type: "radial", stops };
+    return { type: "radial", stops, repeating };
   }
 
-  const conicMatch = gradientStr.match(/^(?:repeating-)?conic-gradient\((.+)\)$/);
+  const conicMatch = gradientStr.match(/^(repeating-)?conic-gradient\((.+)\)$/);
   if (conicMatch) {
-    const inner = conicMatch[1];
+    const repeating = !!conicMatch[1];
+    const inner = conicMatch[2];
     // Parse optional "from <angle>" prefix
     let fromAngle = 0;
     let stopsStr = inner;
@@ -284,9 +310,20 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
-    return { type: "conic", stops, fromAngle };
+    return { type: "conic", stops, fromAngle, repeating };
   }
   return null;
+}
+
+function parseGradients(bgImage: string | undefined): ParsedGradient[] {
+  if (!bgImage || bgImage === "none") return [];
+
+  const gradients: ParsedGradient[] = [];
+  for (const gradientString of extractAllGradients(bgImage)) {
+    const gradient = parseGradient(gradientString);
+    if (gradient) gradients.push(gradient);
+  }
+  return gradients;
 }
 
 // ── Box-shadow parsing ──────────────────────────────────────────────
@@ -360,9 +397,14 @@ function parseBoxShadow(value: string): BoxShadow[] {
 /** Interpolate color at position t [0..1] along conic gradient stops. */
 function interpolateConicColor(
   t: number,
-  stops: GradientStop[]
-): { r: number; g: number; b: number } {
-  if (stops.length === 0) return { r: 0, g: 0, b: 0 };
+  stops: GradientStop[],
+  repeating = false,
+): ParsedColor {
+  if (stops.length === 0) return { r: 0, g: 0, b: 0, a: 1 };
+  const maxOffset = stops[stops.length - 1].offset;
+  if (repeating && maxOffset > 0 && maxOffset < 0.999999) {
+    t = ((t % maxOffset) + maxOffset) % maxOffset;
+  }
   if (t <= stops[0].offset) return stops[0].color;
   if (t >= stops[stops.length - 1].offset) return stops[stops.length - 1].color;
 
@@ -377,6 +419,7 @@ function interpolateConicColor(
         r: Math.round(c0.r + (c1.r - c0.r) * f),
         g: Math.round(c0.g + (c1.g - c0.g) * f),
         b: Math.round(c0.b + (c1.b - c0.b) * f),
+        a: c0.a + (c1.a - c0.a) * f,
       };
     }
   }
@@ -876,9 +919,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.drawBoxShadows(points, style);
     }
 
-    const gradient = parseGradient(style.backgroundImage);
-    if (gradient) {
-      this.drawGradientPolygon(points, gradient, style);
+    const gradients = parseGradients(style.backgroundImage);
+    if (gradients.length > 0) {
+      this.drawGradientPolygon(points, gradients, style);
       return;
     }
 
@@ -1578,11 +1621,98 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   // ── Gradient drawing ────────────────────────────────────────────
 
-  private drawGradientPolygon(points: Quad, gradient: ParsedGradient, style: Style): void {
-    // Draw box-shadow before gradient element too
-    if (style.boxShadow && style.boxShadow !== "none") {
-      this.drawBoxShadows(points, style);
+  private emitPolygonPaintPath(points: Quad, style: Style): void {
+    const elW = Math.abs(points[1].x - points[0].x);
+    const elH = Math.abs(points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, elW, elH);
+    if (radius && isAxisAlignedRect(points) && !style.cornerShapes) {
+      const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
+      const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
+      const w = pxToPt(elW);
+      const h = pxToPt(elH);
+      const rx = pxToPt(Math.min(radius.rx, elW / 2));
+      const ry = pxToPt(Math.min(radius.ry, elH / 2));
+      this.emitRoundedRectPath(left, top, w, h, rx, ry);
+    } else if (radius && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+      const r = Math.min(radius.rx, radius.ry);
+      const segs = roundedQuadPath(points, r, style.cornerShapes);
+      for (const s of segs) {
+        switch (s.type) {
+          case "M":
+            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} m`);
+            break;
+          case "L":
+            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} l`);
+            break;
+          case "Q": {
+            const segsArr = segs;
+            const idx = segsArr.indexOf(s);
+            const prev = idx > 0 ? segsArr[idx - 1] : segs[0];
+            const px = this.ptX(prev.x);
+            const py = this.ptY(prev.y);
+            const cx = this.ptX(s.cx);
+            const cy = this.ptY(s.cy);
+            const ex = this.ptX(s.x);
+            const ey = this.ptY(s.y);
+            const c1x = px + (2 / 3) * (cx - px);
+            const c1y = py + (2 / 3) * (cy - py);
+            const c2x = ex + (2 / 3) * (cx - ex);
+            const c2y = ey + (2 / 3) * (cy - ey);
+            this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
+            break;
+          }
+        }
+      }
+      this.ops.push("h");
+    } else {
+      this.emitQuadPath(points);
     }
+  }
+
+  private drawSolidBackgroundPolygon(points: Quad, style: Style, fillColor: ParsedColor): void {
+    this.ops.push("q");
+
+    const opacity = style.opacity ?? 1;
+    if (opacity < 1) {
+      const gsName = this.getGStateResName(opacity, opacity);
+      this.ops.push(`/${gsName} gs`);
+    }
+
+    this.emitClip(style, getQuadBounds(points));
+    this.setFill(fillColor);
+    this.emitPolygonPaintPath(points, style);
+    this.ops.push("f");
+    this.ops.push("Q");
+  }
+
+  private drawGradientStroke(points: Quad, style: Style): void {
+    const strokeColor = parseVisibleColor(style.stroke);
+    const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
+    if (!strokeColor || strokeWidth <= 0) return;
+
+    this.ops.push("q");
+    this.emitClip(style, getQuadBounds(points));
+    this.setStroke(strokeColor);
+    this.setLineWidth(pxToPt(strokeWidth));
+    this.emitPolygonPaintPath(points, style);
+    this.ops.push("S");
+    this.ops.push("Q");
+  }
+
+  private drawGradientPolygon(points: Quad, gradients: ParsedGradient[], style: Style): void {
+    const fillColor = parseVisibleColor(style.fill);
+    if (fillColor) {
+      this.drawSolidBackgroundPolygon(points, style, fillColor);
+    }
+
+    for (let index = gradients.length - 1; index >= 0; index--) {
+      this.drawSingleGradientLayer(points, gradients[index], style);
+    }
+
+    this.drawGradientStroke(points, style);
+  }
+
+  private drawSingleGradientLayer(points: Quad, gradient: ParsedGradient, style: Style): void {
 
     // Conic gradients need a completely different approach (sector fills)
     if (gradient.type === "conic") {
@@ -1604,7 +1734,8 @@ export class PDFWriter implements Writer<PdfDocument> {
 
     // Register shading
     const shName = `SH${++this.shadingCounter}`;
-    const stops = gradient.stops.map(s => ({
+    const resolvedStops = gradient.repeating ? expandRepeatingStops(gradient.stops) : gradient.stops;
+    const stops = resolvedStops.map(s => ({
       offset: s.offset,
       r: s.color.r,
       g: s.color.g,
@@ -1641,48 +1772,12 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.emitClip(style, getQuadBounds(points));
 
     // Clip path
-    const gradElW = Math.abs(points[1].x - points[0].x);
-    const gradElH = Math.abs(points[3].y - points[0].y);
-    const radius = parseBorderRadius(style.borderRadius, gradElW, gradElH);
-    if (radius && isAxisAlignedRect(points)) {
-      const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
-      const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-      const rw = pxToPt(gradElW);
-      const rh = pxToPt(gradElH);
-      const rx = pxToPt(Math.min(radius.rx, gradElW / 2));
-      const ry = pxToPt(Math.min(radius.ry, gradElH / 2));
-      this.emitRoundedRectPath(left, top, rw, rh, rx, ry);
-    } else {
-      this.emitQuadPath(points);
-    }
+    this.emitPolygonPaintPath(points, style);
     this.ops.push("W n");   // clip + discard path
 
     // Paint shading
     this.ops.push(`/${shName} sh`);
     this.ops.push("Q");
-
-    // Stroke on top if needed
-    const strokeColor = parseVisibleColor(style.stroke);
-    const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
-    if (strokeColor && strokeWidth > 0) {
-      this.ops.push("q");
-      this.emitClip(style, getQuadBounds(points));
-      this.setStroke(strokeColor);
-      this.setLineWidth(pxToPt(strokeWidth));
-      if (radius && isAxisAlignedRect(points)) {
-        const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
-        const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-        const rw = pxToPt(Math.abs(points[1].x - points[0].x));
-        const rh = pxToPt(Math.abs(points[3].y - points[0].y));
-        const rx = pxToPt(Math.min(radius.rx, Math.abs(points[1].x - points[0].x) / 2));
-        const ry = pxToPt(Math.min(radius.ry, Math.abs(points[3].y - points[0].y) / 2));
-        this.emitRoundedRectPath(left, top, rw, rh, rx, ry);
-      } else {
-        this.emitQuadPath(points);
-      }
-      this.ops.push("S");
-      this.ops.push("Q");
-    }
   }
 
   /** Build a PDF color function dictionary for gradient stops. */
@@ -1828,7 +1923,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const r = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2) / 2;
 
     const opacity = style.opacity ?? 1;
-    const stops = gradient.stops;
+    const stops = gradient.repeating ? expandRepeatingStops(gradient.stops) : gradient.stops;
     const fromRad = gradient.fromAngle * Math.PI / 180;
 
     // Number of sectors (more = smoother)
@@ -1865,7 +1960,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       // CSS conic gradient: 0 = top (12 o'clock), clockwise
       // PDF coordinates: angles measure from 3 o'clock, counter-clockwise
       const t = (i + 0.5) / SECTORS; // normalized position [0..1]
-      const color = interpolateConicColor(t, stops);
+      const color = interpolateConicColor(t, stops, gradient.repeating);
 
       // Sector angles in PDF space:
       // CSS 0° = top = PDF 90°, CSS goes clockwise = PDF counter-clockwise

@@ -265,7 +265,7 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 - Polygons → Canvas filled/stroked paths
 - Polylines → Canvas path operations (open or closed)
 - Rounded rectangles → Canvas `arcTo` paths
-- Gradients → Canvas `createLinearGradient` / `createRadialGradient`
+- Gradients → Canvas `createLinearGradient` / `createRadialGradient` / `createConicGradient`, including repeating linear/radial/conic gradients
 - Text → Canvas `fillText` with CSS font string
 - Opacity → Canvas `globalAlpha`
 - Transparent elements are skipped
@@ -290,7 +290,7 @@ Produces a standalone SVG document string. Width and height define the viewport 
 - Polygons → SVG `<rect>` (axis-aligned with border-radius) or `<path>` elements
 - Polylines → SVG `<path>` elements (open or closed)
 - Rounded rectangles → `<rect>` with `rx`/`ry` attributes
-- Gradients → SVG `<linearGradient>` / `<radialGradient>` definitions with `userSpaceOnUse` units
+- Gradients → SVG `<linearGradient>` / `<radialGradient>` definitions with `userSpaceOnUse` units, plus conic-gradient fallback patterns built from sector paths, including repeating variants
 - Text → SVG `<text>` elements with font properties, rotation, and decoration
 - Text shadow → SVG `<filter>` with `<feDropShadow>`
 - Box shadow → SVG `<filter>` with `<feDropShadow>` (outer) or clipped inset filter
@@ -365,7 +365,7 @@ The optional `defaultFont` parameter accepts a TTF file as `Uint8Array`. When pr
 - Polygons → closed paths with fill/stroke operators (`f`, `S`, `B`)
 - Polylines → paths with fill/stroke operators
 - Rounded rectangles → Bézier-approximated rounded rect paths
-- Gradients → PDF shading objects (axial for `linear-gradient`, radial for `radial-gradient`)
+- Gradients → PDF shading objects (axial for `linear-gradient`, radial for `radial-gradient`) plus repeating stop expansion for linear/radial gradients, and sector-based fallback rendering for conic gradients (including repeating conic)
 - Text → PDF text operators with standard font mapping (Helvetica, Times, Courier families)
 - Fill/stroke mode automatically determined from style (fill only, stroke only, or both)
 - Opacity → PDF ExtGState transparency

@@ -69,3 +69,25 @@ export function extractFirstGradient(bgImage: string): string | null {
 
   return null;
 }
+
+export function extractAllGradients(bgImage: string): string[] {
+  const gradients: string[] = [];
+  const re = /(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(bgImage)) !== null) {
+    let depth = 0;
+    const start = match.index;
+    for (let i = start; i < bgImage.length; i++) {
+      if (bgImage[i] === "(") depth++;
+      else if (bgImage[i] === ")") {
+        depth--;
+        if (depth === 0) {
+          gradients.push(bgImage.slice(start, i + 1));
+          re.lastIndex = i + 1;
+          break;
+        }
+      }
+    }
+  }
+  return gradients;
+}

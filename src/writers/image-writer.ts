@@ -11,8 +11,8 @@
 import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
-import { getVisibleCssColorString } from "./shared/css-color.js";
-import { extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
+import { extractAllGradients, extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
 import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
@@ -22,8 +22,68 @@ import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } fr
 interface GradientStop { offset: number; color: string; }
 interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; repeating: boolean; }
 interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
-interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; }
+interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
+
+function formatCssColor(color: ParsedCssColor): string {
+  if (color.a >= 0.999) return `rgb(${color.r}, ${color.g}, ${color.b})`;
+  return `rgba(${color.r}, ${color.g}, ${color.b}, ${Number(color.a.toFixed(3))})`;
+}
+
+function interpolateGradientColor(t: number, stops: GradientStop[], repeating = false): string {
+  const parsedStops = stops
+    .map((stop) => ({ ...stop, parsed: parseCssColor(stop.color) }))
+    .filter((stop): stop is GradientStop & { parsed: ParsedCssColor } => !!stop.parsed)
+    .sort((left, right) => left.offset - right.offset);
+
+  if (parsedStops.length === 0) return stops[0]?.color ?? "transparent";
+  const maxOffset = parsedStops[parsedStops.length - 1].offset;
+  if (repeating && maxOffset > 0 && maxOffset < 0.999999) {
+    t = ((t % maxOffset) + maxOffset) % maxOffset;
+  }
+  if (t <= parsedStops[0].offset) return formatCssColor(parsedStops[0].parsed);
+  if (t >= parsedStops[parsedStops.length - 1].offset) return formatCssColor(parsedStops[parsedStops.length - 1].parsed);
+
+  for (let i = 0; i < parsedStops.length - 1; i++) {
+    const start = parsedStops[i];
+    const end = parsedStops[i + 1];
+    if (t < start.offset || t > end.offset) continue;
+    const range = end.offset - start.offset;
+    const fraction = range > 0 ? (t - start.offset) / range : 0;
+    return formatCssColor({
+      r: Math.round(start.parsed.r + (end.parsed.r - start.parsed.r) * fraction),
+      g: Math.round(start.parsed.g + (end.parsed.g - start.parsed.g) * fraction),
+      b: Math.round(start.parsed.b + (end.parsed.b - start.parsed.b) * fraction),
+      a: start.parsed.a + (end.parsed.a - start.parsed.a) * fraction,
+    });
+  }
+
+  return formatCssColor(parsedStops[parsedStops.length - 1].parsed);
+}
+
+function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
+  if (stops.length < 2) return stops;
+
+  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
+  const period = sortedStops[sortedStops.length - 1].offset;
+  if (!(period > 0 && period < 0.999999)) return sortedStops;
+
+  const repeated: GradientStop[] = [];
+  const repetitions = Math.ceil(1 / period) + 1;
+  for (let rep = 0; rep < repetitions; rep++) {
+    const base = rep * period;
+    for (const stop of sortedStops) {
+      const offset = base + stop.offset;
+      if (offset > 1.000001) break;
+      repeated.push({ color: stop.color, offset: Math.min(offset, 1) });
+    }
+  }
+
+  if (!repeated.some((stop) => Math.abs(stop.offset - 1) < 0.000001)) {
+    repeated.push({ offset: 1, color: interpolateGradientColor(1, sortedStops, true) });
+  }
+  return repeated;
+}
 
 function traceClipQuadPath(ctx: CanvasRenderingContext2D, clipQuad: ClipQuad): void {
   if (clipQuad.radius > 0) {
@@ -105,29 +165,6 @@ function parseColorStops(argsStr: string): GradientStop[] {
   return stops;
 }
 
-/** Extract ALL gradient strings from a backgroundImage value (CSS layer order: first = top). */
-function extractAllGradients(bgImage: string): string[] {
-  const gradients: string[] = [];
-  const re = /(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(bgImage)) !== null) {
-    let depth = 0;
-    const start = m.index;
-    for (let i = start; i < bgImage.length; i++) {
-      if (bgImage[i] === "(") depth++;
-      else if (bgImage[i] === ")") {
-        depth--;
-        if (depth === 0) {
-          gradients.push(bgImage.slice(start, i + 1));
-          re.lastIndex = i + 1;
-          break;
-        }
-      }
-    }
-  }
-  return gradients;
-}
-
 function parseGradient(bgImage: string | undefined): ParsedGradient | null {
   if (!bgImage || bgImage === "none") return null;
   const gradientStr = extractFirstGradient(bgImage);
@@ -159,9 +196,10 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     return { type: "radial", stops, repeating };
   }
 
-  const conicMatch = gradientStr.match(/^conic-gradient\((.+)\)$/);
+  const conicMatch = gradientStr.match(/^(repeating-)?conic-gradient\((.+)\)$/);
   if (conicMatch) {
-    const inner = conicMatch[1];
+    const repeating = !!conicMatch[1];
+    const inner = conicMatch[2];
     // Parse optional "from <angle>" prefix
     let fromAngleDeg = 0;
     let stopsStr = inner;
@@ -175,7 +213,7 @@ function parseGradient(bgImage: string | undefined): ParsedGradient | null {
     }
     const stops = parseColorStops(stopsStr);
     if (stops.length < 2) return null;
-    return { type: "conic", fromAngleDeg, stops };
+    return { type: "conic", fromAngleDeg, stops, repeating };
   }
 
   return null;
@@ -1051,6 +1089,7 @@ export class ImageWriter implements Writer<ImageResult> {
         stops = this.normalizeStopsToFraction(stops, r);
       }
     } else if (gradient.type === "conic") {
+      stops = gradient.repeating ? expandRepeatingStops(stops) : this.normalizeStopsToFraction(stops, 1);
       canvasGrad = ctx.createConicGradient(
         (gradient.fromAngleDeg - 90) * Math.PI / 180,
         cx,

@@ -10,7 +10,6 @@ todo:
 - backdrop-filter
   -> https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter
 - fill of arrows heads in dxf
-- conic gradient
 - line-clamp css property (for text)
 
 create a demo html with the features in tests/demos
