@@ -219,6 +219,33 @@ interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boo
 interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
+type RenderedOutline = {
+  color: ParsedColor;
+  width: number;
+  style: string;
+  offset: number;
+};
+
+function getVisibleOutline(style: Style): RenderedOutline | null {
+  if (!style.outlineWidth) return null;
+  const width = parseFloat(style.outlineWidth);
+  if (!Number.isFinite(width) || width <= 0) return null;
+
+  const outlineStyle = style.outlineStyle === "auto" ? "solid" : style.outlineStyle;
+  if (!outlineStyle || outlineStyle === "none") return null;
+
+  const color = parseVisibleColor(style.outlineColor ?? style.color ?? style.stroke ?? style.fill);
+  if (!color) return null;
+
+  const offset = style.outlineOffset ? parseFloat(style.outlineOffset) : 0;
+  return {
+    color,
+    width,
+    style: outlineStyle,
+    offset: Number.isFinite(offset) ? offset : 0,
+  };
+}
+
 function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
   if (stops.length < 2) return stops;
   const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
@@ -948,6 +975,95 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push(`${pn(pt)} w`);
   }
 
+  private setDashStyle(style: string, widthPx: number): void {
+    if (style === "dashed") {
+      const dash = pxToPt(widthPx * 3);
+      this.ops.push(`[${pn(dash)} ${pn(dash)}] 0 d`);
+      return;
+    }
+    if (style === "dotted") {
+      const dot = pxToPt(widthPx);
+      this.ops.push(`[${pn(dot)} ${pn(dot)}] 0 d`);
+      this.ops.push("1 J");
+      return;
+    }
+    this.ops.push("[] 0 d");
+  }
+
+  private emitOutlinePath(points: Quad, style: Style, outline: RenderedOutline): void {
+    const elW = Math.abs(points[1].x - points[0].x);
+    const elH = Math.abs(points[3].y - points[0].y);
+    const padding = outline.offset + outline.width / 2;
+    const radius = parseBorderRadius(style.borderRadius, elW, elH);
+
+    if (isAxisAlignedRect(points) && !style.cornerShapes) {
+      const minX = Math.min(points[0].x, points[1].x, points[2].x, points[3].x) - padding;
+      const minY = Math.min(points[0].y, points[1].y, points[2].y, points[3].y) - padding;
+      const width = elW + padding * 2;
+      const height = elH + padding * 2;
+      const left = this.ptX(minX);
+      const top = this.ptY(minY);
+      if (radius) {
+        const rx = Math.min(Math.max(radius.rx + padding, 0), width / 2);
+        const ry = Math.min(Math.max(radius.ry + padding, 0), height / 2);
+        this.emitRoundedRectPath(left, top, pxToPt(width), pxToPt(height), pxToPt(rx), pxToPt(ry));
+      } else {
+        this.emitRectPath(left, top, pxToPt(width), pxToPt(height));
+      }
+      return;
+    }
+
+    if (radius) {
+      const rounded = roundedQuadPath(points, Math.min(radius.rx, radius.ry), style.cornerShapes);
+      for (const segment of rounded) {
+        switch (segment.type) {
+          case "M":
+            this.ops.push(`${pn(this.ptX(segment.x))} ${pn(this.ptY(segment.y))} m`);
+            break;
+          case "L":
+            this.ops.push(`${pn(this.ptX(segment.x))} ${pn(this.ptY(segment.y))} l`);
+            break;
+          case "Q": {
+            const segments = rounded;
+            const index = segments.indexOf(segment);
+            const prev = index > 0 ? segments[index - 1] : segments[0];
+            const px = this.ptX(prev.x);
+            const py = this.ptY(prev.y);
+            const cx = this.ptX(segment.cx);
+            const cy = this.ptY(segment.cy);
+            const ex = this.ptX(segment.x);
+            const ey = this.ptY(segment.y);
+            const c1x = px + (2 / 3) * (cx - px);
+            const c1y = py + (2 / 3) * (cy - py);
+            const c2x = ex + (2 / 3) * (cx - ex);
+            const c2y = ey + (2 / 3) * (cy - ey);
+            this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
+            break;
+          }
+        }
+      }
+      this.ops.push("h");
+      return;
+    }
+
+    this.emitQuadPath(points);
+  }
+
+  private drawOutline(points: Quad, style: Style, outline: RenderedOutline): void {
+    this.ops.push("q");
+    const strokeOpacity = (style.opacity ?? 1) * outline.color.a;
+    if (strokeOpacity < 1) {
+      const gsName = this.getGStateResName(1, strokeOpacity);
+      this.ops.push(`/${gsName} gs`);
+    }
+    this.setStroke(outline.color);
+    this.setLineWidth(pxToPt(outline.width));
+    this.setDashStyle(outline.style, outline.width);
+    this.emitOutlinePath(points, style, outline);
+    this.ops.push("S");
+    this.ops.push("Q");
+  }
+
   /**
    * Apply fill/stroke style operators and return the paint operator.
    * Returns null if the shape is fully transparent.
@@ -996,9 +1112,12 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.drawBoxShadows(points, style);
     }
 
+    const outline = getVisibleOutline(style);
+
     const gradients = parseGradients(style.backgroundImage);
     if (gradients.length > 0) {
       this.drawGradientPolygon(points, gradients, style);
+      if (outline) this.drawOutline(points, style, outline);
       return;
     }
 
@@ -1025,64 +1144,66 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
       // Draw each border side independently
       this.drawPerSideBorders(points, style);
+      if (outline) this.drawOutline(points, style, outline);
       this.ops.push("Q");
       return;
     }
 
     const paintOp = this.applyStyleOps(style);
-    if (!paintOp) { this.ops.push("Q"); return; }
+    if (!paintOp && !outline) { this.ops.push("Q"); return; }
 
-    const elW = Math.abs(points[1].x - points[0].x);
-    const elH = Math.abs(points[3].y - points[0].y);
-    const radius = parseBorderRadius(style.borderRadius, elW, elH);
-    if (radius && isAxisAlignedRect(points) && !style.cornerShapes) {
-      const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
-      const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
-      const w = pxToPt(elW);
-      const h = pxToPt(elH);
-      const rx = pxToPt(Math.min(radius.rx, elW / 2));
-      const ry = pxToPt(Math.min(radius.ry, elH / 2));
-      this.emitRoundedRectPath(left, top, w, h, rx, ry);
-    } else if (radius && (!isAxisAlignedRect(points) || style.cornerShapes)) {
-      // Non-axis-aligned quad (or axis-aligned with corner-shape) with border-radius
-      const r = Math.min(radius.rx, radius.ry);
-      const segs = roundedQuadPath(points, r, style.cornerShapes);
-      for (const s of segs) {
-        switch (s.type) {
-          case "M":
-            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} m`);
-            break;
-          case "L":
-            this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} l`);
-            break;
-          case "Q": {
-            // Convert quadratic bezier to cubic (PDF only supports cubic)
-            // Get previous endpoint from the last move/line/curve
-            const segsArr = segs;
-            const idx = segsArr.indexOf(s);
-            const prev = idx > 0 ? segsArr[idx - 1] : segs[0];
-            const px = this.ptX(prev.x);
-            const py = this.ptY(prev.y);
-            const cx = this.ptX(s.cx);
-            const cy = this.ptY(s.cy);
-            const ex = this.ptX(s.x);
-            const ey = this.ptY(s.y);
-            // Quadratic to cubic: cp1 = p0 + 2/3*(cp-p0), cp2 = end + 2/3*(cp-end)
-            const c1x = px + (2 / 3) * (cx - px);
-            const c1y = py + (2 / 3) * (cy - py);
-            const c2x = ex + (2 / 3) * (cx - ex);
-            const c2y = ey + (2 / 3) * (cy - ey);
-            this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
-            break;
+    if (paintOp) {
+      const elW = Math.abs(points[1].x - points[0].x);
+      const elH = Math.abs(points[3].y - points[0].y);
+      const radius = parseBorderRadius(style.borderRadius, elW, elH);
+      if (radius && isAxisAlignedRect(points) && !style.cornerShapes) {
+        const left = this.ptX(Math.min(points[0].x, points[1].x, points[2].x, points[3].x));
+        const top = this.ptY(Math.min(points[0].y, points[1].y, points[2].y, points[3].y));
+        const w = pxToPt(elW);
+        const h = pxToPt(elH);
+        const rx = pxToPt(Math.min(radius.rx, elW / 2));
+        const ry = pxToPt(Math.min(radius.ry, elH / 2));
+        this.emitRoundedRectPath(left, top, w, h, rx, ry);
+      } else if (radius && (!isAxisAlignedRect(points) || style.cornerShapes)) {
+        // Non-axis-aligned quad (or axis-aligned with corner-shape) with border-radius
+        const r = Math.min(radius.rx, radius.ry);
+        const segs = roundedQuadPath(points, r, style.cornerShapes);
+        for (const s of segs) {
+          switch (s.type) {
+            case "M":
+              this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} m`);
+              break;
+            case "L":
+              this.ops.push(`${pn(this.ptX(s.x))} ${pn(this.ptY(s.y))} l`);
+              break;
+            case "Q": {
+              const segsArr = segs;
+              const idx = segsArr.indexOf(s);
+              const prev = idx > 0 ? segsArr[idx - 1] : segs[0];
+              const px = this.ptX(prev.x);
+              const py = this.ptY(prev.y);
+              const cx = this.ptX(s.cx);
+              const cy = this.ptY(s.cy);
+              const ex = this.ptX(s.x);
+              const ey = this.ptY(s.y);
+              const c1x = px + (2 / 3) * (cx - px);
+              const c1y = py + (2 / 3) * (cy - py);
+              const c2x = ex + (2 / 3) * (cx - ex);
+              const c2y = ey + (2 / 3) * (cy - ey);
+              this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
+              break;
+            }
           }
         }
+        this.ops.push("h");
+      } else {
+        this.emitQuadPath(points);
       }
-      this.ops.push("h");
-    } else {
-      this.emitQuadPath(points);
+
+      this.ops.push(paintOp);
     }
 
-    this.ops.push(paintOp);
+    if (outline) this.drawOutline(points, style, outline);
     this.ops.push("Q");
   }
 

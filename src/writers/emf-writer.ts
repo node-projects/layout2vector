@@ -14,6 +14,33 @@ import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds 
 import { getVisibleStroke, isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 import { roundedQuadPath } from "../geometry.js";
 
+type RenderedOutline = {
+  color: number;
+  width: number;
+  style: string;
+  offset: number;
+};
+
+function getVisibleOutline(style: Style): RenderedOutline | null {
+  if (!style.outlineWidth) return null;
+  const width = parseFloat(style.outlineWidth);
+  if (!Number.isFinite(width) || width <= 0) return null;
+
+  const outlineStyle = style.outlineStyle === "auto" ? "solid" : style.outlineStyle;
+  if (!outlineStyle || outlineStyle === "none") return null;
+
+  const color = cssColorToColorRef(style.outlineColor ?? style.color ?? style.stroke ?? style.fill);
+  if (color === null) return null;
+
+  const offset = style.outlineOffset ? parseFloat(style.outlineOffset) : 0;
+  return {
+    color,
+    width,
+    style: outlineStyle,
+    offset: Number.isFinite(offset) ? offset : 0,
+  };
+}
+
 // ── Color helpers ───────────────────────────────────────────────────
 // ── EMF Binary Helpers ──────────────────────────────────────────────
 
@@ -226,6 +253,7 @@ export class EMFWriter implements Writer<Uint8Array> {
 
     const fillColor = cssColorToColorRef(style.fill);
     const stroke = getVisibleStroke(style, cssColorToColorRef);
+    const outline = getVisibleOutline(style);
 
     const clipBounds = getQuadBounds(points);
 
@@ -256,9 +284,10 @@ export class EMFWriter implements Writer<Uint8Array> {
       return;
     }
 
-    if (fillColor === null && !stroke) return;
+    if (fillColor === null && !stroke && !outline) return;
 
     this.saveState();
+      if (outline) this.drawOutline(points, style, outline);
   this.applyClip(style, clipBounds);
 
     const emfElW = Math.abs(points[1].x - points[0].x);
@@ -273,19 +302,23 @@ export class EMFWriter implements Writer<Uint8Array> {
       const h = Math.abs(points[3].y - points[0].y);
       const r = Math.min(radius, w / 2, h / 2);
 
-      const brushHandle = this.createBrush(fillColor);
-      const penHandle = this.createPen(stroke);
-      this.selectObject(brushHandle);
-      this.selectObject(penHandle);
+      if (fillColor !== null || stroke) {
+        const brushHandle = this.createBrush(fillColor);
+        const penHandle = this.createPen(stroke);
+        this.selectObject(brushHandle);
+        this.selectObject(penHandle);
 
-      this.records.writeRecord(EMR.ROUNDRECT, int32Array(
-        Math.round(x), Math.round(y),
-        Math.round(x + w), Math.round(y + h),
-        Math.round(r * 2), Math.round(r * 2)
-      ));
+        this.records.writeRecord(EMR.ROUNDRECT, int32Array(
+          Math.round(x), Math.round(y),
+          Math.round(x + w), Math.round(y + h),
+          Math.round(r * 2), Math.round(r * 2)
+        ));
 
-      this.deleteObject(brushHandle);
-      this.deleteObject(penHandle);
+        this.deleteObject(brushHandle);
+        this.deleteObject(penHandle);
+      }
+
+      if (outline) this.drawOutline(points, style, outline);
       this.restoreState();
       return;
     }
@@ -311,46 +344,90 @@ export class EMFWriter implements Writer<Uint8Array> {
         }
       }
 
-      const brushHandle = this.createBrush(fillColor);
-      const penHandle = this.createPen(stroke);
-      this.selectObject(brushHandle);
-      this.selectObject(penHandle);
+      if (fillColor !== null || stroke) {
+        const brushHandle = this.createBrush(fillColor);
+        const penHandle = this.createPen(stroke);
+        this.selectObject(brushHandle);
+        this.selectObject(penHandle);
 
-      const emfBounds = this.computeBoundsFromPoints(verts);
-      const ptData = int16Array(
-        ...verts.flatMap(p => [Math.round(p.x), Math.round(p.y)])
-      );
-      this.records.writeRecord(EMR.POLYGON16, concat(
-        int32Array(emfBounds.left, emfBounds.top, emfBounds.right, emfBounds.bottom),
-        uint32Array(verts.length),
-        ptData
-      ));
+        const emfBounds = this.computeBoundsFromPoints(verts);
+        const ptData = int16Array(
+          ...verts.flatMap(p => [Math.round(p.x), Math.round(p.y)])
+        );
+        this.records.writeRecord(EMR.POLYGON16, concat(
+          int32Array(emfBounds.left, emfBounds.top, emfBounds.right, emfBounds.bottom),
+          uint32Array(verts.length),
+          ptData
+        ));
 
-      this.deleteObject(brushHandle);
-      this.deleteObject(penHandle);
+        this.deleteObject(brushHandle);
+        this.deleteObject(penHandle);
+      }
+
+      if (outline) this.drawOutline(points, style, outline);
       this.restoreState();
       return;
     }
 
     // Regular polygon (quad)
-    const brushHandle = this.createBrush(fillColor);
-    const penHandle = this.createPen(stroke);
-    this.selectObject(brushHandle);
+    if (fillColor !== null || stroke) {
+      const brushHandle = this.createBrush(fillColor);
+      const penHandle = this.createPen(stroke);
+      this.selectObject(brushHandle);
+      this.selectObject(penHandle);
+
+      const bounds = this.computeBounds(points);
+      const ptData = int16Array(
+        ...points.flatMap(p => [Math.round(p.x), Math.round(p.y)])
+      );
+      this.records.writeRecord(EMR.POLYGON16, concat(
+        int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
+        uint32Array(4),
+        ptData
+      ));
+
+      this.deleteObject(brushHandle);
+      this.deleteObject(penHandle);
+    }
+
+    if (outline) this.drawOutline(points, style, outline);
+    this.restoreState();
+  }
+
+  private drawOutline(points: Quad, style: Style, outline: RenderedOutline): void {
+    const penHandle = this.createPenStyled({ color: outline.color, width: outline.width }, undefined, outline.style);
+    const nullBrush = this.createBrush(null);
+    this.selectObject(nullBrush);
     this.selectObject(penHandle);
 
-    const bounds = this.computeBounds(points);
-    const ptData = int16Array(
-      ...points.flatMap(p => [Math.round(p.x), Math.round(p.y)])
-    );
-    this.records.writeRecord(EMR.POLYGON16, concat(
-      int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
-      uint32Array(4),
-      ptData
-    ));
+    if (isAxisAlignedRect(points) && !style.cornerShapes) {
+      const minX = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
+      const minY = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
+      const width = Math.abs(points[1].x - points[0].x);
+      const height = Math.abs(points[3].y - points[0].y);
+      const padding = outline.offset + outline.width / 2;
+      const radius = parseBorderRadius(style.borderRadius, width, height);
+      const outlineRadius = Math.min(Math.max(radius + padding, 0), (width + padding * 2) / 2, (height + padding * 2) / 2);
+      this.records.writeRecord(EMR.ROUNDRECT, int32Array(
+        Math.round(minX - padding),
+        Math.round(minY - padding),
+        Math.round(minX + width + padding),
+        Math.round(minY + height + padding),
+        Math.round(outlineRadius * 2),
+        Math.round(outlineRadius * 2)
+      ));
+    } else {
+      const bounds = this.computeBounds(points);
+      const ptData = int16Array(...points.flatMap((point) => [Math.round(point.x), Math.round(point.y)]));
+      this.records.writeRecord(EMR.POLYGON16, concat(
+        int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
+        uint32Array(4),
+        ptData
+      ));
+    }
 
-    this.deleteObject(brushHandle);
+    this.deleteObject(nullBrush);
     this.deleteObject(penHandle);
-    this.restoreState();
   }
 
   async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {

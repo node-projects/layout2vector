@@ -4,7 +4,7 @@
 import type { Point, Quad, Style, IRNode, Options } from "../types.js";
 import type { StackingNode } from "../traversal.js";
 import { isSVGElement } from "../traversal.js";
-import { getElementQuads, getNodeQuads } from "../geometry.js";
+import { getElementQuad, getElementQuads, getNodeQuads, quadSize } from "../geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 
@@ -105,13 +105,16 @@ function extractTextNode(
     return results;
   }
 
-  if (resolveTextMeasurementMode(parentStyle, options) === "pretext") {
+  const measurementMode = resolveTextMeasurementMode(parentStyle, options);
+  const nativeTextQuads = measurementMode === "pretext" ? getNativeTextNodeQuads(textNode, parentStyle) : [];
+  const measuredTextStyle = measurementMode === "pretext" ? getPrelaidTextStyle(parentStyle) : parentStyle;
+  if (measurementMode === "pretext" && nativeTextQuads.length !== 1) {
     return extractTextNodeWithPretext(textNode, parentEl, parentStyle, globalIndex);
   }
 
   // Get all quads (one per line fragment) using getBoxQuads.
   // This correctly handles CSS transforms — each quad is properly rotated.
-  const allQuads = getTextNodeQuads(textNode);
+  const allQuads = nativeTextQuads.length === 1 ? nativeTextQuads : getTextNodeQuads(textNode);
   if (allQuads.length === 0) return results;
 
   const lineClamp = getLineClamp(parentEl);
@@ -148,7 +151,7 @@ function extractTextNode(
       type: "text",
       quad: finalQuad,
       text,
-      style: parentStyle,
+      style: measuredTextStyle,
       zIndex: globalIndex,
     });
   } else {
@@ -205,6 +208,58 @@ function getTextNodeQuads(textNode: Text): Quad[] {
   return getNodeQuads(textNode, "border");
 }
 
+function getPrelaidTextStyle(style: Style): Style {
+  return {
+    ...style,
+    direction: undefined,
+    writingMode: undefined,
+    textAlign: undefined,
+    textIndent: undefined,
+    whiteSpace: "pre",
+  };
+}
+
+function getNativeTextNodeQuads(textNode: Text, style: Style): Quad[] {
+  if (!("getBoxQuads" in textNode) || typeof (textNode as any).getBoxQuads !== "function") {
+    return [];
+  }
+
+  try {
+    const rawQuads: DOMQuad[] = (textNode as any).getBoxQuads({ box: "border" });
+    return rawQuads
+      .map((quad) => orientNativeTextQuad([
+        { x: quad.p1.x, y: quad.p1.y },
+        { x: quad.p2.x, y: quad.p2.y },
+        { x: quad.p3.x, y: quad.p3.y },
+        { x: quad.p4.x, y: quad.p4.y },
+      ] as Quad, style.writingMode))
+      .filter(hasQuadArea);
+  } catch {
+    return [];
+  }
+}
+
+function orientNativeTextQuad(quad: Quad, writingMode: string | undefined): Quad {
+  switch (writingMode) {
+    case "vertical-rl":
+    case "vertical-lr":
+    case "sideways-rl":
+      return [quad[1], quad[2], quad[3], quad[0]];
+    case "sideways-lr":
+      return [quad[3], quad[0], quad[1], quad[2]];
+    default:
+      return quad;
+  }
+}
+
+function hasQuadArea(quad: Quad): boolean {
+  const x1 = quad[1].x - quad[0].x;
+  const y1 = quad[1].y - quad[0].y;
+  const x2 = quad[3].x - quad[0].x;
+  const y2 = quad[3].y - quad[0].y;
+  return Math.abs(x1 * y2 - y1 * x2) > 0.01;
+}
+
 // --- Pretext-based text measurement ---
 
 let _pretextModule: { prepareWithSegments: any; layoutWithLines: any } | null = null;
@@ -248,6 +303,7 @@ async function extractTextNodeWithPretext(
   if (!text) return [];
 
   const cs = getComputedStyle(parentEl);
+  const contentTransform = getElementContentTransform(parentEl, cs);
   const fontSize = parseFloat(cs.fontSize) || 16;
   const lhVal = parseFloat(cs.lineHeight);
   const lineHeight = isNaN(lhVal) ? fontSize * 1.2 : lhVal;
@@ -255,24 +311,17 @@ async function extractTextNodeWithPretext(
   const writingMode = cs.writingMode || 'horizontal-tb';
   const direction = cs.direction || 'ltr';
 
-  const parentRect = parentEl.getBoundingClientRect();
   const padL = parseFloat(cs.paddingLeft) || 0;
   const padR = parseFloat(cs.paddingRight) || 0;
   const padT = parseFloat(cs.paddingTop) || 0;
   const padB = parseFloat(cs.paddingBottom) || 0;
-  const cx = parentRect.left + padL;
-  const cy = parentRect.top + padT;
-  const cw = parentRect.width - padL - padR;
-  const ch = parentRect.height - padT - padB;
+  const fallbackRect = parentEl.getBoundingClientRect();
+  const cx = contentTransform ? 0 : fallbackRect.left + padL;
+  const cy = contentTransform ? 0 : fallbackRect.top + padT;
+  const cw = contentTransform ? contentTransform.contentWidth : fallbackRect.width - padL - padR;
+  const ch = contentTransform ? contentTransform.contentHeight : fallbackRect.height - padT - padB;
 
-  const outputStyle: Style = {
-    ...parentStyle,
-    direction: undefined,
-    writingMode: undefined,
-    textAlign: undefined,
-    textIndent: undefined,
-    whiteSpace: "pre",
-  };
+  const outputStyle = getPrelaidTextStyle(parentStyle);
 
   const { prepareWithSegments, layoutWithLines } = await loadPretextModule();
   const whiteSpaceOpt = preservesWhitespace(parentStyle) ? { whiteSpace: 'pre-wrap' as const } : undefined;
@@ -306,7 +355,7 @@ async function extractTextNodeWithPretext(
         { x: x + lw, y: y + lineHeight },
         { x, y: y + lineHeight },
       ];
-      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
+      results.push({ type: "text", quad: mapPretextQuad(quad, contentTransform), text: lineText, style: outputStyle, zIndex: globalIndex });
     }
     return results;
   }
@@ -339,7 +388,7 @@ async function extractTextNodeWithPretext(
         { x: colX, y: colY + lw },
         { x: colX, y: colY },
       ];
-      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
+      results.push({ type: "text", quad: mapPretextQuad(quad, contentTransform), text: lineText, style: outputStyle, zIndex: globalIndex });
 
     } else if (writingMode === 'sideways-lr') {
       // CCW rotation (-90°): characters rotated 90° counter-clockwise, inline flows bottom→top
@@ -364,11 +413,106 @@ async function extractTextNodeWithPretext(
           { x: colX + lineHeight, y: cy + ch },
         ];
       }
-      results.push({ type: "text", quad, text: lineText, style: outputStyle, zIndex: globalIndex });
+      results.push({ type: "text", quad: mapPretextQuad(quad, contentTransform), text: lineText, style: outputStyle, zIndex: globalIndex });
     }
   }
 
   return results;
+}
+
+type ElementContentTransform = {
+  origin: Point;
+  xAxis: Point;
+  yAxis: Point;
+  contentWidth: number;
+  contentHeight: number;
+};
+
+function getElementContentTransform(el: Element, cs: CSSStyleDeclaration): ElementContentTransform | null {
+  const borderQuad = getElementQuad(el, "border");
+  if (!borderQuad) return null;
+  const contentQuad = getElementQuad(el, "content");
+
+  const borderLeft = parseFloat(cs.borderLeftWidth) || 0;
+  const borderRight = parseFloat(cs.borderRightWidth) || 0;
+  const borderTop = parseFloat(cs.borderTopWidth) || 0;
+  const borderBottom = parseFloat(cs.borderBottomWidth) || 0;
+  const padL = parseFloat(cs.paddingLeft) || 0;
+  const padR = parseFloat(cs.paddingRight) || 0;
+  const padT = parseFloat(cs.paddingTop) || 0;
+  const padB = parseFloat(cs.paddingBottom) || 0;
+
+  const htmlEl = el as Element & { clientWidth?: number; clientHeight?: number; };
+  const clientWidth = typeof htmlEl.clientWidth === "number" && htmlEl.clientWidth > 0 ? htmlEl.clientWidth : null;
+  const clientHeight = typeof htmlEl.clientHeight === "number" && htmlEl.clientHeight > 0 ? htmlEl.clientHeight : null;
+  const borderSize = quadSize(borderQuad);
+  const contentSize = contentQuad ? quadSize(contentQuad) : null;
+  const contentWidth = getContentBoxDimension(cs.width, cs.boxSizing, borderLeft, borderRight, padL, padR)
+    ?? (clientWidth !== null ? Math.max(0, clientWidth - padL - padR) : contentSize?.width ?? Math.max(0, borderSize.width - borderLeft - borderRight - padL - padR));
+  const contentHeight = getContentBoxDimension(cs.height, cs.boxSizing, borderTop, borderBottom, padT, padB)
+    ?? (clientHeight !== null ? Math.max(0, clientHeight - padT - padB) : contentSize?.height ?? Math.max(0, borderSize.height - borderTop - borderBottom - padT - padB));
+  const borderBoxWidth = contentWidth + padL + padR + borderLeft + borderRight;
+  const borderBoxHeight = contentHeight + padT + padB + borderTop + borderBottom;
+
+  if (borderBoxWidth <= 0 || borderBoxHeight <= 0) return null;
+
+  const xAxis = {
+    x: (borderQuad[1].x - borderQuad[0].x) / borderBoxWidth,
+    y: (borderQuad[1].y - borderQuad[0].y) / borderBoxWidth,
+  };
+  const yAxis = {
+    x: (borderQuad[3].x - borderQuad[0].x) / borderBoxHeight,
+    y: (borderQuad[3].y - borderQuad[0].y) / borderBoxHeight,
+  };
+  const originOffsetX = borderLeft + padL;
+  const originOffsetY = borderTop + padT;
+
+  return {
+    origin: contentQuad?.[0] ?? {
+      x: borderQuad[0].x + xAxis.x * originOffsetX + yAxis.x * originOffsetY,
+      y: borderQuad[0].y + xAxis.y * originOffsetX + yAxis.y * originOffsetY,
+    },
+    xAxis,
+    yAxis,
+    contentWidth,
+    contentHeight,
+  };
+}
+
+function getContentBoxDimension(
+  size: string,
+  boxSizing: string,
+  borderStart: number,
+  borderEnd: number,
+  paddingStart: number,
+  paddingEnd: number,
+): number | null {
+  const parsed = parseFloat(size);
+  if (!Number.isFinite(parsed)) return null;
+
+  if (boxSizing === "border-box") {
+    return Math.max(0, parsed - borderStart - borderEnd - paddingStart - paddingEnd);
+  }
+
+  return Math.max(0, parsed);
+}
+
+function mapPretextPoint(point: Point, transform: ElementContentTransform | null): Point {
+  if (!transform) return point;
+  return {
+    x: transform.origin.x + transform.xAxis.x * point.x + transform.yAxis.x * point.y,
+    y: transform.origin.y + transform.xAxis.y * point.x + transform.yAxis.y * point.y,
+  };
+}
+
+function mapPretextQuad(quad: Quad, transform: ElementContentTransform | null): Quad {
+  if (!transform) return quad;
+  return [
+    mapPretextPoint(quad[0], transform),
+    mapPretextPoint(quad[1], transform),
+    mapPretextPoint(quad[2], transform),
+    mapPretextPoint(quad[3], transform),
+  ];
 }
 
 function resolveTextMeasurementMode(style: Style, options: Options): "line" | "pretext" {

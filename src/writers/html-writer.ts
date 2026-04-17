@@ -218,6 +218,40 @@ function getQuadTransform(points: Quad): QuadTransform | null {
   };
 }
 
+function getClipBoundsCss(clip: NonNullable<Style["clipBounds"]>): string[] {
+  const css = [
+    "position:absolute",
+    `left:${n(clip.x)}px`,
+    `top:${n(clip.y)}px`,
+    `width:${n(clip.w)}px`,
+    `height:${n(clip.h)}px`,
+    "overflow:hidden",
+  ];
+  if (clip.radius > 0) css.push(`border-radius:${n(clip.radius)}px`);
+  return css;
+}
+
+function offsetCssPosition(style: string, property: "left" | "top", delta: number): string {
+  if (Math.abs(delta) < 0.0001) return style;
+
+  const pattern = new RegExp(`(^|;)${property}:(-?\\d*\\.?\\d+)(px)?(?=;|$)`);
+  if (pattern.test(style)) {
+    return style.replace(pattern, (_match, prefix: string, value: string) => `${prefix}${property}:${n(parseFloat(value) + delta)}px`);
+  }
+
+  const separator = style.length > 0 && !style.endsWith(";") ? ";" : "";
+  return `${style}${separator}${property}:${n(delta)}px`;
+}
+
+function offsetRootElementPosition(html: string, dx: number, dy: number): string {
+  if (Math.abs(dx) < 0.0001 && Math.abs(dy) < 0.0001) return html;
+
+  return html.replace(/^<([a-zA-Z0-9:-]+)([^>]*?)\sstyle="([^"]*)"([^>]*)>/, (_match, tagName: string, before: string, style: string, after: string) => {
+    const shiftedStyle = offsetCssPosition(offsetCssPosition(style, "left", dx), "top", dy);
+    return `<${tagName}${before} style="${shiftedStyle}"${after}>`;
+  });
+}
+
 // ── HTML Writer ─────────────────────────────────────────────────────
 
 /** Image handling mode for the HTML writer. */
@@ -240,10 +274,14 @@ export type HTMLWriterOptions = {
   customCss?: string;
 };
 
+type HTMLContentEntry =
+  | { type: "raw"; html: string }
+  | { type: "clip-group"; key: string; open: string; close: string; children: string[] };
+
 export class HTMLWriter implements Writer<string> {
   private width: number;
   private height: number;
-  private elements: string[] = [];
+  private elements: HTMLContentEntry[] = [];
   private imageMode: HTMLImageMode;
   private imageCounter = 0;
   private imageDedup = new Map<string, string>(); // dataUrl → filename
@@ -318,6 +356,7 @@ export class HTMLWriter implements Writer<string> {
     let wrapped = html;
 
     if (bounds && style.clipPath && style.clipPath !== "none" && bounds.w > 0 && bounds.h > 0) {
+      wrapped = offsetRootElementPosition(wrapped, -bounds.x, -bounds.y);
       const css = [
         "position:absolute",
         `left:${n(bounds.x)}px`,
@@ -327,7 +366,7 @@ export class HTMLWriter implements Writer<string> {
         `clip-path:${style.clipPath}`,
         `-webkit-clip-path:${style.clipPath}`,
       ];
-      wrapped = `<div style="${css.join(";")}"><div style="position:relative;left:${n(-bounds.x)}px;top:${n(-bounds.y)}px;width:${n(this.width)}px;height:${n(this.height)}px">${wrapped}</div></div>`;
+      wrapped = `<div style="${css.join(";")}">${wrapped}</div>`;
     }
 
     if (style.clipQuads?.length) {
@@ -349,16 +388,46 @@ export class HTMLWriter implements Writer<string> {
     const clip = style.clipBounds;
     if (!clip) return wrapped;
 
-    const css = [
-      "position:absolute",
-      `left:${n(clip.x)}px`,
-      `top:${n(clip.y)}px`,
-      `width:${n(clip.w)}px`,
-      `height:${n(clip.h)}px`,
-      "overflow:hidden",
-    ];
-    if (clip.radius > 0) css.push(`border-radius:${n(clip.radius)}px`);
-    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px;width:${n(this.width)}px;height:${n(this.height)}px">${wrapped}</div></div>`;
+    const css = getClipBoundsCss(clip);
+    return `<div style="${css.join(";")}">${offsetRootElementPosition(wrapped, -clip.x, -clip.y)}</div>`;
+  }
+
+  private pushElement(html: string, style: Style, bounds?: ClipPathBounds): void {
+    const simpleGroup = this.buildSimpleClipGroup(html, style);
+    if (simpleGroup) {
+      const last = this.elements.at(-1);
+      if (last?.type === "clip-group" && last.key === simpleGroup.key) {
+        last.children.push(simpleGroup.content);
+        return;
+      }
+
+      this.elements.push({
+        type: "clip-group",
+        key: simpleGroup.key,
+        open: simpleGroup.open,
+        close: simpleGroup.close,
+        children: [simpleGroup.content],
+      });
+      return;
+    }
+
+    this.elements.push({ type: "raw", html: this.applyClip(html, style, bounds) });
+  }
+
+  private buildSimpleClipGroup(html: string, style: Style): { key: string; open: string; close: string; content: string } | null {
+    const clip = style.clipBounds;
+    if (!clip) return null;
+    if (style.clipPath && style.clipPath !== "none") return null;
+    if (style.clipQuads?.length) return null;
+
+    const css = getClipBoundsCss(clip);
+    const open = `<div style="${css.join(";")}">`;
+    return {
+      key: open,
+      open,
+      close: "</div>",
+      content: offsetRootElementPosition(html, -clip.x, -clip.y),
+    };
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -400,7 +469,7 @@ export class HTMLWriter implements Writer<string> {
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);
 
-      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style, clipBounds));
+      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds);
     } else {
       const transform = getQuadTransform(points);
       if (!transform) return;
@@ -425,7 +494,7 @@ export class HTMLWriter implements Writer<string> {
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);
 
-      this.elements.push(this.applyClip(`<div style="${css.join(";")}"></div>`, style, clipBounds));
+      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds);
     }
   }
 
@@ -446,7 +515,7 @@ export class HTMLWriter implements Writer<string> {
     if (style.strokeDasharray && style.strokeDasharray !== "none") svgAttrs.push(`stroke-dasharray="${escHtml(style.strokeDasharray)}"`);
     if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-    this.elements.push(this.applyClip(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points)));
+    this.pushElement(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points));
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
@@ -515,7 +584,7 @@ export class HTMLWriter implements Writer<string> {
         css.push("text-align-last:justify");
       }
 
-      this.elements.push(this.applyClip(`<div style="${css.join(";")}">${escHtml(sanitized)}</div>`, style, getQuadBounds(quad)));
+      this.pushElement(`<div style="${css.join(";")}">${escHtml(sanitized)}</div>`, style, getQuadBounds(quad));
     } else {
       // Axis-aligned text → use a positioned span
       const css: string[] = [
@@ -547,7 +616,7 @@ export class HTMLWriter implements Writer<string> {
         }
       }
 
-      this.elements.push(this.applyClip(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style, getQuadBounds(quad)));
+      this.pushElement(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style, getQuadBounds(quad));
     }
   }
 
@@ -586,15 +655,19 @@ export class HTMLWriter implements Writer<string> {
 
     if (this.imageMode.type === "css") {
       const className = this.getCssImageClass(dataUrl);
-      this.elements.push(this.applyClip(`<div class="${className}" style="${css.join(";")}"></div>`, style, getQuadBounds(quad)));
+      this.pushElement(`<div class="${className}" style="${css.join(";")}"></div>`, style, getQuadBounds(quad));
     } else {
       const src = this.imageMode.type === "external" ? this.getImageFilename(dataUrl) : dataUrl;
-      this.elements.push(this.applyClip(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style, getQuadBounds(quad)));
+      this.pushElement(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style, getQuadBounds(quad));
     }
   }
 
   async end(): Promise<string> {
-    const content = this.elements.join("\n");
+    const content = this.elements.map((entry) =>
+      entry.type === "raw"
+        ? entry.html
+        : `${entry.open}${entry.children.join("")}${entry.close}`
+    ).join("\n");
     let cssImageRules = "";
     if (this.imageMode.type === "css" && this.cssImageClasses.size > 0) {
       const rules: string[] = [];
