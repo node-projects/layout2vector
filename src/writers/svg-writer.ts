@@ -52,6 +52,64 @@ function subpathsToPath(subpaths: PathSubpath[]): string {
     .join(" ");
 }
 
+function normalizeFontFamily(fontFamily: string | undefined, fallback: string): string {
+  const normalized = fontFamily?.trim();
+  return normalized && normalized.length > 0 ? normalized : fallback;
+}
+
+type RenderedOutline = {
+  color: string;
+  width: number;
+  style: string;
+  offset: number;
+};
+
+function getVisibleOutline(style: Style): RenderedOutline | null {
+  if (!style.outlineWidth) return null;
+  const width = parseFloat(style.outlineWidth);
+  if (!Number.isFinite(width) || width <= 0) return null;
+
+  const outlineStyle = style.outlineStyle === "auto" ? "solid" : style.outlineStyle;
+  if (!outlineStyle || outlineStyle === "none") return null;
+
+  const color = getVisibleCssColorString(style.outlineColor ?? style.color ?? style.stroke ?? style.fill);
+  if (!color) return null;
+
+  const offsetValue = style.outlineOffset ? parseFloat(style.outlineOffset) : 0;
+  return {
+    color,
+    width,
+    style: outlineStyle,
+    offset: Number.isFinite(offsetValue) ? offsetValue : 0,
+  };
+}
+
+function getOutlineDasharray(outline: RenderedOutline): string | undefined {
+  switch (outline.style) {
+    case "dashed": {
+      const dash = Math.max(outline.width * 3, 1);
+      return `${n(dash)} ${n(dash)}`;
+    }
+    case "dotted": {
+      const gap = Math.max(outline.width * 1.5, 1);
+      return `${n(outline.width)} ${n(gap)}`;
+    }
+    default:
+      return undefined;
+  }
+}
+
+function roundedQuadToPath(points: Quad, radius: number, cornerShapes?: [number, number, number, number]): string {
+  const segments = roundedQuadPath(points, radius, cornerShapes);
+  return segments.map((segment) => {
+    switch (segment.type) {
+      case "M": return `M${n(segment.x)},${n(segment.y)}`;
+      case "L": return `L${n(segment.x)},${n(segment.y)}`;
+      case "Q": return `Q${n(segment.cx)},${n(segment.cy)} ${n(segment.x)},${n(segment.y)}`;
+    }
+  }).join(" ") + " Z";
+}
+
 // ── Gradient parsing (subset of png-writer logic) ───────────────────
 
 interface GradientStop { offset: number; color: string; }
@@ -375,16 +433,7 @@ export class SVGWriter implements Writer<string> {
 
   private buildClipQuadElement(clipQuad: ClipQuad): string {
     if (clipQuad.radius > 0) {
-      const path = roundedQuadPath(clipQuad.points, clipQuad.radius)
-        .map((segment) => {
-          switch (segment.type) {
-            case "M": return `M${n(segment.x)},${n(segment.y)}`;
-            case "L": return `L${n(segment.x)},${n(segment.y)}`;
-            case "Q": return `Q${n(segment.cx)},${n(segment.cy)} ${n(segment.x)},${n(segment.y)}`;
-          }
-        })
-        .join(" ") + " Z";
-      return `<path d="${path}"/>`;
+      return `<path d="${roundedQuadToPath(clipQuad.points, clipQuad.radius)}"/>`;
     }
 
     const path = clipQuad.points.map((point, index) => `${index === 0 ? "M" : "L"}${n(point.x)},${n(point.y)}`).join(" ") + " Z";
@@ -402,6 +451,54 @@ export class SVGWriter implements Writer<string> {
         (id) => `<clipPath id="${id}" clipPathUnits="userSpaceOnUse">${this.buildClipQuadElement(clipQuad)}</clipPath>`,
       );
     });
+  }
+
+  private getBorderRadiusClipId(points: Quad, style: Style): string | null {
+    const topEdge = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+    const leftEdge = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, topEdge, leftEdge);
+    if (radius <= 0) return null;
+
+    const clipQuad: ClipQuad = {
+      points,
+      radius: Math.min(radius, topEdge / 2, leftEdge / 2),
+    };
+    const key = `radius:${n(clipQuad.radius)}:${clipQuad.points.map((point) => `${n(point.x)},${n(point.y)}`).join("|")}`;
+    return this.getCachedClipId(
+      key,
+      (id) => `<clipPath id="${id}" clipPathUnits="userSpaceOnUse">${this.buildClipQuadElement(clipQuad)}</clipPath>`,
+    );
+  }
+
+  private buildOutlineElement(points: Quad, style: Style, outline: RenderedOutline, opacity: number | undefined): string {
+    const dasharray = getOutlineDasharray(outline);
+    const attrs = [
+      ` fill="none"`,
+      ` stroke="${escXml(outline.color)}"`,
+      ` stroke-width="${n(outline.width)}"`,
+    ];
+    if (dasharray) attrs.push(` stroke-dasharray="${dasharray}"`);
+    if (outline.style === "dotted") attrs.push(` stroke-linecap="round"`);
+    if (opacity !== undefined) attrs.push(` opacity="${n(opacity)}"`);
+
+    if (isAxisAlignedRect(points) && !style.cornerShapes) {
+      const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
+      const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
+      const width = Math.max(points[0].x, points[1].x, points[2].x, points[3].x) - x;
+      const height = Math.max(points[0].y, points[1].y, points[2].y, points[3].y) - y;
+      const padding = outline.offset + outline.width / 2;
+      const radius = parseBorderRadius(style.borderRadius, width, height);
+      const outlineRadius = Math.min(Math.max(radius + padding, 0), (width + padding * 2) / 2, (height + padding * 2) / 2);
+      return `<rect x="${n(x - padding)}" y="${n(y - padding)}" width="${n(width + padding * 2)}" height="${n(height + padding * 2)}" rx="${n(outlineRadius)}" ry="${n(outlineRadius)}"${attrs.join("")}/>`;
+    }
+
+    const topEdge = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
+    const leftEdge = Math.hypot(points[3].x - points[0].x, points[3].y - points[0].y);
+    const radius = parseBorderRadius(style.borderRadius, topEdge, leftEdge);
+    const path = radius > 0 && (!isAxisAlignedRect(points) || style.cornerShapes)
+      ? roundedQuadToPath(points, radius, style.cornerShapes)
+      : `${points.map((point, index) => `${index === 0 ? "M" : "L"}${n(point.x)},${n(point.y)}`).join(" ")} Z`;
+    return `<path d="${path}"${attrs.join("")}/>`;
   }
 
   /** Push an element, wrapping it in clip groups when clipBounds or clip-path are set. */
@@ -428,7 +525,8 @@ export class SVGWriter implements Writer<string> {
   async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
-    if (!fill && !stroke && !style.boxShadow) return;
+    const outline = getVisibleOutline(style);
+    if (!fill && !stroke && !outline && !style.boxShadow) return;
 
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
@@ -450,15 +548,25 @@ export class SVGWriter implements Writer<string> {
       const r = Math.min(radius, w / 2, h / 2);
 
       const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w, h);
-      const element = this.buildLayeredShape(
+      const baseElement = this.buildLayeredShape(
         (attrs) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>` ,
         fill,
         stroke,
         style,
         gradientIds,
-        filterId,
-        opacity,
+        undefined,
+        undefined,
       );
+      const layers = [baseElement];
+      if (outline) {
+        layers.push(this.buildOutlineElement(points, style, outline, undefined));
+      }
+      const groupAttrs: string[] = [];
+      if (filterId) groupAttrs.push(`filter="url(#${filterId})"`);
+      if (opacity !== undefined) groupAttrs.push(`opacity="${n(opacity)}"`);
+      const element = layers.length === 1 && groupAttrs.length === 0
+        ? layers[0]
+        : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
       this.pushElement(element, style, getQuadBounds(points));
 
       // Inset shadows as clipped overlays
@@ -477,27 +585,31 @@ export class SVGWriter implements Writer<string> {
     let pathD: string;
     if (nonAlignedRadius > 0 && (!isAxisAlignedRect(points) || style.cornerShapes)) {
       const segs = roundedQuadPath(points, nonAlignedRadius, style.cornerShapes);
-      pathD = segs.map(s => {
-        switch (s.type) {
-          case "M": return `M${n(s.x)},${n(s.y)}`;
-          case "L": return `L${n(s.x)},${n(s.y)}`;
-          case "Q": return `Q${n(s.cx)},${n(s.cy)} ${n(s.x)},${n(s.y)}`;
-        }
-      }).join(" ") + " Z";
+      pathD = roundedQuadToPath(points, nonAlignedRadius, style.cornerShapes);
     } else {
       pathD = d;
     }
 
     const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w || 1, h || 1);
-    const element = this.buildLayeredShape(
+    const baseElement = this.buildLayeredShape(
       (attrs) => `<path d="${pathD}"${attrs}/>` ,
       fill,
       stroke,
       style,
       gradientIds,
-      filterId,
-      opacity,
+      undefined,
+      undefined,
     );
+    const layers = [baseElement];
+    if (outline) {
+      layers.push(this.buildOutlineElement(points, style, outline, undefined));
+    }
+    const groupAttrs: string[] = [];
+    if (filterId) groupAttrs.push(`filter="url(#${filterId})"`);
+    if (opacity !== undefined) groupAttrs.push(`opacity="${n(opacity)}"`);
+    const element = layers.length === 1 && groupAttrs.length === 0
+      ? layers[0]
+      : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
     this.pushElement(element, style, getQuadBounds(points));
 
     if (isAxisAlignedRect(points)) {
@@ -550,7 +662,7 @@ export class SVGWriter implements Writer<string> {
 
     const fontWeight = style.fontWeight ?? "normal";
     const fontStyle = style.fontStyle ?? "normal";
-    const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "sans-serif";
+    const fontFamily = normalizeFontFamily(style.fontFamily, "sans-serif");
 
     const textColor = getVisibleCssColorString(style.color) ?? getVisibleCssColorString(style.fill) ?? "#000000";
 
@@ -577,6 +689,13 @@ export class SVGWriter implements Writer<string> {
     fontParts.push(`font-size="${n(fontSize)}px"`);
     fontParts.push(`font-family="${escXml(fontFamily)}"`);
     attrs.push(...fontParts);
+
+    if (style.letterSpacing && style.letterSpacing !== "normal") {
+      attrs.push(`letter-spacing="${escXml(style.letterSpacing)}"`);
+    }
+    if (style.wordSpacing && style.wordSpacing !== "normal" && style.wordSpacing !== "0px") {
+      attrs.push(`word-spacing="${escXml(style.wordSpacing)}"`);
+    }
 
     if (Math.abs(angleDeg) > 0.5) {
       attrs.push(`transform="rotate(${n(angleDeg)},${n(x)},${n(y)})"`);
@@ -657,7 +776,22 @@ export class SVGWriter implements Writer<string> {
       attrs.push(`image-rendering="pixelated"`);
     }
 
-    this.pushElement(`<use href="#${symbolId}" ${attrs.join(" ")}/>`, style, getQuadBounds(quad));
+    let imageElement = `<use href="#${symbolId}" ${attrs.join(" ")}/>`;
+    const borderRadiusClipId = this.getBorderRadiusClipId(quad, style);
+    if (borderRadiusClipId) {
+      imageElement = `<g clip-path="url(#${borderRadiusClipId})">${imageElement}</g>`;
+    }
+
+    const outline = getVisibleOutline(style);
+    const layers = [imageElement];
+    if (outline) {
+      layers.push(this.buildOutlineElement(quad, style, outline, undefined));
+    }
+    const element = layers.length === 1 && opacity === undefined
+      ? layers[0]
+      : `<g${opacity !== undefined ? ` opacity="${n(opacity)}"` : ""}>${layers.join("")}</g>`;
+
+    this.pushElement(element, style, getQuadBounds(quad));
   }
 
   async end(): Promise<string> {

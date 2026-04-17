@@ -266,7 +266,7 @@ Requires a Canvas-capable environment (browser `document.createElement('canvas')
 - Polylines → Canvas path operations (open or closed)
 - Rounded rectangles → Canvas `arcTo` paths
 - Gradients → Canvas `createLinearGradient` / `createRadialGradient` / `createConicGradient`, including repeating linear/radial/conic gradients
-- Text → Canvas `fillText` with CSS font string
+- Text → Canvas `fillText` with CSS font string, preserving extracted font-family stacks when the Canvas environment can resolve them
 - Opacity → Canvas `globalAlpha`
 - Transparent elements are skipped
 - Raster images → drawn via async `finalize()` step using `Image` element loading
@@ -291,7 +291,7 @@ Produces a standalone SVG document string. Width and height define the viewport 
 - Polylines → SVG `<path>` elements (open or closed)
 - Rounded rectangles → `<rect>` with `rx`/`ry` attributes
 - Gradients → SVG `<linearGradient>` / `<radialGradient>` definitions with `userSpaceOnUse` units, plus conic-gradient fallback patterns built from sector paths, including repeating variants
-- Text → SVG `<text>` elements with font properties, rotation, and decoration
+- Text → SVG `<text>` elements with the extracted font-family stack, font properties, rotation, and decoration
 - Text shadow → SVG `<filter>` with `<feDropShadow>`
 - Box shadow → SVG `<filter>` with `<feDropShadow>` (outer) or clipped inset filter
 - Opacity → SVG `opacity` attribute
@@ -335,7 +335,7 @@ The optional `zoom` parameter (default 1) multiplies all coordinates and dimensi
 - Axis-aligned polygons → absolutely positioned `<div>` elements with CSS backgrounds, borders, and border-radius
 - Non-axis-aligned polygons → inline SVG `<path>` elements
 - Polylines → inline SVG `<path>` elements
-- Text → `<span>` elements (axis-aligned) or SVG `<text>` elements (rotated)
+- Text → `<span>` elements (axis-aligned) or SVG `<text>` elements (rotated), preserving extracted font-family stacks plus carried spacing and decoration styles where HTML/CSS supports them
 - Gradients → CSS `background-image` on `<div>` elements
 - Box shadow → CSS `box-shadow`
 - Opacity → CSS `opacity`

@@ -25,6 +25,11 @@ interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boo
 interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
+function normalizeFontFamily(fontFamily: string | undefined, fallback: string): string {
+  const normalized = fontFamily?.trim();
+  return normalized && normalized.length > 0 ? normalized : fallback;
+}
+
 function formatCssColor(color: ParsedCssColor): string {
   if (color.a >= 0.999) return `rgb(${color.r}, ${color.g}, ${color.b})`;
   return `rgba(${color.r}, ${color.g}, ${color.b}, ${Number(color.a.toFixed(3))})`;
@@ -765,7 +770,7 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const fontWeight = style.fontWeight ?? "normal";
     const fontStyle = style.fontStyle ?? "normal";
-    const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "sans-serif";
+    const fontFamily = normalizeFontFamily(style.fontFamily, "sans-serif");
 
     // Build CSS font string
     const fontParts: string[] = [];

@@ -641,7 +641,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     // dwRop (uint32) — SRCCOPY = 0x00CC0020
     // cxDest, cyDest (int32) — destination width/height
 
-    const headerDataSize = 80; // fixed fields before DIB data
+    const headerDataSize = 72; // fixed EMRSTRETCHDIBITS fields before DIB data
     const offBmi = 8 + headerDataSize; // offset from record start
     const offBits = offBmi + bmpHeaderSize;
     const recordData = new Uint8Array(headerDataSize + bmpHeaderSize + bmpDataSize);
@@ -1122,10 +1122,8 @@ export class EMFWriter implements Writer<Uint8Array> {
   private createFont(height: number, escapement: number, faceName: string, bold: boolean, italic: boolean): number {
     const handle = this.allocHandle();
 
-    // EXTLOGFONTW is 320 bytes (LOGFONTW = 92 bytes + EXTLOGFONTW extension)
-    // We only need the LOGFONTW portion (92 bytes) for basic font creation.
-    // The EMR_EXTCREATEFONTINDIRECTW record includes:
-    //   ihFonts (uint32) + EXTLOGFONTW or LOGFONTW
+    // EMR_EXTCREATEFONTINDIRECTW requires a full EXTLOGFONTW payload.
+    // We populate the LOGFONTW prefix and leave the extension fields zeroed.
 
     // LOGFONTW layout (92 bytes):
     // lfHeight (int32), lfWidth (int32), lfEscapement (int32), lfOrientation (int32),
@@ -1134,29 +1132,29 @@ export class EMFWriter implements Writer<Uint8Array> {
     // lfQuality (uint8), lfPitchAndFamily (uint8),
     // lfFaceName (64 bytes = 32 UTF-16LE chars)
 
-    const logFont = new Uint8Array(92);
-    const lfv = new DataView(logFont.buffer);
+    const extLogFont = new Uint8Array(320);
+    const lfv = new DataView(extLogFont.buffer);
     lfv.setInt32(0, -height, true); // lfHeight (negative = character height)
     lfv.setInt32(4, 0, true);       // lfWidth
     lfv.setInt32(8, escapement, true);  // lfEscapement
     lfv.setInt32(12, escapement, true); // lfOrientation
     lfv.setInt32(16, bold ? 700 : 400, true); // lfWeight
-    logFont[20] = italic ? 1 : 0;   // lfItalic
-    logFont[21] = 0;                 // lfUnderline
-    logFont[22] = 0;                 // lfStrikeOut
-    logFont[23] = 1;                 // lfCharSet = DEFAULT_CHARSET
-    logFont[24] = 0;                 // lfOutPrecision = OUT_DEFAULT_PRECIS
-    logFont[25] = 0;                 // lfClipPrecision
-    logFont[26] = 0;                 // lfQuality = DEFAULT_QUALITY
-    logFont[27] = 0;                 // lfPitchAndFamily = DEFAULT_PITCH
+    extLogFont[20] = italic ? 1 : 0; // lfItalic
+    extLogFont[21] = 0;              // lfUnderline
+    extLogFont[22] = 0;              // lfStrikeOut
+    extLogFont[23] = 1;              // lfCharSet = DEFAULT_CHARSET
+    extLogFont[24] = 0;              // lfOutPrecision = OUT_DEFAULT_PRECIS
+    extLogFont[25] = 0;              // lfClipPrecision
+    extLogFont[26] = 0;              // lfQuality = DEFAULT_QUALITY
+    extLogFont[27] = 0;              // lfPitchAndFamily = DEFAULT_PITCH
 
     // lfFaceName: up to 31 chars + null (32 UTF-16LE chars = 64 bytes)
     const nameBytes = encodeUtf16LE(faceName.slice(0, 31));
-    logFont.set(nameBytes, 28);
+    extLogFont.set(nameBytes, 28);
 
     this.records.writeRecord(EMR.EXTCREATEFONTINDIRECTW, concat(
       uint32Array(handle),
-      logFont
+      extLogFont
     ));
     return handle;
   }
