@@ -275,8 +275,6 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
     let sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
-    // ACAD TEXT entities have a 256-character limit
-    if (sanitized.length > 256) sanitized = sanitized.slice(0, 256);
 
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
