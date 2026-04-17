@@ -114,9 +114,13 @@ function extractTextNode(
   const allQuads = getTextNodeQuads(textNode);
   if (allQuads.length === 0) return results;
 
-  // For overflow:hidden containers, treat as a single line (the text is clipped)
+  const lineClamp = getLineClamp(parentEl);
+  const isMultilineClamp = lineClamp > 1 && parentStyle.overflow === "hidden" && parentStyle.textOverflow === "ellipsis";
+
+  // For overflow:hidden containers, treat as a single line unless the browser is
+  // exposing a multi-line clamp via -webkit-line-clamp.
   const isOverflowHidden = parentStyle.overflow === "hidden";
-  const effectiveLineCount = isOverflowHidden ? 1 : allQuads.length;
+  const effectiveLineCount = isOverflowHidden && !isMultilineClamp ? 1 : allQuads.length;
 
   // Split text into per-line segments
   const lineTexts =
@@ -149,14 +153,17 @@ function extractTextNode(
     });
   } else {
     // Multi-line: use per-line quads from getBoxQuads (transform-aware)
-    const N = allQuads.length;
-    for (let i = 0; i < N; i++) {
+    const visibleLineCount = isMultilineClamp ? Math.min(lineClamp, allQuads.length, lineTexts.length) : allQuads.length;
+    const hasHiddenClampedLines = isMultilineClamp && Math.max(allQuads.length, lineTexts.length) > visibleLineCount;
+
+    for (let i = 0; i < visibleLineCount; i++) {
       let text = normalizeWhitespaceAwareText(i < lineTexts.length ? lineTexts[i] : "", parentStyle)
         .replace(/[\r\n]+$/g, "");
       if (text.length === 0) continue;
 
       text = applyTextTransform(text, parentStyle.textTransform);
 
+      let quad = allQuads[i];
       const lineStyle: Style = {
         ...parentStyle,
         textAlign: undefined,
@@ -164,9 +171,16 @@ function extractTextNode(
         whiteSpace: preservesWhitespace(parentStyle) ? "pre" : "nowrap",
       };
 
+      if (hasHiddenClampedLines && i === visibleLineCount - 1) {
+        const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), true);
+        if (!clipped) continue;
+        text = clipped.text;
+        quad = clipped.quad;
+      }
+
       results.push({
         type: "text",
-        quad: allQuads[i],
+        quad,
         text,
         style: lineStyle,
         zIndex: globalIndex,
@@ -405,6 +419,20 @@ function clipTextToParent(
   const availableWidth = parentRect.width - padL - padR;
   if (availableWidth <= 0) return null;
 
+  return clipTextToWidth(text, parentEl, textQuad, parentStyle, availableWidth, parentStyle.textOverflow === "ellipsis");
+}
+
+function clipTextToWidth(
+  text: string,
+  parentEl: Element,
+  textQuad: Quad,
+  parentStyle: Style,
+  availableWidth: number,
+  addEllipsis: boolean,
+): { text: string; quad: Quad } | null {
+  if (availableWidth <= 0) return null;
+  const cs = getComputedStyle(parentEl);
+
   // Measure the full text width using a hidden measuring span
   const measSpan = document.createElement("span");
   measSpan.style.cssText = "visibility:hidden;position:absolute;overflow:visible;pointer-events:none";
@@ -419,38 +447,42 @@ function clipTextToParent(
   document.body.appendChild(measSpan);
   const fullTextWidth = measSpan.getBoundingClientRect().width;
 
-  if (fullTextWidth <= availableWidth) {
+  if (!addEllipsis && fullTextWidth <= availableWidth) {
     // Text fits — no clipping needed
     document.body.removeChild(measSpan);
     return { text, quad: textQuad };
   }
 
-  // Text overflows — find how many characters fit
-  const addEllipsis = parentStyle.textOverflow === "ellipsis";
+  // Text overflows or needs a forced ellipsis — find how many characters fit.
   let fitChars = text.length;
-  for (let i = text.length - 1; i >= 0; i--) {
-    const candidate = addEllipsis ? text.substring(0, i).trimEnd() + "…" : text.substring(0, i);
-    measSpan.textContent = candidate;
-    if (measSpan.getBoundingClientRect().width <= availableWidth) {
-      fitChars = i;
-      break;
+  let clippedText = addEllipsis ? `${text.trimEnd()}…` : text;
+  measSpan.textContent = clippedText;
+
+  if (measSpan.getBoundingClientRect().width > availableWidth) {
+    for (let i = text.length - 1; i >= 0; i--) {
+      const candidate = addEllipsis ? text.substring(0, i).trimEnd() + "…" : text.substring(0, i);
+      measSpan.textContent = candidate;
+      if (measSpan.getBoundingClientRect().width <= availableWidth) {
+        fitChars = i;
+        clippedText = candidate;
+        break;
+      }
     }
   }
+
+  const clippedWidth = measSpan.getBoundingClientRect().width;
   document.body.removeChild(measSpan);
 
   if (fitChars <= 0 && !addEllipsis) return null;
 
-  let clippedText: string;
-  if (addEllipsis) {
-    clippedText = fitChars > 0
-      ? text.substring(0, fitChars).trimEnd() + "…"
-      : "…";
-  } else {
-    clippedText = text.substring(0, fitChars);
+  if (fitChars <= 0 && addEllipsis) {
+    clippedText = "…";
   }
 
   // Adjust the quad width proportionally
-  const fraction = Math.min(1, availableWidth / fullTextWidth);
+  if (fullTextWidth <= 0) return { text: clippedText, quad: textQuad };
+
+  const fraction = Math.min(1, clippedWidth / fullTextWidth);
   const clippedQuad: Quad = [
     textQuad[0],
     lerpPt(textQuad[0], textQuad[1], fraction),
@@ -505,6 +537,19 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   lines.push(text.substring(lineStart));
 
   return lines;
+}
+
+function getLineClamp(el: Element): number {
+  const cs = getComputedStyle(el);
+  const clampValue = cs.getPropertyValue("-webkit-line-clamp") || cs.getPropertyValue("line-clamp");
+  const parsed = parseInt(clampValue, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function getQuadWidth(quad: Quad): number {
+  const dx = quad[1].x - quad[0].x;
+  const dy = quad[1].y - quad[0].y;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 function splitPreformattedTextBySourceLines(textNode: Text, expectedLines: number): string[] | null {

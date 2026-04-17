@@ -326,6 +326,27 @@ function expandInsetValues(values: string[]): [string, string, string, string] {
   return [values[0], values[1], values[2], values[3]];
 }
 
+function tracePolylinePath(ctx: CanvasRenderingContext2D, points: Point[], closed: boolean, style: Style): void {
+  const subpaths = style.pathSubpaths;
+  if (subpaths?.length) {
+    for (const subpath of subpaths) {
+      if (subpath.points.length === 0) continue;
+      ctx.moveTo(subpath.points[0].x, subpath.points[0].y);
+      for (let index = 1; index < subpath.points.length; index += 1) {
+        ctx.lineTo(subpath.points[index].x, subpath.points[index].y);
+      }
+      if (subpath.closed) ctx.closePath();
+    }
+    return;
+  }
+
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    ctx.lineTo(points[index].x, points[index].y);
+  }
+  if (closed) ctx.closePath();
+}
+
 // ── Image Result ────────────────────────────────────────────────────
 
 /**
@@ -705,18 +726,14 @@ export class ImageWriter implements Writer<ImageResult> {
     this.applyOpacity(ctx, style);
 
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    if (closed) ctx.closePath();
+    tracePolylinePath(ctx, points, closed, style);
 
     // Fill even for non-closed paths when fill is specified (SVG behavior)
     if (fill) {
       const bbox = this.computeBoundingBox(points);
       const grad = this.createGradientFromBBox(ctx, bbox, style.backgroundImage);
       ctx.fillStyle = grad ?? fill;
-      ctx.fill();
+      ctx.fill(style.fillRule === "evenodd" ? "evenodd" : "nonzero");
     }
     if (stroke) {
       ctx.strokeStyle = stroke.color;

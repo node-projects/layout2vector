@@ -139,18 +139,24 @@ export class DXFWriter implements Writer<string> {
     return name;
   }
 
-  /** Add a HATCH entity with SOLID fill for the given vertices. */
-  private addSolidHatch(verts: { x: number; y: number }[], fillColor: number): void {
+  /** Add a HATCH entity with SOLID fill for one or more closed boundary paths. */
+  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: number): void {
     const BoundaryPaths = HatchBoundaryPaths!;
     const PolylineBoundary = HatchPolylineBoundary!;
     const PredefinedPatterns = HatchPredefinedPatterns!;
     const Pattern = pattern!;
     const boundary = new BoundaryPaths();
-    const polyBoundary = new PolylineBoundary();
-    for (const v of verts) {
-      polyBoundary.add({ x: v.x, y: this.flipY(v.y) });
+    let hasBoundary = false;
+    for (const verts of paths) {
+      if (verts.length < 3) continue;
+      const polyBoundary = new PolylineBoundary();
+      for (const v of verts) {
+        polyBoundary.add({ x: v.x, y: this.flipY(v.y) });
+      }
+      boundary.addPolylineBoundary(polyBoundary);
+      hasBoundary = true;
     }
-    boundary.addPolylineBoundary(polyBoundary);
+    if (!hasBoundary) return;
     this.dxf.addHatch(
       boundary,
       Pattern({ name: PredefinedPatterns.SOLID }),
@@ -234,7 +240,7 @@ export class DXFWriter implements Writer<string> {
       }
       if (fillVisible) {
         const fillColor2 = cssColorToTrueColor(style.fill);
-        if (fillColor2 !== undefined) this.addSolidHatch(verts, fillColor2);
+        if (fillColor2 !== undefined) this.addSolidHatchPaths([verts], fillColor2);
       }
       const dxfVerts = verts.map(p => ({ point: point2d!(p.x, this.flipY(p.y)) }));
       dxfVerts.push({ point: point2d!(verts[0].x, this.flipY(verts[0].y)) });
@@ -264,25 +270,33 @@ export class DXFWriter implements Writer<string> {
     if (!fillVisible && !stroke) return;
 
     // Solid fill via HATCH for closed shapes with a visible fill
-    if (closed && fillVisible && fillColor !== undefined && points.length >= 3) {
-      this.addSolidHatch(
+    if (!style.pathSubpaths?.length && closed && fillVisible && fillColor !== undefined && points.length >= 3) {
+      this.addSolidHatchPaths([
         points.map(p => ({ x: p.x, y: p.y })),
-        fillColor,
-      );
+      ], fillColor);
     }
 
     // Always draw the polyline outline — use stroke color if available, otherwise fill color
     const trueColor = strokeColor ?? fillColor;
     const opts = trueColor !== undefined ? { trueColor: String(trueColor) } : undefined;
-    const vertices = points.map((p) => ({
-      point: point2d!(p.x, this.flipY(p.y)),
-    }));
-    if (closed && points.length > 0) {
-      vertices.push({
-        point: point2d!(points[0].x, this.flipY(points[0].y)),
-      });
+    const subpaths = style.pathSubpaths?.length ? style.pathSubpaths : [{ points, closed }];
+    if (style.pathSubpaths?.length && fillVisible && fillColor !== undefined) {
+      const hatchPaths = style.pathSubpaths
+        .filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        .map((subpath) => subpath.points.map((point) => ({ x: point.x, y: point.y })));
+      this.addSolidHatchPaths(hatchPaths, fillColor);
     }
-    this.dxf.addLWPolyline(vertices, opts);
+    for (const subpath of subpaths) {
+      const vertices = subpath.points.map((point) => ({
+        point: point2d!(point.x, this.flipY(point.y)),
+      }));
+      if (subpath.closed && subpath.points.length > 0) {
+        vertices.push({
+          point: point2d!(subpath.points[0].x, this.flipY(subpath.points[0].y)),
+        });
+      }
+      this.dxf.addLWPolyline(vertices, opts);
+    }
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {

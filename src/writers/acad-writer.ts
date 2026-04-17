@@ -153,20 +153,26 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     this.doc.modelSpace!.entities.add(poly);
   }
 
-  /** Add a solid-filled HATCH for the given vertices. */
-  private addSolidHatch(verts: { x: number; y: number }[], fillColor: InstanceType<typeof ColorType>): void {
+  /** Add a solid-filled HATCH for one or more closed boundary paths. */
+  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: InstanceType<typeof ColorType>): void {
     const hatch = new Hatch!();
     hatch.isSolid = true;
     hatch.patternType = HatchPatternTypeEnum!.SolidFill;
     hatch.pattern = HatchPattern!.solid;
     hatch.color = fillColor;
 
-    const boundaryEdge = new HatchBoundaryPathPolyline!();
-    boundaryEdge.isClosed = true;
-    boundaryEdge.vertices = verts.map(v => new XYZ!(v.x, this.flipY(v.y), 0));
+    let hasPath = false;
+    for (const verts of paths) {
+      if (verts.length < 3) continue;
+      const boundaryEdge = new HatchBoundaryPathPolyline!();
+      boundaryEdge.isClosed = true;
+      boundaryEdge.vertices = verts.map(v => new XYZ!(v.x, this.flipY(v.y), 0));
 
-    const path = new HatchBoundaryPath!([boundaryEdge]);
-    hatch.paths.push(path);
+      const path = new HatchBoundaryPath!([boundaryEdge]);
+      hatch.paths.push(path);
+      hasPath = true;
+    }
+    if (!hasPath) return;
     this.doc.modelSpace!.entities.add(hatch);
   }
 
@@ -202,7 +208,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
       verts.push({ x: x, y: y + r });
       verts.push(...arcPoints(x + r, y + r, r, Math.PI, Math.PI * 1.5, ARC_SEGS));
 
-      if (fillVisible && fillColor) this.addSolidHatch(verts, fillColor);
+      if (fillVisible && fillColor) this.addSolidHatchPaths([verts], fillColor);
       this.createPolyline(verts, true, trueColor);
       return;
     }
@@ -226,13 +232,13 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
           }
         }
       }
-      if (fillVisible && fillColor) this.addSolidHatch(verts, fillColor);
+      if (fillVisible && fillColor) this.addSolidHatchPaths([verts], fillColor);
       this.createPolyline(verts, true, trueColor);
       return;
     }
 
     const verts = points.map(p => ({ x: p.x, y: p.y }));
-    if (fillVisible && fillColor) this.addSolidHatch(verts, fillColor);
+    if (fillVisible && fillColor) this.addSolidHatchPaths([verts], fillColor);
     this.createPolyline(verts, true, trueColor);
   }
 
@@ -244,24 +250,33 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
 
     if (!fillVisible && !stroke) return;
 
-    if (closed && fillVisible && fillColor && points.length >= 3) {
-      this.addSolidHatch(
+    if (style.pathSubpaths?.length && fillVisible && fillColor) {
+      const hatchPaths = style.pathSubpaths
+        .filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        .map((subpath) => subpath.points.map((point) => ({ x: point.x, y: point.y })));
+      this.addSolidHatchPaths(hatchPaths, fillColor);
+    } else if (closed && fillVisible && fillColor && points.length >= 3) {
+      this.addSolidHatchPaths([
         points.map(p => ({ x: p.x, y: p.y })),
-        fillColor,
-      );
+      ], fillColor);
     }
 
     const trueColor = strokeColor ?? fillColor;
-    this.createPolyline(
-      points.map(p => ({ x: p.x, y: p.y })),
-      closed,
-      trueColor,
-    );
+    const subpaths = style.pathSubpaths?.length ? style.pathSubpaths : [{ points, closed }];
+    for (const subpath of subpaths) {
+      this.createPolyline(
+        subpath.points.map(point => ({ x: point.x, y: point.y })),
+        subpath.closed,
+        trueColor,
+      );
+    }
   }
 
   async drawText(quad: Quad, text: string, style: Style): Promise<void> {
-    const sanitized = normalizeWhitespaceAwareText(text, style);
+    let sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
+    // ACAD TEXT entities have a 256-character limit
+    if (sanitized.length > 256) sanitized = sanitized.slice(0, 256);
 
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;

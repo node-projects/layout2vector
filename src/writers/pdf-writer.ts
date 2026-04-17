@@ -645,6 +645,46 @@ export class PDFWriter implements Writer<PdfDocument> {
     return standardAscents[pdfFontName] ?? 0.75;
   }
 
+  /** Estimate the width of a rendered text run in PDF points. */
+  private measureTextWidthPt(pdfFontName: string, text: string, fontSize: number): number | null {
+    const parsed = this.getCustomFontData(pdfFontName);
+    if (parsed) {
+      let advanceWidth = 0;
+      for (const ch of text) {
+        const codePoint = ch.codePointAt(0)!;
+        const glyphId = parsed.cmap.get(codePoint) ?? 0;
+        advanceWidth += parsed.glyphWidths.get(glyphId) ?? parsed.unitsPerEm;
+      }
+      return (advanceWidth / parsed.unitsPerEm) * fontSize;
+    }
+
+    if (pdfFontName === "Courier" || pdfFontName === "Courier-Bold") {
+      return [...text].length * fontSize * 0.6;
+    }
+
+    return null;
+  }
+
+  /** Fit monospaced and embedded text runs to the extracted top-edge width when metrics differ. */
+  private getTextHorizontalScale(style: Style, pdfFontName: string, text: string, fontSize: number, quad: Quad): number | null {
+    const measuredWidth = this.measureTextWidthPt(pdfFontName, text, fontSize);
+    if (!measuredWidth || measuredWidth <= 0) return null;
+
+    const dx = quad[1].x - quad[0].x;
+    const dy = quad[1].y - quad[0].y;
+    const targetWidth = pxToPt(Math.sqrt(dx * dx + dy * dy));
+    if (targetWidth <= 0) return null;
+
+    const scale = (targetWidth / measuredWidth) * 100;
+    if (!Number.isFinite(scale) || Math.abs(scale - 100) < 2) return null;
+
+    const fontFamily = style.fontFamily?.toLowerCase() ?? "";
+    const isMonospaceLike = /mono|monaspace|consolas|menlo|courier/.test(fontFamily) || pdfFontName.startsWith("Courier");
+    if (!isMonospaceLike && !this.isCustomFont(pdfFontName)) return null;
+
+    return Math.max(50, Math.min(200, scale));
+  }
+
   /** Get the parsed TTF data for a custom font name. */
   private getCustomFontData(pdfFontName: string): ParsedTTF | null {
     if (!pdfFontName.startsWith("custom:")) return null;
@@ -776,6 +816,19 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (closed) this.ops.push("h");
   }
 
+  /** Emit a compound path made of multiple subpaths in PDF coordinates. */
+  private emitCompoundPath(subpaths: NonNullable<Style["pathSubpaths"]>): void {
+    for (const subpath of subpaths) {
+      if (subpath.points.length === 0) continue;
+
+      this.ops.push(`${pn(this.ptX(subpath.points[0].x))} ${pn(this.ptY(subpath.points[0].y))} m`);
+      for (let index = 1; index < subpath.points.length; index += 1) {
+        this.ops.push(`${pn(this.ptX(subpath.points[index].x))} ${pn(this.ptY(subpath.points[index].y))} l`);
+      }
+      if (subpath.closed) this.ops.push("h");
+    }
+  }
+
   /** Emit an axis-aligned rectangle path in PDF coordinates. */
   private emitRectPath(x: number, y: number, w: number, h: number): void {
     const bottom = y - h;
@@ -878,7 +931,7 @@ export class PDFWriter implements Writer<PdfDocument> {
    * Apply fill/stroke style operators and return the paint operator.
    * Returns null if the shape is fully transparent.
    */
-  private applyStyleOps(style: Style): "S" | "f" | "B" | null {
+  private applyStyleOps(style: Style): "S" | "f" | "f*" | "B" | "B*" | null {
     const fillColor = parseVisibleColor(style.fill);
     const strokeColor = parseVisibleColor(style.stroke);
     const strokeWidth = style.strokeWidth ? parseFloat(style.strokeWidth) : 0;
@@ -889,10 +942,12 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (!hasFill && !hasStroke) return null;
 
     const opacity = style.opacity ?? 1;
-    if (opacity < 1) {
+    const fillOpacity = hasFill ? opacity * (fillColor?.a ?? 1) : 1;
+    const strokeOpacity = hasStroke ? opacity * (strokeColor?.a ?? 1) : 1;
+    if (fillOpacity < 1 || strokeOpacity < 1) {
       const gsName = this.getGStateResName(
-        hasFill ? opacity : 1,
-        hasStroke ? opacity : 1,
+        fillOpacity,
+        strokeOpacity,
       );
       this.ops.push(`/${gsName} gs`);
     }
@@ -906,8 +961,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.setLineWidth(pxToPt(0.5));
     }
 
-    if (hasFill && hasStroke) return "B";
-    if (hasFill) return "f";
+    const evenOdd = style.fillRule === "evenodd";
+    if (hasFill && hasStroke) return evenOdd ? "B*" : "B";
+    if (hasFill) return evenOdd ? "f*" : "f";
     return "S";
   }
 
@@ -937,9 +993,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       // Draw fill only first (no stroke from applyStyleOps)
       const fillColor = parseVisibleColor(style.fill);
       if (fillColor) {
-        const opacity = style.opacity ?? 1;
-        if (opacity < 1) {
-          const gsName = this.getGStateResName(opacity, 1);
+        const fillOpacity = (style.opacity ?? 1) * fillColor.a;
+        if (fillOpacity < 1) {
+          const gsName = this.getGStateResName(fillOpacity, 1);
           this.ops.push(`/${gsName} gs`);
         }
         this.setFill(fillColor);
@@ -1044,8 +1100,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       if (!color || w <= 0 || !side.borderStyle || side.borderStyle === "none" || side.borderStyle === "hidden") continue;
 
       this.ops.push("q");
-      if (opacity < 1) {
-        const gsName = this.getGStateResName(1, opacity);
+      const strokeOpacity = opacity * color.a;
+      if (strokeOpacity < 1) {
+        const gsName = this.getGStateResName(1, strokeOpacity);
         this.ops.push(`/${gsName} gs`);
       }
       this.setStroke(color);
@@ -1102,7 +1159,11 @@ export class PDFWriter implements Writer<PdfDocument> {
     const paintOp = this.applyStyleOps(style);
     if (!paintOp) { this.ops.push("Q"); return; }
 
-    this.emitPolygonPath(points, closed);
+    if (style.pathSubpaths?.length) {
+      this.emitCompoundPath(style.pathSubpaths);
+    } else {
+      this.emitPolygonPath(points, closed);
+    }
 
     this.ops.push(paintOp);
     this.ops.push("Q");
@@ -1126,7 +1187,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const quadFontSize = quadHeight > 0 ? pxToPt(quadHeight) : styleFontSize;
     const fontSize = Math.min(styleFontSize, quadFontSize);
     const fontWeight = mapFontWeight(style.fontWeight);
-    const fontFamily = style.fontFamily?.split(",")[0]?.trim().replace(/['"]/g, "") || "Helvetica";
+    const fontFamily = style.fontFamily?.replace(/['"]/g, "") || "Helvetica";
     const pdfFontName = this.resolveFont(fontFamily, fontWeight, text);
     const fontRes = this.getFontResName(pdfFontName);
 
@@ -1140,12 +1201,12 @@ export class PDFWriter implements Writer<PdfDocument> {
     const dyScreen = quad[1].y - quad[0].y;
     const anglePdf = Math.atan2(-dyScreen, dxScreen); // negative because Y is flipped
 
-    // Baseline position: offset from top-left of quad
-    // The quad represents the visual line box. Baseline = halfLeading + ascent.
+    // Baseline position: offset from the extracted text quad.
+    // The quad already matches Firefox's live text client rect, so scale the ascent
+    // against the extracted quad height rather than reapplying source line-height math.
     const quadHeightPt = pxToPt(quadHeight);
     const ascentRatio = this.getFontAscentRatio(pdfFontName);
-    const halfLeading = Math.max(0, (quadHeightPt - fontSize) / 2);
-    const baselineOffset = halfLeading + ascentRatio * fontSize;
+    const baselineOffset = ascentRatio * quadHeightPt;
 
     const sinA = Math.sin(anglePdf);
     const cosA = Math.cos(anglePdf);
@@ -1156,7 +1217,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("q");
     this.emitClip(style, clipBounds);
 
-    const opacity = style.opacity ?? 1;
+    const opacity = (style.opacity ?? 1) * (textColor?.a ?? 1);
     if (opacity < 1) {
       const gsName = this.getGStateResName(opacity, opacity);
       this.ops.push(`/${gsName} gs`);
@@ -1165,6 +1226,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("BT");
     this.ops.push(`${pn(r)} ${pn(g)} ${pn(b)} rg`);
     this.ops.push(`/${fontRes} ${pn(fontSize)} Tf`);
+    const horizontalScale = this.getTextHorizontalScale(style, pdfFontName, text, fontSize, quad);
+    if (horizontalScale !== null) {
+      this.ops.push(`${pn(horizontalScale)} Tz`);
+    }
 
     if (Math.abs(anglePdf) > 0.01) {
       // Use text matrix for rotation

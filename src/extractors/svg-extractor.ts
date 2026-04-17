@@ -138,6 +138,7 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
   const base = extractStyle(cs);
   // SVG uses fill/stroke attributes directly
   let fill = cs.fill || el.getAttribute("fill") || undefined;
+  const fillRule = cs.fillRule || el.getAttribute("fill-rule") || undefined;
   const stroke = cs.stroke || el.getAttribute("stroke") || undefined;
   let strokeWidth = cs.strokeWidth || el.getAttribute("stroke-width") || undefined;
 
@@ -201,6 +202,7 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
   return {
     ...base,
     fill: fill !== "none" ? fill : undefined,
+    fillRule: fillRule === "evenodd" ? "evenodd" : fillRule === "nonzero" ? "nonzero" : undefined,
     stroke: stroke !== "none" ? stroke : undefined,
     strokeWidth,
     strokeDasharray,
@@ -419,6 +421,12 @@ function extractPolyline(
 }
 
 function extractPath(el: SVGPathElement, style: Style, zIndex: number, ctm: DOMMatrix): IRNode[] {
+  const subpaths = splitPathSubpaths(el);
+  if (subpaths.length > 1) {
+    const sampled = extractCompoundPathBySampling(el, subpaths, style, zIndex, ctm);
+    if (sampled.length > 0) return sampled;
+  }
+
   // Try getPathData if available (modern API)
   if (typeof (el as any).getPathData === "function") {
     return extractPathFromPathData(el, style, zIndex, ctm);
@@ -426,6 +434,110 @@ function extractPath(el: SVGPathElement, style: Style, zIndex: number, ctm: DOMM
 
   // Fallback: sample via getPointAtLength
   return extractPathBySampling(el, style, zIndex, ctm);
+}
+
+type PathDataSegmentLike = {
+  type: string;
+  values: number[];
+};
+
+function splitPathSubpaths(el: SVGPathElement): string[] {
+  if (typeof (el as any).getPathData === "function") {
+    try {
+      const rawSegments = (el as any).getPathData({ normalize: true }) as PathDataSegmentLike[];
+      const subpaths = splitNormalizedPathData(rawSegments);
+      if (subpaths.length > 1) {
+        return subpaths.map(serializePathDataSegments);
+      }
+    } catch {
+      // Fall through to string-based splitting for older/partial implementations.
+    }
+  }
+
+  return splitPathSubpathsFromString(el.getAttribute("d") ?? "");
+}
+
+function splitNormalizedPathData(segments: PathDataSegmentLike[]): PathDataSegmentLike[][] {
+  const subpaths: PathDataSegmentLike[][] = [];
+  let current: PathDataSegmentLike[] = [];
+
+  for (const segment of segments) {
+    if (segment.type.toUpperCase() === "M" && current.length > 0) {
+      subpaths.push(current);
+      current = [];
+    }
+
+    current.push({
+      type: segment.type.toUpperCase(),
+      values: [...segment.values],
+    });
+  }
+
+  if (current.length > 0) subpaths.push(current);
+  return subpaths;
+}
+
+function serializePathDataSegments(segments: PathDataSegmentLike[]): string {
+  return segments.map((segment) => {
+    if (segment.values.length === 0) return segment.type;
+    return `${segment.type}${segment.values.map((value) => {
+      const rounded = Math.round(value * 1000) / 1000;
+      return Number.isInteger(rounded) ? rounded.toString() : rounded.toString();
+    }).join(" ")}`;
+  }).join(" ");
+}
+
+function splitPathSubpathsFromString(pathData: string): string[] {
+  const trimmed = pathData.trim();
+  if (!trimmed) return [];
+
+  const moveCommands = trimmed.match(/[Mm]/g) ?? [];
+  if (moveCommands.length <= 1) return [trimmed];
+
+  // Splitting relative subpaths without normalizing the path data changes semantics,
+  // so keep those on the legacy sampling path for now.
+  if (/[m]/.test(trimmed)) return [trimmed];
+
+  const subpaths = trimmed.match(/M[^M]*/g)?.map((part) => part.trim()).filter(Boolean);
+  return subpaths && subpaths.length > 1 ? subpaths : [trimmed];
+}
+
+function extractCompoundPathBySampling(
+  el: SVGPathElement,
+  subpaths: string[],
+  style: Style,
+  zIndex: number,
+  ctm: DOMMatrix
+): IRNode[] {
+  const ownerSvg = el.ownerSVGElement;
+  if (!ownerSvg) return [];
+
+  const pathSubpaths: NonNullable<Style["pathSubpaths"]> = [];
+  for (const subpath of subpaths) {
+    const tempPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    tempPath.setAttribute("d", subpath);
+    tempPath.setAttribute("visibility", "hidden");
+    ownerSvg.appendChild(tempPath);
+    try {
+      const sampled = samplePathGeometry(tempPath, el, ctm);
+      if (sampled) pathSubpaths.push(sampled);
+    } finally {
+      tempPath.remove();
+    }
+  }
+
+  if (pathSubpaths.length === 0) return [];
+
+  return [{
+    type: "polyline",
+    points: pathSubpaths.flatMap((subpath) => subpath.points),
+    closed: pathSubpaths.every((subpath) => subpath.closed),
+    style: {
+      ...style,
+      pathSubpaths,
+    },
+    zIndex,
+  }];
 }
 
 function extractPathFromPathData(
@@ -445,17 +557,36 @@ function extractPathBySampling(
   zIndex: number,
   ctm: DOMMatrix
 ): IRNode[] {
+  const sampled = samplePathGeometry(el, el, ctm);
+  if (!sampled) return [];
+
+  const results: IRNode[] = [{
+    type: "polyline",
+    points: sampled.points,
+    closed: sampled.closed,
+    style,
+    zIndex,
+  }];
+  results.push(...extractMarkers(el, sampled.points, style, zIndex, sampled.closed));
+  return results;
+}
+
+function samplePathGeometry(
+  pathEl: SVGPathElement,
+  transformEl: SVGGraphicsElement,
+  ctm: DOMMatrix
+): NonNullable<Style["pathSubpaths"]>[number] | null {
   let totalLength: number;
   try {
-    totalLength = el.getTotalLength();
+    totalLength = pathEl.getTotalLength();
   } catch {
-    return [];
+    return null;
   }
 
-  if (totalLength === 0) return [];
+  if (totalLength === 0) return null;
 
   // Detect if the path is closed by checking for Z/z command in path data
-  const pathData = el.getAttribute("d") ?? "";
+  const pathData = pathEl.getAttribute("d") ?? "";
   const closed = /[Zz]\s*$/.test(pathData.trim()) || /[Zz]/.test(pathData);
 
   const points: Point[] = [];
@@ -463,14 +594,12 @@ function extractPathBySampling(
 
   for (let i = 0; i <= sampleCount; i++) {
     const len = (totalLength * i) / sampleCount;
-    const pt = el.getPointAtLength(len);
+    const pt = pathEl.getPointAtLength(len);
     points.push({ x: pt.x, y: pt.y });
   }
 
-  const transformed = transformPoints(points, el, ctm);
-  const results: IRNode[] = [{ type: "polyline", points: transformed, closed, style, zIndex }];
-  results.push(...extractMarkers(el, transformed, style, zIndex, closed));
-  return results;
+  const transformed = transformPoints(points, transformEl, ctm);
+  return { points: transformed, closed };
 }
 
 /**

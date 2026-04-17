@@ -5,6 +5,12 @@
 /** A 2D point. */
 export type Point = { x: number; y: number };
 
+/** One subpath of a compound path. */
+export type PathSubpath = {
+  points: Point[];
+  closed: boolean;
+};
+
 /** A quad defined by 4 points (top-left, top-right, bottom-right, bottom-left). */
 export type Quad = [Point, Point, Point, Point];
 
@@ -17,9 +23,11 @@ export type ClipQuad = {
 /** Extracted computed style subset. */
 export type Style = {
   fill?: string;
+  fillRule?: "nonzero" | "evenodd";
   stroke?: string;
   strokeWidth?: string;
   strokeDasharray?: string;
+  pathSubpaths?: PathSubpath[];
 
   fontSize?: string;
   fontFamily?: string;

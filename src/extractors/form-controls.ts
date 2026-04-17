@@ -34,6 +34,11 @@ type LocalRect = {
   height: number;
 };
 
+type ControlDisplayText = {
+  text: string;
+  isPlaceholder: boolean;
+};
+
 let measureContext: CanvasRenderingContext2D | null | undefined;
 
 export function shouldSkipFormControlDescendant(el: Element, options: Options): boolean {
@@ -221,15 +226,15 @@ function extractButtonInputGeometry(
   globalIndex: number,
   fallbackLabel: string
 ): IRNode[] {
-  const value = input.value || fallbackLabel;
+  const value: ControlDisplayText = { text: input.value || fallbackLabel, isPlaceholder: false };
   return extractSingleLineControlGeometry(input, node, globalIndex, value, "center", DEFAULT_BUTTON_COLOR);
 }
 
 function extractSingleLineControlGeometry(
-  el: HTMLElement,
+  el: HTMLInputElement,
   node: StackingNode,
   globalIndex: number,
-  rawText: string,
+  displayText: ControlDisplayText,
   align: "left" | "center",
   fillFallback: string
 ): IRNode[] {
@@ -238,24 +243,28 @@ function extractSingleLineControlGeometry(
 
   const { quad, localWidth, localHeight } = geometry;
   const cs = getComputedStyle(el);
-  const boxStyle = getControlBoxStyle(node.extractedStyle, fillFallback, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
   const fontSize = getFontSize(node.extractedStyle, cs);
   const lineHeight = Math.min(getLineHeight(node.extractedStyle, cs, fontSize), localHeight);
   const paddingX = Math.max(parsePx(cs.paddingLeft), align === "center" ? 8 : 6);
   const paddingY = Math.max(parsePx(cs.paddingTop), 4);
   const contentBox = insetRect(localWidth, localHeight, paddingX, paddingY, Math.max(parsePx(cs.paddingRight), paddingX), Math.max(parsePx(cs.paddingBottom), paddingY));
 
-  const nodes: IRNode[] = [{
-    type: "polygon",
-    points: quad,
-    style: boxStyle,
-    zIndex: globalIndex,
-  }];
+  const nodes: IRNode[] = [];
+  if (shouldRenderSyntheticControlBox(node.extractedStyle, cs)) {
+    const boxStyle = getControlBoxStyle(node.extractedStyle, fillFallback, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
+    nodes.push({
+      type: "polygon",
+      points: quad,
+      style: boxStyle,
+      zIndex: globalIndex,
+    });
+  }
 
-  const text = rawText.trim();
+  const text = displayText.text.trim();
   if (!text) return nodes;
 
-  const textNode = createSingleLineTextNode(text, quad, localWidth, localHeight, contentBox, node.extractedStyle, cs, globalIndex + 1, align, lineHeight);
+  const textStyle = resolveControlTextStyle(el, node.extractedStyle, cs, displayText.isPlaceholder);
+  const textNode = createSingleLineTextNode(text, quad, localWidth, localHeight, contentBox, textStyle, cs, globalIndex + 1, align, lineHeight);
   if (textNode) nodes.push(textNode);
   return nodes;
 }
@@ -270,7 +279,6 @@ function extractTextAreaGeometry(
 
   const { quad, localWidth, localHeight } = geometry;
   const cs = getComputedStyle(textarea);
-  const boxStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_SURFACE_COLOR, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
   const fontSize = getFontSize(node.extractedStyle, cs);
   const lineHeight = Math.max(1, getLineHeight(node.extractedStyle, cs, fontSize));
   const paddingLeft = Math.max(parsePx(cs.paddingLeft), 6);
@@ -279,19 +287,29 @@ function extractTextAreaGeometry(
   const paddingBottom = Math.max(parsePx(cs.paddingBottom), paddingTop);
   const contentBox = insetRect(localWidth, localHeight, paddingLeft, paddingTop, paddingRight, paddingBottom);
 
-  const nodes: IRNode[] = [{
-    type: "polygon",
-    points: quad,
-    style: boxStyle,
-    zIndex: globalIndex,
-  }];
+  const nodes: IRNode[] = [];
+  if (shouldRenderSyntheticControlBox(node.extractedStyle, cs)) {
+    const boxStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_SURFACE_COLOR, DEFAULT_BORDER_COLOR, DEFAULT_FORM_RADIUS_PX);
+    nodes.push({
+      type: "polygon",
+      points: quad,
+      style: boxStyle,
+      zIndex: globalIndex,
+    });
+  }
 
   const rawValue = textarea.value.replace(/\r\n?/g, "\n");
-  if (!rawValue.trim()) return nodes;
+  const rawPlaceholder = textarea.placeholder.replace(/\r\n?/g, "\n");
+  const displayText: ControlDisplayText = rawValue.length === 0
+    ? { text: rawPlaceholder, isPlaceholder: rawPlaceholder.length > 0 }
+    : { text: rawValue, isPlaceholder: false };
+  if (!displayText.text.trim()) return nodes;
+
+  const textStyle = resolveControlTextStyle(textarea, node.extractedStyle, cs, displayText.isPlaceholder);
 
   const lines = textarea.wrap === "off"
-    ? rawValue.split("\n")
-    : wrapText(rawValue, Math.max(1, contentBox.width), node.extractedStyle, cs);
+    ? displayText.text.split("\n")
+    : wrapText(displayText.text, Math.max(1, contentBox.width), textStyle, cs);
   const maxLines = Math.max(1, Math.floor(contentBox.height / lineHeight));
 
   let zIndex = globalIndex + 1;
@@ -306,7 +324,7 @@ function extractTextAreaGeometry(
       width: contentBox.width,
       height: availableHeight,
     };
-    const textNode = createSingleLineTextNode(text, quad, localWidth, localHeight, lineBox, node.extractedStyle, cs, zIndex++, "left", Math.min(lineHeight, availableHeight));
+    const textNode = createSingleLineTextNode(text, quad, localWidth, localHeight, lineBox, textStyle, cs, zIndex++, "left", Math.min(lineHeight, availableHeight));
     if (textNode) nodes.push(textNode);
   }
 
@@ -488,6 +506,61 @@ function shouldUseFallbackFill(style: Style): boolean {
   return !isVisibleColor(style.fill);
 }
 
+function shouldRenderSyntheticControlBox(baseStyle: Style, cs: CSSStyleDeclaration): boolean {
+  // Some custom controls use a transparent native input/textarea only as an interaction target.
+  // Synthesizing a fallback box for those controls invents a white/native background that is not present.
+  const hasVisibleFill = isVisibleColor(baseStyle.fill);
+  const hasVisibleStroke = isVisibleColor(baseStyle.stroke) || hasVisibleBorderStroke(baseStyle);
+  const hasVisibleShadow = !!(baseStyle.boxShadow && baseStyle.boxShadow !== "none");
+  const hasVisibleBackgroundImage = !!(baseStyle.backgroundImage && baseStyle.backgroundImage !== "none");
+  const hasVisibleTextColor = isVisibleColor(cs.color);
+
+  if (!hasVisibleFill && !hasVisibleStroke && !hasVisibleShadow && !hasVisibleBackgroundImage && !hasVisibleTextColor) {
+    return false;
+  }
+
+  return true;
+}
+
+function hasVisibleBorderStroke(style: Style): boolean {
+  return isVisibleColor(style.borderTopColor) || isVisibleColor(style.borderRightColor) || isVisibleColor(style.borderBottomColor) || isVisibleColor(style.borderLeftColor);
+}
+
+function resolveControlTextStyle(
+  el: HTMLInputElement | HTMLTextAreaElement,
+  baseStyle: Style,
+  cs: CSSStyleDeclaration,
+  isPlaceholder: boolean
+): Style {
+  if (!isPlaceholder) return baseStyle;
+
+  let placeholderStyle: CSSStyleDeclaration | null = null;
+  try {
+    placeholderStyle = getComputedStyle(el, "::placeholder");
+  } catch {
+    placeholderStyle = null;
+  }
+
+  if (!placeholderStyle) return baseStyle;
+
+  return {
+    ...baseStyle,
+    color: isVisibleColor(placeholderStyle.color) ? placeholderStyle.color : baseStyle.color,
+    fontStyle: placeholderStyle.fontStyle && placeholderStyle.fontStyle !== "normal" ? placeholderStyle.fontStyle : baseStyle.fontStyle,
+    fontWeight: placeholderStyle.fontWeight && placeholderStyle.fontWeight !== "400" ? placeholderStyle.fontWeight : baseStyle.fontWeight,
+    letterSpacing: placeholderStyle.letterSpacing && placeholderStyle.letterSpacing !== "normal" ? placeholderStyle.letterSpacing : baseStyle.letterSpacing,
+    wordSpacing: placeholderStyle.wordSpacing && placeholderStyle.wordSpacing !== "normal" ? placeholderStyle.wordSpacing : baseStyle.wordSpacing,
+    opacity: resolvePlaceholderOpacity(baseStyle.opacity, placeholderStyle.opacity),
+  };
+}
+
+function resolvePlaceholderOpacity(baseOpacity: number | undefined, placeholderOpacity: string): number | undefined {
+  const parsed = parseFloat(placeholderOpacity);
+  if (Number.isNaN(parsed)) return baseOpacity;
+  if (baseOpacity === undefined) return parsed;
+  return baseOpacity * parsed;
+}
+
 function normalizeStrokeWidth(value: string | undefined, fallbackPx: number): string {
   if (value) {
     const parsed = parseFloat(value);
@@ -542,18 +615,23 @@ function createSingleLineTextNode(
   };
 }
 
-function getInputDisplayValue(input: HTMLInputElement): string {
+function getInputDisplayValue(input: HTMLInputElement): ControlDisplayText {
   const type = input.type.toLowerCase();
   const value = input.value ?? "";
-  if (!value) return "";
+  if (!value) {
+    return {
+      text: input.placeholder ?? "",
+      isPlaceholder: !!input.placeholder,
+    };
+  }
 
   switch (type) {
     case "password":
-      return "*".repeat(value.length);
+      return { text: "*".repeat(value.length), isPlaceholder: false };
     case "datetime-local":
-      return value.replace("T", " ");
+      return { text: value.replace("T", " "), isPlaceholder: false };
     default:
-      return value;
+      return { text: value, isPlaceholder: false };
   }
 }
 

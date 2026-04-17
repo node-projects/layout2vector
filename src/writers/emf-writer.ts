@@ -364,6 +364,50 @@ export class EMFWriter implements Writer<Uint8Array> {
     this.saveState();
     this.applyClip(style, getPointBounds(points));
 
+    if (style.pathSubpaths?.length) {
+      const drawableSubpaths = style.pathSubpaths.filter((subpath) => subpath.points.length >= 2);
+      const hasFilledSubpath = fillColor !== null && drawableSubpaths.some((subpath) => subpath.closed && subpath.points.length >= 3);
+      const brushHandle = this.createBrush(hasFilledSubpath ? fillColor : null);
+      const penHandle = this.createPenStyled(
+        stroke ?? (!hasFilledSubpath && fillColor !== null ? { color: fillColor, width: 1 } : null),
+        style.strokeDasharray,
+      );
+      this.selectObject(brushHandle);
+      this.selectObject(penHandle);
+      this.records.writeRecord(
+        EMR.SETPOLYFILLMODE,
+        uint32Array(style.fillRule === "evenodd" ? ALTERNATE : WINDING),
+      );
+      this.records.writeRecord(EMR.BEGINPATH, null);
+      for (const subpath of drawableSubpaths) {
+        const bounds = this.computeBoundsFromPoints(subpath.points);
+        const ptData = int16Array(
+          ...subpath.points.flatMap((point) => [Math.round(point.x), Math.round(point.y)])
+        );
+        this.records.writeRecord(EMR.POLYLINE16, concat(
+          int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
+          uint32Array(subpath.points.length),
+          ptData
+        ));
+        if (subpath.closed) {
+          this.records.writeRecord(EMR.CLOSEFIGURE, null);
+        }
+      }
+      this.records.writeRecord(EMR.ENDPATH, null);
+      if (hasFilledSubpath && stroke) {
+        this.records.writeRecord(EMR.STROKEANDFILLPATH, null);
+      } else if (hasFilledSubpath) {
+        this.records.writeRecord(EMR.FILLPATH, null);
+      } else {
+        this.records.writeRecord(EMR.STROKEPATH, null);
+      }
+
+      this.deleteObject(brushHandle);
+      this.deleteObject(penHandle);
+      this.restoreState();
+      return;
+    }
+
     if (closed && fillColor !== null && points.length >= 3) {
       // Draw as filled polygon
       const brushHandle = this.createBrush(fillColor);

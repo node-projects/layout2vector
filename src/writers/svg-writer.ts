@@ -2,7 +2,7 @@
  * SVG Writer.
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
-import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, PathSubpath, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
@@ -39,6 +39,17 @@ function escXml(s: string): string {
     }
   }
   return out;
+}
+
+function pointsToPath(points: Point[], closed: boolean): string {
+  return points.map((point, index) => `${index === 0 ? "M" : "L"}${n(point.x)},${n(point.y)}`).join(" ") + (closed ? " Z" : "");
+}
+
+function subpathsToPath(subpaths: PathSubpath[]): string {
+  return subpaths
+    .filter((subpath) => subpath.points.length > 0)
+    .map((subpath) => pointsToPath(subpath.points, subpath.closed))
+    .join(" ");
 }
 
 // ── Gradient parsing (subset of png-writer logic) ───────────────────
@@ -510,11 +521,12 @@ export class SVGWriter implements Writer<string> {
       if (p.x > maxX) maxX = p.x;
       if (p.y > maxY) maxY = p.y;
     }
-    const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
+    const d = style.pathSubpaths?.length ? subpathsToPath(style.pathSubpaths) : pointsToPath(points, closed);
     const gradientIds = this.addGradientDefs(style.backgroundImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
+    const hasClosedSubpath = closed || !!style.pathSubpaths?.some((subpath) => subpath.closed);
     const element = this.buildLayeredShape(
-      (attrs) => `<path d="${d}"${attrs}/>` ,
-      fill,
+      (attrs) => `<path d="${d}"${style.fillRule === "evenodd" ? ' fill-rule="evenodd"' : ""}${attrs}/>` ,
+      hasClosedSubpath ? fill : null,
       stroke,
       style,
       gradientIds,

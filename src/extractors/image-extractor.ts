@@ -298,6 +298,34 @@ function rasterToRendered(dataUrl: string, w: number, h: number): { dataUrl: str
   return result;
 }
 
+type RasterInspection = {
+  hasVisibleContent: boolean;
+  hasTransparency: boolean;
+  rgbData?: number[];
+};
+
+function inspectRasterImageData(imageData: ImageData, includeRgbData: boolean): RasterInspection {
+  const rgba = imageData.data;
+  const rgbData = includeRgbData ? new Array((rgba.length / 4) * 3) : undefined;
+  let hasVisibleContent = false;
+  let hasTransparency = false;
+
+  for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
+    const alpha = rgba[i + 3];
+    if (alpha > 0) hasVisibleContent = true;
+    if (alpha < 255) hasTransparency = true;
+
+    if (rgbData) {
+      const opacity = alpha / 255;
+      rgbData[j] = Math.round(rgba[i] * opacity + 255 * (1 - opacity));
+      rgbData[j + 1] = Math.round(rgba[i + 1] * opacity + 255 * (1 - opacity));
+      rgbData[j + 2] = Math.round(rgba[i + 2] * opacity + 255 * (1 - opacity));
+    }
+  }
+
+  return { hasVisibleContent, hasTransparency, rgbData };
+}
+
 function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { dataUrl: string; rgbData?: number[] } | null {
   try {
     // Use pre-decoded Image from preloadImages if available (ensures synchronous decode)
@@ -324,16 +352,8 @@ function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { data
     // Extract raw RGB for PDF embedding (alpha-blend onto white since PDF doesn't support alpha)
     const pixels = canvas.width * canvas.height;
     if (pixels <= 250000) {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const rgba = imageData.data;
-      const rgb: number[] = new Array(pixels * 3);
-      for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
-        const a = rgba[i + 3] / 255;
-        rgb[j] = Math.round(rgba[i] * a + 255 * (1 - a));
-        rgb[j + 1] = Math.round(rgba[i + 1] * a + 255 * (1 - a));
-        rgb[j + 2] = Math.round(rgba[i + 2] * a + 255 * (1 - a));
-      }
-      return { dataUrl: pngUrl, rgbData: rgb };
+      const inspection = inspectRasterImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), true);
+      return { dataUrl: pngUrl, rgbData: inspection.rgbData };
     }
     return { dataUrl: pngUrl };
   } catch {
@@ -632,57 +652,28 @@ export function extractImageGeometry(
     canvas.height = renderH;
     const ctx = canvas.getContext("2d");
     if (ctx) {
-      // First draw without white background to check for transparency
-      // (only when the browser actually decoded the image — natW > 0)
+      // Draw without a background first so transparent small icons can stay transparent.
       if (disableSmoothing) ctx.imageSmoothingEnabled = false;
       drawObjectFitImage(ctx, drawEl, renderW, renderH, objectFitPlan.sourceRect);
 
+      const pixels = renderW * renderH;
+      const inspection = inspectRasterImageData(ctx.getImageData(0, 0, renderW, renderH), pixels <= 250000);
+
       if (natW > 0 && natH > 0) {
-        // Check if the image has any visible (non-transparent) content
-        const probeData = ctx.getImageData(0, 0, renderW, renderH).data;
-        let hasVisibleContent = false;
-        for (let i = 3; i < probeData.length; i += 4) {
-          if (probeData[i] > 0) { hasVisibleContent = true; break; }
-        }
-        if (!hasVisibleContent) {
+        if (!inspection.hasVisibleContent) {
           // Image is fully transparent — skip it
           imageDataCache.set(imgCacheKey, null);
           return [];
         }
       }
 
-      // Now composite onto white background for JPEG export
-      ctx.clearRect(0, 0, renderW, renderH);
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, renderW, renderH);
-      if (disableSmoothing) ctx.imageSmoothingEnabled = false;
-      drawObjectFitImage(ctx, drawEl, renderW, renderH, objectFitPlan.sourceRect);
-
-      // Check if drawImage actually produced content (Firefox headless bug:
-      // data URL PNGs may not render to canvas at all)
-      let canvasWorked = true;
-      if (isDataUrl && src.startsWith("data:image/png") && drawEl.naturalWidth === 0) {
-        const probe = ctx.getImageData(0, 0, 1, 1).data;
-        if (probe[0] === 255 && probe[1] === 255 && probe[2] === 255) {
-          canvasWorked = false;
-        }
-      }
+      // If the browser could not decode the image into the canvas, fall back below.
+      const canvasWorked = inspection.hasVisibleContent;
 
       if (canvasWorked) {
-        dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-
-        // Extract raw RGB for lossless PDF embedding (small images only)
-        const pixels = renderW * renderH;
-        if (pixels <= 250000) {
-          const imageData = ctx.getImageData(0, 0, renderW, renderH);
-          const rgba = imageData.data;
-          rgbData = new Array(pixels * 3);
-          for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
-            rgbData[j] = rgba[i];
-            rgbData[j + 1] = rgba[i + 1];
-            rgbData[j + 2] = rgba[i + 2];
-          }
-        }
+        const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+        dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
+        rgbData = inspection.rgbData;
       }
     }
   } catch { /* canvas tainted */ }
@@ -691,16 +682,9 @@ export function extractImageGeometry(
   if (!dataUrl && isDataUrl && src.startsWith("data:image/png")) {
     const decoded = decodePngDataUrl(src);
     if (decoded) {
-      // Check if decoded image is fully transparent
-      let hasAlpha = false;
-      for (let i = 3; i < decoded.rgba.length; i += 4) {
-        if (decoded.rgba[i] > 0) { hasAlpha = true; break; }
-      }
-      if (!hasAlpha) {
-        imageDataCache.set(imgCacheKey, null);
-        return []; // fully transparent image
-      }
-      // Put the decoded pixels into a canvas at rendered size to generate a JPEG data URL
+      // Put the decoded pixels into a canvas at rendered size so small transparent
+      // images can stay transparent in HTML/SVG/image writers while PDF/EMF still
+      // get white-blended RGB data.
       try {
         const canvas = document.createElement("canvas");
         canvas.width = renderW;
@@ -717,23 +701,17 @@ export function extractImageGeometry(
             imgData.data.set(decoded.rgba);
             tmpCtx.putImageData(imgData, 0, 0);
             // Scale to render size
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, renderW, renderH);
             if (disableSmoothing) ctx.imageSmoothingEnabled = false;
             drawObjectFitImage(ctx, tmpCanvas, renderW, renderH, objectFitPlan.sourceRect);
-            dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-            // Extract raw RGB for PDF at render size
             const pixels = renderW * renderH;
-            if (pixels <= 250000) {
-              const renderedData = ctx.getImageData(0, 0, renderW, renderH);
-              const rgba = renderedData.data;
-              rgbData = new Array(pixels * 3);
-              for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
-                rgbData[j] = rgba[i];
-                rgbData[j + 1] = rgba[i + 1];
-                rgbData[j + 2] = rgba[i + 2];
-              }
+            const inspection = inspectRasterImageData(ctx.getImageData(0, 0, renderW, renderH), pixels <= 250000);
+            if (!inspection.hasVisibleContent) {
+              imageDataCache.set(imgCacheKey, null);
+              return [];
             }
+            const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+            dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
+            rgbData = inspection.rgbData;
           }
         }
       } catch { /* fallback below */ }
@@ -756,9 +734,10 @@ export function extractImageGeometry(
     }
   }
 
-  // For SVG sources, use original SVG data URL (browsers/SVG viewers render it natively);
-  // writers that need pixel data use rgbData.
-  if (isSvgSource(src)) dataUrl = src;
+  // For inline SVG data URLs, keep the original payload so writers that can render
+  // SVG natively preserve fidelity. For remote SVG sources, keep the resolved data URL
+  // or raster fallback; reverting to the original URL re-taints downstream canvases.
+  if (isSvgSource(src) && src.startsWith("data:image/svg+xml")) dataUrl = src;
 
   imageDataCache.set(imgCacheKey, { dataUrl, rgbData });
   return [{

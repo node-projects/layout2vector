@@ -2,7 +2,7 @@
  * HTML Writer.
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
-import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, PathSubpath, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
@@ -55,6 +55,13 @@ function quadToSvgPath(points: Quad): string {
 /** Build an SVG polyline/polygon path string. */
 function pointsToSvgPath(points: Point[], closed: boolean): string {
   return points.map((p, i) => `${i === 0 ? "M" : "L"}${n(p.x)},${n(p.y)}`).join(" ") + (closed ? " Z" : "");
+}
+
+function subpathsToSvgPath(subpaths: PathSubpath[]): string {
+  return subpaths
+    .filter((subpath) => subpath.points.length > 0)
+    .map((subpath) => pointsToSvgPath(subpath.points, subpath.closed))
+    .join(" ");
 }
 
 /** Build an SVG path from rounded quad path segments. */
@@ -146,7 +153,7 @@ function appendEffectCss(css: string[], style: Style, includeOutline = true): vo
   }
 }
 
-function appendTextCss(css: string[], style: Style, preserveWhitespace: boolean): void {
+function appendTextCss(css: string[], style: Style, preserveWhitespace: boolean, includeLineHeight = true): void {
   const whiteSpace = style.whiteSpace
     ? style.whiteSpace
     : preserveWhitespace
@@ -154,7 +161,7 @@ function appendTextCss(css: string[], style: Style, preserveWhitespace: boolean)
       : "normal";
   pushCss(css, "white-space", whiteSpace);
 
-  if (style.lineHeight && style.lineHeight !== "normal") {
+  if (includeLineHeight && style.lineHeight && style.lineHeight !== "normal") {
     pushCss(css, "line-height", style.lineHeight);
   }
   if (style.letterSpacing && style.letterSpacing !== "normal") {
@@ -320,7 +327,7 @@ export class HTMLWriter implements Writer<string> {
         `clip-path:${style.clipPath}`,
         `-webkit-clip-path:${style.clipPath}`,
       ];
-      wrapped = `<div style="${css.join(";")}"><div style="position:relative;left:${n(-bounds.x)}px;top:${n(-bounds.y)}px">${wrapped}</div></div>`;
+      wrapped = `<div style="${css.join(";")}"><div style="position:relative;left:${n(-bounds.x)}px;top:${n(-bounds.y)}px;width:${n(this.width)}px;height:${n(this.height)}px">${wrapped}</div></div>`;
     }
 
     if (style.clipQuads?.length) {
@@ -351,7 +358,7 @@ export class HTMLWriter implements Writer<string> {
       "overflow:hidden",
     ];
     if (clip.radius > 0) css.push(`border-radius:${n(clip.radius)}px`);
-    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px">${wrapped}</div></div>`;
+    return `<div style="${css.join(";")}"><div style="position:relative;left:${n(-clip.x)}px;top:${n(-clip.y)}px;width:${n(this.width)}px;height:${n(this.height)}px">${wrapped}</div></div>`;
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -429,10 +436,12 @@ export class HTMLWriter implements Writer<string> {
     if (!fill && !stroke) return;
 
     const opacity = style.opacity;
-    const d = pointsToSvgPath(points, closed);
+    const d = style.pathSubpaths?.length ? subpathsToSvgPath(style.pathSubpaths) : pointsToSvgPath(points, closed);
+    const hasClosedSubpath = closed || !!style.pathSubpaths?.some((subpath) => subpath.closed);
     const svgAttrs: string[] = [];
-    if (fill && closed) svgAttrs.push(`fill="${escHtml(fill)}"`);
+    if (fill && hasClosedSubpath) svgAttrs.push(`fill="${escHtml(fill)}"`);
     else svgAttrs.push(`fill="none"`);
+    if (style.fillRule === "evenodd") svgAttrs.push('fill-rule="evenodd"');
     if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);
     if (style.strokeDasharray && style.strokeDasharray !== "none") svgAttrs.push(`stroke-dasharray="${escHtml(style.strokeDasharray)}"`);
     if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
@@ -513,17 +522,17 @@ export class HTMLWriter implements Writer<string> {
       const css: string[] = [
         "position:absolute",
         `left:${n(quad[0].x)}px`,
-        `top:${n(quad[0].y + halfLeading)}px`,
+        `top:${n(quad[0].y)}px`,
         `font-size:${n(fontSize)}px`,
         `font-family:${escHtml(fontFamily)}`,
         `color:${textColor}`,
-        "line-height:1",
       ];
 
       if (fontWeight !== "normal" && fontWeight !== "400") css.push(`font-weight:${fontWeight}`);
       if (fontStyle !== "normal") css.push(`font-style:${fontStyle}`);
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
-      appendTextCss(css, style, preserveWhitespace);
+      appendTextCss(css, style, preserveWhitespace, false);
+      css.push(`line-height:${n(quadHeight)}px`);
       appendTextEffectsCss(css, style);
 
       if (style.textShadow && style.textShadow !== "none") {
@@ -565,6 +574,9 @@ export class HTMLWriter implements Writer<string> {
     const ir = style.imageRendering;
     if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
       css.push("image-rendering:pixelated");
+    }
+    if (style.borderRadius && style.borderRadius !== "0px") {
+      css.push(`border-radius:${style.borderRadius}`);
     }
     if (outline) {
       css.push(`outline:${escHtml(outline.width)} ${escHtml(outline.style)} ${escHtml(outline.color)}`);
