@@ -172,7 +172,7 @@ function extractTextNode(
       };
 
       if (hasHiddenClampedLines && i === visibleLineCount - 1) {
-        const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), true);
+        const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), "force");
         if (!clipped) continue;
         text = clipped.text;
         quad = clipped.quad;
@@ -419,7 +419,14 @@ function clipTextToParent(
   const availableWidth = parentRect.width - padL - padR;
   if (availableWidth <= 0) return null;
 
-  return clipTextToWidth(text, parentEl, textQuad, parentStyle, availableWidth, parentStyle.textOverflow === "ellipsis");
+  return clipTextToWidth(
+    text,
+    parentEl,
+    textQuad,
+    parentStyle,
+    availableWidth,
+    parentStyle.textOverflow === "ellipsis" ? "overflow" : "none"
+  );
 }
 
 function clipTextToWidth(
@@ -428,7 +435,7 @@ function clipTextToWidth(
   textQuad: Quad,
   parentStyle: Style,
   availableWidth: number,
-  addEllipsis: boolean,
+  ellipsisMode: "none" | "overflow" | "force",
 ): { text: string; quad: Quad } | null {
   if (availableWidth <= 0) return null;
   const cs = getComputedStyle(parentEl);
@@ -447,14 +454,15 @@ function clipTextToWidth(
   document.body.appendChild(measSpan);
   const fullTextWidth = measSpan.getBoundingClientRect().width;
 
-  if (!addEllipsis && fullTextWidth <= availableWidth) {
+  if (ellipsisMode !== "force" && fullTextWidth <= availableWidth + 0.5) {
     // Text fits — no clipping needed
     document.body.removeChild(measSpan);
     return { text, quad: textQuad };
   }
 
-  // Text overflows or needs a forced ellipsis — find how many characters fit.
+  // Text overflows or must show a clamp ellipsis — find how many characters fit.
   let fitChars = text.length;
+  const addEllipsis = ellipsisMode !== "none";
   let clippedText = addEllipsis ? `${text.trimEnd()}…` : text;
   measSpan.textContent = clippedText;
 
