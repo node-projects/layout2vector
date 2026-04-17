@@ -510,20 +510,39 @@ function shouldRenderSyntheticControlBox(baseStyle: Style, cs: CSSStyleDeclarati
   // Some custom controls use a transparent native input/textarea only as an interaction target.
   // Synthesizing a fallback box for those controls invents a white/native background that is not present.
   const hasVisibleFill = isVisibleColor(baseStyle.fill);
-  const hasVisibleStroke = isVisibleColor(baseStyle.stroke) || hasVisibleBorderStroke(baseStyle);
+  const hasVisibleStroke = hasVisibleShapeStroke(baseStyle) || hasVisibleBorderStroke(baseStyle);
   const hasVisibleShadow = !!(baseStyle.boxShadow && baseStyle.boxShadow !== "none");
   const hasVisibleBackgroundImage = !!(baseStyle.backgroundImage && baseStyle.backgroundImage !== "none");
-  const hasVisibleTextColor = isVisibleColor(cs.color);
+  void cs;
 
-  if (!hasVisibleFill && !hasVisibleStroke && !hasVisibleShadow && !hasVisibleBackgroundImage && !hasVisibleTextColor) {
+  if (!hasVisibleFill && !hasVisibleStroke && !hasVisibleShadow && !hasVisibleBackgroundImage) {
     return false;
   }
 
   return true;
 }
 
+function hasVisibleShapeStroke(style: Style): boolean {
+  if (!isVisibleColor(style.stroke)) return false;
+  if (!style.strokeWidth) return false;
+  const width = parseFloat(style.strokeWidth);
+  return Number.isFinite(width) && width > 0;
+}
+
 function hasVisibleBorderStroke(style: Style): boolean {
-  return isVisibleColor(style.borderTopColor) || isVisibleColor(style.borderRightColor) || isVisibleColor(style.borderBottomColor) || isVisibleColor(style.borderLeftColor);
+  return hasVisibleBorderSide(style.borderTopColor, style.borderTopWidth, style.borderTopStyle)
+    || hasVisibleBorderSide(style.borderRightColor, style.borderRightWidth, style.borderRightStyle)
+    || hasVisibleBorderSide(style.borderBottomColor, style.borderBottomWidth, style.borderBottomStyle)
+    || hasVisibleBorderSide(style.borderLeftColor, style.borderLeftWidth, style.borderLeftStyle);
+}
+
+function hasVisibleBorderSide(color?: string, width?: string, borderStyle?: string): boolean {
+  if (!isVisibleColor(color)) return false;
+  if (!width) return false;
+  if (!borderStyle || borderStyle === "none" || borderStyle === "hidden") return false;
+
+  const parsedWidth = parseFloat(width);
+  return Number.isFinite(parsedWidth) && parsedWidth > 0;
 }
 
 function resolveControlTextStyle(

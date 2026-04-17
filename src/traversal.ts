@@ -269,19 +269,28 @@ function buildStackingNode(
   // Determine clip bounds for children: if this element has overflow:hidden
   // (and optionally border-radius), children should be clipped to this boundary
   let childClipBounds = parentClipBounds;
-  const overflow = cs.overflowX || cs.overflow;
-  if (overflow === "hidden" || overflow === "clip") {
-    const rect = element.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      const bounds = getTransformedRectBounds(rect, coordinateTransform);
-      childClipBounds = {
-        x: bounds.x,
-        y: bounds.y,
-        w: bounds.w,
-        h: bounds.h,
-        radius: parseBorderRadius(cs),
-      };
+  const overflowX = cs.overflowX || cs.overflow;
+  const overflowY = cs.overflowY || cs.overflow;
+  if (overflowX === "hidden" || overflowX === "clip" || overflowY === "hidden" || overflowY === "clip") {
+    let rect = element.getBoundingClientRect();
+    // Firefox returns height:0 for iframe body with overflow:hidden and only
+    // absolutely-positioned children. Use the viewport dimensions instead.
+    if ((rect.width === 0 || rect.height === 0) && element === element.ownerDocument.body) {
+      const vw = element.ownerDocument.documentElement.clientWidth;
+      const vh = element.ownerDocument.documentElement.clientHeight;
+      rect = new DOMRect(rect.x, rect.y, vw, vh);
     }
+    const bounds = getTransformedRectBounds(rect, coordinateTransform);
+    const ownClipBounds = {
+      x: bounds.x,
+      y: bounds.y,
+      w: bounds.w,
+      h: bounds.h,
+      radius: parseBorderRadius(cs),
+    };
+    childClipBounds = childClipBounds
+      ? intersectClipBounds(childClipBounds, ownClipBounds)
+      : ownClipBounds;
   }
 
   // Determine which root to traverse children from
@@ -306,7 +315,11 @@ function buildStackingNode(
       const childEl = child as Element;
       const childCs = getComputedStyle(childEl);
 
-      if (!includeInvisible && !isVisible(childCs)) {
+      // display:none removes element and all descendants from layout — skip subtree.
+      // opacity:0 makes the compositing layer fully transparent — skip subtree.
+      // visibility:hidden hides the element but children can override with
+      // visibility:visible, so the subtree must still be walked.
+      if (!includeInvisible && (childCs.display === "none" || childCs.opacity === "0")) {
         continue;
       }
 

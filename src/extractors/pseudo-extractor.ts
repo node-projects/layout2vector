@@ -442,6 +442,8 @@ function extractOnePseudo(
 
   // Skip when pseudo-element isn't generated
   if (pseudoCs.display === "none") return [];
+  if (pseudoCs.visibility === "hidden") return [];
+  if (pseudoCs.opacity === "0") return [];
   const rawContent = pseudoCs.content;
   if (!rawContent || rawContent === "none" || rawContent === "normal") return [];
 

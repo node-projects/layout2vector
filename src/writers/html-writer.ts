@@ -108,6 +108,19 @@ type RenderedOutline = {
   offset?: string;
 };
 
+type RenderedBorder = {
+  color: string;
+  width: string;
+  style: string;
+};
+
+type RenderedBorders = {
+  top: RenderedBorder | null;
+  right: RenderedBorder | null;
+  bottom: RenderedBorder | null;
+  left: RenderedBorder | null;
+};
+
 type QuadTransform = {
   width: number;
   height: number;
@@ -132,6 +145,46 @@ function getVisibleOutline(style: Style): RenderedOutline | null {
     style: style.outlineStyle,
     offset: style.outlineOffset,
   };
+}
+
+function getVisibleBorder(width: string | undefined, style: string | undefined, color: string | undefined): RenderedBorder | null {
+  if (!width || parseFloat(width) <= 0) return null;
+  if (!style || style === "none") return null;
+
+  const visibleColor = getVisibleCssColorString(color);
+  if (!visibleColor) return null;
+
+  return {
+    color: visibleColor,
+    width,
+    style,
+  };
+}
+
+function getVisibleBorders(style: Style): RenderedBorders | null {
+  const borders: RenderedBorders = {
+    top: getVisibleBorder(style.borderTopWidth, style.borderTopStyle, style.borderTopColor),
+    right: getVisibleBorder(style.borderRightWidth, style.borderRightStyle, style.borderRightColor),
+    bottom: getVisibleBorder(style.borderBottomWidth, style.borderBottomStyle, style.borderBottomColor),
+    left: getVisibleBorder(style.borderLeftWidth, style.borderLeftStyle, style.borderLeftColor),
+  };
+
+  if (!borders.top && !borders.right && !borders.bottom && !borders.left) return null;
+  return borders;
+}
+
+function appendBorderCss(css: string[], borders: RenderedBorders | null, stroke: { color: string; width: number } | null): void {
+  if (borders) {
+    if (borders.top) css.push(`border-top:${escHtml(borders.top.width)} ${escHtml(borders.top.style)} ${escHtml(borders.top.color)}`);
+    if (borders.right) css.push(`border-right:${escHtml(borders.right.width)} ${escHtml(borders.right.style)} ${escHtml(borders.right.color)}`);
+    if (borders.bottom) css.push(`border-bottom:${escHtml(borders.bottom.width)} ${escHtml(borders.bottom.style)} ${escHtml(borders.bottom.color)}`);
+    if (borders.left) css.push(`border-left:${escHtml(borders.left.width)} ${escHtml(borders.left.style)} ${escHtml(borders.left.color)}`);
+    return;
+  }
+
+  if (stroke) {
+    css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
+  }
 }
 
 function appendEffectCss(css: string[], style: Style, includeOutline = true): void {
@@ -433,12 +486,13 @@ export class HTMLWriter implements Writer<string> {
   async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
+    const borders = getVisibleBorders(style);
     const outline = getVisibleOutline(style);
     // Only output gradients in background-image; url() images are handled by drawImage
     const bgImage = style.backgroundImage && style.backgroundImage !== "none"
       ? style.backgroundImage : undefined;
     const hasGradient = bgImage && !(/url\s*\(/.test(bgImage));
-    if (!fill && !stroke && !outline && !style.boxShadow && !hasGradient) return;
+    if (!fill && !stroke && !borders && !outline && !style.boxShadow && !hasGradient) return;
 
     const opacity = style.opacity;
 
@@ -462,7 +516,7 @@ export class HTMLWriter implements Writer<string> {
 
       if (fill) css.push(`background-color:${fill}`);
       if (hasGradient) css.push(`background-image:${bgImage}`);
-      if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
+      appendBorderCss(css, borders, stroke);
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
       if (style.cornerShapes) css.push(`corner-shape:${cornerShapesToCss(style.cornerShapes)}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);
@@ -487,7 +541,7 @@ export class HTMLWriter implements Writer<string> {
 
       if (fill) css.push(`background-color:${fill}`);
       if (hasGradient) css.push(`background-image:${bgImage}`);
-      if (stroke) css.push(`border:${n(stroke.width)}px solid ${stroke.color}`);
+      appendBorderCss(css, borders, stroke);
       if (style.borderRadius && style.borderRadius !== "0px") css.push(`border-radius:${style.borderRadius}`);
       if (style.cornerShapes) css.push(`corner-shape:${cornerShapesToCss(style.cornerShapes)}`);
       if (style.boxShadow && style.boxShadow !== "none") css.push(`box-shadow:${style.boxShadow}`);

@@ -45,16 +45,18 @@ function walkSVGTree(
     return;
   }
 
-  // Skip hidden SVG elements (display:none or visibility:hidden)
+  // Skip hidden SVG elements (display:none removes from layout entirely).
+  // visibility:hidden hides the element but children can override it,
+  // so we must still walk children.
   const cs = getComputedStyle(el);
-  if (cs.display === "none" || cs.visibility === "hidden") return;
+  if (cs.display === "none") return;
 
   // Compute this element's effective opacity
   const ownOpacity = cs.opacity ? parseFloat(cs.opacity) : 1;
   const effectiveOpacity = parentOpacity * ownOpacity;
 
-  // Process this element if it's a renderable SVG shape
-  if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement) {
+  // Process this element if it's a renderable SVG shape and visible
+  if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement && cs.visibility !== "hidden") {
     const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity, cs);
     results.push(...nodes);
   }

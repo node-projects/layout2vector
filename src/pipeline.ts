@@ -61,6 +61,13 @@ export async function extractIR(root: Element | Element[], options: Options = {}
     for (const node of ordered) {
       const el = node.element;
 
+      // Skip geometry extraction for visibility:hidden elements.
+      // These are still traversed (children can override visibility:visible)
+      // but the hidden element itself should not produce IR nodes.
+      // Use node.style (computed during traversal with correct document context)
+      // instead of calling getComputedStyle here, which fails for iframe elements.
+      if (node.style.visibility === "hidden") continue;
+
       // Propagate clip bounds from the stacking tree into the extracted style
       if (node.clipBounds) {
         node.extractedStyle.clipBounds = node.clipBounds;
@@ -412,6 +419,76 @@ function isVisibleNode(node: IRNode): boolean {
   }
 }
 
+type NodeBounds = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+function getNodeBounds(node: IRNode): NodeBounds {
+  switch (node.type) {
+    case "polygon":
+      return getPointCollectionBounds(node.points);
+    case "polyline":
+      return getPointCollectionBounds(node.points);
+    case "text":
+      return getPointCollectionBounds(node.quad);
+    case "image":
+      return getPointCollectionBounds(node.quad);
+  }
+}
+
+function getPointCollectionBounds(points: Array<{ x: number; y: number }>): NodeBounds {
+  let left = Infinity;
+  let top = Infinity;
+  let right = -Infinity;
+  let bottom = -Infinity;
+
+  for (const point of points) {
+    if (point.x < left) left = point.x;
+    if (point.y < top) top = point.y;
+    if (point.x > right) right = point.x;
+    if (point.y > bottom) bottom = point.y;
+  }
+
+  return { left, top, right, bottom };
+}
+
+function boundsIntersect(a: NodeBounds, b: NodeBounds): boolean {
+  return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+}
+
+function isFullyClippedNode(node: IRNode): boolean {
+  const bounds = getNodeBounds(node);
+  const clipBounds = node.style.clipBounds;
+  if (clipBounds) {
+    if (clipBounds.w <= 0 || clipBounds.h <= 0) {
+      return true;
+    }
+
+    if (!boundsIntersect(bounds, {
+      left: clipBounds.x,
+      top: clipBounds.y,
+      right: clipBounds.x + clipBounds.w,
+      bottom: clipBounds.y + clipBounds.h,
+    })) {
+      return true;
+    }
+  }
+
+  if (node.style.clipQuads?.length) {
+    for (const clipQuad of node.style.clipQuads) {
+      const clipQuadBounds = getPointCollectionBounds(clipQuad.points);
+      if (!boundsIntersect(bounds, clipQuadBounds)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 /**
  * Render IR nodes through a writer.
  * Processes nodes in order (already sorted by the pipeline).
@@ -422,6 +499,7 @@ export async function renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T
 
   for (const node of nodes) {
     if (!isVisibleNode(node)) continue;
+    if (isFullyClippedNode(node)) continue;
     switch (node.type) {
       case "polygon":
         await writer.drawPolygon(node.points, node.style);

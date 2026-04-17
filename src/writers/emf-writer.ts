@@ -681,7 +681,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     // BITMAPINFOHEADER
     dibView.setUint32(0, 40, true);        // biSize
     dibView.setInt32(4, width, true);       // biWidth
-    dibView.setInt32(8, -height, true);     // biHeight (negative = top-down)
+    dibView.setInt32(8, height, true);      // biHeight (positive = bottom-up for broader EMF compatibility)
     dibView.setUint16(12, 1, true);        // biPlanes
     dibView.setUint16(14, 24, true);       // biBitCount (24-bit RGB)
     dibView.setUint32(16, 0, true);        // biCompression (BI_RGB)
@@ -691,10 +691,11 @@ export class EMFWriter implements Writer<Uint8Array> {
     dibView.setUint32(32, 0, true);        // biClrUsed
     dibView.setUint32(36, 0, true);        // biClrImportant
 
-    // Convert RGB to BGR row data with padding
+    // Convert RGB to BGR row data with padding.
+    // EMF consumers are more broadly compatible with bottom-up BI_RGB DIBs.
     const pixelOffset = bmpHeaderSize;
     for (let row = 0; row < height; row++) {
-      const srcRowStart = row * width * 3;
+      const srcRowStart = (height - 1 - row) * width * 3;
       const dstRowStart = pixelOffset + row * rowBytes;
       for (let col = 0; col < width; col++) {
         const si = srcRowStart + col * 3;
@@ -785,8 +786,13 @@ export class EMFWriter implements Writer<Uint8Array> {
     // nPalEntries: UINT32
     // szlDevice:  SIZEL (2 × int32) — reference device size in pixels
     // szlMillimeters: SIZEL (2 × int32) — reference device size in mm
+    // --- Extended header fields (improves viewer compatibility) ---
+    // cbPixelFormat: UINT32 — size of pixel format descriptor (0 = none)
+    // offPixelFormat: UINT32 — offset to pixel format descriptor (0 = none)
+    // bOpenGL: UINT32 — whether OpenGL commands present (0 = no)
+    // szlMicrometers: SIZEL (2 × int32) — device size in micrometers
 
-    const headerDataSize = 80;
+    const headerDataSize = 100; // extended header
     const headerRecordSize = 8 + headerDataSize;
     const totalSize = headerRecordSize + bodySize;
 
@@ -829,6 +835,13 @@ export class EMFWriter implements Writer<Uint8Array> {
     // Reference device: mm (approximate for 96 DPI)
     hv.setInt32(72, 508, true);  // ~508mm ≈ 20 inches
     hv.setInt32(76, 285, true);  // ~285mm ≈ 11.25 inches
+    // Extended fields
+    hv.setUint32(80, 0, true);   // cbPixelFormat (no pixel format)
+    hv.setUint32(84, 0, true);   // offPixelFormat
+    hv.setUint32(88, 0, true);   // bOpenGL (no OpenGL commands)
+    // szlMicrometers — device size in micrometers
+    hv.setInt32(92, 508000, true);  // width: 508mm = 508000µm
+    hv.setInt32(96, 285000, true);  // height: 285mm = 285000µm
 
     // Assemble the complete file
     const output = new Uint8Array(totalSize);

@@ -554,11 +554,76 @@ export class SVGWriter implements Writer<string> {
     this.elements.push(wrapped);
   }
 
+  /** Check if borders have different colors/widths/styles per side (skip if borderRadius). */
+  private hasMixedBorders(style: Style): boolean {
+    if (style.borderRadius && style.borderRadius !== "0px" && style.borderRadius !== "0%") return false;
+    const sides = [
+      { c: style.borderTopColor, w: style.borderTopWidth, s: style.borderTopStyle },
+      { c: style.borderRightColor, w: style.borderRightWidth, s: style.borderRightStyle },
+      { c: style.borderBottomColor, w: style.borderBottomWidth, s: style.borderBottomStyle },
+      { c: style.borderLeftColor, w: style.borderLeftWidth, s: style.borderLeftStyle },
+    ];
+    if (!sides[0].s) return false;
+    if (sides.some(s => s.s === "double")) return true;
+    const ref = sides[0];
+    return sides.some(s => s.c !== ref.c || s.w !== ref.w || s.s !== ref.s);
+  }
+
+  /** Draw each border side independently as an SVG line. */
+  private drawPerSideBorders(points: Quad, style: Style): void {
+    const sides: Array<{
+      from: Point; to: Point;
+      color?: string; width?: string; borderStyle?: string;
+    }> = [
+      { from: points[0], to: points[1], color: style.borderTopColor, width: style.borderTopWidth, borderStyle: style.borderTopStyle },
+      { from: points[1], to: points[2], color: style.borderRightColor, width: style.borderRightWidth, borderStyle: style.borderRightStyle },
+      { from: points[2], to: points[3], color: style.borderBottomColor, width: style.borderBottomWidth, borderStyle: style.borderBottomStyle },
+      { from: points[3], to: points[0], color: style.borderLeftColor, width: style.borderLeftWidth, borderStyle: style.borderLeftStyle },
+    ];
+
+    for (const side of sides) {
+      const color = getVisibleCssColorString(side.color);
+      const w = side.width ? parseFloat(side.width) : 0;
+      if (!color || w <= 0 || !side.borderStyle || side.borderStyle === "none" || side.borderStyle === "hidden") continue;
+
+      const x1 = n(side.from.x), y1 = n(side.from.y);
+      const x2 = n(side.to.x), y2 = n(side.to.y);
+
+      if (side.borderStyle === "double" && w >= 3) {
+        const lineW = Math.max(1, w / 3);
+        const dx = side.to.x - side.from.x;
+        const dy = side.to.y - side.from.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len <= 0) continue;
+        const nx = -dy / len;
+        const ny = dx / len;
+        const off = w / 3;
+
+        // Outer line
+        this.elements.push(`<line x1="${n(side.from.x - nx * off)}" y1="${n(side.from.y - ny * off)}" x2="${n(side.to.x - nx * off)}" y2="${n(side.to.y - ny * off)}" stroke="${escXml(color)}" stroke-width="${n(lineW)}"/>`);
+        // Inner line
+        this.elements.push(`<line x1="${n(side.from.x + nx * off)}" y1="${n(side.from.y + ny * off)}" x2="${n(side.to.x + nx * off)}" y2="${n(side.to.y + ny * off)}" stroke="${escXml(color)}" stroke-width="${n(lineW)}"/>`);
+      } else {
+        const attrs: string[] = [
+          `x1="${x1}"`, `y1="${y1}"`, `x2="${x2}"`, `y2="${y2}"`,
+          `stroke="${escXml(color)}"`, `stroke-width="${n(w)}"`,
+        ];
+        if (side.borderStyle === "dashed") {
+          attrs.push(`stroke-dasharray="${n(w * 3)} ${n(w * 3)}"`);
+        } else if (side.borderStyle === "dotted") {
+          attrs.push(`stroke-dasharray="${n(w)} ${n(w)}"`, `stroke-linecap="round"`);
+        }
+        this.elements.push(`<line ${attrs.join(" ")}/>`);
+      }
+    }
+  }
+
   async drawPolygon(points: Quad, style: Style): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
     const outline = getVisibleOutline(style);
-    if (!fill && !stroke && !outline && !style.boxShadow) return;
+    const mixedBorders = this.hasMixedBorders(style);
+    if (!fill && !stroke && !outline && !style.boxShadow && !mixedBorders) return;
 
     const w = Math.abs(points[1].x - points[0].x);
     const h = Math.abs(points[3].y - points[0].y);
@@ -583,7 +648,7 @@ export class SVGWriter implements Writer<string> {
       const baseElement = this.buildLayeredShape(
         (attrs) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>` ,
         fill,
-        stroke,
+        mixedBorders ? null : stroke,
         style,
         gradientIds,
         undefined,
@@ -600,6 +665,7 @@ export class SVGWriter implements Writer<string> {
         ? layers[0]
         : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
       this.pushElement(element, style, getQuadBounds(points));
+      if (mixedBorders) this.drawPerSideBorders(points, style);
 
       // Inset shadows as clipped overlays
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, r);
@@ -626,7 +692,7 @@ export class SVGWriter implements Writer<string> {
     const baseElement = this.buildLayeredShape(
       (attrs) => `<path d="${pathD}"${attrs}/>` ,
       fill,
-      stroke,
+      mixedBorders ? null : stroke,
       style,
       gradientIds,
       undefined,
@@ -643,6 +709,7 @@ export class SVGWriter implements Writer<string> {
       ? layers[0]
       : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
     this.pushElement(element, style, getQuadBounds(points));
+    if (mixedBorders) this.drawPerSideBorders(points, style);
 
     if (isAxisAlignedRect(points)) {
       this.addInsetShadows(shadows.filter(s => s.inset), x, y, w, h, 0);

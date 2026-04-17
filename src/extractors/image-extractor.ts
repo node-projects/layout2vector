@@ -105,9 +105,8 @@ export async function preloadImages(root: Element): Promise<void> {
   for (const el of allElements) {
     const bg = getComputedStyle(el).backgroundImage;
     if (!bg || bg === "none") continue;
-    const urlMatch = bg.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
-    if (!urlMatch) continue;
-    const url = urlMatch[1];
+    const url = extractCssUrlValue(bg);
+    if (!url) continue;
 
     // External URL (not a data URL) — fetch and cache
     if (!url.startsWith("data:")) {
@@ -167,6 +166,38 @@ function blobToDataUrl(blob: Blob): Promise<string> {
   });
 }
 
+function extractCssUrlValue(value: string): string | null {
+  const urlIndex = value.search(/url\s*\(/i);
+  if (urlIndex < 0) return null;
+
+  let index = value.indexOf("(", urlIndex) + 1;
+  while (index < value.length && /\s/.test(value[index])) index++;
+  if (index >= value.length) return null;
+
+  const quote = value[index] === '"' || value[index] === "'" ? value[index++] : null;
+  let result = "";
+  let escaped = false;
+
+  for (; index < value.length; index++) {
+    const ch = value[index];
+    if (escaped) {
+      result += `\\${ch}`;
+      escaped = false;
+      continue;
+    }
+    if (ch === "\\") {
+      escaped = true;
+      continue;
+    }
+    if (quote ? ch === quote : ch === ")") {
+      return result.trim();
+    }
+    result += ch;
+  }
+
+  return null;
+}
+
 /** Check if an element has a CSS background-image with a url(). */
 export function hasBackgroundImage(style: Style): boolean {
   const bg = style.backgroundImage;
@@ -187,12 +218,8 @@ export function extractBackgroundImage(
   const bg = style.backgroundImage;
   if (!bg || bg === "none") return [];
 
-  // Extract the URL from url("...") or url('...') or url(...)
-  // Use separate patterns: quoted (allows parens inside) vs unquoted
-  const urlMatch = bg.match(/url\s*\(\s*"([^"]+)"\s*\)/) ||
-                   bg.match(/url\s*\(\s*'([^']+)'\s*\)/) ||
-                   bg.match(/url\s*\(\s*([^)]+)\s*\)/);
-  if (!urlMatch) return [];
+  const parsedUrl = extractCssUrlValue(bg);
+  if (!parsedUrl) return [];
 
   const quad = getElementQuad(el);
   if (!quad) return [];
@@ -202,7 +229,7 @@ export function extractBackgroundImage(
   const w = htmlEl.offsetWidth || Math.abs(quad[1].x - quad[0].x);
   const h = htmlEl.offsetHeight || Math.abs(quad[3].y - quad[0].y);
 
-  let url = urlMatch[1];
+  let url = parsedUrl;
   const originalUrl = url;
 
   // Resolve from preloaded cache (external URLs fetched during preloadImages)
@@ -370,12 +397,31 @@ function decodeBgSvgDataUrl(dataUrl: string): string | null {
     }
     const commaIndex = dataUrl.indexOf(",");
     if (commaIndex >= 0) {
-      return decodeURIComponent(dataUrl.slice(commaIndex + 1));
+      return decodeSvgDataPayload(dataUrl.slice(commaIndex + 1));
     }
   } catch {
     // Decode error
   }
   return null;
+}
+
+function decodeSvgDataPayload(payload: string): string {
+  const cssDecoded = decodeCssEscapes(payload);
+  try {
+    return decodeURIComponent(cssDecoded);
+  } catch {
+    return cssDecoded;
+  }
+}
+
+function decodeCssEscapes(value: string): string {
+  return value
+    .replace(/\\(?:\r\n|[\n\r\f])/g, "")
+    .replace(/\\([0-9a-fA-F]{1,6})(?:\r\n|[ \n\r\t\f])?/g, (_match, hex: string) => {
+      const codePoint = Number.parseInt(hex, 16);
+      return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : "";
+    })
+    .replace(/\\(.)/g, "$1");
 }
 
 
@@ -516,9 +562,8 @@ function rasterizeBackgroundImage(el: Element, elWidth: number, elHeight: number
   const h = Math.round(elHeight) || 1;
   const cs = getComputedStyle(el);
   const bgImage = cs.backgroundImage;
-  const urlMatch = bgImage.match(/url\s*\(\s*["']?([^"')]+)["']?\s*\)/);
-  if (!urlMatch) return null;
-  const url = urlMatch[1];
+  const url = extractCssUrlValue(bgImage);
+  if (!url) return null;
 
   const cacheKey = `bgRaster|${url.length}|${w}|${h}|${url.slice(0, 100)}`;
   if (imageDataCache.has(cacheKey)) {
@@ -953,7 +998,7 @@ function decodeSvgDataUrl(dataUrl: string): string | null {
     // URL-encoded or UTF-8 data URL
     const commaIndex = dataUrl.indexOf(",");
     if (commaIndex >= 0) {
-      return decodeURIComponent(dataUrl.slice(commaIndex + 1));
+      return decodeSvgDataPayload(dataUrl.slice(commaIndex + 1));
     }
   } catch {
     // Decode error
