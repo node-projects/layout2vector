@@ -166,7 +166,7 @@ function extractTextNode(
       let quad = allQuads[i];
       const lineStyle: Style = {
         ...parentStyle,
-        textAlign: undefined,
+        textAlign: getMultilineTextAlign(parentStyle.textAlign, i, visibleLineCount),
         textIndent: undefined,
         whiteSpace: preservesWhitespace(parentStyle) ? "pre" : "nowrap",
       };
@@ -189,6 +189,11 @@ function extractTextNode(
   }
 
   return results;
+}
+
+function getMultilineTextAlign(textAlign: string | undefined, lineIndex: number, lineCount: number): string | undefined {
+  if (textAlign !== "justify") return undefined;
+  return lineIndex < lineCount - 1 ? textAlign : undefined;
 }
 
 /**

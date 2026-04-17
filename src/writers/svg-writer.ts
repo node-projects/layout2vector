@@ -64,6 +64,38 @@ type RenderedOutline = {
   offset: number;
 };
 
+type QuadTransform = {
+  width: number;
+  height: number;
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+  e: number;
+  f: number;
+};
+
+function getQuadTransform(points: Quad): QuadTransform | null {
+  const dx = points[1].x - points[0].x;
+  const dy = points[1].y - points[0].y;
+  const ldx = points[3].x - points[0].x;
+  const ldy = points[3].y - points[0].y;
+  const width = Math.hypot(dx, dy);
+  const height = Math.hypot(ldx, ldy);
+  if (width <= 0 || height <= 0) return null;
+
+  return {
+    width,
+    height,
+    a: dx / width,
+    b: dy / width,
+    c: ldx / height,
+    d: ldy / height,
+    e: points[0].x,
+    f: points[0].y,
+  };
+}
+
 function getVisibleOutline(style: Style): RenderedOutline | null {
   if (!style.outlineWidth) return null;
   const width = parseFloat(style.outlineWidth);
@@ -654,6 +686,10 @@ export class SVGWriter implements Writer<string> {
     if (sanitized.length === 0) return;
 
     const opacity = (style.opacity !== undefined && style.opacity < 1) ? style.opacity : undefined;
+    const transform = getQuadTransform(quad);
+    if (!transform) return;
+    const transformed = !isAxisAlignedRect(quad);
+    const usesVerticalWriting = !!style.writingMode && style.writingMode !== "horizontal-tb";
 
     // Compute font metrics
     const quadHeight = Math.sqrt((quad[3].x - quad[0].x) ** 2 + (quad[3].y - quad[0].y) ** 2);
@@ -666,17 +702,11 @@ export class SVGWriter implements Writer<string> {
 
     const textColor = getVisibleCssColorString(style.color) ?? getVisibleCssColorString(style.fill) ?? "#000000";
 
-    // Compute rotation
-    const dx = quad[1].x - quad[0].x;
-    const dy = quad[1].y - quad[0].y;
-    const angle = Math.atan2(dy, dx);
-    const angleDeg = angle * (180 / Math.PI);
-
-    // Text position: em-square top (quad[0] offset by half-leading toward quad[3])
     const halfLeading = Math.max(0, (quadHeight - fontSize) / 2);
-    const t = quadHeight > 0 ? halfLeading / quadHeight : 0;
-    const x = quad[0].x + (quad[3].x - quad[0].x) * t;
-    const y = quad[0].y + (quad[3].y - quad[0].y) * t;
+    const x = transformed ? 0 : quad[0].x;
+    const y = transformed
+      ? (usesVerticalWriting ? 0 : halfLeading)
+      : quad[0].y + (quadHeight > 0 ? (quad[3].y - quad[0].y) * (halfLeading / quadHeight) : 0);
 
     const attrs: string[] = [];
     attrs.push(`x="${n(x)}" y="${n(y)}"`);
@@ -697,8 +727,8 @@ export class SVGWriter implements Writer<string> {
       attrs.push(`word-spacing="${escXml(style.wordSpacing)}"`);
     }
 
-    if (Math.abs(angleDeg) > 0.5) {
-      attrs.push(`transform="rotate(${n(angleDeg)},${n(x)},${n(y)})"`);
+    if (transformed) {
+      attrs.push(`transform="matrix(${n(transform.a)},${n(transform.b)},${n(transform.c)},${n(transform.d)},${n(transform.e)},${n(transform.f)})"`);
     }
     if (opacity !== undefined) {
       attrs.push(`opacity="${n(opacity)}"`);
@@ -732,7 +762,7 @@ export class SVGWriter implements Writer<string> {
 
     // Justified text: use textLength to stretch text to match the original quad width
     if (style.textAlign === "justify") {
-      const quadWidth = Math.sqrt(dx * dx + dy * dy);
+      const quadWidth = transform.width;
       if (quadWidth > 0) {
         attrs.push(`textLength="${n(quadWidth)}" lengthAdjust="spacing"`);
       }

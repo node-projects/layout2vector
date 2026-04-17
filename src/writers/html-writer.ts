@@ -512,7 +512,6 @@ export class HTMLWriter implements Writer<string> {
         css.push(`text-shadow:${style.textShadow}`);
       }
       if (style.textAlign === "justify") {
-        css.push("text-align:justify");
         css.push("text-align-last:justify");
       }
 
@@ -544,7 +543,6 @@ export class HTMLWriter implements Writer<string> {
         const quadWidth = Math.sqrt(dx * dx + dy * dy);
         if (quadWidth > 0) {
           css.push(`width:${n(quadWidth)}px`);
-          css.push("text-align:justify");
           css.push("text-align-last:justify");
         }
       }

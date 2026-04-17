@@ -30,15 +30,36 @@ import { isAxisAlignedRect } from "./shared/writer-utils.js";
 // ── Shared helpers ──────────────────────────────────────────────────
 
 function parseBorderRadius(borderRadius: string | undefined, elWidth?: number, elHeight?: number): { rx: number; ry: number } | null {
-  if (!borderRadius || borderRadius === "0px") return null;
-  const hasPercent = borderRadius.includes("%");
-  const parts = borderRadius.split(/\s+/).map(s => parseFloat(s)).filter(n => !isNaN(n) && n > 0);
-  if (parts.length === 0) return null;
-  let rx = parts[0], ry = parts.length > 1 ? parts[1] : parts[0];
-  if (hasPercent) {
-    rx = (elWidth ?? 0) * rx / 100 || rx;
-    ry = (elHeight ?? 0) * ry / 100 || ry;
+  if (!borderRadius || borderRadius === "0px" || borderRadius === "0%") return null;
+
+  const [horizontalPart, verticalPart] = borderRadius.split("/").map((part) => part.trim());
+  const horizontalTokens = horizontalPart.split(/\s+/).filter(Boolean);
+  const verticalTokens = (verticalPart || horizontalPart).split(/\s+/).filter(Boolean);
+
+  const parseRadiusToken = (token: string | undefined, reference: number | undefined): number | null => {
+    if (!token) return null;
+    const value = parseFloat(token);
+    if (!Number.isFinite(value) || value <= 0) return null;
+    if (token.includes("%")) {
+      return reference !== undefined && reference > 0 ? (reference * value) / 100 : value;
+    }
+    return value;
+  };
+
+  let rx = parseRadiusToken(horizontalTokens[0], elWidth);
+  let ry = parseRadiusToken(verticalTokens[0] ?? horizontalTokens[1] ?? horizontalTokens[0], elHeight);
+  if (rx == null || ry == null) return null;
+
+  if ((elWidth ?? 0) > 0 && (elHeight ?? 0) > 0) {
+    const scaleX = elWidth! / (rx * 2);
+    const scaleY = elHeight! / (ry * 2);
+    const scale = Math.min(1, scaleX, scaleY);
+    if (scale < 1) {
+      rx *= scale;
+      ry *= scale;
+    }
   }
+
   return { rx, ry };
 }
 
