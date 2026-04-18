@@ -72,6 +72,7 @@ export async function injectLibrary(page: Page): Promise<void> {
       "writers/shared/css-color.js",
       "writers/shared/gradient-utils.js",
       "shared/text-whitespace.js",
+      "shared/zlib-inflate.js",
       "writers/shared/writer-utils.js",
       "geometry.js",
       "traversal.js",

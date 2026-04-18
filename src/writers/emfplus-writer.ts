@@ -1,5 +1,6 @@
 import type { Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath, type PathSegment } from "../geometry.js";
+import { inflateZlibSync } from "../shared/zlib-inflate.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds, type ClipPathShape } from "./shared/clip-path.js";
 import { parseCssColor } from "./shared/css-color.js";
@@ -287,20 +288,6 @@ function decodeDataUrl(dataUrl: string): { mimeType: string; data: Uint8Array } 
   return { mimeType, data: new TextEncoder().encode(decodeURIComponent(payload)) };
 }
 
-async function inflateDeflate(data: Uint8Array): Promise<Uint8Array> {
-  if (typeof DecompressionStream !== "undefined") {
-    const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream("deflate"));
-    return new Uint8Array(await new Response(stream).arrayBuffer());
-  }
-
-  if (typeof process !== "undefined" && typeof process.versions === "object" && process.versions?.node) {
-    const zlib = await import("node:zlib");
-    return Uint8Array.from(zlib.inflateSync(data));
-  }
-
-  throw new Error("No deflate decompressor available");
-}
-
 function readUint32BE(bytes: Uint8Array, offset: number): number {
   return (
     (bytes[offset] << 24)
@@ -366,8 +353,8 @@ async function decodePng(data: Uint8Array): Promise<PngImage | null> {
 
   const channelCount = colorType === 6 ? 4 : 3;
   const stride = width * channelCount;
-  const inflated = await inflateDeflate(concatBytes(...idatChunks));
-  if (inflated.byteLength < height * (stride + 1)) return null;
+  const inflated = inflateZlibSync(concatBytes(...idatChunks));
+  if (!inflated || inflated.byteLength < height * (stride + 1)) return null;
 
   const rowBytes = width * channelCount;
   const rgba = new Uint8Array(width * height * 4);

@@ -6,6 +6,7 @@
 import type { Quad, IRNode, Options, Style } from "../types.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
 import { getElementQuad } from "../geometry.js";
+import { inflateZlibSync } from "../shared/zlib-inflate.js";
 
 /**
  * Cache for image rasterization results, keyed by source URL + dimensions.
@@ -1190,7 +1191,7 @@ function decodePngDataUrl(dataUrl: string): { width: number; height: number; rgb
     for (const chunk of idatChunks) { compressed.set(chunk, pos); pos += chunk.length; }
 
     // Decompress zlib-wrapped IDAT data
-    const rawData = inflateSync(compressed);
+    const rawData = inflateZlibSync(compressed);
     const bpp = channels; // bytes per pixel
     const rowBytes = width * bpp + 1; // +1 for filter byte
     if (!rawData || rawData.length < rowBytes) return null; // need at least 1 row
@@ -1255,143 +1256,3 @@ function paethPredictor(a: number, b: number, c: number): number {
   return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 }
 
-/**
- * Synchronous zlib inflate (decompress). Handles the zlib wrapper (2-byte header)
- * and the raw deflate stream. Minimal implementation sufficient for PNG IDAT chunks.
- */
-function inflateSync(data: Uint8Array): Uint8Array | null {
-  // Skip zlib header (2 bytes: CMF + FLG)
-  if (data.length < 6) return null;
-  const cmf = data[0];
-  if ((cmf & 0x0F) !== 8) return null; // not deflate
-  let pos = 2;
-
-  const output: number[] = [];
-
-  // Read bits LSB-first
-  let bitBuf = 0;
-  let bitCount = 0;
-
-  function readBits(n: number): number {
-    while (bitCount < n) {
-      if (pos >= data.length) return -1;
-      bitBuf |= data[pos++] << bitCount;
-      bitCount += 8;
-    }
-    const val = bitBuf & ((1 << n) - 1);
-    bitBuf >>>= n;
-    bitCount -= n;
-    return val;
-  }
-
-  function readHuffman(lengths: number[], maxBits: number): number {
-    // Build lookup table
-    const counts = new Array(maxBits + 1).fill(0);
-    for (const l of lengths) if (l > 0) counts[l]++;
-    const offsets = new Array(maxBits + 2).fill(0);
-    for (let i = 1; i <= maxBits; i++) offsets[i + 1] = offsets[i] + counts[i];
-    const symbols = new Array(lengths.length);
-    for (let i = 0; i < lengths.length; i++) {
-      if (lengths[i] > 0) symbols[offsets[lengths[i]]++] = i;
-    }
-
-    // Decode one symbol
-    let code = 0, first = 0, idx = 0;
-    for (let len = 1; len <= maxBits; len++) {
-      code |= readBits(1);
-      const count = counts[len];
-      if (code < first + count) return symbols[idx + code - first];
-      idx += count;
-      first = (first + count) << 1;
-      code <<= 1;
-    }
-    return -1;
-  }
-
-  // fixed Huffman tables
-  const fixedLitLen: number[] = [];
-  for (let i = 0; i <= 143; i++) fixedLitLen.push(8);
-  for (let i = 144; i <= 255; i++) fixedLitLen.push(9);
-  for (let i = 256; i <= 279; i++) fixedLitLen.push(7);
-  for (let i = 280; i <= 287; i++) fixedLitLen.push(8);
-  const fixedDist: number[] = new Array(32).fill(5);
-
-  const lenBase = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
-  const lenExtra = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
-  const distBase = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
-  const distExtra = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
-
-  let bfinal = 0;
-  while (!bfinal) {
-    bfinal = readBits(1);
-    const btype = readBits(2);
-
-    if (btype === 0) {
-      // Stored block
-      bitBuf = 0; bitCount = 0; // align to byte
-      const len = data[pos] | (data[pos + 1] << 8); pos += 4; // len + nlen
-      for (let i = 0; i < len; i++) output.push(data[pos++]);
-    } else {
-      let litLenLens: number[];
-      let distLens: number[];
-
-      if (btype === 1) {
-        litLenLens = fixedLitLen;
-        distLens = fixedDist;
-      } else if (btype === 2) {
-        // Dynamic Huffman
-        const hlit = readBits(5) + 257;
-        const hdist = readBits(5) + 1;
-        const hclen = readBits(4) + 4;
-        const codeLenOrder = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
-        const codeLenLens = new Array(19).fill(0);
-        for (let i = 0; i < hclen; i++) codeLenLens[codeLenOrder[i]] = readBits(3);
-
-        const allLens: number[] = [];
-        while (allLens.length < hlit + hdist) {
-          const sym = readHuffman(codeLenLens, 7);
-          if (sym < 16) {
-            allLens.push(sym);
-          } else if (sym === 16) {
-            const rep = readBits(2) + 3;
-            const val = allLens[allLens.length - 1] || 0;
-            for (let i = 0; i < rep; i++) allLens.push(val);
-          } else if (sym === 17) {
-            const rep = readBits(3) + 3;
-            for (let i = 0; i < rep; i++) allLens.push(0);
-          } else if (sym === 18) {
-            const rep = readBits(7) + 11;
-            for (let i = 0; i < rep; i++) allLens.push(0);
-          }
-        }
-        litLenLens = allLens.slice(0, hlit);
-        distLens = allLens.slice(hlit, hlit + hdist);
-      } else {
-        return null; // invalid block type
-      }
-
-      // Decode symbols
-      while (true) {
-        const sym = readHuffman(litLenLens, 15);
-        if (sym < 0) return null;
-        if (sym === 256) break; // end of block
-        if (sym < 256) {
-          output.push(sym);
-        } else {
-          // Length/distance pair
-          const lenIdx = sym - 257;
-          const length = lenBase[lenIdx] + readBits(lenExtra[lenIdx]);
-          const distSym = readHuffman(distLens, 15);
-          if (distSym < 0) return null;
-          const distance = distBase[distSym] + readBits(distExtra[distSym]);
-          if (distance > output.length) return null; // invalid back-reference
-          for (let i = 0; i < length; i++) {
-            output.push(output[output.length - distance]);
-          }
-        }
-      }
-    }
-  }
-
-  return new Uint8Array(output);
-}
