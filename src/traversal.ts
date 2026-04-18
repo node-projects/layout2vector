@@ -8,6 +8,14 @@ type CoordinateTransform = { a: number; b: number; c: number; d: number; e: numb
 
 const IDENTITY_TRANSFORM: CoordinateTransform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
 
+function createsOverflowClip(overflow: string | undefined): boolean {
+  return overflow === "hidden"
+    || overflow === "clip"
+    || overflow === "scroll"
+    || overflow === "auto"
+    || overflow === "overlay";
+}
+
 /** Represents a node in the stacking context tree. */
 export interface StackingNode {
   element: Element;
@@ -266,12 +274,12 @@ function buildStackingNode(
     clipBounds: parentClipBounds,
   };
 
-  // Determine clip bounds for children: if this element has overflow:hidden
-  // (and optionally border-radius), children should be clipped to this boundary
+  // Determine clip bounds for children: if this element has clipped or scrollable
+  // overflow, children should be clipped to the visible scrollport boundary.
   let childClipBounds = parentClipBounds;
   const overflowX = cs.overflowX || cs.overflow;
   const overflowY = cs.overflowY || cs.overflow;
-  if (overflowX === "hidden" || overflowX === "clip" || overflowY === "hidden" || overflowY === "clip") {
+  if (createsOverflowClip(overflowX) || createsOverflowClip(overflowY)) {
     let rect = element.getBoundingClientRect();
     // Firefox returns height:0 for iframe body with overflow:hidden and only
     // absolutely-positioned children. Use the viewport dimensions instead.
