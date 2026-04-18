@@ -92,6 +92,43 @@ test.describe("PNG Writer Output", () => {
     expect(result.irCount).toBeGreaterThan(0);
   });
 
+  test("preserves holes in compound SVG paths", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <path d="M10 10 H90 V90 H10 Z M35 35 H65 V65 H35 Z" fill="rgb(145, 152, 161)" fill-rule="evenodd" />
+          </svg>
+        </div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: false,
+      });
+      const writer = new (window as any).__HC.PNGWriter(100, 100);
+      const pngResult = await (window as any).__HC.renderIR(ir, writer);
+      await pngResult.finalize();
+      const ctx = pngResult.getCanvas().getContext("2d")!;
+      return {
+        outer: Array.from(ctx.getImageData(20, 20, 1, 1).data),
+        hole: Array.from(ctx.getImageData(50, 50, 1, 1).data),
+      };
+    });
+
+    expect(result.outer[0]).toBeGreaterThan(120);
+    expect(result.outer[0]).toBeLessThan(180);
+    expect(result.outer[1]).toBeGreaterThan(120);
+    expect(result.outer[2]).toBeGreaterThan(120);
+    expect(result.hole[0]).toBeGreaterThan(240);
+    expect(result.hole[1]).toBeGreaterThan(240);
+    expect(result.hole[2]).toBeGreaterThan(240);
+  });
+
   test("handles rounded rectangles", async ({ page }) => {
     await setupPage(
       page,

@@ -27,6 +27,36 @@ function createPolygonNodes(clipPath: string): IRNode[] {
   }];
 }
 
+function createCompoundPathNodes(): IRNode[] {
+  const outer = [
+    { x: 0, y: 0 },
+    { x: 40, y: 0 },
+    { x: 40, y: 40 },
+    { x: 0, y: 40 },
+  ];
+  const inner = [
+    { x: 10, y: 10 },
+    { x: 30, y: 10 },
+    { x: 30, y: 30 },
+    { x: 10, y: 30 },
+  ];
+
+  return [{
+    type: "polyline",
+    points: [...outer, ...inner],
+    closed: true,
+    style: {
+      fill: "#999999",
+      fillRule: "evenodd",
+      pathSubpaths: [
+        { points: outer, closed: true },
+        { points: inner, closed: true },
+      ],
+    },
+    zIndex: 0,
+  }];
+}
+
 function listEmfRecordTypes(bytes: Uint8Array): number[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const types: number[] = [];
@@ -58,6 +88,22 @@ test.describe("Writer clip-path support", () => {
 
     expect(svg).toMatch(/clip-path="url\(#clip\d+\)"/);
     expect(svg).toContain("<path d=\"M50,0 L100,100 L0,100 Z\"");
+  });
+
+  test("HTML writer keeps compound path subpaths in one SVG path", async () => {
+    const writer = new HTMLWriter({ width: 40, height: 40 });
+    const html = await renderIR(createCompoundPathNodes(), writer);
+
+    expect(html).toContain('fill-rule="evenodd"');
+    expect(html).toContain('M0,0 L40,0 L40,40 L0,40 Z M10,10 L30,10 L30,30 L10,30 Z');
+  });
+
+  test("SVG writer keeps compound path subpaths in one path element", async () => {
+    const writer = new SVGWriter({ width: 40, height: 40 });
+    const svg = await renderIR(createCompoundPathNodes(), writer);
+
+    expect(svg).toContain('fill-rule="evenodd"');
+    expect(svg).toContain('M0,0 L40,0 L40,40 L0,40 Z M10,10 L30,10 L30,30 L10,30 Z');
   });
 
   test("PDF writer emits clip operators for clip-path shapes", async () => {

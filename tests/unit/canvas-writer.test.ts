@@ -41,6 +41,53 @@ test.describe("CanvasWriter", () => {
     expectMostlyRed(result.pixel);
   });
 
+  test("preserves the full CSS font-family stack when rendering text", async ({ page }) => {
+    await setupPage(page, `<html><body style="margin:0;padding:0;"></body></html>`);
+
+    const result = await page.evaluate(async () => {
+      const originalFillText = CanvasRenderingContext2D.prototype.fillText;
+      let capturedFont = "";
+
+      CanvasRenderingContext2D.prototype.fillText = function (...args) {
+        capturedFont = this.font;
+        return originalFillText.apply(this, args as [string, number, number, number?]);
+      };
+
+      try {
+        const writer = new (window as any).__HC.CanvasWriter({ width: 220, height: 80 });
+        await writer.begin();
+        await writer.drawText(
+          [
+            { x: 20, y: 20 },
+            { x: 200, y: 20 },
+            { x: 200, y: 52 },
+            { x: 20, y: 52 },
+          ],
+          "Stack",
+          {
+            color: "rgb(0, 0, 0)",
+            fontFamily: '"Mona Sans", "Segoe UI", sans-serif',
+            fontSize: "24px",
+            fontWeight: "700",
+            fontStyle: "italic",
+          },
+        );
+        const canvas = await writer.end();
+        return {
+          capturedFont,
+          width: canvas.width,
+        };
+      } finally {
+        CanvasRenderingContext2D.prototype.fillText = originalFillText;
+      }
+    });
+
+    expect(result.width).toBe(220);
+    expect(result.capturedFont).toContain('italic');
+    expect(result.capturedFont).toMatch(/\b(?:700|bold)\b/);
+    expect(result.capturedFont).toContain('"Mona Sans", "Segoe UI", sans-serif');
+  });
+
   const clipCases = [
     {
       name: "inset()",

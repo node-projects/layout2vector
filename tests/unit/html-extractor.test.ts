@@ -93,6 +93,37 @@ test.describe("HTML Geometry Extraction", () => {
     expect(polygons.length).toBeLessThanOrEqual(2);
   });
 
+  test("skips visibility:hidden pseudo-elements", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="position:relative;width:120px;height:40px;color:black;">
+          Visible
+        </div>
+        <style>
+          #target::after {
+            content: "hidden pseudo";
+            position: absolute;
+            left: 0;
+            top: 20px;
+            visibility: hidden;
+          }
+        </style>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeText: true,
+        includePseudoElements: true,
+      });
+    });
+
+    const textNodes = ir.filter((n: any) => n.type === "text");
+    expect(textNodes.some((node: any) => node.text.includes("hidden pseudo"))).toBe(false);
+  });
+
   test("handles content box type", async ({ page }) => {
     await setupPage(
       page,

@@ -90,6 +90,75 @@ test.describe("Image Extraction", () => {
     expect(imageNode.quad[3].y - imageNode.quad[0].y).toBeCloseTo(60, 0);
   });
 
+  test("preserves transparency for small PNG images", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:4px;height:4px;display:block;" />
+      </body></html>`
+    );
+
+    await page.evaluate(() => {
+      const img = document.getElementById("target") as HTMLImageElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 4;
+      canvas.height = 4;
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, 4, 4);
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(1, 1, 2, 2);
+      img.src = canvas.toDataURL("image/png");
+    });
+
+    await page.waitForFunction(() => {
+      const img = document.getElementById("target") as HTMLImageElement | null;
+      return !!img && img.complete && img.naturalWidth > 0;
+    });
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((n: any) => n.type === "image");
+      if (!imageNode) return null;
+
+      const decoded = await new Promise<{ corner: number[]; center: number[]; mimeType: string | null }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            corner: Array.from(ctx.getImageData(0, 0, 1, 1).data),
+            center: Array.from(ctx.getImageData(1, 1, 1, 1).data),
+            mimeType: imageNode.dataUrl.match(/^data:([^;,]+)/)?.[1] ?? null,
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted image"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return {
+        ...decoded,
+        hasRgbData: Array.isArray(imageNode.rgbData) && imageNode.rgbData.length > 0,
+      };
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.mimeType).toBe("image/png");
+    expect(extracted?.hasRgbData).toBe(true);
+    expect(extracted?.corner[3]).toBe(0);
+    expect(extracted?.center[0]).toBeGreaterThan(200);
+    expect(extracted?.center[1]).toBeLessThan(50);
+    expect(extracted?.center[2]).toBeLessThan(50);
+    expect(extracted?.center[3]).toBe(255);
+  });
+
   test("converts SVG data URL (base64) to vector geometry", async ({ page }) => {
     await setupPage(
       page,
@@ -138,6 +207,45 @@ test.describe("Image Extraction", () => {
 
     expect(polygonNodes.length).toBeGreaterThan(0);
     expect(imageNodes.length).toBe(0);
+  });
+
+  test("keeps a safe data URL for remote SVG image nodes", async ({ page }) => {
+    await page.route("https://assets.example.test/icon.svg", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#8957e5" fill-rule="evenodd" d="M1 1h14v14H1z M5 5h6v6H5z"/></svg>',
+      });
+    });
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="https://assets.example.test/icon.svg" style="width:32px;height:32px;display:block;" />
+      </body></html>`
+    );
+
+    await page.waitForFunction(() => {
+      const img = document.getElementById("target") as HTMLImageElement | null;
+      return !!img && img.complete && img.naturalWidth > 0;
+    });
+
+    const imageNode = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      return ir.find((n: any) => n.type === "image") ?? null;
+    });
+
+    expect(imageNode).not.toBeNull();
+    expect(imageNode.dataUrl).toMatch(/^data:image\//);
+    expect(imageNode.dataUrl).not.toBe("https://assets.example.test/icon.svg");
   });
 
   test("does NOT extract images when includeImages is false/unset", async ({ page }) => {
@@ -381,6 +489,65 @@ test.describe("Image Extraction", () => {
     const polygonNodes = ir.filter((n: any) => n.type === "polygon");
     // Should have at least the element's own polygon + the SVG rect polygon
     expect(polygonNodes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test("extracts quoted background-image SVG data URL with embedded quotes", async ({ page }) => {
+    const SVG_BG = "data:image/svg+xml,<svg focusable=\\\"false\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" viewBox=\\\"0 0 100 100\\\"><rect width=\\\"100\\\" height=\\\"100\\\" fill=\\\"%2300f\\\"></rect></svg>";
+
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          width: 100px;
+          height: 100px;
+          background-image: url("${SVG_BG}");
+          background-size: cover;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <div id="target"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const polygonNodes = ir.filter((n: any) => n.type === "polygon");
+    expect(polygonNodes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  test("extracts CSS-escaped background-image SVG data URL as vector geometry", async ({ page }) => {
+    const SVG_BG = "data:image/svg+xml,\\00003csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'\\00003e\\00003crect width='100' height='100' fill='%2300f'/\\00003e\\00003c/svg\\00003e";
+
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          width: 100px;
+          height: 100px;
+          background-image: url("${SVG_BG}");
+          background-size: cover;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <div id="target"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const polygonNodes = ir.filter((n: any) => n.type === "polygon");
+    expect(polygonNodes.length).toBeGreaterThanOrEqual(2);
+    expect(ir.some((n: any) => n.type === "image")).toBe(false);
   });
 
   test("does NOT extract background-image when includeImages is false", async ({ page }) => {

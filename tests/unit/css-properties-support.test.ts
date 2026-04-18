@@ -70,6 +70,57 @@ text withlongtoken</p>
     expect(summary.verticalStyle.writingMode).toBe("vertical-rl");
   });
 
+  test("extractIR preserves visible lines for multi-line line-clamp ellipsis", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><head><style>
+        #clamp {
+          width: 165px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          color: rgb(240, 246, 252);
+          font-family: "Mona Sans VF", Arial, sans-serif;
+          font-size: 14px;
+          line-height: 21px;
+        }
+      </style></head><body style="margin:0;padding:24px;background:rgb(13, 17, 23);">
+        <a id="clamp" href="#">CodeQL 2.25.2 adds Kotlin 2.3.20 support and other updates</a>
+      </body></html>`
+    );
+
+    const lines = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const ir = await extract(document.getElementById("clamp"), { boxType: "border", includeText: true });
+      return ir.filter((node: any) => node.type === "text").map((node: any) => node.text);
+    });
+
+    expect(lines).toHaveLength(2);
+    expect(lines.join(" ")).toContain("CodeQL 2.25.2 adds");
+    expect(lines[1]).toMatch(/Kotlin|2\.3\.20|support/);
+    expect(lines[1].endsWith("…")).toBe(true);
+  });
+
+  test("extractIR does not force ellipsis when single-line text still fits", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;background:rgb(13, 17, 23);color:rgb(240, 246, 252);font:600 14px/1.5 'Mona Sans VF', Arial, sans-serif;">
+        <span id="fits" style="display:inline-block;width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">roji</span>
+      </body></html>`
+    );
+
+    const text = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const ir = await extract(document.getElementById("fits"), { boxType: "border", includeText: true });
+      return ir.find((node: any) => node.type === "text")?.text;
+    });
+
+    expect(text).toBe("roji");
+  });
+
   test("HTML writer emits carried CSS properties for transformed boxes and text", async () => {
     const polygonPoints: Quad = [
       { x: 24, y: 18 },
@@ -146,6 +197,93 @@ text withlongtoken</p>
     expect(html).toContain("-webkit-mask:linear-gradient");
   });
 
+  test("HTML writer emits per-side borders from extracted box styles", async () => {
+    const boxQuad: Quad = [
+      { x: 20, y: 20 },
+      { x: 80, y: 20 },
+      { x: 80, y: 60 },
+      { x: 20, y: 60 },
+    ];
+
+    const nodes: IRNode[] = [{
+      type: "polygon",
+      points: boxQuad,
+      style: {
+        borderLeftWidth: "0.8px",
+        borderLeftStyle: "solid",
+        borderLeftColor: "rgba(248, 249, 250, 0.25)",
+        borderBottomWidth: "1px",
+        borderBottomStyle: "solid",
+        borderBottomColor: "rgb(68, 71, 70)",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new HTMLWriter({ width: 120, height: 90 });
+    const html = await renderIR(nodes, writer);
+
+    expect(html).toContain("border-left:0.8px solid rgba(248, 249, 250, 0.25)");
+    expect(html).toContain("border-bottom:1px solid rgb(68, 71, 70)");
+  });
+
+  test("HTML writer applies image border radius", async () => {
+    const imageQuad: Quad = [
+      { x: 20, y: 20 },
+      { x: 52, y: 20 },
+      { x: 52, y: 52 },
+      { x: 20, y: 52 },
+    ];
+
+    const nodes: IRNode[] = [{
+      type: "image",
+      quad: imageQuad,
+      dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wn8n8QAAAAASUVORK5CYII=",
+      width: 32,
+      height: 32,
+      style: {
+        borderRadius: "50%",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new HTMLWriter({ width: 80, height: 80 });
+    const html = await renderIR(nodes, writer);
+
+    expect(html).toContain("border-radius:50%");
+    expect(html).toContain("<img src=\"data:image/png;base64,");
+  });
+
+  test("HTML writer uses the extracted text quad height for positioned text", async () => {
+    const textQuad: Quad = [
+      { x: 24, y: 10 },
+      { x: 84, y: 10 },
+      { x: 84, y: 26 },
+      { x: 24, y: 26 },
+    ];
+
+    const nodes: IRNode[] = [{
+      type: "text",
+      quad: textQuad,
+      text: "Merged",
+      style: {
+        color: "rgb(255, 255, 255)",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "12px",
+        fontWeight: "500",
+        lineHeight: "24px",
+        whiteSpace: "nowrap",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new HTMLWriter({ width: 120, height: 60 });
+    const html = await renderIR(nodes, writer);
+
+    expect(html).toContain("top:10px");
+    expect(html).toContain("line-height:16px");
+    expect(html).not.toContain("line-height:24px");
+  });
+
   test("SVG writer emits native writing-mode and direction attributes for text", async () => {
     const textQuad: Quad = [
       { x: 20, y: 24 },
@@ -160,9 +298,13 @@ text withlongtoken</p>
       text: "VERTICAL",
       style: {
         color: "rgb(12, 34, 56)",
-        fontFamily: "Georgia, serif",
+        fontFamily: '"Mona Sans", "Segoe UI", sans-serif',
         fontSize: "28px",
         fontWeight: "700",
+        fontStyle: "italic",
+        letterSpacing: "2px",
+        wordSpacing: "4px",
+        textDecoration: "underline",
         direction: "rtl",
         writingMode: "vertical-rl",
       },
@@ -175,6 +317,63 @@ text withlongtoken</p>
     expect(svg).toContain('writing-mode="vertical-rl"');
     expect(svg).toContain('direction="rtl"');
     expect(svg).toContain('unicode-bidi="embed"');
+    expect(svg).toContain('font-family="&quot;Mona Sans&quot;, &quot;Segoe UI&quot;, sans-serif"');
+    expect(svg).toContain('font-style="italic"');
+    expect(svg).toContain('font-weight="700"');
+    expect(svg).toContain('letter-spacing="2px"');
+    expect(svg).toContain('word-spacing="4px"');
+    expect(svg).toContain('text-decoration="underline"');
+  });
+
+  test("SVG writer emits outlines for rounded boxes and clips rounded images", async () => {
+    const boxQuad: Quad = [
+      { x: 20, y: 20 },
+      { x: 180, y: 20 },
+      { x: 180, y: 140 },
+      { x: 20, y: 140 },
+    ];
+    const imageQuad: Quad = [
+      { x: 40, y: 160 },
+      { x: 72, y: 160 },
+      { x: 72, y: 192 },
+      { x: 40, y: 192 },
+    ];
+
+    const nodes: IRNode[] = [
+      {
+        type: "polygon",
+        points: boxQuad,
+        style: {
+          fill: "rgb(255, 244, 214)",
+          borderRadius: "18px",
+          outlineColor: "rgb(10, 20, 30)",
+          outlineWidth: "4px",
+          outlineStyle: "dashed",
+          outlineOffset: "6px",
+        },
+        zIndex: 0,
+      },
+      {
+        type: "image",
+        quad: imageQuad,
+        dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wn8n8QAAAAASUVORK5CYII=",
+        width: 32,
+        height: 32,
+        style: {
+          borderRadius: "50%",
+        },
+        zIndex: 1,
+      },
+    ];
+
+    const writer = new SVGWriter({ width: 220, height: 220 });
+    const svg = await renderIR(nodes, writer);
+
+    expect(svg).toContain('stroke="rgb(10, 20, 30)"');
+    expect(svg).toContain('stroke-dasharray="12 12"');
+    expect(svg).toContain('<clipPath id="clip');
+    expect(svg).toContain('<use href="#imgSym');
+    expect(svg).toContain('clip-path="url(#clip');
   });
 
   test("SVG writer emits a conic-gradient pattern fallback", async () => {
