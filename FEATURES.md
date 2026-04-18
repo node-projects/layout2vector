@@ -26,7 +26,8 @@ This matrix lists the concrete output formats discussed in this comparison.
 | DXF | Yes | No | No | No | Native writer in `layout2vector`. |
 | DXF (acad-ts) | Yes | No | No | No | Alternative DXF writer in `layout2vector` using `@node-projects/acad-ts`. |
 | DWG | Yes | No | No | No | Native writer in `layout2vector` using `@node-projects/acad-ts`. |
-| EMF | Yes | No | No | No | Native writer in `layout2vector`. |
+| EMF | Yes | No | No | No | Native GDI EMF writer in `layout2vector`. |
+| EMF+ | Yes | No | No | No | Native EMF+ writer in `layout2vector` using an EMF container with EMF+ comment records. |
 | PDF | Yes | No | No | Partial | `layout2vector` has a native PDF writer. SnapDOM documents PDF export through the official `pdf-image` plugin, which embeds a raster capture into a downloadable PDF. |
 | PNG | Yes | Yes | Yes | Yes | html2canvas and html2canvas-pro export PNG through the returned canvas. SnapDOM exposes `toPng()`. |
 | JPEG | Yes | Yes | Yes | Yes | html2canvas and html2canvas-pro export JPEG through canvas APIs. SnapDOM exposes `toJpg()`. |
@@ -41,7 +42,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | --- | --- | --- | --- | --- | --- |
 | Core rendering model | Structured DOM -> IR -> writer pipeline | DOM -> canvas reconstruction | DOM -> canvas reconstruction | Clone -> style/resource inlining -> SVG `foreignObject` -> export | `layout2vector` exposes typed IR nodes and writer backends; the others are screenshot-first. |
 | Requires a temporary cloned document/container | No | Yes | Yes | Yes | html2canvas exposes clone-oriented options such as `onclone` and `removeContainer`. html2canvas-pro stays clone-based and adds `iframeContainer` plus document-cloner fixes. SnapDOM explicitly documents a clone-based capture flow. |
-| Built-in output formats | DXF, DWG, EMF, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | SVG, PNG, JPG, WEBP, Canvas, Blob | SnapDOM's PDF story is plugin-based, not a built-in core writer. |
+| Built-in output formats | DXF, DWG, EMF, EMF+, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | SVG, PNG, JPG, WEBP, Canvas, Blob | SnapDOM's PDF story is plugin-based, not a built-in core writer. |
 | Structured IR / custom backends | Yes | No | No | Partial | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. SnapDOM can add custom exports through beta plugins, but it does not expose a typed scene graph. |
 | Plugin / hook system around capture | No | No | No | Yes | SnapDOM documents `beforeSnap`, `beforeClone`, `afterClone`, `beforeRender`, `afterRender`, `beforeExport`, `afterExport`, and `defineExports`. |
 | Keeps text as text/vector objects | Yes | No | No | No | html2canvas, html2canvas-pro, and SnapDOM are screenshot-oriented. `layout2vector` preserves text nodes for text-capable writers, including extracted font-family stacks in the HTML, SVG, and Canvas/Image outputs. |
@@ -68,7 +69,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Font embedding / icon-font controls | No | No | No | Yes | I did not find a public font-embedding control surface in `layout2vector`, html2canvas, or html2canvas-pro. SnapDOM documents `embedFonts`, `localFonts`, `iconFonts`, and `excludeFonts`. |
 | Cache control / pre-cache API | No | No | No | Yes | `layout2vector` has internal caches but no public cache mode API. SnapDOM documents `cache` modes and `preCache()`. |
 | Cross-origin image control knobs | Partial | Yes | Yes+ | Yes | html2canvas documents `allowTaint`, `useCORS`, and `proxy`. html2canvas-pro keeps those and adds `customIsSameOrigin`. SnapDOM documents `useProxy` plus fallback image handling. `layout2vector` preloads images, but browser security still applies. |
-| CAD / print / vector-document workflows | Yes | No | No | No | This is the clearest product split: `layout2vector` targets DXF, DWG, EMF, PDF, SVG, and HTML export, not just screenshots. |
+| CAD / print / vector-document workflows | Yes | No | No | No | This is the clearest product split: `layout2vector` targets DXF, DWG, EMF, EMF+, PDF, SVG, and HTML export, not just screenshots. |
 
 ## Takeaways
 

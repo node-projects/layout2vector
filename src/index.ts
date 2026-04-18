@@ -36,6 +36,7 @@ export { extractPseudoElements, parseCSSContentValue } from "./extractors/pseudo
 // Writers
 export { DXFWriter, type DXFWriterOptions } from "./writers/dxf-writer.js";
 export { EMFWriter, type EMFWriterOptions } from "./writers/emf-writer.js";
+export { EMFPlusWriter, type EMFPlusWriterOptions } from "./writers/emfplus-writer.js";
 export { PDFWriter, type PDFWriterOptions } from "./writers/pdf-writer.js";
 export { CanvasWriter, type CanvasWriterOptions } from "./writers/canvas-writer.js";
 export { ImageWriter, ImageResult, type ImageWriterOptions } from "./writers/image-writer.js";

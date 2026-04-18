@@ -1,12 +1,22 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
+import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
 
+const EMR_COMMENT = 0x0046;
 const EMR_EXTCREATEFONTINDIRECTW = 0x0052;
 const EMR_STRETCHDIBITS = 0x0051;
 const EMR_ROUNDRECT = 0x002C;
+const EMFPLUS_COMMENT_IDENTIFIER = 0x2B464D45;
+const EMFPLUS_HEADER = 0x4001;
+const EMFPLUS_EOF = 0x4002;
+const EMFPLUS_OBJECT = 0x4008;
+const EMFPLUS_FILL_PATH = 0x4014;
+const EMFPLUS_DRAW_PATH = 0x4015;
+const EMFPLUS_DRAW_IMAGE_POINTS = 0x401B;
+const EMFPLUS_DRAW_STRING = 0x401C;
 
 function findRecord(emfBytes: Uint8Array, targetType: number): { offset: number; size: number } | null {
   const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
@@ -41,6 +51,51 @@ function countRecords(emfBytes: Uint8Array, targetType: number): number {
   }
 
   return count;
+}
+
+function getEmfPlusCommentRecords(emfBytes: Uint8Array): Array<{
+  offset: number;
+  size: number;
+  emfPlusType: number;
+  emfPlusFlags: number;
+  emfPlusSize: number;
+  emfPlusDataSize: number;
+}> {
+  const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+  const records: Array<{
+    offset: number;
+    size: number;
+    emfPlusType: number;
+    emfPlusFlags: number;
+    emfPlusSize: number;
+    emfPlusDataSize: number;
+  }> = [];
+  let offset = 0;
+
+  while (offset + 16 <= emfBytes.byteLength) {
+    const type = view.getUint32(offset, true);
+    const size = view.getUint32(offset + 4, true);
+    if (size < 16) break;
+
+    if (type === EMR_COMMENT) {
+      const dataSize = view.getUint32(offset + 8, true);
+      const identifier = view.getUint32(offset + 12, true);
+      if (identifier === EMFPLUS_COMMENT_IDENTIFIER && dataSize >= 16 && offset + 24 <= emfBytes.byteLength) {
+        records.push({
+          offset,
+          size,
+          emfPlusType: view.getUint16(offset + 16, true),
+          emfPlusFlags: view.getUint16(offset + 18, true),
+          emfPlusSize: view.getUint32(offset + 20, true),
+          emfPlusDataSize: view.getUint32(offset + 24, true),
+        });
+      }
+    }
+
+    offset += size;
+  }
+
+  return records;
 }
 
 test.describe("Writer Output", () => {
@@ -241,6 +296,78 @@ test.describe("Writer Output", () => {
     const emfBytes = await renderIR(ir, writer);
 
     expect(countRecords(emfBytes, EMR_ROUNDRECT)).toBeGreaterThanOrEqual(2);
+  });
+
+  test("EMF+ writer produces EMF+ comment records inside a valid EMF container", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="width:200px;height:100px;background:green;">
+          <p style="color:white;font-size:14px;">Hello EMF+</p>
+        </div>
+      </body></html>`
+    );
+
+    const ir: IRNode[] = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+    });
+
+    const writer = new EMFPlusWriter({ width: 200, height: 100 });
+    const emfBytes = await renderIR(ir, writer);
+    const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+    const emfPlusRecords = getEmfPlusCommentRecords(emfBytes);
+
+    expect(view.getUint32(0, true)).toBe(0x00000001);
+    expect(view.getUint32(40, true)).toBe(0x464D4520);
+    expect(emfPlusRecords.length).toBeGreaterThan(0);
+    expect(emfPlusRecords[0]?.emfPlusType).toBe(EMFPLUS_HEADER);
+    expect(emfPlusRecords.at(-1)?.emfPlusType).toBe(EMFPLUS_EOF);
+  });
+
+  test("EMF+ writer emits path, text, image and object records for mixed content", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="position:relative;width:220px;height:120px;background:#fff;overflow:hidden;">
+          <div style="position:absolute;left:12px;top:10px;width:72px;height:48px;background:#f66;border:3px dashed #004488;border-radius:12px;"></div>
+          <img
+            alt="dot"
+            width="2"
+            height="2"
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2P8z8AARAwMjDAGACwBA/+8RVWvAAAAAElFTkSuQmCC"
+            style="position:absolute;left:110px;top:12px;width:28px;height:28px;opacity:0.7;"
+          />
+          <p style="position:absolute;left:12px;top:72px;margin:0;color:#123456;font-size:14px;">Hello EMF+</p>
+        </div>
+      </body></html>`
+    );
+
+    await page.waitForFunction(() => {
+      const img = document.querySelector("img") as HTMLImageElement | null;
+      return !!img && img.complete && img.naturalWidth > 0;
+    });
+
+    const ir: IRNode[] = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeImages: true,
+        includeText: true,
+      });
+    });
+
+    const writer = new EMFPlusWriter({ width: 220, height: 120 });
+    const emfBytes = await renderIR(ir, writer);
+    const emfPlusTypes = getEmfPlusCommentRecords(emfBytes).map((record) => record.emfPlusType);
+
+    expect(emfPlusTypes).toContain(EMFPLUS_OBJECT);
+    expect(emfPlusTypes.some((type) => type === EMFPLUS_FILL_PATH || type === EMFPLUS_DRAW_PATH)).toBe(true);
+    expect(emfPlusTypes).toContain(EMFPLUS_DRAW_STRING);
+    expect(emfPlusTypes).toContain(EMFPLUS_DRAW_IMAGE_POINTS);
   });
 
 });

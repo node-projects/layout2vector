@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **DWG**, **EMF**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **DWG**, **EMF**, **EMF+**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees and, optionally, same-origin iframe documents), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF (Windows Enhanced Metafile), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF and EMF+ (Windows Enhanced Metafile variants), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
 
 For a feature-by-feature comparison with html2canvas, html2canvas-pro, and SnapDOM, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
 
@@ -25,7 +25,7 @@ npm install @node-projects/layout2vector
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, DWGWriter, AcadDXFWriter, EMFWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, DWGWriter, AcadDXFWriter, EMFWriter, EMFPlusWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -78,11 +78,15 @@ const htmlString = await renderIR(ir, htmlWriter);
 const emfWriter = new EMFWriter({ width: 800, height: 600 });
 const emfBytes = await renderIR(ir, emfWriter); // Uint8Array → save as .emf file
 
-// 9. Render to DWG (AutoCAD binary format via @node-projects/acad-ts)
+// 9. Render to EMF+ (EMF container with EMF+ records)
+const emfPlusWriter = new EMFPlusWriter({ width: 800, height: 600 });
+const emfPlusBytes = await renderIR(ir, emfPlusWriter); // Uint8Array → save as .emf file
+
+// 10. Render to DWG (AutoCAD binary format via @node-projects/acad-ts)
 const dwgWriter = new DWGWriter({ maxY: document.documentElement.scrollHeight });
 const dwgBytes = await renderIR(ir, dwgWriter); // Uint8Array → save as .dwg file
 
-// 10. Render to DXF via acad-ts (alternative DXF writer)
+// 11. Render to DXF via acad-ts (alternative DXF writer)
 const acadDxfWriter = new AcadDXFWriter({ maxY: document.documentElement.scrollHeight });
 const acadDxfBytes = await renderIR(ir, acadDxfWriter);
 // acadDxfBytes is a complete .dxf file as a Uint8Array
@@ -220,6 +224,28 @@ Produces a `Uint8Array` containing a binary **Enhanced Metafile (EMF)** file (Wi
 - Colors → GDI COLORREF (`0x00BBGGRR` values)
 - Transparent elements are skipped
 - Output is a valid AC1015-format EMF file readable by GDI-enabled applications (Word, Visio, AutoCAD, etc.)
+
+
+#### `EMFPlusWriter`
+
+```ts
+type EMFPlusWriterOptions = {
+  width: number;
+  height: number;
+  zoom?: number;
+};
+new EMFPlusWriter(options: EMFPlusWriterOptions)
+```
+
+Produces a `Uint8Array` containing an **EMF+** drawing stream wrapped in an EMF container. Width and height define the viewport in CSS pixels.
+
+- Polygons and rounded shapes → EMF+ path objects with fill/stroke records
+- Polylines → EMF+ path objects with stroke records
+- Text → EMF+ font/string-format objects plus `DrawString`
+- Images → EMF+ bitmap/image objects plus `DrawImagePoints`
+- Clipping → EMF+ clip rect/path state records
+- Transparent elements are skipped
+- Output is still saved as `.emf`, but the payload uses EMF+ records inside `EMR_COMMENT` wrappers
 
 
 

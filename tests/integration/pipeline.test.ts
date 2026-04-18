@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
+import { renderIR } from "../../src/pipeline.js";
+import type { IRNode, Writer } from "../../src/types.js";
 
 test.describe("Full Pipeline: DOM → IR → Writer", () => {
   test("end-to-end: simple div produces complete IR", async ({ page }) => {
@@ -61,6 +63,124 @@ test.describe("Full Pipeline: DOM → IR → Writer", () => {
 
     expect(polygons.length).toBeGreaterThanOrEqual(2); // HTML div + SVG rect
     expect(polylines.length).toBeGreaterThanOrEqual(1); // SVG circle
+  });
+
+  test("end-to-end: zero-size overflow clips descendants", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="root" style="position:relative;width:220px;height:120px;background:#fff;">
+          <div style="position:absolute;left:10px;top:20px;width:0;height:0;overflow:hidden;">
+            <a id="target" style="display:block;width:110px;height:44px;border:2px solid rgba(255, 255, 255, 0.16);color:rgb(10, 10, 10);font:16px/1 Arial, sans-serif;white-space:nowrap;">Hidden link</a>
+          </div>
+        </div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(async () => {
+      const el = document.getElementById("root")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+    });
+
+    const clippedBox = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.borderLeftWidth === "2px" &&
+      node.style.clipBounds?.w === 0 &&
+      node.style.clipBounds?.h === 0
+    );
+    const clippedText = ir.find((node: any) =>
+      node.type === "text" &&
+      node.text.includes("Hidden")
+    );
+
+    expect(clippedBox).toBeDefined();
+    expect(clippedBox.style.clipBounds).toMatchObject({
+      x: 10,
+      y: 20,
+      w: 0,
+      h: 0,
+    });
+    expect(clippedText).toBeDefined();
+    expect(clippedText.style.clipBounds).toMatchObject({
+      x: 10,
+      y: 20,
+      w: 0,
+      h: 0,
+    });
+  });
+
+  test("renderIR skips nodes that are fully outside their clip bounds", async () => {
+    const calls: string[] = [];
+    const writer: Writer<string> = {
+      begin: async () => {},
+      drawPolygon: async () => { calls.push("polygon"); },
+      drawPolyline: async () => { calls.push("polyline"); },
+      drawText: async (_quad, text) => { calls.push(`text:${text}`); },
+      drawImage: async () => { calls.push("image"); },
+      end: async () => calls.join(","),
+    };
+
+    const nodes: IRNode[] = [
+      {
+        type: "polygon",
+        points: [
+          { x: 0, y: 0 },
+          { x: 20, y: 0 },
+          { x: 20, y: 20 },
+          { x: 0, y: 20 },
+        ],
+        style: { fill: "rgb(255, 0, 0)" },
+        zIndex: 0,
+      },
+      {
+        type: "text",
+        quad: [
+          { x: 30, y: 0 },
+          { x: 90, y: 0 },
+          { x: 90, y: 20 },
+          { x: 30, y: 20 },
+        ],
+        text: "Visible",
+        style: { color: "rgb(0, 0, 0)" },
+        zIndex: 1,
+      },
+      {
+        type: "polygon",
+        points: [
+          { x: 40, y: 40 },
+          { x: 80, y: 40 },
+          { x: 80, y: 80 },
+          { x: 40, y: 80 },
+        ],
+        style: {
+          fill: "rgb(0, 0, 255)",
+          clipBounds: { x: 10, y: 10, w: 0, h: 0, radius: 0 },
+        },
+        zIndex: 2,
+      },
+      {
+        type: "text",
+        quad: [
+          { x: 100, y: 40 },
+          { x: 180, y: 40 },
+          { x: 180, y: 60 },
+          { x: 100, y: 60 },
+        ],
+        text: "Hidden",
+        style: {
+          color: "rgb(0, 0, 0)",
+          clipBounds: { x: 10, y: 10, w: 0, h: 0, radius: 0 },
+        },
+        zIndex: 3,
+      },
+    ];
+
+    await renderIR(nodes, writer);
+
+    expect(calls).toEqual(["polygon", "text:Visible"]);
   });
 
   test("end-to-end: stacking contexts in correct order", async ({ page }) => {

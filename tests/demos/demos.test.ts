@@ -13,6 +13,7 @@ import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
+import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
 import { DWGWriter } from "../../src/writers/acad-writer.js";
 import { AcadDXFWriter } from "../../src/writers/acad-writer.js";
 import { renderIR } from "../../src/pipeline.js";
@@ -37,9 +38,13 @@ const demoFiles = fs
 
 for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
-  const convertFormControls = name === "form-controls" || name === "form2";
+  const convertFormControls = name === "form-controls" || name === "form2" || name === "github" || name === "google";
 
   test(`convert demo: ${name}`, async ({ page, browserName }) => {
+    // Complex pages (e.g. github.html with external CSS) need more time,
+    // especially on Firefox which loads resources differently.
+    test.setTimeout(120_000);
+
     const projectOutputDir = browserName === "chromium" ? outputDir : path.join(outputDir, browserName);
     if (!fs.existsSync(projectOutputDir)) {
       fs.mkdirSync(projectOutputDir, { recursive: true });
@@ -156,13 +161,48 @@ for (const demoFile of demoFiles) {
     expect(ir.length).toBeGreaterThan(0);
 
     // Dump IR for specific demos
-    if (name === "comprehensive" || name === "images" || name === "test4") {
+    if (name === "comprehensive" || name === "images" || name === "test4" || name === "github") {
       const irPath = path.join(projectOutputDir, `${name}-ir.json`);
       fs.writeFileSync(irPath, JSON.stringify(ir, null, 2), "utf-8");
     }
 
-    // Compute bounding box of all IR nodes to determine output dimensions.
-    // Coordinates are root-relative, so the extent of the content defines the viewport.
+    const viewport = await page.evaluate(() => {
+      const root = document.getElementById("root") ?? document.body;
+      const rootElement = root as Element & {
+        getBoxQuads?: (options?: { box?: "border" | "content" }) => DOMQuad[];
+      };
+
+      const quads = rootElement.getBoxQuads?.({ box: "border" }) ?? [];
+      if (quads.length > 0) {
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        for (const quad of quads) {
+          for (const point of [quad.p1, quad.p2, quad.p3, quad.p4]) {
+            if (point.x < minX) minX = point.x;
+            if (point.y < minY) minY = point.y;
+            if (point.x > maxX) maxX = point.x;
+            if (point.y > maxY) maxY = point.y;
+          }
+        }
+
+        const width = Math.ceil(Math.max(maxX - minX, root.scrollWidth, root.clientWidth));
+        const height = Math.ceil(Math.max(maxY - minY, root.scrollHeight, root.clientHeight));
+        return {
+          width: width || 1,
+          height: height || 1,
+        };
+      }
+
+      const rect = root.getBoundingClientRect();
+      return {
+        width: Math.ceil(Math.max(rect.width, root.scrollWidth, root.clientWidth)) || 1,
+        height: Math.ceil(Math.max(rect.height, root.scrollHeight, root.clientHeight)) || 1,
+      };
+    });
+
+    // Fallback to the IR extent if the root box was unexpectedly empty.
     let maxX = 0, maxY = 0;
     for (const node of ir) {
       const pts: Array<{ x: number; y: number }> =
@@ -174,7 +214,8 @@ for (const demoFile of demoFiles) {
         if (p.y > maxY) maxY = p.y;
       }
     }
-    const viewport = { width: Math.ceil(maxX) || 1, height: Math.ceil(maxY) || 1 };
+    if (viewport.width <= 1 && maxX > 0) viewport.width = Math.ceil(maxX);
+    if (viewport.height <= 1 && maxY > 0) viewport.height = Math.ceil(maxY);
 
     // --- DXF output ---
     const dxfWriter = new DXFWriter(viewport.height);
@@ -320,6 +361,14 @@ for (const demoFile of demoFiles) {
     const emfPath = path.join(projectOutputDir, `${name}.emf`);
     fs.writeFileSync(emfPath, emfBytes);
 
+    // --- EMF+ output ---
+    const emfPlusWriter = new EMFPlusWriter({ width: viewport.width, height: viewport.height });
+    const emfPlusBytes = await renderIR(ir, emfPlusWriter);
+    expect(emfPlusBytes).toBeInstanceOf(Uint8Array);
+    expect(emfPlusBytes.length).toBeGreaterThan(80);
+    const emfPlusPath = path.join(projectOutputDir, `${name}-emfplus.emf`);
+    fs.writeFileSync(emfPlusPath, emfPlusBytes);
+
     // --- DWG output ---
     const dwgWriter = new DWGWriter({ maxY: viewport.height });
     const dwgBytes = await renderIR(ir, dwgWriter);
@@ -343,6 +392,7 @@ for (const demoFile of demoFiles) {
     const svgStat = fs.statSync(svgPath);
     const htmlStat = fs.statSync(htmlOutPath);
     const emfStat = fs.statSync(emfPath);
+    const emfPlusStat = fs.statSync(emfPlusPath);
     const dwgStat = fs.statSync(dwgPath);
     const acadDxfStat = fs.statSync(acadDxfPath);
     expect(dxfStat.size).toBeGreaterThan(0);
@@ -351,11 +401,12 @@ for (const demoFile of demoFiles) {
     expect(svgStat.size).toBeGreaterThan(0);
     expect(htmlStat.size).toBeGreaterThan(0);
     expect(emfStat.size).toBeGreaterThan(0);
+    expect(emfPlusStat.size).toBeGreaterThan(0);
     expect(dwgStat.size).toBeGreaterThan(0);
     expect(acadDxfStat.size).toBeGreaterThan(0);
 
     console.log(
-      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes), EMF (${emfStat.size} bytes), DWG (${dwgStat.size} bytes), AcadDXF (${acadDxfStat.size} bytes)`
+      `  \u2713 ${name}: ${ir.length} IR nodes \u2192 DXF (${dxfStat.size} bytes), PDF (${pdfStat.size} bytes), PNG (${pngStat ? pngStat.size + " bytes" : "skipped"}), SVG (${svgStat.size} bytes), HTML (${htmlStat.size} bytes), EMF (${emfStat.size} bytes), EMF+ (${emfPlusStat.size} bytes), DWG (${dwgStat.size} bytes), AcadDXF (${acadDxfStat.size} bytes)`
     );
   });
 }
