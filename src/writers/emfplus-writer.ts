@@ -4,7 +4,14 @@ import { inflateZlibSync } from "../shared/zlib-inflate.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds, type ClipPathShape } from "./shared/clip-path.js";
 import { parseCssColor } from "./shared/css-color.js";
-import { isAxisAlignedRect, parseAverageBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
+import {
+  expandRepeatingGradientStops,
+  normalizeGradientStopOffsets,
+  parseAllGradientsAst,
+  type GradientStopAst,
+  type ParsedGradientAst,
+} from "./shared/gradient-utils.js";
+import { isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 export type EMFPlusWriterOptions = {
   width: number;
@@ -51,6 +58,17 @@ type PngImage = {
   rgba: Uint8Array;
 };
 
+type GradientStop = {
+  offset: number;
+  color: number;
+};
+
+type BackgroundBox = {
+  matrix: [number, number, number, number, number, number];
+  width: number;
+  height: number;
+};
+
 const EMPTY_BYTES: Uint8Array<ArrayBuffer> = new Uint8Array(0);
 
 const EMR = {
@@ -86,6 +104,7 @@ const EMFPLUS = {
 } as const;
 
 const OBJECT_TYPE = {
+  BRUSH: 0x01,
   PEN: 0x02,
   PATH: 0x03,
   IMAGE: 0x05,
@@ -137,10 +156,17 @@ const PATH_POINT_TYPE_BEZIER = 0x03;
 const PATH_POINT_FLAG_CLOSE_SUBPATH = 0x08;
 const PATH_POINT_FLAGS_COMPRESSED = 0x4000;
 const GRAPHICS_VERSION = 0xDBC01001;
+const BRUSH_GRAPHICS_VERSION = 0xDBC01002;
 const EMFPLUS_HEADER_FLAG_DUAL = 0x0001;
 const EMFPLUS_FLAGS_DISPLAY = 0x00000001;
 const DEFAULT_DPI = 96;
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+const BRUSH_TYPE_PATH_GRADIENT = 0x03;
+const BRUSH_TYPE_LINEAR_GRADIENT = 0x04;
+const BRUSH_DATA_PATH = 0x00000001;
+const BRUSH_DATA_TRANSFORM = 0x00000002;
+const BRUSH_DATA_PRESET_COLORS = 0x00000004;
+const CONIC_GRADIENT_SEGMENTS = 120;
 
 const PATH_SLOT = 0;
 const PEN_SLOT = 1;
@@ -148,6 +174,7 @@ const FONT_SLOT = 2;
 const STRING_FORMAT_SLOT = 3;
 const IMAGE_SLOT = 4;
 const DEFAULT_IMAGE_ATTRIBUTES_SLOT = 5;
+const BRUSH_SLOT = 6;
 
 function concatBytes(...chunks: Uint8Array[]): Uint8Array<ArrayBuffer> {
   const total = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
@@ -476,6 +503,13 @@ function cssColorToArgb(value: string | undefined, opacity = 1): number | null {
   return (((alpha << 24) >>> 0) | (parsed.r << 16) | (parsed.g << 8) | parsed.b) >>> 0;
 }
 
+function cssColorToArgbStop(value: string | undefined, opacity = 1): number | null {
+  const parsed = parseCssColor(value);
+  if (!parsed) return null;
+  const alpha = clamp(Math.round(parsed.a * opacity * 255), 0, 255);
+  return (((alpha << 24) >>> 0) | (parsed.r << 16) | (parsed.g << 8) | parsed.b) >>> 0;
+}
+
 function parseVisibleStroke(style: Pick<Style, "stroke" | "strokeWidth" | "strokeDasharray">, opacity: number): RenderedStroke | null {
   const color = cssColorToArgb(style.stroke, opacity);
   if (color === null) return null;
@@ -555,6 +589,102 @@ function parseDashArray(dasharray: string | undefined): number[] {
     .filter((value) => Number.isFinite(value) && value >= 0);
 }
 
+function argbToComponents(color: number): { a: number; r: number; g: number; b: number } {
+  return {
+    a: (color >>> 24) & 0xFF,
+    r: (color >>> 16) & 0xFF,
+    g: (color >>> 8) & 0xFF,
+    b: color & 0xFF,
+  };
+}
+
+function interpolateArgbColor(t: number, stops: GradientStop[], repeating = false): number {
+  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
+  if (sortedStops.length === 0) return 0;
+  if (sortedStops.length === 1) return sortedStops[0].color;
+
+  const maxOffset = sortedStops[sortedStops.length - 1].offset;
+  if (repeating && maxOffset > 0 && maxOffset < 0.999999) {
+    t = ((t % maxOffset) + maxOffset) % maxOffset;
+  }
+
+  if (t <= sortedStops[0].offset) return sortedStops[0].color;
+  if (t >= sortedStops[sortedStops.length - 1].offset) return sortedStops[sortedStops.length - 1].color;
+
+  for (let index = 0; index < sortedStops.length - 1; index += 1) {
+    const start = sortedStops[index];
+    const end = sortedStops[index + 1];
+    if (t < start.offset || t > end.offset) continue;
+
+    const range = end.offset - start.offset;
+    const fraction = range > 0 ? (t - start.offset) / range : 0;
+    const from = argbToComponents(start.color);
+    const to = argbToComponents(end.color);
+    const a = Math.round(from.a + (to.a - from.a) * fraction);
+    const r = Math.round(from.r + (to.r - from.r) * fraction);
+    const g = Math.round(from.g + (to.g - from.g) * fraction);
+    const b = Math.round(from.b + (to.b - from.b) * fraction);
+    return (((a << 24) >>> 0) | (r << 16) | (g << 8) | b) >>> 0;
+  }
+
+  return sortedStops[sortedStops.length - 1].color;
+}
+
+function ensureGradientEdgeStops(stops: GradientStop[], repeating = false): GradientStop[] {
+  const sortedStops = [...stops]
+    .map((stop) => ({ ...stop, offset: clamp(stop.offset, 0, 1) }))
+    .sort((left, right) => left.offset - right.offset);
+  if (sortedStops.length === 0) return sortedStops;
+
+  if (sortedStops[0].offset > 0) {
+    sortedStops.unshift({ offset: 0, color: sortedStops[0].color });
+  }
+
+  const lastStop = sortedStops[sortedStops.length - 1];
+  if (lastStop.offset < 1) {
+    sortedStops.push({
+      offset: 1,
+      color: repeating ? interpolateArgbColor(1, sortedStops, true) : lastStop.color,
+    });
+  }
+
+  return sortedStops;
+}
+
+function resolveGradientStops(stopsAst: GradientStopAst<number>[], scaleLength: number, repeating: boolean): GradientStop[] {
+  if (scaleLength <= 0) return [];
+
+  const hasPixelStop = stopsAst.some((stop) => stop.unit === "px");
+  const stops = stopsAst.map((stop) => ({
+    color: stop.color,
+    offset: stop.unit === "auto"
+      ? -1
+      : stop.unit === "px"
+        ? stop.offset / scaleLength
+        : stop.offset,
+  }));
+
+  if (stops.length < 2) return [];
+
+  const normalized = normalizeGradientStopOffsets(stops);
+  if (repeating) {
+    const repeatedSource = [...normalized].sort((left, right) => left.offset - right.offset);
+    if (repeatedSource.length > 0 && repeatedSource[0].offset > 0) {
+      repeatedSource.unshift({ offset: 0, color: repeatedSource[0].color });
+    }
+    return ensureGradientEdgeStops(expandRepeatingGradientStops(repeatedSource, (sortedStops) => ({
+      offset: 1,
+      color: interpolateArgbColor(1, [...sortedStops], true),
+    })).map((stop) => ({ ...stop, offset: clamp(stop.offset, 0, 1) })), true);
+  }
+
+  if (hasPixelStop) {
+    return ensureGradientEdgeStops(normalized, false);
+  }
+
+  return ensureGradientEdgeStops(normalized, false);
+}
+
 function createStrokeFromBorder(color: string | undefined, width: string | undefined, borderStyle: string | undefined, opacity: number): RenderedStroke | null {
   const argb = cssColorToArgb(color, opacity);
   const numericWidth = parseNumeric(width);
@@ -591,6 +721,28 @@ function quadToTransform(quad: Quad): { matrix: [number, number, number, number,
     ],
     width,
     height,
+  };
+}
+
+function transformPoint(matrix: [number, number, number, number, number, number], point: Point): Point {
+  return {
+    x: matrix[0] * point.x + matrix[2] * point.y + matrix[4],
+    y: matrix[1] * point.x + matrix[3] * point.y + matrix[5],
+  };
+}
+
+function transformFigure(figure: PathFigure, matrix: [number, number, number, number, number, number]): PathFigure {
+  return {
+    start: transformPoint(matrix, figure.start),
+    segments: figure.segments.map((segment) => segment.kind === "line"
+      ? { kind: "line", to: transformPoint(matrix, segment.to) }
+      : {
+        kind: "bezier",
+        cp1: transformPoint(matrix, segment.cp1),
+        cp2: transformPoint(matrix, segment.cp2),
+        to: transformPoint(matrix, segment.to),
+      }),
+    closed: figure.closed,
   };
 }
 
@@ -742,7 +894,7 @@ function figuresFromClipShape(shape: ClipPathShape): PathFigure[] {
   return [roundedRectFigure(shape.x, shape.y, shape.w, shape.h, shape.rx, shape.ry)];
 }
 
-function serializePathFigures(figures: PathFigure[]): Uint8Array {
+function serializePathFigures(figures: PathFigure[], graphicsVersion = GRAPHICS_VERSION): Uint8Array {
   const points: Point[] = [];
   const pointTypes: number[] = [];
 
@@ -767,7 +919,7 @@ function serializePathFigures(figures: PathFigure[]): Uint8Array {
   }
 
   const pathData = concatBytes(
-    uint32Array(GRAPHICS_VERSION, points.length, 0),
+    uint32Array(graphicsVersion, points.length, 0),
     pointArrayToFloat32(points),
     align4(Uint8Array.from(pointTypes)),
   );
@@ -860,15 +1012,18 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
     if (opacity <= 0) return;
 
     const fillColor = cssColorToArgb(style.fill, opacity);
+    const figure = this.figureForPolygon(points, style);
+    const backgroundBox = this.getBackgroundBox(points);
+    const gradientFills = backgroundBox ? this.buildBackgroundGradientFills(style.backgroundImage, opacity, backgroundBox) : [];
     const stroke = parseVisibleStroke(style, opacity);
     const outline = parseVisibleOutline(style, opacity);
     const clipBounds = getQuadBounds(points);
 
     if (this.hasMixedBorders(style)) {
-      if (fillColor !== null) {
+      if (fillColor !== null || gradientFills.length > 0) {
         this.saveState();
         this.applyClip(style, clipBounds);
-        this.emitFigures([this.figureForPolygon(points, style)], fillColor, null, style.fillRule, undefined);
+        this.emitBackgroundFills([figure], fillColor, gradientFills, backgroundBox);
         this.restoreState();
       }
       this.drawPerSideBorders(points, style, opacity);
@@ -879,11 +1034,14 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
       this.drawOutline(points, style, outline);
     }
 
-    if (fillColor === null && !stroke) return;
+    if (fillColor === null && gradientFills.length === 0 && !stroke) return;
 
     this.saveState();
     this.applyClip(style, clipBounds);
-    this.emitFigures([this.figureForPolygon(points, style)], fillColor, stroke, style.fillRule, style.strokeDasharray);
+    this.emitBackgroundFills([figure], fillColor, gradientFills, backgroundBox);
+    if (stroke) {
+      this.emitFigures([figure], null, stroke, style.fillRule, style.strokeDasharray);
+    }
     this.restoreState();
   }
 
@@ -1068,6 +1226,178 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
     this.emitRecord(EMFPLUS.SET_CLIP_PATH, PATH_SLOT | (combineMode << 8), EMPTY_BYTES);
   }
 
+  private getBackgroundBox(points: Quad): BackgroundBox | null {
+    const transform = quadToTransform(points);
+    if (!transform) return null;
+    return {
+      matrix: transform.matrix,
+      width: transform.width,
+      height: transform.height,
+    };
+  }
+
+  private buildBackgroundGradientFills(
+    backgroundImage: string | undefined,
+    opacity: number,
+    box: BackgroundBox,
+  ): Array<ParsedGradientAst<number>> {
+    return parseAllGradientsAst(backgroundImage, {
+      parseColor: (value) => cssColorToArgbStop(value, opacity),
+    });
+  }
+
+  private buildPresetColorData(stops: GradientStop[]): Uint8Array {
+    return concatBytes(
+      uint32Array(stops.length),
+      float32Array(...stops.map((stop) => clamp(stop.offset, 0, 1))),
+      uint32Array(...stops.map((stop) => stop.color)),
+    );
+  }
+
+  private buildLinearGradientBrush(gradient: Extract<ParsedGradientAst<number>, { type: "linear" }>, box: BackgroundBox): Uint8Array | null {
+    const angleRad = ((gradient.angleDeg - 90) * Math.PI) / 180;
+    const cos = Math.cos(angleRad);
+    const sin = Math.sin(angleRad);
+    const halfLength = Math.abs(box.width * cos) / 2 + Math.abs(box.height * sin) / 2;
+    if (halfLength <= 0) return null;
+
+    const localCenter = { x: box.width / 2, y: box.height / 2 };
+    const localStart = { x: localCenter.x - cos * halfLength, y: localCenter.y - sin * halfLength };
+    const localEnd = { x: localCenter.x + cos * halfLength, y: localCenter.y + sin * halfLength };
+    const worldStart = transformPoint(box.matrix, localStart);
+    const worldEnd = transformPoint(box.matrix, localEnd);
+    const stops = resolveGradientStops(gradient.stops, halfLength * 2, gradient.repeating);
+    if (stops.length < 2) return null;
+
+    const firstStop = stops[0];
+    const lastStop = stops[stops.length - 1];
+    const hasPresetStops = stops.length > 2;
+    return concatBytes(
+      uint32Array(
+        BRUSH_GRAPHICS_VERSION,
+        BRUSH_TYPE_LINEAR_GRADIENT,
+        BRUSH_DATA_TRANSFORM | (hasPresetStops ? BRUSH_DATA_PRESET_COLORS : 0),
+        0,
+      ),
+      float32Array(0, -0.5, 1, 1),
+      uint32Array(firstStop.color, lastStop.color, firstStop.color, lastStop.color),
+      float32Array(
+        worldEnd.x - worldStart.x,
+        worldEnd.y - worldStart.y,
+        worldStart.y - worldEnd.y,
+        worldEnd.x - worldStart.x,
+        worldStart.x,
+        worldStart.y,
+      ),
+      hasPresetStops ? this.buildPresetColorData(stops) : EMPTY_BYTES,
+    );
+  }
+
+  private buildRadialGradientBrush(gradient: Extract<ParsedGradientAst<number>, { type: "radial" }>, box: BackgroundBox): Uint8Array | null {
+    const radius = Math.max(box.width, box.height) / 2;
+    if (radius <= 0) return null;
+
+    const localCenter = { x: box.width / 2, y: box.height / 2 };
+    const worldCenter = transformPoint(box.matrix, localCenter);
+    const gradientPath = transformFigure(ellipseFigure(localCenter.x, localCenter.y, radius, radius), box.matrix);
+    const pathData = serializePathFigures([gradientPath], BRUSH_GRAPHICS_VERSION);
+    const stops = resolveGradientStops(gradient.stops, radius, gradient.repeating);
+    if (stops.length < 2) return null;
+
+    const firstStop = stops[0];
+    const lastStop = stops[stops.length - 1];
+    const hasPresetStops = stops.length > 2;
+    return concatBytes(
+      uint32Array(
+        BRUSH_GRAPHICS_VERSION,
+        BRUSH_TYPE_PATH_GRADIENT,
+        BRUSH_DATA_PATH | (hasPresetStops ? BRUSH_DATA_PRESET_COLORS : 0),
+        WRAP_MODE_CLAMP,
+        firstStop.color,
+      ),
+      float32Array(worldCenter.x, worldCenter.y),
+      uint32Array(1, lastStop.color, pathData.byteLength),
+      pathData,
+      hasPresetStops ? this.buildPresetColorData(stops) : EMPTY_BYTES,
+    );
+  }
+
+  private emitBrushFilledFigures(figures: PathFigure[], brushData: Uint8Array): void {
+    if (figures.length === 0) return;
+    this.emitObject(PATH_SLOT, OBJECT_TYPE.PATH, serializePathFigures(figures));
+    this.emitObject(BRUSH_SLOT, OBJECT_TYPE.BRUSH, brushData);
+    this.emitRecord(EMFPLUS.FILL_PATH, PATH_SLOT, uint32Array(BRUSH_SLOT));
+  }
+
+  private emitConicGradientFill(
+    figures: PathFigure[],
+    gradient: Extract<ParsedGradientAst<number>, { type: "conic" }>,
+    box: BackgroundBox,
+  ): void {
+    const stops = resolveGradientStops(gradient.stops, 1, gradient.repeating);
+    if (stops.length < 2) return;
+
+    const center = { x: box.width / 2, y: box.height / 2 };
+    const radius = Math.sqrt(box.width * box.width + box.height * box.height) / 2 + 1;
+    const startAngle = ((gradient.fromAngleDeg - 90) * Math.PI) / 180;
+    const angleStep = (Math.PI * 2) / CONIC_GRADIENT_SEGMENTS;
+
+    const stateId = this.saveState();
+    this.applyClipFigures(figures, COMBINE_MODE_INTERSECT);
+
+    for (let index = 0; index < CONIC_GRADIENT_SEGMENTS; index += 1) {
+      const angle0 = startAngle + index * angleStep;
+      const angle1 = startAngle + (index + 1) * angleStep;
+      const t = (index + 0.5) / CONIC_GRADIENT_SEGMENTS;
+      const fillColor = interpolateArgbColor(t, stops, gradient.repeating);
+      const triangle = figureFromPoints([
+        transformPoint(box.matrix, center),
+        transformPoint(box.matrix, {
+          x: center.x + Math.cos(angle0) * radius,
+          y: center.y + Math.sin(angle0) * radius,
+        }),
+        transformPoint(box.matrix, {
+          x: center.x + Math.cos(angle1) * radius,
+          y: center.y + Math.sin(angle1) * radius,
+        }),
+      ], true);
+      if (!triangle) continue;
+      this.emitFigures([triangle], fillColor, null, undefined, undefined);
+    }
+
+    this.restoreState(stateId);
+  }
+
+  private emitBackgroundFills(
+    figures: PathFigure[],
+    fillColor: number | null,
+    gradients: ParsedGradientAst<number>[],
+    box: BackgroundBox | null,
+  ): void {
+    if (fillColor !== null) {
+      this.emitFigures(figures, fillColor, null, undefined, undefined);
+    }
+
+    if (!box || gradients.length === 0) return;
+
+    for (let index = gradients.length - 1; index >= 0; index -= 1) {
+      const gradient = gradients[index];
+      if (gradient.type === "linear") {
+        const brushData = this.buildLinearGradientBrush(gradient, box);
+        if (brushData) this.emitBrushFilledFigures(figures, brushData);
+        continue;
+      }
+
+      if (gradient.type === "radial") {
+        const brushData = this.buildRadialGradientBrush(gradient, box);
+        if (brushData) this.emitBrushFilledFigures(figures, brushData);
+        continue;
+      }
+
+      this.emitConicGradientFill(figures, gradient, box);
+    }
+  }
+
   private emitFigures(figures: PathFigure[], fillColor: number | null, stroke: RenderedStroke | null, _fillRule: Style["fillRule"], dasharray: string | undefined): void {
     if (figures.length === 0) return;
 
@@ -1223,6 +1553,17 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
     const height = distance(points[0], points[3]);
     const radius = parseBorderRadius(style.borderRadius, width, height);
     if (radius > 0) {
+      if (isAxisAlignedRect(points) && !style.cornerShapes) {
+        const minX = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
+        const minY = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
+        const axisWidth = Math.abs(points[1].x - points[0].x);
+        const axisHeight = Math.abs(points[3].y - points[0].y);
+        const clampedRadius = Math.min(radius, axisWidth / 2, axisHeight / 2);
+        if (clampedRadius >= Math.min(axisWidth, axisHeight) / 2 - 0.01) {
+          return ellipseFigure(minX + axisWidth / 2, minY + axisHeight / 2, axisWidth / 2, axisHeight / 2);
+        }
+        return roundedRectFigure(minX, minY, axisWidth, axisHeight, clampedRadius, clampedRadius);
+      }
       return figureFromRoundedQuad(points, radius, style.cornerShapes);
     }
     return this.figureForClipQuad(points);

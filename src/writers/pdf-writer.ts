@@ -21,7 +21,13 @@ import {
 } from "../pdf-objects.js";
 import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
-import { extractAllGradients, extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import {
+  expandRepeatingGradientStops,
+  normalizeGradientStopOffsets,
+  parseAllGradientsAst,
+  type GradientStopAst,
+  type ParsedGradientAst,
+} from "./shared/gradient-utils.js";
 import { parseTTF, type ParsedTTF } from "../ttf-parser.js";
 import type { Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
@@ -216,7 +222,7 @@ function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } 
 interface GradientStop { offset: number; color: ParsedColor; }
 interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop[]; repeating: boolean; }
 interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
-interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngle: number; repeating: boolean; }
+interface ConicGradient  { type: "conic";  stops: GradientStop[]; fromAngleDeg: number; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
 
 type RenderedOutline = {
@@ -246,132 +252,37 @@ function getVisibleOutline(style: Style): RenderedOutline | null {
   };
 }
 
-function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
-  if (stops.length < 2) return stops;
-  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
-  const period = sortedStops[sortedStops.length - 1].offset;
-  if (!(period > 0 && period < 0.999999)) return sortedStops;
+function resolveGradientStops(stopsAst: GradientStopAst<ParsedColor>[]): GradientStop[] {
+  const stops = stopsAst.map((stop) => ({
+    color: stop.color,
+    offset: stop.unit === "auto" ? -1 : stop.offset,
+  }));
 
-  const repeated: GradientStop[] = [];
-  const repetitions = Math.ceil(1 / period) + 1;
-  for (let rep = 0; rep < repetitions; rep++) {
-    const base = rep * period;
-    for (const stop of sortedStops) {
-      const offset = base + stop.offset;
-      if (offset > 1.000001) break;
-      repeated.push({ color: stop.color, offset: Math.min(offset, 1) });
-    }
-  }
-
-  if (!repeated.some((stop) => Math.abs(stop.offset - 1) < 0.000001)) {
-    repeated.push({ offset: 1, color: interpolateConicColor(1, sortedStops, true) });
-  }
-  return repeated;
-}
-
-function parseColorStops(argsStr: string): GradientStop[] {
-  const stops: GradientStop[] = [];
-  const parts = splitTopLevelCommaSeparated(argsStr);
-
-  for (const part of parts) {
-    const percentMatch = part.match(/([\d.]+)%\s*$/);
-    const pxMatch = !percentMatch ? part.match(/([\d.]+)px\s*$/) : null;
-    const colorStr = (percentMatch || pxMatch) ? part.slice(0, (percentMatch || pxMatch)!.index).trim() : part.trim();
-    const color = parseColor(colorStr);
-    if (!color) continue;
-    let offset = -1;
-    if (percentMatch) offset = parseFloat(percentMatch[1]) / 100;
-    else if (pxMatch) offset = -(parseFloat(pxMatch[1]) + 1);
-    stops.push({ offset, color });
-  }
-
-  const hasPxStops = stops.some(s => s.offset < -1);
-  if (hasPxStops) {
+  if (stops.length === 0) return stops;
+  if (stopsAst.some((stop) => stop.unit === "px")) {
     let maxPx = 0;
-    for (const s of stops) { if (s.offset < -1) { const px = -(s.offset + 1); if (px > maxPx) maxPx = px; } }
-    if (maxPx > 0) { for (const s of stops) { if (s.offset < -1) s.offset = -(s.offset + 1) / maxPx; } }
-  }
-  if (stops.length > 0) {
-    if (stops[0].offset < 0) stops[0].offset = 0;
-    if (stops[stops.length - 1].offset < 0) stops[stops.length - 1].offset = 1;
-    let lastKnown = 0;
-    for (let i = 1; i < stops.length; i++) {
-      if (stops[i].offset >= 0) {
-        const gap = i - lastKnown;
-        if (gap > 1) {
-          const s0 = stops[lastKnown].offset, s1 = stops[i].offset;
-          for (let j = lastKnown + 1; j < i; j++) stops[j].offset = s0 + (s1 - s0) * ((j - lastKnown) / gap);
-        }
-        lastKnown = i;
+    for (let index = 0; index < stopsAst.length; index += 1) {
+      if (stopsAst[index].unit === "px" && stops[index].offset > maxPx) maxPx = stops[index].offset;
+    }
+    if (maxPx > 0) {
+      for (let index = 0; index < stopsAst.length; index += 1) {
+        if (stopsAst[index].unit === "px") stops[index].offset /= maxPx;
       }
     }
   }
-  return stops;
+
+  return normalizeGradientStopOffsets(stops);
 }
 
-function parseGradient(bgImage: string | undefined): ParsedGradient | null {
-  if (!bgImage || bgImage === "none") return null;
-  const gradientStr = extractFirstGradient(bgImage);
-  if (!gradientStr) return null;
-
-  const linearMatch = gradientStr.match(/^(repeating-)?linear-gradient\((.+)\)$/);
-  if (linearMatch) {
-    const repeating = !!linearMatch[1];
-    const inner = linearMatch[2];
-    const splitIdx = findFirstTopLevelComma(inner);
-    let angleDeg = 180, stopsStr = inner;
-    if (splitIdx >= 0) {
-      const firstPart = inner.slice(0, splitIdx).trim();
-      if (/^(to\s|[\d.]+deg|[\d.]+rad|[\d.]+turn)/i.test(firstPart)) {
-        angleDeg = parseGradientAngle(firstPart);
-        stopsStr = inner.slice(splitIdx + 1);
-      }
-    }
-    const stops = parseColorStops(stopsStr);
-    if (stops.length < 2) return null;
-    return { type: "linear", angleDeg, stops, repeating };
-  }
-
-  const radialMatch = gradientStr.match(/^(repeating-)?radial-gradient\((.+)\)$/);
-  if (radialMatch) {
-    const repeating = !!radialMatch[1];
-    const stops = parseColorStops(radialMatch[2]);
-    if (stops.length < 2) return null;
-    return { type: "radial", stops, repeating };
-  }
-
-  const conicMatch = gradientStr.match(/^(repeating-)?conic-gradient\((.+)\)$/);
-  if (conicMatch) {
-    const repeating = !!conicMatch[1];
-    const inner = conicMatch[2];
-    // Parse optional "from <angle>" prefix
-    let fromAngle = 0;
-    let stopsStr = inner;
-    const fromMatch = inner.match(/^from\s+([\d.]+)(deg|rad|turn)?\s*,\s*/i);
-    if (fromMatch) {
-      const val = parseFloat(fromMatch[1]);
-      const unit = fromMatch[2]?.toLowerCase();
-      if (unit === "rad") fromAngle = val * (180 / Math.PI);
-      else if (unit === "turn") fromAngle = val * 360;
-      else fromAngle = val;
-      stopsStr = inner.slice(fromMatch[0].length);
-    }
-    const stops = parseColorStops(stopsStr);
-    if (stops.length < 2) return null;
-    return { type: "conic", stops, fromAngle, repeating };
-  }
-  return null;
+function toPdfGradient(gradient: ParsedGradientAst<ParsedColor>): ParsedGradient {
+  const stops = resolveGradientStops(gradient.stops);
+  if (gradient.type === "linear") return { ...gradient, stops };
+  if (gradient.type === "radial") return { ...gradient, stops };
+  return { ...gradient, stops };
 }
 
 function parseGradients(bgImage: string | undefined): ParsedGradient[] {
-  if (!bgImage || bgImage === "none") return [];
-
-  const gradients: ParsedGradient[] = [];
-  for (const gradientString of extractAllGradients(bgImage)) {
-    const gradient = parseGradient(gradientString);
-    if (gradient) gradients.push(gradient);
-  }
-  return gradients;
+  return parseAllGradientsAst(bgImage, { parseColor }).map(toPdfGradient);
 }
 
 // ── Box-shadow parsing ──────────────────────────────────────────────
@@ -1941,7 +1852,12 @@ export class PDFWriter implements Writer<PdfDocument> {
 
     // Register shading
     const shName = `SH${++this.shadingCounter}`;
-    const resolvedStops = gradient.repeating ? expandRepeatingStops(gradient.stops) : gradient.stops;
+    const resolvedStops = gradient.repeating
+      ? expandRepeatingGradientStops(gradient.stops, (sortedStops) => ({
+        offset: 1,
+        color: interpolateConicColor(1, [...sortedStops], true),
+      }))
+      : gradient.stops;
     const stops = resolvedStops.map(s => ({
       offset: s.offset,
       r: s.color.r,
@@ -2130,8 +2046,13 @@ export class PDFWriter implements Writer<PdfDocument> {
     const r = Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2) / 2;
 
     const opacity = style.opacity ?? 1;
-    const stops = gradient.repeating ? expandRepeatingStops(gradient.stops) : gradient.stops;
-    const fromRad = gradient.fromAngle * Math.PI / 180;
+    const stops = gradient.repeating
+      ? expandRepeatingGradientStops(gradient.stops, (sortedStops) => ({
+        offset: 1,
+        color: interpolateConicColor(1, [...sortedStops], true),
+      }))
+      : gradient.stops;
+    const fromRad = gradient.fromAngleDeg * Math.PI / 180;
 
     // Number of sectors (more = smoother)
     const SECTORS = 72;

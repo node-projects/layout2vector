@@ -12,7 +12,14 @@ import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
-import { extractAllGradients, extractFirstGradient, findFirstTopLevelComma, parseGradientAngle, splitTopLevelCommaSeparated } from "./shared/gradient-utils.js";
+import {
+  expandRepeatingGradientStops,
+  normalizeGradientStopOffsets,
+  parseAllGradientsAst,
+  parseGradientAst,
+  type GradientStopAst,
+  type ParsedGradientAst,
+} from "./shared/gradient-utils.js";
 import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
@@ -66,30 +73,6 @@ function interpolateGradientColor(t: number, stops: GradientStop[], repeating = 
   return formatCssColor(parsedStops[parsedStops.length - 1].parsed);
 }
 
-function expandRepeatingStops(stops: GradientStop[]): GradientStop[] {
-  if (stops.length < 2) return stops;
-
-  const sortedStops = [...stops].sort((left, right) => left.offset - right.offset);
-  const period = sortedStops[sortedStops.length - 1].offset;
-  if (!(period > 0 && period < 0.999999)) return sortedStops;
-
-  const repeated: GradientStop[] = [];
-  const repetitions = Math.ceil(1 / period) + 1;
-  for (let rep = 0; rep < repetitions; rep++) {
-    const base = rep * period;
-    for (const stop of sortedStops) {
-      const offset = base + stop.offset;
-      if (offset > 1.000001) break;
-      repeated.push({ color: stop.color, offset: Math.min(offset, 1) });
-    }
-  }
-
-  if (!repeated.some((stop) => Math.abs(stop.offset - 1) < 0.000001)) {
-    repeated.push({ offset: 1, color: interpolateGradientColor(1, sortedStops, true) });
-  }
-  return repeated;
-}
-
 function traceClipQuadPath(ctx: CanvasRenderingContext2D, clipQuad: ClipQuad): void {
   if (clipQuad.radius > 0) {
     const segments = roundedQuadPath(clipQuad.points, clipQuad.radius);
@@ -119,109 +102,28 @@ function traceClipQuadPath(ctx: CanvasRenderingContext2D, clipQuad: ClipQuad): v
   ctx.closePath();
 }
 
-function parseColorStops(argsStr: string): GradientStop[] {
-  const stops: GradientStop[] = [];
-  const parts = splitTopLevelCommaSeparated(argsStr);
+function resolveGradientStops(stopsAst: GradientStopAst<string>[]): GradientStop[] {
+  const stops = stopsAst.map((stop) => ({
+    color: stop.color,
+    offset: stop.unit === "auto" ? -1 : stop.offset,
+  }));
 
-  for (const part of parts) {
-    const percentMatch = part.match(/([\d.]+)%\s*$/);
-    const pxMatch = !percentMatch ? part.match(/([\d.]+)px\s*$/) : null;
-    const colorStr = (percentMatch || pxMatch)
-      ? part.slice(0, (percentMatch || pxMatch)!.index).trim()
-      : part.trim();
-    if (!colorStr) continue;
-    let offset = -1;
-    if (percentMatch) offset = parseFloat(percentMatch[1]) / 100;
-    else if (pxMatch) offset = -parseFloat(pxMatch[1]) - 2; // negative: raw px (encode as -(px+2) to distinguish from -1=unknown)
-    stops.push({ offset, color: colorStr });
+  if (stops.length === 0) return stops;
+  if (stopsAst.some((stop) => stop.unit === "px")) {
+    for (let index = 0; index < stops.length; index += 1) {
+      if (stopsAst[index].unit === "auto") stops[index].offset = 0;
+    }
+    return stops;
   }
 
-  if (stops.length > 0) {
-    // Check if all stops are in px units (offset <= -2)
-    const hasPxStops = stops.some(s => s.offset <= -2);
-    if (hasPxStops) {
-      // Convert px stops: find the max px value and normalize to 0..1
-      // The actual px values are encoded as -(px+2)
-      for (const s of stops) {
-        if (s.offset <= -2) {
-          s.offset = -(s.offset + 2); // decode to actual px
-        } else if (s.offset < 0) {
-          s.offset = 0; // unknown → 0
-        }
-      }
-      // Keep raw px values; they'll be resolved in buildCanvasGradient
-      return stops;
-    }
-
-    if (stops[0].offset < 0) stops[0].offset = 0;
-    if (stops[stops.length - 1].offset < 0) stops[stops.length - 1].offset = 1;
-    let lastKnown = 0;
-    for (let i = 1; i < stops.length; i++) {
-      if (stops[i].offset >= 0) {
-        const gap = i - lastKnown;
-        if (gap > 1) {
-          const s0 = stops[lastKnown].offset, s1 = stops[i].offset;
-          for (let j = lastKnown + 1; j < i; j++) stops[j].offset = s0 + (s1 - s0) * ((j - lastKnown) / gap);
-        }
-        lastKnown = i;
-      }
-    }
-  }
-  return stops;
+  return normalizeGradientStopOffsets(stops);
 }
 
-function parseGradient(bgImage: string | undefined): ParsedGradient | null {
-  if (!bgImage || bgImage === "none") return null;
-  const gradientStr = extractFirstGradient(bgImage);
-  if (!gradientStr) return null;
-
-  const linearMatch = gradientStr.match(/^(repeating-)?linear-gradient\((.+)\)$/);
-  if (linearMatch) {
-    const repeating = !!linearMatch[1];
-    const inner = linearMatch[2];
-    const splitIdx = findFirstTopLevelComma(inner);
-    let angleDeg = 180, stopsStr = inner;
-    if (splitIdx >= 0) {
-      const firstPart = inner.slice(0, splitIdx).trim();
-      if (/^(to\s|[\d.]+deg|[\d.]+rad|[\d.]+turn)/i.test(firstPart)) {
-        angleDeg = parseGradientAngle(firstPart);
-        stopsStr = inner.slice(splitIdx + 1);
-      }
-    }
-    const stops = parseColorStops(stopsStr);
-    if (stops.length < 2) return null;
-    return { type: "linear", angleDeg, stops, repeating };
-  }
-
-  const radialMatch = gradientStr.match(/^(repeating-)?radial-gradient\((.+)\)$/);
-  if (radialMatch) {
-    const repeating = !!radialMatch[1];
-    const stops = parseColorStops(radialMatch[2]);
-    if (stops.length < 2) return null;
-    return { type: "radial", stops, repeating };
-  }
-
-  const conicMatch = gradientStr.match(/^(repeating-)?conic-gradient\((.+)\)$/);
-  if (conicMatch) {
-    const repeating = !!conicMatch[1];
-    const inner = conicMatch[2];
-    // Parse optional "from <angle>" prefix
-    let fromAngleDeg = 0;
-    let stopsStr = inner;
-    const fromMatch = inner.match(/^from\s+([\d.]+)(deg|rad|turn)/i);
-    if (fromMatch) {
-      const val = parseFloat(fromMatch[1]);
-      const unit = fromMatch[2].toLowerCase();
-      fromAngleDeg = unit === "rad" ? val * (180 / Math.PI) : unit === "turn" ? val * 360 : val;
-      const splitIdx = findFirstTopLevelComma(inner);
-      if (splitIdx >= 0) stopsStr = inner.slice(splitIdx + 1);
-    }
-    const stops = parseColorStops(stopsStr);
-    if (stops.length < 2) return null;
-    return { type: "conic", fromAngleDeg, stops, repeating };
-  }
-
-  return null;
+function toCanvasGradient(gradient: ParsedGradientAst<string>): ParsedGradient {
+  const stops = resolveGradientStops(gradient.stops);
+  if (gradient.type === "linear") return { ...gradient, stops };
+  if (gradient.type === "radial") return { ...gradient, stops };
+  return { ...gradient, stops };
 }
 
 // ── Box shadow parsing ──────────────────────────────────────────────
@@ -1020,8 +922,10 @@ export class ImageWriter implements Writer<ImageResult> {
     points: Quad | null,
     backgroundImage: string | undefined,
   ): CanvasGradient | null {
-    const gradient = parseGradient(backgroundImage);
-    if (!gradient || !points) return null;
+    const gradientAst = parseGradientAst(backgroundImage);
+    if (!gradientAst || !points) return null;
+
+    const gradient = toCanvasGradient(gradientAst);
 
     const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
     const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
@@ -1038,8 +942,8 @@ export class ImageWriter implements Writer<ImageResult> {
     backgroundImage: string | undefined,
   ): CanvasGradient[] {
     if (!backgroundImage || backgroundImage === "none") return [];
-    const gradStrs = extractAllGradients(backgroundImage);
-    if (gradStrs.length === 0) return [];
+    const gradients = parseAllGradientsAst(backgroundImage).map(toCanvasGradient);
+    if (gradients.length === 0) return [];
 
     const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
     const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
@@ -1047,10 +951,8 @@ export class ImageWriter implements Writer<ImageResult> {
     const h = Math.abs(points[3].y - points[0].y) || 1;
 
     const result: CanvasGradient[] = [];
-    for (const gs of gradStrs) {
-      const parsed = parseGradient(gs);
-      if (!parsed) continue;
-      const cg = this.buildCanvasGradient(ctx, parsed, x, y, w, h);
+    for (const gradient of gradients) {
+      const cg = this.buildCanvasGradient(ctx, gradient, x, y, w, h);
       if (cg) result.push(cg);
     }
     return result;
@@ -1061,8 +963,9 @@ export class ImageWriter implements Writer<ImageResult> {
     bbox: { x: number; y: number; w: number; h: number },
     backgroundImage: string | undefined,
   ): CanvasGradient | null {
-    const gradient = parseGradient(backgroundImage);
-    if (!gradient) return null;
+    const gradientAst = parseGradientAst(backgroundImage);
+    if (!gradientAst) return null;
+    const gradient = toCanvasGradient(gradientAst);
 
     return this.buildCanvasGradient(ctx, gradient, bbox.x, bbox.y, bbox.w || 1, bbox.h || 1);
   }
@@ -1111,7 +1014,12 @@ export class ImageWriter implements Writer<ImageResult> {
         stops = this.normalizeStopsToFraction(stops, r);
       }
     } else if (gradient.type === "conic") {
-      stops = gradient.repeating ? expandRepeatingStops(stops) : this.normalizeStopsToFraction(stops, 1);
+      stops = gradient.repeating
+        ? expandRepeatingGradientStops(stops, (sortedStops) => ({
+          offset: 1,
+          color: interpolateGradientColor(1, [...sortedStops], true),
+        }))
+        : this.normalizeStopsToFraction(stops, 1);
       canvasGrad = ctx.createConicGradient(
         (gradient.fromAngleDeg - 90) * Math.PI / 180,
         cx,
