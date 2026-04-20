@@ -31,6 +31,8 @@ export interface StackingNode {
   clipQuads?: ClipQuad[];
   /** Clip boundary from an ancestor with overflow:hidden + border-radius. */
   clipBounds?: { x: number; y: number; w: number; h: number; radius: number };
+  /** Clip boundary that applies to this node's children and pseudo-elements. */
+  childClipBounds?: { x: number; y: number; w: number; h: number; radius: number };
 }
 
 /**
@@ -300,6 +302,7 @@ function buildStackingNode(
       ? intersectClipBounds(childClipBounds, ownClipBounds)
       : ownClipBounds;
   }
+  node.childClipBounds = childClipBounds;
 
   // Determine which root to traverse children from
   const childRoot = (element.shadowRoot as ShadowRoot | null) ?? element;
@@ -481,13 +484,40 @@ function intersectClipBounds(
   const y = Math.max(parent.y, child.y);
   const right = Math.min(parent.x + parent.w, child.x + child.w);
   const bottom = Math.min(parent.y + parent.h, child.y + child.h);
+  const w = Math.max(0, right - x);
+  const h = Math.max(0, bottom - y);
+
+  if (w <= 0 || h <= 0) {
+    return { x, y, w, h, radius: 0 };
+  }
+
+  const epsilon = 0.01;
+  const matchesParent =
+    Math.abs(parent.x - x) < epsilon &&
+    Math.abs(parent.y - y) < epsilon &&
+    Math.abs(parent.w - w) < epsilon &&
+    Math.abs(parent.h - h) < epsilon;
+  const matchesChild =
+    Math.abs(child.x - x) < epsilon &&
+    Math.abs(child.y - y) < epsilon &&
+    Math.abs(child.w - w) < epsilon &&
+    Math.abs(child.h - h) < epsilon;
+
+  let radius = 0;
+  if (matchesParent && matchesChild) {
+    radius = Math.max(parent.radius, child.radius);
+  } else if (matchesChild) {
+    radius = child.radius;
+  } else if (matchesParent) {
+    radius = parent.radius;
+  }
 
   return {
     x,
     y,
-    w: Math.max(0, right - x),
-    h: Math.max(0, bottom - y),
-    radius: Math.min(parent.radius, child.radius),
+    w,
+    h,
+    radius,
   };
 }
 

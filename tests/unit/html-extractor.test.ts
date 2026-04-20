@@ -124,6 +124,51 @@ test.describe("HTML Geometry Extraction", () => {
     expect(textNodes.some((node: any) => node.text.includes("hidden pseudo"))).toBe(false);
   });
 
+  test("clips pseudo-elements to an overflow-hidden parent", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;overflow:hidden;">
+        <main id="target" style="position:relative;width:120px;height:80px;overflow:hidden;border-radius:24px;">
+          Clip me
+        </main>
+        <style>
+          #target::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: -20px;
+            width: 60px;
+            height: 60px;
+            background: red;
+            border-radius: 50%;
+          }
+        </style>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includePseudoElements: true,
+      });
+
+      const pseudo = ir
+        .filter((node: any) => node.type === "polygon")
+        .find((node: any) => Math.min(...node.points.map((point: any) => point.y)) < 0);
+
+      return pseudo ? { points: pseudo.points, clipBounds: pseudo.style.clipBounds } : null;
+    });
+
+    expect(summary).toBeDefined();
+    expect(Math.min(...summary.points.map((point: any) => point.y))).toBeLessThan(0);
+    expect(summary.clipBounds).toBeDefined();
+    expect(summary.clipBounds.x).toBeCloseTo(0, 0);
+    expect(summary.clipBounds.y).toBeCloseTo(0, 0);
+    expect(summary.clipBounds.w).toBeCloseTo(120, 0);
+    expect(summary.clipBounds.h).toBeCloseTo(80, 0);
+    expect(summary.clipBounds.radius).toBeCloseTo(24, 0);
+  });
+
   test("extracts outside list markers as text pseudo-elements", async ({ page }) => {
     await setupPage(
       page,

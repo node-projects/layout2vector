@@ -29,6 +29,17 @@ function inheritContainerClipping(nodes: IRNode[], inheritedStyle: IRNode["style
   }
 }
 
+function getPseudoInheritedStyle(node: StackingNode): IRNode["style"] {
+  if (!node.childClipBounds || node.extractedStyle.clipBounds === node.childClipBounds) {
+    return node.extractedStyle;
+  }
+
+  return {
+    ...node.extractedStyle,
+    clipBounds: node.childClipBounds,
+  };
+}
+
 function attachSourceMetadata(nodes: IRNode[], element: Element, options: Options, originalType?: string): void {
   if (!options.includeSourceMetadata || nodes.length === 0) return;
 
@@ -146,7 +157,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
       // ::before / ::after pseudo-element extraction
       if (options.includePseudoElements !== false) {
-        const pseudoNodes = extractPseudoElements(el, node.extractedStyle, globalIndex, options);
+        const pseudoNodes = extractPseudoElements(el, getPseudoInheritedStyle(node), globalIndex, options);
         attachSourceMetadata(pseudoNodes, el, options, `${el.tagName.toLowerCase()}::pseudo`);
         transformIRGeometry(pseudoNodes, node.coordinateTransform);
         irNodes.push(...pseudoNodes);
