@@ -5,6 +5,8 @@ import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
 import { DWGWriter } from "../../src/writers/acad-writer.js";
 import { AcadDXFWriter } from "../../src/writers/acad-writer.js";
 import { renderIR } from "../../src/pipeline.js";
+import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { SVGWriter } from "../../src/writers/svg-writer.js";
 import type { IRNode } from "../../src/types.js";
 import { DwgReader, Hatch } from "@node-projects/acad-ts";
 
@@ -211,6 +213,97 @@ test.describe("Writer Output", () => {
     expect(texts.length).toBeGreaterThan(0);
     expect(texts[0].text).toContain("Hello PDF");
     expect(texts[0].style).toBeDefined();
+  });
+
+  test("source metadata is attached to IR and surfaced in HTML and SVG output", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="root" width="40" height="20" viewBox="0 0 40 20">
+          <rect id="shape" x="0" y="0" width="40" height="20" fill="red" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir: IRNode[] = await page.evaluate(() => {
+      const el = document.getElementById("root")!;
+      return (window as any).__HC.extractIR(el, {
+        includeSourceMetadata: true,
+        includeText: false,
+      });
+    });
+
+    const polygon = ir.find((node) => node.type === "polygon" && node.source?.id === "shape");
+    expect(polygon).toBeDefined();
+    expect(polygon?.source).toMatchObject({
+      id: "shape",
+      originalType: "rect",
+    });
+    expect(polygon?.source?.xpath).toContain("/svg");
+
+    const html = await renderIR(ir, new HTMLWriter({ width: 40, height: 20 }));
+    const svg = await renderIR(ir, new SVGWriter({ width: 40, height: 20 }));
+
+    expect(html).toContain('data-source-id="shape"');
+    expect(html).toContain('data-source-original-type="rect"');
+    expect(html).toContain('data-source-xpath="/html/body/svg/rect"');
+    expect(svg).toContain('data-source-id="shape"');
+    expect(svg).toContain('data-source-original-type="rect"');
+    expect(svg).toContain('data-source-xpath="/html/body/svg/rect"');
+  });
+
+  test("source metadata xpath includes shadow-root boundaries", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="host"></div>
+      </body></html>`
+    );
+
+    const ir: IRNode[] = await page.evaluate(async () => {
+      const host = document.getElementById("host")!;
+      const shadowRoot = host.attachShadow({ mode: "open" });
+      const child = document.createElement("div");
+      child.id = "shadow-box";
+      child.style.width = "40px";
+      child.style.height = "20px";
+      child.style.background = "red";
+      shadowRoot.appendChild(child);
+
+      return (window as any).__HC.extractIR(host, {
+        includeSourceMetadata: true,
+        includeText: false,
+      });
+    });
+
+    const polygon = ir.find((node) => node.type === "polygon" && node.source?.id === "shadow-box");
+    expect(polygon).toBeDefined();
+    expect(polygon?.source?.xpath).toBe("/html/body/div/shadow-root()/div");
+
+    const html = await renderIR(ir, new HTMLWriter({ width: 40, height: 20 }));
+    expect(html).toContain('data-source-id="shadow-box"');
+    expect(html).toContain('data-source-xpath="/html/body/div/shadow-root()/div"');
+  });
+
+  test("SVG writer preserves filter and blend-mode styles", async () => {
+    const ir: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 20 },
+        { x: 0, y: 20 },
+      ],
+      style: {
+        fill: "rgb(255, 0, 0)",
+        filter: "blur(12px)",
+        mixBlendMode: "plus-lighter",
+      },
+      zIndex: 0,
+    }];
+
+    const svg = await renderIR(ir, new SVGWriter({ width: 20, height: 20 }));
+    expect(svg).toContain('style="filter:blur(12px);mix-blend-mode:plus-lighter"');
   });
 
   test("EMF writer produces valid binary output", async ({ page }) => {

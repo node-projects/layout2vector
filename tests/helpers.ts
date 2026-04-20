@@ -69,7 +69,9 @@ export async function injectLibrary(page: Page): Promise<void> {
     // Use compiled JS from dist
     const files = [
       "types.js",
+      "shared/source-metadata.js",
       "writers/shared/css-color.js",
+      "writers/shared/filter-effects.js",
       "writers/shared/gradient-utils.js",
       "shared/text-whitespace.js",
       "shared/zlib-inflate.js",

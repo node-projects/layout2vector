@@ -37,6 +37,109 @@ async function setGeneratedRasterImage(page: Page, sourceWidth: number, sourceHe
   });
 }
 
+async function supportsGeneratedVideo(page: Page): Promise<boolean> {
+  return page.evaluate(() => {
+    if (typeof MediaRecorder === "undefined") return false;
+    if (typeof HTMLCanvasElement.prototype.captureStream !== "function") return false;
+    return [
+      "video/webm;codecs=vp9",
+      "video/webm;codecs=vp8",
+      "video/webm",
+    ].some((mimeType) => MediaRecorder.isTypeSupported(mimeType));
+  });
+}
+
+async function setGeneratedVideo(page: Page, posterColor = "#00ff00"): Promise<void> {
+  await page.evaluate(async ({ posterColor }) => {
+    function makeColorDataUrl(color: string): string {
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 18;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("canvas unavailable");
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/png");
+    }
+
+    function getRecordingMimeType(): string {
+      const candidates = [
+        "video/webm;codecs=vp9",
+        "video/webm;codecs=vp8",
+        "video/webm",
+      ];
+      return candidates.find((mimeType) => MediaRecorder.isTypeSupported(mimeType)) ?? "";
+    }
+
+    async function recordSolidColorVideo(color: string): Promise<string> {
+      const mimeType = getRecordingMimeType();
+      if (!mimeType) throw new Error("No supported MediaRecorder video mime type");
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 18;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("canvas unavailable");
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const stream = canvas.captureStream(1);
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks: Blob[] = [];
+      const stopped = new Promise<Blob>((resolve, reject) => {
+        recorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size > 0) chunks.push(event.data);
+        });
+        recorder.addEventListener("stop", () => resolve(new Blob(chunks, { type: mimeType })), { once: true });
+        recorder.addEventListener("error", () => reject(new Error("MediaRecorder failed")), { once: true });
+      });
+
+      recorder.start();
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      recorder.stop();
+
+      const blob = await stopped;
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error ?? new Error("Failed to read generated video"));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    const video = document.getElementById("target") as HTMLVideoElement;
+    video.poster = makeColorDataUrl(posterColor);
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.src = await recordSolidColorVideo("#ff0000");
+
+    await new Promise<void>((resolve, reject) => {
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0 && video.videoHeight > 0) {
+        resolve();
+        return;
+      }
+
+      const cleanup = () => {
+        video.removeEventListener("loadeddata", onLoadedData);
+        video.removeEventListener("error", onError);
+      };
+      const onLoadedData = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = () => {
+        cleanup();
+        reject(new Error("Video failed to load"));
+      };
+
+      video.addEventListener("loadeddata", onLoadedData);
+      video.addEventListener("error", onError);
+      video.load();
+    });
+  }, { posterColor });
+}
+
 test.describe("Image Extraction", () => {
   test("extracts raster image (JPEG data URL) as image IR node", async ({ page }) => {
     await setupPage(
@@ -209,6 +312,30 @@ test.describe("Image Extraction", () => {
     expect(imageNodes.length).toBe(0);
   });
 
+  test("rasterizes SVG data URL when element effects require an image layer", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="${SVG_CIRCLE_DATA_URL}" style="width:100px;height:100px;display:block;filter:blur(4px);" />
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    const polylineNodes = ir.filter((n: any) => n.type === "polyline");
+
+    expect(imageNodes.length).toBeGreaterThan(0);
+    expect(imageNodes[0].dataUrl).toMatch(/^data:image\//);
+    expect(polylineNodes.length).toBe(0);
+  });
+
   test("keeps a safe data URL for remote SVG image nodes", async ({ page }) => {
     await page.route("https://assets.example.test/icon.svg", async (route) => {
       await route.fulfill({
@@ -283,6 +410,149 @@ test.describe("Image Extraction", () => {
 
     const imageNodes = ir.filter((n: any) => n.type === "image");
     expect(imageNodes.length).toBe(0);
+  });
+
+  test("extracts the first video frame as an image only when includeVideos is enabled", async ({ page }) => {
+    if (!(await supportsGeneratedVideo(page))) {
+      test.skip(true, "Generated video fixture requires MediaRecorder and captureStream support");
+    }
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <video id="target" style="width:96px;height:54px;display:block;object-fit:cover;"></video>
+      </body></html>`
+    );
+    await setGeneratedVideo(page, "#00ff00");
+
+    const withoutVideos = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: false,
+        includeText: false,
+      });
+
+      return ir.filter((n: any) => n.type === "image").length;
+    });
+
+    expect(withoutVideos).toBe(0);
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeVideos: true,
+        includeImages: false,
+        includeText: false,
+      });
+
+      const imageNodes = ir.filter((n: any) => n.type === "image");
+      if (imageNodes.length === 0) return null;
+
+      const imageNode = imageNodes[0];
+      const center = await new Promise<number[]>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("canvas unavailable"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          resolve(Array.from(ctx.getImageData(Math.floor(img.naturalWidth / 2), Math.floor(img.naturalHeight / 2), 1, 1).data));
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted image"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return {
+        count: imageNodes.length,
+        dataUrl: imageNode.dataUrl,
+        width: imageNode.width,
+        height: imageNode.height,
+        center,
+      };
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.count).toBe(1);
+    expect(extracted?.dataUrl).toMatch(/^data:image\//);
+    expect(extracted?.width).toBeGreaterThan(0);
+    expect(extracted?.height).toBeGreaterThan(0);
+    expect(extracted?.center[0]).toBeGreaterThan(200);
+    expect(extracted?.center[1]).toBeLessThan(80);
+    expect(extracted?.center[2]).toBeLessThan(80);
+  });
+
+  test("extracts canvas content as an image IR node", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <canvas id="target" width="120" height="60" style="width:120px;height:60px;display:block;"></canvas>
+      </body></html>`
+    );
+
+    await page.evaluate(() => {
+      const canvas = document.getElementById("target") as HTMLCanvasElement;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#0044ff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(30, 30, 14, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((n: any) => n.type === "image");
+      if (!imageNode) return null;
+
+      const sampled = await new Promise<{ blue: number[]; white: number[] }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            blue: Array.from(ctx.getImageData(100, 30, 1, 1).data),
+            white: Array.from(ctx.getImageData(30, 30, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted canvas image"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return {
+        width: imageNode.width,
+        height: imageNode.height,
+        dataUrl: imageNode.dataUrl,
+        quadWidth: imageNode.quad[1].x - imageNode.quad[0].x,
+        quadHeight: imageNode.quad[3].y - imageNode.quad[0].y,
+        ...sampled,
+      };
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.dataUrl).toMatch(/^data:image\//);
+    expect(extracted?.width).toBe(120);
+    expect(extracted?.height).toBe(60);
+    expect(extracted?.quadWidth).toBeCloseTo(120, 0);
+    expect(extracted?.quadHeight).toBeCloseTo(60, 0);
+    expect(extracted?.blue[2]).toBeGreaterThan(200);
+    expect(extracted?.blue[0]).toBeLessThan(50);
+    expect(extracted?.white[0]).toBeGreaterThan(200);
+    expect(extracted?.white[1]).toBeGreaterThan(200);
+    expect(extracted?.white[2]).toBeGreaterThan(200);
   });
 
   test("skips broken/unloaded images gracefully", async ({ page }) => {

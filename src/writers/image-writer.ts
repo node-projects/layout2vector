@@ -20,6 +20,7 @@ import {
   type GradientStopAst,
   type ParsedGradientAst,
 } from "./shared/gradient-utils.js";
+import { getCssCanvasFilter, mapMixBlendModeToCanvasComposite } from "./shared/filter-effects.js";
 import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
@@ -31,6 +32,18 @@ interface LinearGradient { type: "linear"; angleDeg: number; stops: GradientStop
 interface RadialGradient { type: "radial"; stops: GradientStop[]; repeating: boolean; }
 interface ConicGradient { type: "conic"; fromAngleDeg: number; stops: GradientStop[]; repeating: boolean; }
 type ParsedGradient = LinearGradient | RadialGradient | ConicGradient;
+
+function applyRenderEffects(ctx: CanvasRenderingContext2D, style: Style): void {
+  const filter = getCssCanvasFilter(style.filter);
+  if (filter && "filter" in ctx) {
+    ctx.filter = filter;
+  }
+
+  const composite = mapMixBlendModeToCanvasComposite(style.mixBlendMode);
+  if (composite) {
+    ctx.globalCompositeOperation = composite;
+  }
+}
 
 function normalizeFontFamily(fontFamily: string | undefined, fallback: string): string {
   const normalized = fontFamily?.trim();
@@ -298,6 +311,7 @@ export class ImageResult {
     if (img.style.opacity !== undefined && img.style.opacity < 1) {
       ctx.globalAlpha = img.style.opacity;
     }
+    applyRenderEffects(ctx, img.style);
 
     // Compute transform for potentially rotated quad
     const q = img.quad;
@@ -580,6 +594,7 @@ export class ImageWriter implements Writer<ImageResult> {
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, quadBounds(points), style);
     this.applyOpacity(ctx, style);
+    applyRenderEffects(ctx, style);
 
     // Draw outer (drop) shadows before the shape
     this.drawBoxShadows(ctx, points, style, false);
@@ -646,6 +661,7 @@ export class ImageWriter implements Writer<ImageResult> {
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, this.computeBoundingBox(points), style);
     this.applyOpacity(ctx, style);
+    applyRenderEffects(ctx, style);
 
     ctx.beginPath();
     tracePolylinePath(ctx, points, closed, style);
@@ -677,6 +693,7 @@ export class ImageWriter implements Writer<ImageResult> {
     this.applyClipBounds(ctx, style);
     this.applyClipPath(ctx, quadBounds(quad), style);
     this.applyOpacity(ctx, style);
+    applyRenderEffects(ctx, style);
 
     // Compute font size from quad height
     const quadHeight = Math.sqrt(

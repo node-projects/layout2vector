@@ -2,7 +2,7 @@
  * HTML Writer.
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
-import type { ClipQuad, PathSubpath, Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, PathSubpath, Point, Quad, SourceMetadata, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
@@ -45,6 +45,28 @@ function escHtml(s: string): string {
     }
   }
   return out;
+}
+
+function buildSourceDataAttributes(source: SourceMetadata | undefined): string[] {
+  if (!source) return [];
+
+  const attrs = [
+    `data-source-xpath="${escHtml(source.xpath)}"`,
+    `data-source-original-type="${escHtml(source.originalType)}"`,
+  ];
+  if (source.id) {
+    attrs.push(`data-source-id="${escHtml(source.id)}"`);
+  }
+  return attrs;
+}
+
+function injectOpeningTagAttributes(html: string, attributes: string[]): string {
+  if (attributes.length === 0) return html;
+
+  return html.replace(/^<([^\s>/]+)([^>]*?)(\s*\/?)>/, (_match, tagName: string, rest: string, closing: string) => {
+    const trimmedRest = rest.trimEnd();
+    return `<${tagName}${trimmedRest ? ` ${trimmedRest}` : ""} ${attributes.join(" ")}${closing}>`;
+  });
 }
 
 /** Build an SVG polygon path string from quad points. */
@@ -445,8 +467,9 @@ export class HTMLWriter implements Writer<string> {
     return `<div style="${css.join(";")}">${offsetRootElementPosition(wrapped, -clip.x, -clip.y)}</div>`;
   }
 
-  private pushElement(html: string, style: Style, bounds?: ClipPathBounds): void {
-    const simpleGroup = this.buildSimpleClipGroup(html, style);
+  private pushElement(html: string, style: Style, bounds?: ClipPathBounds, source?: SourceMetadata): void {
+    const content = injectOpeningTagAttributes(html, buildSourceDataAttributes(source));
+    const simpleGroup = this.buildSimpleClipGroup(content, style);
     if (simpleGroup) {
       const last = this.elements.at(-1);
       if (last?.type === "clip-group" && last.key === simpleGroup.key) {
@@ -464,7 +487,7 @@ export class HTMLWriter implements Writer<string> {
       return;
     }
 
-    this.elements.push({ type: "raw", html: this.applyClip(html, style, bounds) });
+    this.elements.push({ type: "raw", html: this.applyClip(content, style, bounds) });
   }
 
   private buildSimpleClipGroup(html: string, style: Style): { key: string; open: string; close: string; content: string } | null {
@@ -483,7 +506,7 @@ export class HTMLWriter implements Writer<string> {
     };
   }
 
-  async drawPolygon(points: Quad, style: Style): Promise<void> {
+  async drawPolygon(points: Quad, style: Style, source?: SourceMetadata): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
     const borders = getVisibleBorders(style);
@@ -523,7 +546,7 @@ export class HTMLWriter implements Writer<string> {
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);
 
-      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds);
+      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds, source);
     } else {
       const transform = getQuadTransform(points);
       if (!transform) return;
@@ -548,11 +571,11 @@ export class HTMLWriter implements Writer<string> {
       if (opacity !== undefined && opacity < 1) css.push(`opacity:${n(opacity)}`);
       appendEffectCss(css, style);
 
-      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds);
+      this.pushElement(`<div style="${css.join(";")}"></div>`, style, clipBounds, source);
     }
   }
 
-  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
+  async drawPolyline(points: Point[], closed: boolean, style: Style, source?: SourceMetadata): Promise<void> {
     if (points.length < 2) return;
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
@@ -569,10 +592,10 @@ export class HTMLWriter implements Writer<string> {
     if (style.strokeDasharray && style.strokeDasharray !== "none") svgAttrs.push(`stroke-dasharray="${escHtml(style.strokeDasharray)}"`);
     if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-    this.pushElement(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points));
+    this.pushElement(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points), source);
   }
 
-  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
+  async drawText(quad: Quad, text: string, style: Style, source?: SourceMetadata): Promise<void> {
     const preserveWhitespace = preservesWhitespace(style);
     const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
@@ -638,7 +661,7 @@ export class HTMLWriter implements Writer<string> {
         css.push("text-align-last:justify");
       }
 
-      this.pushElement(`<div style="${css.join(";")}">${escHtml(sanitized)}</div>`, style, getQuadBounds(quad));
+      this.pushElement(`<div style="${css.join(";")}">${escHtml(sanitized)}</div>`, style, getQuadBounds(quad), source);
     } else {
       // Axis-aligned text → use a positioned span
       const css: string[] = [
@@ -670,11 +693,11 @@ export class HTMLWriter implements Writer<string> {
         }
       }
 
-      this.pushElement(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style, getQuadBounds(quad));
+      this.pushElement(`<span style="${css.join(";")}">${escHtml(sanitized)}</span>`, style, getQuadBounds(quad), source);
     }
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, _rgbData?: number[], source?: SourceMetadata): Promise<void> {
     const transform = getQuadTransform(quad);
     if (!transform) return;
 
@@ -709,10 +732,10 @@ export class HTMLWriter implements Writer<string> {
 
     if (this.imageMode.type === "css") {
       const className = this.getCssImageClass(dataUrl);
-      this.pushElement(`<div class="${className}" style="${css.join(";")}"></div>`, style, getQuadBounds(quad));
+      this.pushElement(`<div class="${className}" style="${css.join(";")}"></div>`, style, getQuadBounds(quad), source);
     } else {
       const src = this.imageMode.type === "external" ? this.getImageFilename(dataUrl) : dataUrl;
-      this.pushElement(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style, getQuadBounds(quad));
+      this.pushElement(`<img src="${escHtml(src)}" style="${css.join(";")}" />`, style, getQuadBounds(quad), source);
     }
   }
 

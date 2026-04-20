@@ -303,4 +303,27 @@ test.describe("SVG Geometry Extraction", () => {
     expect(compound.style.pathSubpaths[1].points[0].x).toBeGreaterThan(100);
     expect(compound.style.pathSubpaths.every((subpath: any) => subpath.closed)).toBe(true);
   });
+
+  test("extracts compact arc-flag multi-subpath SVG paths as a compound polyline", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="m13.974 2.052-8 4.7a4 4 0 00.385 7.097l.942.423-1.327.78a4 4 0 004.052 6.897l8-4.7a4.001 4.001 0 00-.384-7.096L16.7 9.73l1.326-.78a4 4 0 10-4.052-6.897ZM10 15V9l5 3-5 3Z" fill="rgb(145, 152, 161)" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    const compound = polylines.find((polyline: any) => polyline.style?.pathSubpaths?.length === 2);
+    expect(compound).toBeDefined();
+    expect(compound.style.pathSubpaths.every((subpath: any) => subpath.closed)).toBe(true);
+    expect(compound.style.pathSubpaths[1].points[0].x).toBeCloseTo(10, 1);
+    expect(compound.style.pathSubpaths[1].points[0].y).toBeCloseTo(15, 1);
+  });
 });

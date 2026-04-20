@@ -3,6 +3,9 @@ import { renderIR } from "../../src/pipeline.js";
 import type { IRNode, Quad } from "../../src/types.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
 
+const RED_PIXEL_JPEG =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=";
+
 const chipQuad: Quad = [
   { x: 0, y: 0 },
   { x: 42.2833, y: 0 },
@@ -114,5 +117,32 @@ test.describe("PDF writer regressions", () => {
     expect(content).toContain("0.0392 0.0784 0.1176 RG");
     expect(content).toContain("1.5 w");
     expect(content).toMatch(/20\.625 165\.6 m\s+99\.375 165\.6 l/);
+  });
+
+  test("clips rounded images before drawing JPEG XObjects", async () => {
+    const writer = new PDFWriter({ pageWidth: 60, pageHeight: 60 });
+    const pdf = await renderIR([{
+      type: "image",
+      quad: [
+        { x: 10, y: 10 },
+        { x: 42, y: 10 },
+        { x: 42, y: 42 },
+        { x: 10, y: 42 },
+      ],
+      dataUrl: RED_PIXEL_JPEG,
+      width: 1,
+      height: 1,
+      style: {
+        borderRadius: "50%",
+      },
+      zIndex: 0,
+    } satisfies IRNode], writer);
+
+    await pdf.finalize();
+    const ops = ((writer as any).ops as string[]).join("\n");
+
+    expect(ops).toContain("/Im1 Do");
+    expect(ops).toContain("W n");
+    expect(ops.match(/\bc\b/g)?.length ?? 0).toBe(4);
   });
 });

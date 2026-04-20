@@ -31,6 +31,7 @@
     "test:integration": "npx playwright test --project=integration",
     "test:ui": "npx playwright test --project=ui",
     "test:demos": "npx playwright test --project=demos",
+    "test:url": "npx playwright test tests/demos/url.test.ts --project=demos",
     "prepublishOnly": "npm run build && npm run bundle",
     "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --external:@chenglou/pretext --platform=neutral --bundle --outfile=./dist/index-min.js"
   },

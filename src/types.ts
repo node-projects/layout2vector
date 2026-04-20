@@ -92,6 +92,12 @@ export type Style = {
 /** Controls how text is split into IR text nodes during extraction. */
 export type TextMeasurementMode = "line" | "pretext" | "auto";
 
+export type SourceMetadata = {
+  id?: string;
+  xpath: string;
+  originalType: string;
+};
+
 /** Intermediate representation node. */
 export type IRNode =
   | {
@@ -99,6 +105,7 @@ export type IRNode =
       points: Quad;
       style: Style;
       zIndex: number;
+      source?: SourceMetadata;
     }
   | {
       type: "text";
@@ -106,6 +113,7 @@ export type IRNode =
       text: string;
       style: Style;
       zIndex: number;
+      source?: SourceMetadata;
     }
   | {
       type: "polyline";
@@ -113,6 +121,7 @@ export type IRNode =
       closed: boolean;
       style: Style;
       zIndex: number;
+      source?: SourceMetadata;
     }
   | {
       type: "image";
@@ -124,6 +133,7 @@ export type IRNode =
       rgbData?: number[];
       style: Style;
       zIndex: number;
+      source?: SourceMetadata;
     };
 
 /** Extraction options. */
@@ -131,6 +141,19 @@ export type Options = {
   boxType?: "border" | "content";
   includeText?: boolean;
   includeImages?: boolean;
+  /**
+   * When true, `<video>` elements are converted into `image` IR nodes by
+   * rasterizing their first decoded frame at the element's display size.
+   * Uses `imageScale` for rasterization resolution. Defaults to false.
+   */
+  includeVideos?: boolean;
+  /**
+   * When true, extracted IR nodes include source metadata for debugging and traceability.
+   * The metadata contains the source element id (if present), an absolute XPath-like path,
+   * and the original DOM/SVG source type before any IR conversion.
+   * Defaults to false.
+   */
+  includeSourceMetadata?: boolean;
   includeInvisible?: boolean;
   /**
    * Controls text extraction granularity.
@@ -196,9 +219,9 @@ export type Options = {
 /** Writer interface for output generation. */
 export interface Writer<TOutput> {
   begin(): Promise<void>;
-  drawPolygon(points: Quad, style: Style): Promise<void>;
-  drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void>;
-  drawText(quad: Quad, text: string, style: Style): Promise<void>;
-  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void>;
+  drawPolygon(points: Quad, style: Style, source?: SourceMetadata): Promise<void>;
+  drawPolyline(points: Point[], closed: boolean, style: Style, source?: SourceMetadata): Promise<void>;
+  drawText(quad: Quad, text: string, style: Style, source?: SourceMetadata): Promise<void>;
+  drawImage?(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[], source?: SourceMetadata): Promise<void>;
   end(): Promise<TOutput>;
 }

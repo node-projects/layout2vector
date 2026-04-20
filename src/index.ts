@@ -29,7 +29,7 @@ export { getElementQuad, getElementQuads, getElementOrigin, quadSize, getSvgScre
 // Extractors (advanced usage)
 export { extractHTMLGeometry } from "./extractors/html-extractor.js";
 export { extractSVGSubtree } from "./extractors/svg-extractor.js";
-export { extractImageGeometry, isImageElement, hasBackgroundImage, extractBackgroundImage, preloadImages } from "./extractors/image-extractor.js";
+export { extractImageGeometry, extractVideoGeometry, isImageElement, isVideoElement, hasBackgroundImage, extractBackgroundImage, preloadImages } from "./extractors/image-extractor.js";
 export { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
 export { extractPseudoElements, parseCSSContentValue } from "./extractors/pseudo-extractor.js";
 

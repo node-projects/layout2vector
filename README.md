@@ -111,6 +111,8 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `boxType` | `"border" \| "content"` | `"border"` | Which CSS box to use for element quads |
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
+| `includeVideos` | `boolean` | `false` | Whether to extract `<video>` elements as image IR nodes using the first decoded video frame |
+| `includeSourceMetadata` | `boolean` | `false` | Whether to attach source metadata to each IR node for debugging and traceability. HTML and SVG writers surface this as `data-source-*` attributes. |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `textMeasurement` | `"line" \| "pretext" \| "auto"` | `"line"` | Text extraction granularity. `pretext` uses `@chenglou/pretext` for accurate text measurement and layout, supporting all writing modes (vertical-rl, vertical-lr, sideways-rl, sideways-lr). `auto` keeps the fast line mode for normal text and switches to pretext only when non-default `writing-mode` or `direction` is present. Requires `@chenglou/pretext` to be installed when using `pretext` or `auto` with non-standard writing modes. |
 | `walkIframes` | `boolean` | `false` | Traverse same-origin iframe documents and merge their content into the same IR paint order |
@@ -541,6 +543,7 @@ Enable with `includeImages: true`. All image preloading and embedding is now **a
 - **All images** (including `<img>` and CSS `background-image: url()`, even in Shadow DOM) are embedded as data URLs in all output formats (DXF, PDF, PNG, SVG, HTML).
 - **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization.
 - **Raster images** (PNG, JPEG, GIF, WebP, data URLs, remote URLs): extracted as `image` IR nodes with embedded data URL.
+- **Video elements**: enable with `includeVideos: true` to rasterize each `<video>` into an `image` IR node using its first decoded frame. `imageScale` also applies to video frame rasterization.
 - **CSS `background-image: url()`**: SVG URLs are vector-converted; raster URLs are extracted as image nodes.
 - **Data URLs**: all `data:` schemes are supported (`base64`, URL-encoded, UTF-8).
 - **Remote URLs**: images are rasterized via canvas; cross-origin images fall back to the original `src`.

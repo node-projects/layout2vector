@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-demo-ready="pending">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Export Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top, rgba(60, 128, 255, 0.18), transparent 40%),
+        linear-gradient(180deg, #f4f7fb 0%, #dbe6f4 100%);
+      color: #10213a;
+    }
+
+    .panel {
+      width: min(720px, calc(100vw - 48px));
+      padding: 24px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 24px 60px rgba(16, 33, 58, 0.16);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #355a8a;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #38506f;
+    }
+
+    .frame {
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #0b172a 0%, #16314d 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    video {
+      display: block;
+      width: 320px;
+      max-width: 100%;
+      aspect-ratio: 16 / 9;
+      margin: 0 auto;
+      border-radius: 18px;
+      background: #09101c;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    .status {
+      margin-top: 14px;
+      font-size: 13px;
+      text-align: center;
+      color: #9bb2cf;
+    }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <p class="eyebrow">Media Export</p>
+    <h1>First-frame video export</h1>
+    <p>This demo generates a short clip in the browser and keeps the first decoded frame available for export.</p>
+    <div class="frame">
+      <video id="demo-video" muted playsinline preload="auto"></video>
+      <div class="status" id="status">Preparing demo video…</div>
+    </div>
+  </main>
+
+  <script>
+    (async () => {
+      const root = document.documentElement;
+      const status = document.getElementById("status");
+      const video = document.getElementById("demo-video");
+
+      function setState(state, message) {
+        root.dataset.demoReady = state;
+        if (status) status.textContent = message;
+      }
+
+      function chooseMimeType() {
+        if (!("MediaRecorder" in window)) return null;
+        const candidates = [
+          "video/webm;codecs=vp9",
+          "video/webm;codecs=vp8",
+          "video/webm",
+        ];
+
+        for (const candidate of candidates) {
+          if (typeof MediaRecorder.isTypeSupported === "function" && MediaRecorder.isTypeSupported(candidate)) {
+            return candidate;
+          }
+        }
+
+        return candidates[2];
+      }
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      function drawFrame(ctx, label, primary, secondary) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, ctx.canvas.height);
+        gradient.addColorStop(0, "#08111f");
+        gradient.addColorStop(1, "#123052");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+        ctx.fillStyle = primary;
+        ctx.fillRect(28, 28, 122, 92);
+        ctx.fillStyle = secondary;
+        ctx.fillRect(170, 42, 118, 20);
+        ctx.fillRect(170, 74, 92, 20);
+        ctx.fillRect(170, 106, 64, 20);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.fillRect(28, 132, 260, 18);
+
+        ctx.fillStyle = "#f8fbff";
+        ctx.font = "700 26px Segoe UI, sans-serif";
+        ctx.fillText(label, 28, 164);
+      }
+
+      async function createVideoBlob() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 320;
+        canvas.height = 180;
+        const ctx = canvas.getContext("2d");
+        if (!ctx || typeof canvas.captureStream !== "function") {
+          throw new Error("Canvas video capture is unavailable.");
+        }
+
+        const mimeType = chooseMimeType();
+        if (!mimeType) {
+          throw new Error("MediaRecorder is unavailable.");
+        }
+
+        drawFrame(ctx, "FRAME 1", "#eb3b5a", "#fed330");
+
+        const stream = canvas.captureStream(8);
+        const recorder = new MediaRecorder(stream, {
+          mimeType,
+          videoBitsPerSecond: 300000,
+        });
+        const chunks = [];
+
+        const stopped = new Promise((resolve, reject) => {
+          recorder.addEventListener("stop", resolve, { once: true });
+          recorder.addEventListener("error", () => reject(new Error("MediaRecorder failed.")), { once: true });
+        });
+
+        recorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        });
+
+        recorder.start();
+        await delay(180);
+        drawFrame(ctx, "FRAME 2", "#2d98da", "#20bf6b");
+        await delay(180);
+        recorder.stop();
+        await stopped;
+        stream.getTracks().forEach((track) => track.stop());
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType });
+        if (!blob.size) {
+          throw new Error("Generated video blob is empty.");
+        }
+
+        return blob;
+      }
+
+      try {
+        const blob = await createVideoBlob();
+        const objectUrl = URL.createObjectURL(blob);
+        video.src = objectUrl;
+
+        await new Promise((resolve, reject) => {
+          const onLoaded = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            reject(new Error("Video failed to load."));
+          };
+          const cleanup = () => {
+            video.removeEventListener("loadeddata", onLoaded);
+            video.removeEventListener("error", onError);
+          };
+
+          video.addEventListener("loadeddata", onLoaded);
+          video.addEventListener("error", onError);
+          video.load();
+        });
+
+        video.pause();
+        try {
+          video.currentTime = 0;
+        } catch {
+          // Some browsers already keep the initial frame at time zero.
+        }
+
+        if (video.seeking) {
+          await new Promise((resolve) => {
+            const done = () => {
+              video.removeEventListener("seeked", done);
+              video.removeEventListener("error", done);
+              resolve();
+            };
+            video.addEventListener("seeked", done);
+            video.addEventListener("error", done);
+          });
+        }
+
+        setState("ready", "Video ready for export.");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setState("error", `Video generation failed: ${message}`);
+      }
+    })();
+  </script>
+</body>
+</html>

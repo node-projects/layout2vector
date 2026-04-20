@@ -5,6 +5,7 @@
 import type { Point, Quad, Style, IRNode, Options } from "../types.js";
 import { extractStyle } from "../traversal.js";
 import { getSvgScreenCtm, getElementQuad } from "../geometry.js";
+import { buildSourceMetadata } from "../shared/source-metadata.js";
 
 /** Number of sample points for path/circle/ellipse approximation. */
 const PATH_SAMPLE_COUNT = 64;
@@ -58,6 +59,12 @@ function walkSVGTree(
   // Process this element if it's a renderable SVG shape and visible
   if (el instanceof SVGGraphicsElement && el !== el.ownerSVGElement && cs.visibility !== "hidden") {
     const nodes = extractSVGElement(el, nextIndex(), options, effectiveOpacity, cs);
+    if (options.includeSourceMetadata && nodes.length > 0) {
+      const source = buildSourceMetadata(el, tag);
+      for (const node of nodes) {
+        node.source = source;
+      }
+    }
     results.push(...nodes);
   }
 

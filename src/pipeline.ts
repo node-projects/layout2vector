@@ -12,10 +12,31 @@ import {
 } from "./traversal.js";
 import { extractHTMLGeometry } from "./extractors/html-extractor.js";
 import { extractSVGSubtree } from "./extractors/svg-extractor.js";
-import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
+import { isImageElement, isCanvasElement, isVideoElement, extractImageGeometry, extractCanvasGeometry, extractVideoGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
 import { isMathMLRoot, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
 import { extractPseudoElements } from "./extractors/pseudo-extractor.js";
 import { clearGeometryCaches, getElementOrigin } from "./geometry.js";
+import { buildSourceMetadata } from "./shared/source-metadata.js";
+
+function inheritContainerClipping(nodes: IRNode[], inheritedStyle: IRNode["style"]): void {
+  for (const node of nodes) {
+    if (inheritedStyle.clipBounds && !node.style.clipBounds) {
+      node.style.clipBounds = inheritedStyle.clipBounds;
+    }
+    if (inheritedStyle.clipQuads?.length && !node.style.clipQuads?.length) {
+      node.style.clipQuads = inheritedStyle.clipQuads;
+    }
+  }
+}
+
+function attachSourceMetadata(nodes: IRNode[], element: Element, options: Options, originalType?: string): void {
+  if (!options.includeSourceMetadata || nodes.length === 0) return;
+
+  const source = buildSourceMetadata(element, originalType);
+  for (const node of nodes) {
+    node.source = source;
+  }
+}
 
 /**
  * Extract the full IR from one or more root DOM elements.
@@ -82,6 +103,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // the SVG content paints over it (correct paint order).
       if (isSVGRoot(el)) {
         const htmlNodes = await extractHTMLGeometry(node, globalIndex, options);
+        attachSourceMetadata(htmlNodes, el, options);
         transformIRGeometry(htmlNodes, node.coordinateTransform);
         irNodes.push(...htmlNodes);
         globalIndex += htmlNodes.length || 1;
@@ -94,6 +116,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
           // so the SVG extractor can combine it with the SVG element tree opacity.
           (node.extractedStyle.opacity ?? 1) / (parseFloat(getComputedStyle(el).opacity || '1') || 1)
         );
+        inheritContainerClipping(svgNodes, node.extractedStyle);
         transformIRGeometry(svgNodes, node.coordinateTransform);
         irNodes.push(...svgNodes);
         globalIndex += svgNodes.length || 1;
@@ -108,6 +131,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // MathML root: extract decorations (fraction bars, radical overlines)
       if (isMathMLRoot(el)) {
         const mathNodes = extractMathMLFeatures(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(mathNodes, el, options);
         transformIRGeometry(mathNodes, node.coordinateTransform);
         irNodes.push(...mathNodes);
         globalIndex += mathNodes.length;
@@ -115,6 +139,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
       // HTML element extraction
       const htmlNodes = await extractHTMLGeometry(node, globalIndex, options);
+      attachSourceMetadata(htmlNodes, el, options);
       transformIRGeometry(htmlNodes, node.coordinateTransform);
       irNodes.push(...htmlNodes);
       globalIndex += htmlNodes.length || 1;
@@ -122,6 +147,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // ::before / ::after pseudo-element extraction
       if (options.includePseudoElements !== false) {
         const pseudoNodes = extractPseudoElements(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(pseudoNodes, el, options, `${el.tagName.toLowerCase()}::pseudo`);
         transformIRGeometry(pseudoNodes, node.coordinateTransform);
         irNodes.push(...pseudoNodes);
         globalIndex += pseudoNodes.length;
@@ -130,14 +156,34 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       // Image element extraction (on top of HTML geometry)
       if (options.includeImages && isImageElement(el)) {
         const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(imageNodes, el, options, "img");
         transformIRGeometry(imageNodes, node.coordinateTransform);
         irNodes.push(...imageNodes);
         globalIndex += imageNodes.length || 1;
       }
 
+      // Canvas element extraction (current bitmap as image IR)
+      if (options.includeImages && isCanvasElement(el)) {
+        const canvasNodes = extractCanvasGeometry(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(canvasNodes, el, options, "canvas");
+        transformIRGeometry(canvasNodes, node.coordinateTransform);
+        irNodes.push(...canvasNodes);
+        globalIndex += canvasNodes.length || 1;
+      }
+
+      // Video element extraction (first frame as image IR)
+      if (options.includeVideos && isVideoElement(el)) {
+        const videoNodes = await extractVideoGeometry(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(videoNodes, el, options, "video");
+        transformIRGeometry(videoNodes, node.coordinateTransform);
+        irNodes.push(...videoNodes);
+        globalIndex += videoNodes.length || 1;
+      }
+
       // CSS background-image url() extraction
       if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
         const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
+        attachSourceMetadata(bgNodes, el, options, "background-image");
         transformIRGeometry(bgNodes, node.coordinateTransform);
         irNodes.push(...bgNodes);
         globalIndex += bgNodes.length || 1;
@@ -503,17 +549,17 @@ export async function renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T
     if (isFullyClippedNode(node)) continue;
     switch (node.type) {
       case "polygon":
-        await writer.drawPolygon(node.points, node.style);
+        await writer.drawPolygon(node.points, node.style, node.source);
         break;
       case "text":
-        await writer.drawText(node.quad, node.text, node.style);
+        await writer.drawText(node.quad, node.text, node.style, node.source);
         break;
       case "polyline":
-        await writer.drawPolyline(node.points, node.closed, node.style);
+        await writer.drawPolyline(node.points, node.closed, node.style, node.source);
         break;
       case "image":
         if (writer.drawImage) {
-          await writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style, node.rgbData);
+          await writer.drawImage(node.quad, node.dataUrl, node.width, node.height, node.style, node.rgbData, node.source);
         }
         break;
     }

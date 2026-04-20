@@ -2,7 +2,7 @@
  * SVG Writer.
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
-import type { ClipQuad, PathSubpath, Point, Quad, Style, Writer } from "../types.js";
+import type { ClipQuad, PathSubpath, Point, Quad, SourceMetadata, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
@@ -15,6 +15,7 @@ import {
   type GradientStopAst,
   type ParsedGradientAst,
 } from "./shared/gradient-utils.js";
+import { getSvgBlendModeStyle } from "./shared/filter-effects.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius as parseBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -46,6 +47,42 @@ function escXml(s: string): string {
     }
   }
   return out;
+}
+
+function buildSourceDataAttributes(source: SourceMetadata | undefined): string[] {
+  if (!source) return [];
+
+  const attrs = [
+    `data-source-xpath="${escXml(source.xpath)}"`,
+    `data-source-original-type="${escXml(source.originalType)}"`,
+  ];
+  if (source.id) {
+    attrs.push(`data-source-id="${escXml(source.id)}"`);
+  }
+  return attrs;
+}
+
+function injectOpeningTagAttributes(xml: string, attributes: string[]): string {
+  if (attributes.length === 0) return xml;
+
+  return xml.replace(/^<([^\s>/]+)([^>]*?)(\s*\/?)>/, (_match, tagName: string, rest: string, closing: string) => {
+    const trimmedRest = rest.trimEnd();
+    return `<${tagName}${trimmedRest ? ` ${trimmedRest}` : ""} ${attributes.join(" ")}${closing}>`;
+  });
+}
+
+function getSvgEffectStyle(style: Style): string | undefined {
+  const declarations: string[] = [];
+  if (style.filter && style.filter !== "none") {
+    declarations.push(`filter:${style.filter}`);
+  }
+
+  const blendMode = getSvgBlendModeStyle(style.mixBlendMode);
+  if (blendMode) {
+    declarations.push(`mix-blend-mode:${blendMode}`);
+  }
+
+  return declarations.length > 0 ? declarations.join(";") : undefined;
 }
 
 function pointsToPath(points: Point[], closed: boolean): string {
@@ -436,8 +473,13 @@ export class SVGWriter implements Writer<string> {
   }
 
   /** Push an element, wrapping it in clip groups when clipBounds or clip-path are set. */
-  private pushElement(element: string, style: Style, bounds?: ClipPathBounds): void {
-    let wrapped = element;
+  private pushElement(element: string, style: Style, bounds?: ClipPathBounds, source?: SourceMetadata): void {
+    let wrapped = injectOpeningTagAttributes(element, buildSourceDataAttributes(source));
+
+    const effectStyle = getSvgEffectStyle(style);
+    if (effectStyle) {
+      wrapped = `<g style="${escXml(effectStyle)}">${wrapped}</g>`;
+    }
 
     for (const quadClipId of this.getQuadClipIds(style)) {
       wrapped = `<g clip-path="url(#${quadClipId})">${wrapped}</g>`;
@@ -520,7 +562,7 @@ export class SVGWriter implements Writer<string> {
     }
   }
 
-  async drawPolygon(points: Quad, style: Style): Promise<void> {
+  async drawPolygon(points: Quad, style: Style, source?: SourceMetadata): Promise<void> {
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
     const outline = getVisibleOutline(style);
@@ -566,7 +608,7 @@ export class SVGWriter implements Writer<string> {
       const element = layers.length === 1 && groupAttrs.length === 0
         ? layers[0]
         : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
-      this.pushElement(element, style, getQuadBounds(points));
+      this.pushElement(element, style, getQuadBounds(points), source);
       if (mixedBorders) this.drawPerSideBorders(points, style);
 
       // Inset shadows as clipped overlays
@@ -610,7 +652,7 @@ export class SVGWriter implements Writer<string> {
     const element = layers.length === 1 && groupAttrs.length === 0
       ? layers[0]
       : `<g${groupAttrs.length > 0 ? ` ${groupAttrs.join(" ")}` : ""}>${layers.join("")}</g>`;
-    this.pushElement(element, style, getQuadBounds(points));
+    this.pushElement(element, style, getQuadBounds(points), source);
     if (mixedBorders) this.drawPerSideBorders(points, style);
 
     if (isAxisAlignedRect(points)) {
@@ -618,7 +660,7 @@ export class SVGWriter implements Writer<string> {
     }
   }
 
-  async drawPolyline(points: Point[], closed: boolean, style: Style): Promise<void> {
+  async drawPolyline(points: Point[], closed: boolean, style: Style, source?: SourceMetadata): Promise<void> {
     if (points.length < 2) return;
     const fill = getVisibleCssColorString(style.fill);
     const stroke = getVisibleStroke(style, getVisibleCssColorString);
@@ -646,10 +688,10 @@ export class SVGWriter implements Writer<string> {
       undefined,
       opacity,
     );
-    this.pushElement(element, style, getPointBounds(points));
+    this.pushElement(element, style, getPointBounds(points), source);
   }
 
-  async drawText(quad: Quad, text: string, style: Style): Promise<void> {
+  async drawText(quad: Quad, text: string, style: Style, source?: SourceMetadata): Promise<void> {
     const preserveWhitespace = preservesWhitespace(style);
     const sanitized = normalizeWhitespaceAwareText(text, style);
     if (sanitized.length === 0) return;
@@ -737,10 +779,10 @@ export class SVGWriter implements Writer<string> {
       }
     }
 
-    this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style, getQuadBounds(quad));
+    this.pushElement(`<text ${attrs.join(" ")}>${escXml(sanitized)}</text>`, style, getQuadBounds(quad), source);
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, _rgbData?: number[], source?: SourceMetadata): Promise<void> {
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
     const topEdge = Math.sqrt(dx * dx + dy * dy);
@@ -790,7 +832,7 @@ export class SVGWriter implements Writer<string> {
       ? layers[0]
       : `<g${opacity !== undefined ? ` opacity="${n(opacity)}"` : ""}>${layers.join("")}</g>`;
 
-    this.pushElement(element, style, getQuadBounds(quad));
+    this.pushElement(element, style, getQuadBounds(quad), source);
   }
 
   async end(): Promise<string> {

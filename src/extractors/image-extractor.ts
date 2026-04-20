@@ -1,7 +1,7 @@
 /**
- * Image element extraction.
- * Handles <img> tags: SVG images are converted to vector geometry,
- * raster images are embedded as data URLs.
+ * Image and video element extraction.
+ * Handles <img> tags: simple SVG images may be converted to vector geometry,
+ * while effected/clipped SVGs and raster images are embedded as image nodes.
  */
 import type { Quad, IRNode, Options, Style } from "../types.js";
 import { extractSVGSubtree } from "./svg-extractor.js";
@@ -34,6 +34,16 @@ export function clearImageCache(): void {
 /** Check if an element is an <img> element. */
 export function isImageElement(el: Element): el is HTMLImageElement {
   return el.tagName.toLowerCase() === "img";
+}
+
+/** Check if an element is a <canvas> element. */
+export function isCanvasElement(el: Element): el is HTMLCanvasElement {
+  return el.tagName.toLowerCase() === "canvas";
+}
+
+/** Check if an element is a <video> element. */
+export function isVideoElement(el: Element): el is HTMLVideoElement {
+  return el.tagName.toLowerCase() === "video";
 }
 
 /**
@@ -389,6 +399,41 @@ function rasterToRenderedUncached(dataUrl: string, w: number, h: number): { data
   }
 }
 
+function renderDataUrlWithSampling(
+  dataUrl: string,
+  w: number,
+  h: number,
+  disableSmoothing: boolean,
+  sourceRect?: { x: number; y: number; width: number; height: number }
+): { dataUrl: string; rgbData?: number[] } | null {
+  try {
+    const img = new Image();
+    img.src = dataUrl;
+    if (!img.complete || img.naturalWidth === 0) return null;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    if (disableSmoothing) ctx.imageSmoothingEnabled = false;
+    drawObjectFitImage(ctx, img, w, h, sourceRect);
+
+    const pixels = w * h;
+    const inspection = inspectRasterImageData(ctx.getImageData(0, 0, w, h), pixels <= 250000);
+    if (!inspection.hasVisibleContent) return null;
+
+    const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+    return {
+      dataUrl: preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
+      rgbData: inspection.rgbData,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** Decode SVG content from a background-image data URL. */
 function decodeBgSvgDataUrl(dataUrl: string): string | null {
   try {
@@ -613,10 +658,20 @@ function rasterizeBackgroundImageUncached(url: string, w: number, h: number): st
   }
 }
 
+function requiresRasterSvgImage(style: Style): boolean {
+  if (style.filter && style.filter !== "none") return true;
+  if (style.mixBlendMode && style.mixBlendMode !== "normal") return true;
+  if (style.mask && style.mask !== "none") return true;
+  if (style.clipPath && style.clipPath !== "none") return true;
+  if (style.clipBounds) return true;
+  if (style.clipQuads?.length) return true;
+  return false;
+}
+
 /**
  * Extract geometry or image data from an <img> element.
- * - SVG images: converted to vector geometry (polygon/polyline/text IR nodes)
- * - Raster images: emitted as `image` IR nodes with embedded data URL
+ * - Simple SVG images: converted to vector geometry (polygon/polyline/text IR nodes)
+ * - Effected/clipped SVGs and raster images: emitted as `image` IR nodes with embedded data URL
  */
 export function extractImageGeometry(
   el: HTMLImageElement,
@@ -630,6 +685,8 @@ export function extractImageGeometry(
   // Check for a pre-fetched version of this image (from preloadImages)
   const preloadedEl = preloadedImageElems.get(src);
   const drawEl: HTMLImageElement = preloadedEl ?? el;
+  const natW = drawEl.naturalWidth || el.naturalWidth || 0;
+  const natH = drawEl.naturalHeight || el.naturalHeight || 0;
 
   // Skip images that haven't loaded or are broken.
   // For data URL images, naturalWidth may be 0 if the browser hasn't decoded yet,
@@ -641,11 +698,12 @@ export function extractImageGeometry(
   if (!quad) return [];
 
   // Adjust geometry and source sampling for object-fit / object-position.
-  const objectFitPlan = getObjectFitPlan(el, quad);
+  const objectFitPlan = getObjectFitPlan(el, quad, natW, natH);
   const adjustedQuad = objectFitPlan.quad;
 
-  // Try converting SVG images to vector geometry
-  if (isSvgSource(src) && !objectFitPlan.sourceRect) {
+  // Keep SVG <img> elements as image layers when CSS effects or clipping need to
+  // apply to the image as a single composited unit.
+  if (isSvgSource(src) && !objectFitPlan.sourceRect && !requiresRasterSvgImage(style)) {
     const svgContent = extractSvgContent(src);
     if (svgContent) {
       const svgNodes = convertSvgToGeometry(svgContent, el, adjustedQuad, globalIndex, options);
@@ -687,8 +745,6 @@ export function extractImageGeometry(
   // Determine if we should use nearest-neighbor (pixelated) scaling
   const imageRendering = getComputedStyle(el).imageRendering || "";
   const isPixelated = imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges";
-  const natW = drawEl.naturalWidth || 0;
-  const natH = drawEl.naturalHeight || 0;
   const isSmallSource = natW > 0 && natH > 0 && (natW <= 16 || natH <= 16);
   const disableSmoothing = isPixelated || isSmallSource || renderW <= 16 || renderH <= 16;
 
@@ -798,28 +854,215 @@ export function extractImageGeometry(
   }];
 }
 
+/**
+ * Extract the current bitmap of a <canvas> element as an image IR node.
+ */
+export function extractCanvasGeometry(
+  el: HTMLCanvasElement,
+  style: Style,
+  globalIndex: number,
+  options: Options
+): IRNode[] {
+  const natW = el.width || 0;
+  const natH = el.height || 0;
+  if (!natW || !natH) return [];
+
+  const quad = getElementQuad(el);
+  if (!quad) return [];
+
+  const objectFitPlan = getObjectFitPlan(el, quad, natW, natH);
+  const adjustedQuad = objectFitPlan.quad;
+  const imageScale = options.imageScale ?? 1;
+  const displayW = Math.round(Math.sqrt((adjustedQuad[1].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[1].y - adjustedQuad[0].y) ** 2)) || natW || 1;
+  const displayH = Math.round(Math.sqrt((adjustedQuad[3].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[3].y - adjustedQuad[0].y) ** 2)) || natH || 1;
+  const renderW = Math.min(Math.round(displayW * imageScale), 4096);
+  const renderH = Math.min(Math.round(displayH * imageScale), 4096);
+
+  const imageRendering = getComputedStyle(el).imageRendering || "";
+  const isPixelated = imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges";
+  const isSmallSource = natW <= 16 || natH <= 16;
+  const disableSmoothing = isPixelated || isSmallSource || renderW <= 16 || renderH <= 16;
+
+  try {
+    const sourceDataUrl = el.toDataURL("image/png");
+    let rgbData: number[] | undefined;
+
+    const sourceCtx = el.getContext("2d");
+    if (sourceCtx && natW * natH <= 250000) {
+      const inspection = inspectRasterImageData(sourceCtx.getImageData(0, 0, natW, natH), true);
+      if (!inspection.hasVisibleContent) return [];
+      rgbData = inspection.rgbData;
+    }
+
+    let dataUrl = sourceDataUrl;
+    let width = natW;
+    let height = natH;
+
+    if (objectFitPlan.sourceRect || renderW !== natW || renderH !== natH) {
+      const rendered = renderDataUrlWithSampling(sourceDataUrl, renderW, renderH, disableSmoothing, objectFitPlan.sourceRect);
+      if (rendered) {
+        dataUrl = rendered.dataUrl;
+        width = renderW;
+        height = renderH;
+        rgbData = rendered.rgbData ?? rgbData;
+      }
+    }
+
+    return [{
+      type: "image",
+      quad: adjustedQuad,
+      dataUrl,
+      width,
+      height,
+      rgbData,
+      style,
+      zIndex: globalIndex,
+    }];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Extract the first decoded frame of a <video> element as an image IR node.
+ */
+export async function extractVideoGeometry(
+  el: HTMLVideoElement,
+  style: Style,
+  globalIndex: number,
+  options: Options
+): Promise<IRNode[]> {
+  const src = getVideoSourceUrl(el);
+  if (!src) return [];
+
+  const quad = getElementQuad(el);
+  if (!quad) return [];
+
+  const drawEl = await loadFirstVideoFrame(el, src);
+  if (!drawEl) return [];
+
+  try {
+    const natW = drawEl.videoWidth || el.videoWidth || 0;
+    const natH = drawEl.videoHeight || el.videoHeight || 0;
+    if (!natW || !natH) return [];
+
+    const objectFitPlan = getObjectFitPlan(el, quad, natW, natH);
+    const adjustedQuad = objectFitPlan.quad;
+
+    const imageScale = options.imageScale ?? 1;
+    const displayW = Math.round(Math.sqrt((adjustedQuad[1].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[1].y - adjustedQuad[0].y) ** 2)) || natW || 1;
+    const displayH = Math.round(Math.sqrt((adjustedQuad[3].x - adjustedQuad[0].x) ** 2 + (adjustedQuad[3].y - adjustedQuad[0].y) ** 2)) || natH || 1;
+    const renderW = Math.min(Math.round(displayW * imageScale), 4096);
+    const renderH = Math.min(Math.round(displayH * imageScale), 4096);
+
+    const cropKey = objectFitPlan.sourceRect
+      ? `${objectFitPlan.sourceRect.x.toFixed(3)}|${objectFitPlan.sourceRect.y.toFixed(3)}|${objectFitPlan.sourceRect.width.toFixed(3)}|${objectFitPlan.sourceRect.height.toFixed(3)}`
+      : "full";
+    const videoCacheKey = `video|${src.length}|${renderW}|${renderH}|${cropKey}|${src.slice(0, 100)}`;
+    const cachedVideo = imageDataCache.get(videoCacheKey);
+    if (cachedVideo !== undefined) {
+      if (cachedVideo === null) return [];
+      return [{
+        type: "image",
+        quad: adjustedQuad,
+        dataUrl: cachedVideo.dataUrl,
+        width: renderW,
+        height: renderH,
+        rgbData: cachedVideo.rgbData,
+        style,
+        zIndex: globalIndex,
+      }];
+    }
+
+    const imageRendering = getComputedStyle(el).imageRendering || "";
+    const isPixelated = imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges";
+    const isSmallSource = natW <= 16 || natH <= 16;
+    const disableSmoothing = isPixelated || isSmallSource || renderW <= 16 || renderH <= 16;
+
+    let dataUrl: string | null = null;
+    let rgbData: number[] | undefined;
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = renderW;
+      canvas.height = renderH;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        if (disableSmoothing) ctx.imageSmoothingEnabled = false;
+        drawObjectFitImage(ctx, drawEl, renderW, renderH, objectFitPlan.sourceRect);
+
+        const pixels = renderW * renderH;
+        const inspection = inspectRasterImageData(ctx.getImageData(0, 0, renderW, renderH), pixels <= 250000);
+        if (!inspection.hasVisibleContent) {
+          imageDataCache.set(videoCacheKey, null);
+          return [];
+        }
+
+        const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+        dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
+        rgbData = inspection.rgbData;
+      }
+    } catch { /* canvas tainted */ }
+
+    if (!dataUrl) {
+      imageDataCache.set(videoCacheKey, null);
+      return [];
+    }
+
+    imageDataCache.set(videoCacheKey, { dataUrl, rgbData });
+    return [{
+      type: "image",
+      quad: adjustedQuad,
+      dataUrl,
+      width: renderW,
+      height: renderH,
+      rgbData,
+      style,
+      zIndex: globalIndex,
+    }];
+  } finally {
+    if (drawEl !== el) {
+      disposeTemporaryVideo(drawEl);
+    }
+  }
+}
+
 type ObjectFitPlan = {
   quad: Quad;
   sourceRect?: { x: number; y: number; width: number; height: number };
 };
 
 /**
- * The extracted image geometry can differ from the element box when object-fit
+ * The extracted media geometry can differ from the element box when object-fit
  * does not stretch the content, and some modes also require source cropping.
  */
-function getObjectFitPlan(el: HTMLImageElement, quad: Quad): ObjectFitPlan {
+function getObjectFitPlan(
+  el: Element,
+  quad: Quad,
+  natW: number,
+  natH: number
+): ObjectFitPlan {
   const computedStyle = getComputedStyle(el);
   const objectFit = computedStyle.objectFit;
+  if (!natW || !natH) return { quad };
 
-  const natW = el.naturalWidth;
-  const natH = el.naturalHeight;
+  return getObjectFitPlanFromDimensions(quad, natW, natH, objectFit, computedStyle.objectPosition);
+}
+
+function getObjectFitPlanFromDimensions(
+  quad: Quad,
+  natW: number,
+  natH: number,
+  objectFit: string,
+  objectPositionValue: string
+): ObjectFitPlan {
   if (!natW || !natH) return { quad };
 
   const boxW = Math.sqrt((quad[1].x - quad[0].x) ** 2 + (quad[1].y - quad[0].y) ** 2);
   const boxH = Math.sqrt((quad[3].x - quad[0].x) ** 2 + (quad[3].y - quad[0].y) ** 2);
   if (boxW === 0 || boxH === 0) return { quad };
 
-  const objectPosition = parseObjectPosition(computedStyle.objectPosition);
+  const objectPosition = parseObjectPosition(objectPositionValue);
   const imgAspect = natW / natH;
   const boxAspect = boxW / boxH;
 
@@ -862,6 +1105,151 @@ function getObjectFitPlan(el: HTMLImageElement, quad: Quad): ObjectFitPlan {
   }
 
   return { quad };
+}
+
+function getVideoSourceUrl(el: HTMLVideoElement): string | null {
+  const src = el.currentSrc || el.src;
+  if (src) return src;
+  const source = el.querySelector("source[src]") as HTMLSourceElement | null;
+  return source?.src ?? null;
+}
+
+async function loadFirstVideoFrame(el: HTMLVideoElement, src: string): Promise<HTMLVideoElement | null> {
+  const canUseOriginalElement = canReuseOriginalVideoElement(el, src);
+  if (
+    canUseOriginalElement &&
+    el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+    el.videoWidth > 0 &&
+    el.videoHeight > 0 &&
+    Math.abs(el.currentTime) < 0.001
+  ) {
+    return el;
+  }
+
+  const tempVideo = document.createElement("video");
+  tempVideo.muted = true;
+  tempVideo.playsInline = true;
+  tempVideo.preload = "auto";
+  const crossOriginMode = getVideoCrossOriginMode(el, src);
+  if (crossOriginMode) tempVideo.crossOrigin = crossOriginMode;
+  tempVideo.src = src;
+
+  try {
+    await waitForVideoReady(tempVideo);
+    if (!tempVideo.videoWidth || !tempVideo.videoHeight) {
+      disposeTemporaryVideo(tempVideo);
+      return null;
+    }
+    await seekVideoToStart(tempVideo);
+    return tempVideo;
+  } catch {
+    disposeTemporaryVideo(tempVideo);
+    return null;
+  }
+}
+
+function canReuseOriginalVideoElement(el: HTMLVideoElement, src: string): boolean {
+  if (el.crossOrigin) return true;
+  return !isCrossOriginVideoSource(src);
+}
+
+function getVideoCrossOriginMode(el: HTMLVideoElement, src: string): "anonymous" | "use-credentials" | null {
+  if (el.crossOrigin === "use-credentials") return "use-credentials";
+  if (el.crossOrigin === "anonymous") return "anonymous";
+  return isCrossOriginVideoSource(src) ? "anonymous" : null;
+}
+
+function isCrossOriginVideoSource(src: string): boolean {
+  try {
+    const url = new URL(src, document.baseURI);
+    if (url.protocol === "data:" || url.protocol === "blob:") return false;
+    return url.origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForVideoReady(video: HTMLVideoElement): Promise<void> {
+  if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0 && video.videoHeight > 0) {
+    return;
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("error", onError);
+    };
+    const onLoadedData = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = () => {
+      cleanup();
+      reject(new Error("video load failed"));
+    };
+
+    video.addEventListener("loadeddata", onLoadedData);
+    video.addEventListener("error", onError);
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0 && video.videoHeight > 0) {
+      cleanup();
+      resolve();
+      return;
+    }
+
+    video.load();
+  });
+}
+
+async function seekVideoToStart(video: HTMLVideoElement): Promise<void> {
+  video.pause();
+  if (Math.abs(video.currentTime) < 0.001 && !video.seeking) return;
+
+  await new Promise<void>((resolve) => {
+    const cleanup = () => {
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("error", onError);
+    };
+    const onSeeked = () => {
+      cleanup();
+      resolve();
+    };
+    const onError = () => {
+      cleanup();
+      resolve();
+    };
+
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("error", onError);
+
+    try {
+      video.currentTime = 0;
+    } catch {
+      cleanup();
+      resolve();
+      return;
+    }
+
+    if (Math.abs(video.currentTime) < 0.001 && !video.seeking) {
+      cleanup();
+      resolve();
+    }
+  });
+}
+
+function disposeTemporaryVideo(video: HTMLVideoElement): void {
+  try {
+    video.pause();
+  } catch {
+    // ignore
+  }
+
+  video.removeAttribute("src");
+  try {
+    video.load();
+  } catch {
+    // ignore
+  }
 }
 
 function parseObjectPosition(value: string): { x: number; y: number } {

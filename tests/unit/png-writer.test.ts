@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
 
+const RED_PIXEL_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVQIW2P8z8AARAwMjDAGACwBA/+8RVWvAAAAAElFTkSuQmCC";
+
 test.describe("PNG Writer Output", () => {
   test("produces a valid PNG data URL for a simple element", async ({ page }) => {
     await setupPage(
@@ -127,6 +130,102 @@ test.describe("PNG Writer Output", () => {
     expect(result.hole[0]).toBeGreaterThan(240);
     expect(result.hole[1]).toBeGreaterThan(240);
     expect(result.hole[2]).toBeGreaterThan(240);
+  });
+
+  test("clips circular images in PNG output", async ({ page }) => {
+    await setupPage(page, "<html><body style=\"margin:0;\"></body></html>");
+
+    const result = await page.evaluate(async (dataUrl) => {
+      const writer = new (window as any).__HC.PNGWriter(80, 80);
+      const pngResult = await (window as any).__HC.renderIR([{
+        type: "image",
+        quad: [
+          { x: 20, y: 20 },
+          { x: 52, y: 20 },
+          { x: 52, y: 52 },
+          { x: 20, y: 52 },
+        ],
+        dataUrl,
+        width: 2,
+        height: 2,
+        style: {
+          borderRadius: "50%",
+        },
+        zIndex: 0,
+      }], writer);
+
+      await pngResult.finalize();
+      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
+      return {
+        center: sample(36, 36),
+        corner: sample(22, 22),
+      };
+    }, RED_PIXEL_PNG);
+
+    expect(result.center[0]).toBeGreaterThan(200);
+    expect(result.center[1]).toBeLessThan(80);
+    expect(result.center[2]).toBeLessThan(80);
+    expect(result.center[3]).toBe(255);
+    expect(result.corner[0]).toBeGreaterThan(240);
+    expect(result.corner[1]).toBeGreaterThan(240);
+    expect(result.corner[2]).toBeGreaterThan(240);
+    expect(result.corner[3]).toBe(255);
+  });
+
+  test("applies blur filters to filled shapes in PNG output", async ({ page }) => {
+    await setupPage(page, "<html><body style=\"margin:0;\"></body></html>");
+
+    const result = await page.evaluate(async () => {
+      const writer = new (window as any).__HC.PNGWriter(120, 120);
+      const pngResult = await (window as any).__HC.renderIR([
+        {
+          type: "polygon",
+          points: [
+            { x: 8, y: 40 },
+            { x: 28, y: 40 },
+            { x: 28, y: 80 },
+            { x: 8, y: 80 },
+          ],
+          style: {
+            fill: "rgb(255, 0, 0)",
+          },
+          zIndex: 0,
+        },
+        {
+          type: "polygon",
+          points: [
+            { x: 72, y: 40 },
+            { x: 92, y: 40 },
+            { x: 92, y: 80 },
+            { x: 72, y: 80 },
+          ],
+          style: {
+            fill: "rgb(255, 0, 0)",
+            filter: "blur(10px)",
+          },
+          zIndex: 1,
+        },
+      ], writer);
+
+      await pngResult.finalize();
+      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
+      return {
+        controlOutside: sample(34, 60),
+        blurredCenter: sample(82, 60),
+        blurredOutside: sample(98, 60),
+      };
+    });
+
+    expect(result.blurredCenter[0]).toBeGreaterThan(180);
+    expect(result.blurredCenter[0]).toBeGreaterThan(result.blurredCenter[1] + 80);
+    expect(result.blurredCenter[0]).toBeGreaterThan(result.blurredCenter[2] + 80);
+    expect(result.controlOutside[0]).toBeGreaterThan(240);
+    expect(result.controlOutside[1]).toBeGreaterThan(240);
+    expect(result.controlOutside[2]).toBeGreaterThan(240);
+    expect(result.blurredOutside[1]).toBeLessThan(result.controlOutside[1]);
+    expect(result.blurredOutside[2]).toBeLessThan(result.controlOutside[2]);
   });
 
   test("handles rounded rectangles", async ({ page }) => {
