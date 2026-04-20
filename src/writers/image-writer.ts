@@ -293,6 +293,7 @@ export class ImageResult {
     this.applyClipQuads(ctx, img.style);
     this.applyClipBounds(ctx, img.style);
     this.applyClipPath(ctx, quadBounds(img.quad), img.style);
+    this.applyBorderRadiusClip(ctx, img.quad, img.style);
 
     if (img.style.opacity !== undefined && img.style.opacity < 1) {
       ctx.globalAlpha = img.style.opacity;
@@ -352,6 +353,20 @@ export class ImageResult {
 
     const fillRule = this.traceClipPath(ctx, clipPath, bounds);
     if (fillRule) ctx.clip(fillRule);
+  }
+
+  private applyBorderRadiusClip(ctx: CanvasRenderingContext2D, quad: Quad, style: Style): void {
+    const topEdge = Math.hypot(quad[1].x - quad[0].x, quad[1].y - quad[0].y);
+    const leftEdge = Math.hypot(quad[3].x - quad[0].x, quad[3].y - quad[0].y);
+    const radius = Math.min(
+      parseMinDimensionBorderRadius(style.borderRadius, topEdge, leftEdge),
+      topEdge / 2,
+      leftEdge / 2,
+    );
+    if (!Number.isFinite(radius) || radius <= 0) return;
+
+    traceClipQuadPath(ctx, { points: quad, radius });
+    ctx.clip();
   }
 
   private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {

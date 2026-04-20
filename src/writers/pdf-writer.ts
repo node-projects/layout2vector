@@ -788,6 +788,37 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
   }
 
+  private emitRoundedQuadPath(points: Quad, radius: number, cornerShapes?: Style["cornerShapes"]): void {
+    const segs = roundedQuadPath(points, radius, cornerShapes);
+    for (const segment of segs) {
+      switch (segment.type) {
+        case "M":
+          this.ops.push(`${pn(this.ptX(segment.x))} ${pn(this.ptY(segment.y))} m`);
+          break;
+        case "L":
+          this.ops.push(`${pn(this.ptX(segment.x))} ${pn(this.ptY(segment.y))} l`);
+          break;
+        case "Q": {
+          const idx = segs.indexOf(segment);
+          const prev = idx > 0 ? segs[idx - 1] : segs[0];
+          const px = this.ptX(prev.x);
+          const py = this.ptY(prev.y);
+          const cx = this.ptX(segment.cx);
+          const cy = this.ptY(segment.cy);
+          const ex = this.ptX(segment.x);
+          const ey = this.ptY(segment.y);
+          const c1x = px + (2 / 3) * (cx - px);
+          const c1y = py + (2 / 3) * (cy - py);
+          const c2x = ex + (2 / 3) * (cx - ex);
+          const c2y = ey + (2 / 3) * (cy - ey);
+          this.ops.push(`${pn(c1x)} ${pn(c1y)} ${pn(c2x)} ${pn(c2y)} ${pn(ex)} ${pn(ey)} c`);
+          break;
+        }
+      }
+    }
+    this.ops.push("h");
+  }
+
   /** Emit an axis-aligned rectangle path in PDF coordinates. */
   private emitRectPath(x: number, y: number, w: number, h: number): void {
     const bottom = y - h;
@@ -867,6 +898,28 @@ export class PDFWriter implements Writer<PdfDocument> {
     }
 
     this.ops.push(clipShape.fillRule === "evenodd" ? "W* n" : "W n");
+  }
+
+  private emitImageBorderRadiusClip(quad: Quad, style: Style): void {
+    const topEdge = Math.hypot(quad[1].x - quad[0].x, quad[1].y - quad[0].y);
+    const leftEdge = Math.hypot(quad[3].x - quad[0].x, quad[3].y - quad[0].y);
+    const radius = parseBorderRadius(style.borderRadius, topEdge, leftEdge);
+    if (!radius) return;
+
+    if (isAxisAlignedRect(quad) && !style.cornerShapes) {
+      const bounds = getQuadBounds(quad);
+      const x = this.ptX(bounds.x);
+      const y = this.ptY(bounds.y);
+      const w = pxToPt(bounds.w);
+      const h = pxToPt(bounds.h);
+      const rx = pxToPt(Math.min(radius.rx, bounds.w / 2));
+      const ry = pxToPt(Math.min(radius.ry, bounds.h / 2));
+      this.emitRoundedRectPath(x, y, w, h, rx, ry);
+    } else {
+      this.emitRoundedQuadPath(quad, Math.min(radius.rx, radius.ry), style.cornerShapes);
+    }
+
+    this.ops.push("W n");
   }
 
   // ── Style helpers ───────────────────────────────────────────────
@@ -1396,6 +1449,7 @@ export class PDFWriter implements Writer<PdfDocument> {
 
     this.ops.push("q");
     this.emitClip(style, clipBounds);
+    this.emitImageBorderRadiusClip(quad, style);
 
     const opacity = style.opacity ?? 1;
     if (opacity < 1) {
