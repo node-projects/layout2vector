@@ -489,19 +489,184 @@ function serializePathDataSegments(segments: PathDataSegmentLike[]): string {
   }).join(" ");
 }
 
+const PATH_COMMAND_ARITY: Record<string, number> = {
+  A: 7,
+  C: 6,
+  H: 1,
+  L: 2,
+  M: 2,
+  Q: 4,
+  S: 4,
+  T: 2,
+  V: 1,
+  Z: 0,
+};
+
+function isPathCommandToken(token: string): boolean {
+  return /^[AaCcHhLlMmQqSsTtVvZz]$/.test(token);
+}
+
+function tokenizePathData(pathData: string): string[] {
+  return Array.from(
+    pathData.matchAll(/[AaCcHhLlMmQqSsTtVvZz]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g),
+    (match) => match[0],
+  );
+}
+
+function parsePathDataCommands(pathData: string): PathDataSegmentLike[] | null {
+  const tokens = tokenizePathData(pathData);
+  if (tokens.length === 0) return [];
+
+  const commands: PathDataSegmentLike[] = [];
+  let index = 0;
+  let currentCommand = "";
+
+  while (index < tokens.length) {
+    if (isPathCommandToken(tokens[index])) {
+      currentCommand = tokens[index];
+      index += 1;
+    } else if (!currentCommand) {
+      return null;
+    }
+
+    const upperCommand = currentCommand.toUpperCase();
+    const arity = PATH_COMMAND_ARITY[upperCommand];
+    if (arity === undefined) return null;
+
+    if (arity === 0) {
+      commands.push({ type: currentCommand, values: [] });
+      continue;
+    }
+
+    const values: number[] = [];
+    while (index < tokens.length && !isPathCommandToken(tokens[index])) {
+      const value = Number(tokens[index]);
+      if (!Number.isFinite(value)) return null;
+      values.push(value);
+      index += 1;
+    }
+
+    if (values.length < arity) return null;
+
+    if (upperCommand === "M") {
+      commands.push({ type: currentCommand, values: values.slice(0, 2) });
+      const lineCommand = currentCommand === "m" ? "l" : "L";
+      for (let valueIndex = 2; valueIndex < values.length; valueIndex += 2) {
+        if (valueIndex + 1 >= values.length) return null;
+        commands.push({
+          type: lineCommand,
+          values: values.slice(valueIndex, valueIndex + 2),
+        });
+      }
+      continue;
+    }
+
+    if (values.length % arity !== 0) return null;
+
+    for (let valueIndex = 0; valueIndex < values.length; valueIndex += arity) {
+      commands.push({
+        type: currentCommand,
+        values: values.slice(valueIndex, valueIndex + arity),
+      });
+    }
+  }
+
+  return commands;
+}
+
+function advancePathCurrentPoint(
+  segment: PathDataSegmentLike,
+  currentPoint: Point,
+  subpathStart: Point,
+): Point {
+  const type = segment.type;
+  const values = segment.values;
+  const relative = type === type.toLowerCase();
+
+  switch (type.toUpperCase()) {
+    case "Z":
+      return { ...subpathStart };
+    case "H": {
+      const x = values[values.length - 1];
+      return {
+        x: relative ? currentPoint.x + x : x,
+        y: currentPoint.y,
+      };
+    }
+    case "V": {
+      const y = values[values.length - 1];
+      return {
+        x: currentPoint.x,
+        y: relative ? currentPoint.y + y : y,
+      };
+    }
+    case "A":
+    case "C":
+    case "L":
+    case "M":
+    case "Q":
+    case "S":
+    case "T": {
+      const x = values[values.length - 2];
+      const y = values[values.length - 1];
+      return {
+        x: relative ? currentPoint.x + x : x,
+        y: relative ? currentPoint.y + y : y,
+      };
+    }
+    default:
+      return currentPoint;
+  }
+}
+
+function splitParsedPathDataCommands(segments: PathDataSegmentLike[]): string[] {
+  const subpaths: PathDataSegmentLike[][] = [];
+  let currentSubpath: PathDataSegmentLike[] = [];
+  let currentPoint: Point = { x: 0, y: 0 };
+  let subpathStart: Point = { x: 0, y: 0 };
+
+  for (const segment of segments) {
+    if (segment.type.toUpperCase() === "M") {
+      if (currentSubpath.length > 0) {
+        subpaths.push(currentSubpath);
+      }
+
+      currentPoint = advancePathCurrentPoint(segment, currentPoint, subpathStart);
+      subpathStart = { ...currentPoint };
+      currentSubpath = [{ type: "M", values: [currentPoint.x, currentPoint.y] }];
+      continue;
+    }
+
+    if (currentSubpath.length === 0) {
+      return [];
+    }
+
+    currentSubpath.push({
+      type: segment.type.toUpperCase() === "Z" ? "Z" : segment.type,
+      values: [...segment.values],
+    });
+    currentPoint = advancePathCurrentPoint(segment, currentPoint, subpathStart);
+  }
+
+  if (currentSubpath.length > 0) {
+    subpaths.push(currentSubpath);
+  }
+
+  return subpaths.map(serializePathDataSegments);
+}
+
 function splitPathSubpathsFromString(pathData: string): string[] {
   const trimmed = pathData.trim();
   if (!trimmed) return [];
 
-  const moveCommands = trimmed.match(/[Mm]/g) ?? [];
+  const parsed = parsePathDataCommands(trimmed);
+  if (!parsed) return [trimmed];
+
+  const moveCommands = parsed.filter((segment) => segment.type.toUpperCase() === "M");
   if (moveCommands.length <= 1) return [trimmed];
 
-  // Splitting relative subpaths without normalizing the path data changes semantics,
-  // so keep those on the legacy sampling path for now.
-  if (/[m]/.test(trimmed)) return [trimmed];
-
-  const subpaths = trimmed.match(/M[^M]*/g)?.map((part) => part.trim()).filter(Boolean);
-  return subpaths && subpaths.length > 1 ? subpaths : [trimmed];
+  const subpaths = splitParsedPathDataCommands(parsed);
+  return subpaths.length > 1 ? subpaths : [trimmed];
 }
 
 function extractCompoundPathBySampling(

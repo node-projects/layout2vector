@@ -15,7 +15,7 @@ import { extractSVGSubtree } from "./extractors/svg-extractor.js";
 import { isImageElement, extractImageGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
 import { isMathMLRoot, extractMathMLFeatures } from "./extractors/mathml-extractor.js";
 import { extractPseudoElements } from "./extractors/pseudo-extractor.js";
-import { getElementOrigin } from "./geometry.js";
+import { clearGeometryCaches, getElementOrigin } from "./geometry.js";
 
 /**
  * Extract the full IR from one or more root DOM elements.
@@ -35,6 +35,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
   // Clear image rasterization cache from previous runs
   clearImageCache();
+  clearGeometryCaches();
 
   // Pre-fetch external images into internal caches (non-destructive to page DOM)
   if (options.includeImages) {

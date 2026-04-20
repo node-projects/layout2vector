@@ -6,6 +6,72 @@
  */
 import type { Point, Quad } from "./types.js";
 
+let iframeElementCache = new WeakMap<Document, HTMLIFrameElement[]>();
+
+export function clearGeometryCaches(): void {
+  iframeElementCache = new WeakMap<Document, HTMLIFrameElement[]>();
+}
+
+function getNodeOwnerDocument(node: Element | Text | Range): Document | null {
+  if ("nodeType" in node) return node.ownerDocument;
+  return node.startContainer?.ownerDocument ?? null;
+}
+
+function getTopAccessibleDocument(ownerDocument: Document): Document {
+  let topDocument = ownerDocument;
+  let currentWindow: Window | null = ownerDocument.defaultView;
+
+  while (currentWindow?.parent && currentWindow.parent !== currentWindow) {
+    try {
+      topDocument = currentWindow.parent.document;
+      currentWindow = currentWindow.parent;
+    } catch {
+      break;
+    }
+  }
+
+  return topDocument;
+}
+
+function collectSameOriginIframeElements(
+  ownerDocument: Document,
+  results: HTMLIFrameElement[],
+  seenDocuments: Set<Document>,
+): void {
+  if (seenDocuments.has(ownerDocument)) return;
+  seenDocuments.add(ownerDocument);
+
+  for (const iframe of Array.from(ownerDocument.querySelectorAll("iframe"))) {
+    results.push(iframe);
+    try {
+      const childDocument = iframe.contentDocument;
+      if (childDocument) {
+        collectSameOriginIframeElements(childDocument, results, seenDocuments);
+      }
+    } catch {
+      // Ignore cross-origin iframes.
+    }
+  }
+}
+
+export function getBoxQuadsOptions(
+  node: Element | Text | Range,
+  box: "border" | "content" = "border",
+): { box: "border" | "content"; iframes?: HTMLIFrameElement[] } {
+  const ownerDocument = getNodeOwnerDocument(node);
+  if (!ownerDocument) return { box };
+
+  const topDocument = getTopAccessibleDocument(ownerDocument);
+  let iframes = iframeElementCache.get(topDocument);
+  if (!iframes) {
+    iframes = [];
+    collectSameOriginIframeElements(topDocument, iframes, new Set<Document>());
+    iframeElementCache.set(topDocument, iframes);
+  }
+
+  return iframes.length > 0 ? { box, iframes } : { box };
+}
+
 /**
  * Get an element's border-box quad via getBoxQuads.
  * Returns null if the element has zero area.
@@ -13,7 +79,7 @@ import type { Point, Quad } from "./types.js";
 export function getElementQuad(el: Element, box: "border" | "content" = "border"): Quad | null {
   if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
     try {
-      const rawQuads: DOMQuad[] = (el as any).getBoxQuads({ box });
+      const rawQuads: DOMQuad[] = (el as any).getBoxQuads(getBoxQuadsOptions(el, box));
       if (rawQuads.length > 0) {
         const q = rawQuads[0];
         const quad: Quad = [
@@ -44,7 +110,7 @@ export function getElementQuad(el: Element, box: "border" | "content" = "border"
 export function getElementQuads(el: Element, box: "border" | "content" = "border"): Quad[] {
   if ("getBoxQuads" in el && typeof (el as any).getBoxQuads === "function") {
     try {
-      const rawQuads: DOMQuad[] = (el as any).getBoxQuads({ box });
+      const rawQuads: DOMQuad[] = (el as any).getBoxQuads(getBoxQuadsOptions(el, box));
       return rawQuads.map(domQuadToQuad).filter(hasArea);
     } catch { /* fall through */ }
   }
@@ -65,7 +131,7 @@ export function getElementQuads(el: Element, box: "border" | "content" = "border
 export function getNodeQuads(node: Element | Text | Range, box: "border" | "content" = "border"): Quad[] {
   if ("getBoxQuads" in node && typeof (node as any).getBoxQuads === "function") {
     try {
-      const rawQuads: DOMQuad[] = (node as any).getBoxQuads({ box });
+      const rawQuads: DOMQuad[] = (node as any).getBoxQuads(getBoxQuadsOptions(node, box));
       return rawQuads.map(domQuadToQuad).filter(hasArea);
     } catch { /* fall through */ }
   }

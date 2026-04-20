@@ -1559,9 +1559,6 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
         const axisWidth = Math.abs(points[1].x - points[0].x);
         const axisHeight = Math.abs(points[3].y - points[0].y);
         const clampedRadius = Math.min(radius, axisWidth / 2, axisHeight / 2);
-        if (clampedRadius >= Math.min(axisWidth, axisHeight) / 2 - 0.01) {
-          return ellipseFigure(minX + axisWidth / 2, minY + axisHeight / 2, axisWidth / 2, axisHeight / 2);
-        }
         return roundedRectFigure(minX, minY, axisWidth, axisHeight, clampedRadius, clampedRadius);
       }
       return figureFromRoundedQuad(points, radius, style.cornerShapes);

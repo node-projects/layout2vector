@@ -1,5 +1,5 @@
 /**
- * Extraction of ::before and ::after pseudo-element geometry.
+ * Extraction of ::before, ::after, and ::marker pseudo-element geometry.
  *
  * Strategy: for each pseudo-element with generated content we
  *  1.  Read the raw content from getComputedStyle(el, pseudo).
@@ -59,8 +59,31 @@ export function extractPseudoElements(
     const nodes = extractOnePseudo(el, pseudo, parentStyle, globalIndex + results.length, options);
     results.push(...nodes);
   }
+  const markerNodes = extractMarkerPseudo(el, parentStyle, globalIndex + results.length, options);
+  results.push(...markerNodes);
   return results;
 }
+
+const DEFAULT_LIST_MARKER_TEXT: Record<string, string> = {
+  disc: "\u2022",
+  circle: "\u25e6",
+  square: "\u25aa",
+  "disclosure-open": "\u25be",
+  "disclosure-closed": "\u25b8",
+};
+
+const MARKER_TEXT_PROPERTIES = [
+  "font-size",
+  "font-family",
+  "font-weight",
+  "font-style",
+  "line-height",
+  "letter-spacing",
+  "word-spacing",
+  "text-transform",
+  "white-space",
+  "color",
+] as const;
 
 // ─── content token types ─────────────────────────────────────
 
@@ -405,6 +428,117 @@ function toRoman(n: number): string {
     while (n >= vals[i]) { result += syms[i]; n -= vals[i]; }
   }
   return result;
+}
+
+function resolveDefaultMarkerText(el: Element, listStyleType: string): string | null {
+  if (!listStyleType || listStyleType === "none") return null;
+  if (listStyleType in DEFAULT_LIST_MARKER_TEXT) {
+    return DEFAULT_LIST_MARKER_TEXT[listStyleType];
+  }
+
+  const listItemValue = resolveCounter(el, "list-item");
+  switch (listStyleType) {
+    case "decimal":
+      return `${listItemValue}.`;
+    case "decimal-leading-zero":
+      return `${String(listItemValue).padStart(2, "0")}.`;
+    case "lower-alpha":
+    case "lower-latin":
+    case "upper-alpha":
+    case "upper-latin":
+    case "lower-roman":
+    case "upper-roman":
+      return `${formatCounter(listItemValue, listStyleType)}.`;
+    default:
+      return null;
+  }
+}
+
+function firstContentRect(el: Element): DOMRect | null {
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const rects = Array.from(range.getClientRects()).filter((rect) => rect.width > 0 || rect.height > 0);
+  return rects[0] ?? null;
+}
+
+function translateQuad(quad: Quad, dx: number, dy: number): Quad {
+  return quad.map((point) => ({ x: point.x + dx, y: point.y + dy })) as Quad;
+}
+
+function resolveMarkerText(el: Element, markerCs: CSSStyleDeclaration): string | null {
+  const rawContent = markerCs.content;
+  if (rawContent && rawContent !== "normal" && rawContent !== "none") {
+    return parseCSSContentValue(rawContent, el);
+  }
+
+  const listStyleType = getComputedStyle(el).listStyleType;
+  return resolveDefaultMarkerText(el, listStyleType);
+}
+
+function extractMarkerPseudo(
+  el: Element,
+  parentStyle: Style,
+  globalIndex: number,
+  options: Options,
+): IRNode[] {
+  const elStyle = getComputedStyle(el);
+  if (elStyle.display !== "list-item") return [];
+
+  const markerCs = getComputedStyle(el, "::marker");
+  if (markerCs.display === "none") return [];
+  if (markerCs.visibility === "hidden") return [];
+  if (markerCs.opacity === "0") return [];
+
+  const text = resolveMarkerText(el, markerCs);
+  if (!text) return [];
+
+  const temp = document.createElement("hc-marker");
+  temp.textContent = text;
+  temp.style.position = "fixed";
+  temp.style.left = "0";
+  temp.style.top = "0";
+  temp.style.visibility = "hidden";
+  temp.style.pointerEvents = "none";
+  temp.style.display = "inline-block";
+  for (const prop of MARKER_TEXT_PROPERTIES) {
+    const value = markerCs.getPropertyValue(prop);
+    if (value && value !== "initial" && value !== "") {
+      temp.style.setProperty(prop, value);
+    }
+  }
+
+  document.body.appendChild(temp);
+  const measuredQuad = getElementQuads(temp, options.boxType ?? "border")[0];
+  temp.remove();
+  if (!measuredQuad) return [];
+
+  const liRect = el.getBoundingClientRect();
+  const firstRect = firstContentRect(el);
+  const markerHeight = parseFloat(markerCs.lineHeight || markerCs.fontSize) || (firstRect?.height ?? liRect.height);
+  const markerLaneWidth = el.parentElement
+    ? parseFloat(getComputedStyle(el.parentElement).paddingInlineStart) || (parseFloat(markerCs.fontSize) || 14) * 2
+    : (parseFloat(markerCs.fontSize) || 14) * 2;
+
+  const currentCenterX = (measuredQuad[0].x + measuredQuad[1].x) / 2;
+  const currentCenterY = (measuredQuad[0].y + measuredQuad[3].y) / 2;
+  const desiredCenterX = elStyle.listStylePosition === "inside"
+    ? liRect.left + markerLaneWidth / 2
+    : liRect.left - markerLaneWidth / 2;
+  const desiredCenterY = (firstRect?.top ?? liRect.top) + markerHeight / 2;
+  const quad = translateQuad(measuredQuad, desiredCenterX - currentCenterX, desiredCenterY - currentCenterY);
+
+  const markerStyle = extractStyle(markerCs);
+  markerStyle.opacity = parentStyle.opacity;
+  if (parentStyle.clipBounds) markerStyle.clipBounds = parentStyle.clipBounds;
+  if (parentStyle.clipQuads) markerStyle.clipQuads = parentStyle.clipQuads;
+
+  return [{
+    type: "text",
+    quad,
+    text,
+    style: markerStyle,
+    zIndex: globalIndex,
+  }];
 }
 
 // ─── quote resolution ────────────────────────────────────────

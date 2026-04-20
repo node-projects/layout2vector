@@ -77,6 +77,15 @@ function toNearestAcadIndexColor(color: InstanceType<typeof ColorType>): Instanc
   if (!color.isTrueColor) return color;
 
   const [r, g, b] = color.getRgb();
+
+  // AutoCAD index 7 adapts between black and white based on the viewer background.
+  // Prefer it for nearly neutral extremes so tiny solid hatches stay visible.
+  const maxChannel = Math.max(r, g, b);
+  const minChannel = Math.min(r, g, b);
+  if (maxChannel <= 16 || minChannel >= 239) {
+    return new Color!(7);
+  }
+
   let bestIndex = 7;
   let bestDistance = Number.POSITIVE_INFINITY;
 
@@ -278,8 +287,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
 
     const dx = quad[1].x - quad[0].x;
     const dy = quad[1].y - quad[0].y;
-    const angleRad = Math.atan2(dy, dx);
-    const angleDeg = -angleRad * (180 / Math.PI);
+    const rotationRad = -Math.atan2(dy, dx);
 
     const ldx = quad[3].x - quad[0].x;
     const ldy = quad[3].y - quad[0].y;
@@ -302,7 +310,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     entity.insertPoint = new XYZ!(bottomLeft.x, this.flipY(bottomLeft.y), 0);
     entity.height = height;
     entity.value = sanitized;
-    if (Math.abs(angleDeg) > 0.1) entity.rotation = angleDeg;
+    if (Math.abs(rotationRad) > 0.001) entity.rotation = rotationRad;
     if (textColor) entity.color = textColor;
 
     this.doc.modelSpace!.entities.add(entity);
@@ -356,12 +364,8 @@ export class DWGWriter implements Writer<Uint8Array> {
     await ensureAcadLoaded();
     const doc = await this.builder.end();
 
-    // DWG stores angles in radians, but the shared builder stores degrees (for DXF).
-    // Convert text rotation from degrees to radians before DWG serialization.
     for (const entity of doc.modelSpace!.entities) {
-      if (entity instanceof TextEntity!) {
-        entity.rotation = entity.rotation * (Math.PI / 180);
-      } else if (entity instanceof Hatch! && entity.color.isTrueColor) {
+      if (entity instanceof Hatch! && entity.color.isTrueColor) {
         // Some DWG viewers ignore true-color solid hatch fills but accept indexed hatch colors.
         entity.color = toNearestAcadIndexColor(entity.color);
       }

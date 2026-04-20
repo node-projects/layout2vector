@@ -4,7 +4,7 @@
 import type { Point, Quad, Style, IRNode, Options } from "../types.js";
 import type { StackingNode } from "../traversal.js";
 import { isSVGElement } from "../traversal.js";
-import { getElementQuad, getElementQuads, getNodeQuads, quadSize } from "../geometry.js";
+import { getBoxQuadsOptions, getElementQuad, getElementQuads, getNodeQuads, quadSize } from "../geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 
@@ -225,7 +225,7 @@ function getNativeTextNodeQuads(textNode: Text, style: Style): Quad[] {
   }
 
   try {
-    const rawQuads: DOMQuad[] = (textNode as any).getBoxQuads({ box: "border" });
+    const rawQuads: DOMQuad[] = (textNode as any).getBoxQuads(getBoxQuadsOptions(textNode, "border"));
     return rawQuads
       .map((quad) => orientNativeTextQuad([
         { x: quad.p1.x, y: quad.p1.y },
