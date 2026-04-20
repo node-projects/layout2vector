@@ -38,7 +38,7 @@ const demoFiles = fs
 
 for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
-  const convertFormControls = name === "form-controls" || name === "form2" || name === "github" || name === "google";
+  const convertFormControls = name === "form-controls" || name === "form2" || name === "github" || name === "google" || name === "test8";
 
   test(`convert demo: ${name}`, async ({ page, browserName }) => {
     // Complex pages (e.g. github.html with external CSS) need more time,

@@ -2,8 +2,11 @@ import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
 import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
+import { DWGWriter } from "../../src/writers/acad-writer.js";
+import { AcadDXFWriter } from "../../src/writers/acad-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
+import { DwgReader, Hatch } from "@node-projects/acad-ts";
 
 const EMR_COMMENT = 0x0046;
 const EMR_EXTCREATEFONTINDIRECTW = 0x0052;
@@ -89,6 +92,59 @@ function getEmfPlusCommentRecords(emfBytes: Uint8Array): Array<{
           emfPlusSize: view.getUint32(offset + 20, true),
           emfPlusDataSize: view.getUint32(offset + 24, true),
         });
+      }
+    }
+
+    offset += size;
+  }
+
+  return records;
+}
+
+function getAllEmfPlusRecords(emfBytes: Uint8Array): Array<{
+  emfPlusType: number;
+  emfPlusFlags: number;
+  emfPlusSize: number;
+  emfPlusDataSize: number;
+  data: Uint8Array;
+}> {
+  const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+  const records: Array<{
+    emfPlusType: number;
+    emfPlusFlags: number;
+    emfPlusSize: number;
+    emfPlusDataSize: number;
+    data: Uint8Array;
+  }> = [];
+  let offset = 0;
+
+  while (offset + 16 <= emfBytes.byteLength) {
+    const type = view.getUint32(offset, true);
+    const size = view.getUint32(offset + 4, true);
+    if (size < 16) break;
+
+    if (type === EMR_COMMENT) {
+      const dataSize = view.getUint32(offset + 8, true);
+      const identifier = view.getUint32(offset + 12, true);
+      if (identifier === EMFPLUS_COMMENT_IDENTIFIER && dataSize >= 16) {
+        let innerOffset = offset + 16;
+        const innerEnd = Math.min(offset + 12 + dataSize, offset + size);
+        while (innerOffset + 12 <= innerEnd) {
+          const emfPlusType = view.getUint16(innerOffset, true);
+          const emfPlusFlags = view.getUint16(innerOffset + 2, true);
+          const emfPlusSize = view.getUint32(innerOffset + 4, true);
+          const emfPlusDataSize = view.getUint32(innerOffset + 8, true);
+          if (emfPlusSize < 12 || innerOffset + emfPlusSize > innerEnd) break;
+
+          records.push({
+            emfPlusType,
+            emfPlusFlags,
+            emfPlusSize,
+            emfPlusDataSize,
+            data: emfBytes.subarray(innerOffset + 12, innerOffset + 12 + emfPlusDataSize),
+          });
+          innerOffset += emfPlusSize;
+        }
       }
     }
 
@@ -298,6 +354,33 @@ test.describe("Writer Output", () => {
     expect(countRecords(emfBytes, EMR_ROUNDRECT)).toBeGreaterThanOrEqual(2);
   });
 
+  test("EMF+ writer keeps filled pill shapes as rounded rectangles", async () => {
+    const ir: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 10, y: 10 },
+        { x: 150, y: 10 },
+        { x: 150, y: 45 },
+        { x: 10, y: 45 },
+      ],
+      style: {
+        fill: "rgb(77, 81, 86)",
+        borderRadius: "999px",
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new EMFPlusWriter({ width: 180, height: 80 });
+    const emfBytes = await renderIR(ir, writer);
+    const pathObjects = getAllEmfPlusRecords(emfBytes).filter((record) =>
+      record.emfPlusType === EMFPLUS_OBJECT && ((record.emfPlusFlags >> 8) & 0x7F) === 0x03,
+    );
+
+    expect(pathObjects.length).toBeGreaterThan(0);
+    const pathView = new DataView(pathObjects[0].data.buffer, pathObjects[0].data.byteOffset, pathObjects[0].data.byteLength);
+    expect(pathView.getUint32(4, true)).toBeGreaterThan(13);
+  });
+
   test("EMF+ writer produces EMF+ comment records inside a valid EMF container", async ({ page }) => {
     await setupPage(
       page,
@@ -368,6 +451,96 @@ test.describe("Writer Output", () => {
     expect(emfPlusTypes.some((type) => type === EMFPLUS_FILL_PATH || type === EMFPLUS_DRAW_PATH)).toBe(true);
     expect(emfPlusTypes).toContain(EMFPLUS_DRAW_STRING);
     expect(emfPlusTypes).toContain(EMFPLUS_DRAW_IMAGE_POINTS);
+  });
+
+  test("EMF+ writer emits gradient brush records and vector conic fills", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="position:relative;width:420px;height:180px;background:#fff;overflow:hidden;">
+          <div style="position:absolute;left:12px;top:12px;width:120px;height:56px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:12px;"></div>
+          <div style="position:absolute;left:156px;top:12px;width:84px;height:84px;background:radial-gradient(circle, #ff9a9e 0%, #fecfef 50%, #fdfcfb 100%);border-radius:50%;"></div>
+          <div style="position:absolute;left:264px;top:12px;width:84px;height:84px;background:conic-gradient(red, yellow, lime, aqua, blue, magenta, red);border-radius:50%;"></div>
+          <div style="position:absolute;left:12px;top:108px;width:140px;height:56px;background:repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);"></div>
+          <div style="position:absolute;left:172px;top:108px;width:180px;height:56px;background:linear-gradient(to right, rgba(255,0,0,0.5), transparent), linear-gradient(to bottom, rgba(0,0,255,0.5), transparent), #e8e8e8;"></div>
+        </div>
+      </body></html>`
+    );
+
+    const ir: IRNode[] = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: false,
+      });
+    });
+
+    const writer = new EMFPlusWriter({ width: 420, height: 180 });
+    const emfBytes = await renderIR(ir, writer);
+    const records = getAllEmfPlusRecords(emfBytes);
+    const brushObjects = records.filter((record) => record.emfPlusType === EMFPLUS_OBJECT && ((record.emfPlusFlags >> 8) & 0x7F) === 0x01);
+    const brushTypes = brushObjects.map((record) => new DataView(record.data.buffer, record.data.byteOffset, record.data.byteLength).getUint32(4, true));
+    const brushPathFills = records.filter((record) => record.emfPlusType === EMFPLUS_FILL_PATH && (record.emfPlusFlags & 0x8000) === 0);
+    const solidPathFills = records.filter((record) => record.emfPlusType === EMFPLUS_FILL_PATH && (record.emfPlusFlags & 0x8000) !== 0);
+
+    expect(brushTypes).toContain(0x04);
+    expect(brushTypes).toContain(0x03);
+    expect(brushPathFills.length).toBeGreaterThanOrEqual(4);
+    expect(brushPathFills.some((record) => new DataView(record.data.buffer, record.data.byteOffset, record.data.byteLength).getUint32(0, true) === 6)).toBe(true);
+    expect(solidPathFills.length).toBeGreaterThan(40);
+  });
+
+  test("AcadDXF writer keeps text rotation in sane DXF degree range", async () => {
+    const ir: IRNode[] = [{
+      type: "text",
+      quad: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+        { x: -10, y: 20 },
+        { x: -10, y: 0 },
+      ],
+      text: "A",
+      style: {
+        color: "rgb(0, 0, 0)",
+        fontSize: "20px",
+      },
+      zIndex: 0,
+    }];
+
+    const bytes = await renderIR(ir, new AcadDXFWriter({ maxY: 100 }));
+    const dxf = Buffer.from(bytes).toString("utf-8");
+    const entityMatch = dxf.match(/\n  0\nTEXT\n([\s\S]*?)\n  0\nENDSEC/);
+
+    expect(entityMatch).not.toBeNull();
+
+    const rotationMatch = entityMatch![1].match(/\n 50\n([^\r\n]+)/);
+    expect(rotationMatch).not.toBeNull();
+    expect(parseFloat(rotationMatch![1])).toBeCloseTo(-90, 3);
+  });
+
+  test("DWG writer keeps tiny neutral hatches on adaptive color index 7", async () => {
+    const ir: IRNode[] = [{
+      type: "polyline",
+      points: [
+        { x: 10, y: 10 },
+        { x: 30, y: 20 },
+        { x: 10, y: 30 },
+      ],
+      closed: true,
+      style: {
+        fill: "rgb(0, 0, 0)",
+        stroke: "rgb(0, 0, 0)",
+      },
+      zIndex: 0,
+    }];
+
+    const bytes = await renderIR(ir, new DWGWriter({ maxY: 100 }));
+    const doc = new DwgReader(Buffer.from(bytes)).read();
+    const hatches = Array.from(doc.modelSpace!.entities).filter((entity) => entity instanceof Hatch);
+
+    expect(hatches.length).toBe(1);
+    expect(hatches[0].color.isTrueColor).toBe(false);
+    expect(hatches[0].color.index).toBe(7);
   });
 
 });

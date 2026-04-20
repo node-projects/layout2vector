@@ -281,4 +281,26 @@ test.describe("SVG Geometry Extraction", () => {
     expect(compound.closed).toBe(true);
     expect(compound.style.pathSubpaths.every((subpath: any) => subpath.closed)).toBe(true);
   });
+
+  test("extracts relative moveto SVG subpaths as a compound polyline", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="220" height="80" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 10 H70 V50 H10 Z m100 10 h60 v20 h-60 z" fill="rgb(145, 152, 161)" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const polylines = ir.filter((n: any) => n.type === "polyline");
+    const compound = polylines.find((polyline: any) => polyline.style?.pathSubpaths?.length === 2);
+    expect(compound).toBeDefined();
+    expect(compound.style.pathSubpaths[1].points[0].x).toBeGreaterThan(100);
+    expect(compound.style.pathSubpaths.every((subpath: any) => subpath.closed)).toBe(true);
+  });
 });

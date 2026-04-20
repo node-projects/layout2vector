@@ -112,6 +112,68 @@ test.describe("Full Pipeline: DOM → IR → Writer", () => {
     });
   });
 
+  test("end-to-end: overflow scroll and auto clip descendants like a static viewport", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="root" style="position:relative;width:240px;height:140px;background:#fff;">
+          <div style="position:absolute;left:10px;top:20px;width:60px;height:40px;overflow:scroll;">
+            <div id="scroll-child" style="position:absolute;left:0;top:60px;width:20px;height:20px;background:rgb(255, 0, 0);"></div>
+          </div>
+          <div style="position:absolute;left:110px;top:20px;width:60px;height:40px;overflow:auto;">
+            <div id="auto-child" style="position:absolute;left:0;top:60px;width:20px;height:20px;background:rgb(0, 0, 255);"></div>
+          </div>
+        </div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("root")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: false,
+      });
+    });
+
+    const scrollChild = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.fill === "rgb(255, 0, 0)"
+    );
+    const autoChild = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.fill === "rgb(0, 0, 255)"
+    );
+
+    expect(scrollChild).toBeDefined();
+    expect(scrollChild.style.clipBounds).toMatchObject({
+      x: 10,
+      y: 20,
+      w: 60,
+      h: 40,
+    });
+
+    expect(autoChild).toBeDefined();
+    expect(autoChild.style.clipBounds).toMatchObject({
+      x: 110,
+      y: 20,
+      w: 60,
+      h: 40,
+    });
+
+    const calls: string[] = [];
+    const writer: Writer<string> = {
+      begin: async () => {},
+      drawPolygon: async (_points, style) => { calls.push(style.fill ?? "polygon"); },
+      drawPolyline: async () => { calls.push("polyline"); },
+      drawText: async (_quad, text) => { calls.push(`text:${text}`); },
+      drawImage: async () => { calls.push("image"); },
+      end: async () => calls.join(","),
+    };
+
+    await renderIR([scrollChild as IRNode, autoChild as IRNode], writer);
+    expect(calls).toEqual([]);
+  });
+
   test("renderIR skips nodes that are fully outside their clip bounds", async () => {
     const calls: string[] = [];
     const writer: Writer<string> = {

@@ -124,6 +124,35 @@ test.describe("HTML Geometry Extraction", () => {
     expect(textNodes.some((node: any) => node.text.includes("hidden pseudo"))).toBe(false);
   });
 
+  test("extracts outside list markers as text pseudo-elements", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:40px;">
+        <ul id="target" style="margin:0;padding-inline-start:28px;color:rgb(20, 20, 20);">
+          <li id="item">Alpha item</li>
+        </ul>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(() => {
+      const root = document.getElementById("target")!;
+      const item = document.getElementById("item")!;
+      const ir = (window as any).__HC.extractIR(root, {
+        boxType: "border",
+        includeText: true,
+        includePseudoElements: true,
+      });
+      const marker = ir
+        .filter((node: any) => node.type === "text")
+        .find((node: any) => node.text === "•");
+      const liRect = item.getBoundingClientRect();
+      return { marker, liLeft: liRect.left };
+    });
+
+    expect(summary.marker).toBeDefined();
+    expect(summary.marker.quad[0].x).toBeLessThan(summary.liLeft);
+  });
+
   test("handles content box type", async ({ page }) => {
     await setupPage(
       page,
