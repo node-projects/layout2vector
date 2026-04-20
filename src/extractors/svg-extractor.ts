@@ -506,24 +506,58 @@ function isPathCommandToken(token: string): boolean {
   return /^[AaCcHhLlMmQqSsTtVvZz]$/.test(token);
 }
 
-function tokenizePathData(pathData: string): string[] {
-  return Array.from(
-    pathData.matchAll(/[AaCcHhLlMmQqSsTtVvZz]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g),
-    (match) => match[0],
-  );
-}
-
 function parsePathDataCommands(pathData: string): PathDataSegmentLike[] | null {
-  const tokens = tokenizePathData(pathData);
-  if (tokens.length === 0) return [];
-
   const commands: PathDataSegmentLike[] = [];
   let index = 0;
   let currentCommand = "";
 
-  while (index < tokens.length) {
-    if (isPathCommandToken(tokens[index])) {
-      currentCommand = tokens[index];
+  function skipSeparators(): void {
+    while (index < pathData.length && /[\s,]/.test(pathData[index])) {
+      index += 1;
+    }
+  }
+
+  function readNumberValue(): number | null {
+    skipSeparators();
+    const match = /^[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/.exec(pathData.slice(index));
+    if (!match) return null;
+
+    const value = Number(match[0]);
+    if (!Number.isFinite(value)) return null;
+    index += match[0].length;
+    return value;
+  }
+
+  function readArcFlagValue(): number | null {
+    skipSeparators();
+    const flag = pathData[index];
+    if (flag !== "0" && flag !== "1") return null;
+    index += 1;
+    return Number(flag);
+  }
+
+  function readSegmentValues(command: string): number[] | null {
+    const upperCommand = command.toUpperCase();
+    const arity = PATH_COMMAND_ARITY[upperCommand];
+    if (arity === undefined || arity === 0) return [];
+
+    const values: number[] = [];
+    for (let valueIndex = 0; valueIndex < arity; valueIndex += 1) {
+      const value = upperCommand === "A" && (valueIndex === 3 || valueIndex === 4)
+        ? readArcFlagValue()
+        : readNumberValue();
+      if (value === null) return null;
+      values.push(value);
+    }
+    return values;
+  }
+
+  while (true) {
+    skipSeparators();
+    if (index >= pathData.length) break;
+
+    if (isPathCommandToken(pathData[index])) {
+      currentCommand = pathData[index];
       index += 1;
     } else if (!currentCommand) {
       return null;
@@ -535,39 +569,41 @@ function parsePathDataCommands(pathData: string): PathDataSegmentLike[] | null {
 
     if (arity === 0) {
       commands.push({ type: currentCommand, values: [] });
+      currentCommand = "";
       continue;
     }
 
-    const values: number[] = [];
-    while (index < tokens.length && !isPathCommandToken(tokens[index])) {
-      const value = Number(tokens[index]);
-      if (!Number.isFinite(value)) return null;
-      values.push(value);
-      index += 1;
-    }
-
-    if (values.length < arity) return null;
-
     if (upperCommand === "M") {
-      commands.push({ type: currentCommand, values: values.slice(0, 2) });
+      const moveValues = readSegmentValues(currentCommand);
+      if (!moveValues) return null;
+
+      commands.push({ type: currentCommand, values: moveValues });
       const lineCommand = currentCommand === "m" ? "l" : "L";
-      for (let valueIndex = 2; valueIndex < values.length; valueIndex += 2) {
-        if (valueIndex + 1 >= values.length) return null;
+
+      skipSeparators();
+      while (index < pathData.length && !isPathCommandToken(pathData[index])) {
+        const lineValues = readSegmentValues(lineCommand);
+        if (!lineValues) return null;
         commands.push({
           type: lineCommand,
-          values: values.slice(valueIndex, valueIndex + 2),
+          values: lineValues,
         });
+        skipSeparators();
       }
       continue;
     }
 
-    if (values.length % arity !== 0) return null;
+    while (true) {
+      const values = readSegmentValues(currentCommand);
+      if (!values) return null;
 
-    for (let valueIndex = 0; valueIndex < values.length; valueIndex += arity) {
       commands.push({
         type: currentCommand,
-        values: values.slice(valueIndex, valueIndex + arity),
+        values,
       });
+
+      skipSeparators();
+      if (index >= pathData.length || isPathCommandToken(pathData[index])) break;
     }
   }
 
@@ -954,8 +990,8 @@ function extractMarkers(
   // because the path continues back to the start vertex.
   const midMarker = resolveMarker(markerMid);
   if (midMarker) {
-    const lastMid = closed ? points.length : points.length - 1;
-    for (let i = 1; i < lastMid; i++) {
+    const lastMidIndex = closed ? points.length - 1 : points.length - 2;
+    for (let i = 1; i <= lastMidIndex; i++) {
       const prev = points[i - 1];
       const next = points[(i + 1) % points.length];
       const angle = Math.atan2(next.y - prev.y, next.x - prev.x);
