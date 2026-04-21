@@ -116,6 +116,17 @@ const WINDING = 2;
 const TA_LEFT = 0;
 const TA_TOP = 0;
 
+const PX_TO_HUNDREDTH_MM = 2646 / 100;
+const MAX_COMPAT_FRAME_HUNDREDTH_MM = 0xffff;
+
+function getPageScaleHundredthMmPerPixel(width: number, height: number): { exScale: number; eyScale: number } {
+  const frameMetrics = getCompatibleFrameMetrics(width, height);
+  return {
+    exScale: frameMetrics.frameWidth / Math.max(width, 1),
+    eyScale: frameMetrics.frameHeight / Math.max(height, 1),
+  };
+}
+
 /**
  * Low-level binary buffer for building EMF records.
  */
@@ -195,6 +206,30 @@ function encodeUtf16LE(str: string): Uint8Array {
     view.setUint16(i * 2, str.charCodeAt(i), true);
   }
   return buf;
+}
+
+function getCompatibleFrameMetrics(width: number, height: number): {
+  frameWidth: number;
+  frameHeight: number;
+  millimeterWidth: number;
+  millimeterHeight: number;
+  micrometerWidth: number;
+  micrometerHeight: number;
+} {
+  const rawFrameWidth = Math.max(1, Math.round(width * PX_TO_HUNDREDTH_MM));
+  const rawFrameHeight = Math.max(1, Math.round(height * PX_TO_HUNDREDTH_MM));
+  const scale = Math.min(1, MAX_COMPAT_FRAME_HUNDREDTH_MM / Math.max(rawFrameWidth, rawFrameHeight));
+  const frameWidth = Math.max(1, Math.round(rawFrameWidth * scale));
+  const frameHeight = Math.max(1, Math.round(rawFrameHeight * scale));
+
+  return {
+    frameWidth,
+    frameHeight,
+    millimeterWidth: Math.max(1, Math.round(frameWidth / 100)),
+    millimeterHeight: Math.max(1, Math.round(frameHeight / 100)),
+    micrometerWidth: frameWidth * 10,
+    micrometerHeight: frameHeight * 10,
+  };
 }
 
 // ── EMF Writer Options ──────────────────────────────────────────────
@@ -590,8 +625,8 @@ export class EMFWriter implements Writer<Uint8Array> {
     // Record data layout after the 8-byte record header:
     // [0..15]   rclBounds (4 × int32)
     // [16..19]  iGraphicsMode (1 = GM_COMPATIBLE)
-    // [20..23]  exScale (float, 0 for MM_TEXT)
-    // [24..27]  eyScale (float, 0 for MM_TEXT)
+    // [20..23]  exScale (float, page scale in 0.01 mm per logical unit)
+    // [24..27]  eyScale (float, page scale in 0.01 mm per logical unit)
     // [28..35]  EMRTEXT.ptlReference (2 × int32 = x, y)
     // [36..39]  EMRTEXT.nChars
     // [40..43]  EMRTEXT.offString (offset from record start)
@@ -603,6 +638,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     const offString = 8 + 68; // record header (8) + data before string (68)
     const recordData = new Uint8Array(68 + textUtf16.byteLength);
     const dv = new DataView(recordData.buffer);
+    const pageScale = getPageScaleHundredthMmPerPixel(this.width, this.height);
 
     // rclBounds
     dv.setInt32(0, bounds.left, true);
@@ -612,9 +648,9 @@ export class EMFWriter implements Writer<Uint8Array> {
 
     // iGraphicsMode = GM_COMPATIBLE (1)
     dv.setUint32(16, 1, true);
-    // exScale, eyScale = 0.0 for MM_TEXT
-    dv.setFloat32(20, 0.0, true);
-    dv.setFloat32(24, 0.0, true);
+    // exScale/eyScale match the page's 0.01 mm per logical-pixel scale.
+    dv.setFloat32(20, pageScale.exScale, true);
+    dv.setFloat32(24, pageScale.eyScale, true);
 
     // EMRTEXT
     dv.setInt32(28, x, true);      // ptlReference.x
@@ -806,12 +842,13 @@ export class EMFWriter implements Writer<Uint8Array> {
     hv.setInt32(8, this.width - 1, true);  // right
     hv.setInt32(12, this.height - 1, true); // bottom
 
-    // rclFrame (0.01mm units, approximate: assume 96 DPI → 1px = 0.2646mm = 26.46 × 0.01mm)
-    const pxToHundredthMm = 2646 / 100;
+    // Some legacy EMF consumers fail once rclFrame exceeds 16-bit-sized dimensions.
+    // Keep the physical frame metadata within that range while preserving aspect ratio.
+    const frameMetrics = getCompatibleFrameMetrics(this.width, this.height);
     hv.setInt32(16, 0, true);
     hv.setInt32(20, 0, true);
-    hv.setInt32(24, Math.round(this.width * pxToHundredthMm), true);
-    hv.setInt32(28, Math.round(this.height * pxToHundredthMm), true);
+    hv.setInt32(24, frameMetrics.frameWidth, true);
+    hv.setInt32(28, frameMetrics.frameHeight, true);
 
     // Signature: ' EMF' = 0x464D4520
     hv.setUint32(32, 0x464D4520, true);
@@ -830,19 +867,18 @@ export class EMFWriter implements Writer<Uint8Array> {
     hv.setUint32(56, 0, true); // offDescription
     // Palette entries
     hv.setUint32(60, 0, true);
-    // Reference device: 1920×1080 pixels
-    hv.setInt32(64, 1920, true);
-    hv.setInt32(68, 1080, true);
-    // Reference device: mm (approximate for 96 DPI)
-    hv.setInt32(72, 508, true);  // ~508mm ≈ 20 inches
-    hv.setInt32(76, 285, true);  // ~285mm ≈ 11.25 inches
+    // Reference device size is page-sized so importers can derive a consistent DPI.
+    hv.setInt32(64, this.width, true);
+    hv.setInt32(68, this.height, true);
+    hv.setInt32(72, frameMetrics.millimeterWidth, true);
+    hv.setInt32(76, frameMetrics.millimeterHeight, true);
     // Extended fields
     hv.setUint32(80, 0, true);   // cbPixelFormat (no pixel format)
     hv.setUint32(84, 0, true);   // offPixelFormat
     hv.setUint32(88, 0, true);   // bOpenGL (no OpenGL commands)
     // szlMicrometers — device size in micrometers
-    hv.setInt32(92, 508000, true);  // width: 508mm = 508000µm
-    hv.setInt32(96, 285000, true);  // height: 285mm = 285000µm
+    hv.setInt32(92, frameMetrics.micrometerWidth, true);
+    hv.setInt32(96, frameMetrics.micrometerHeight, true);
 
     // Assemble the complete file
     const output = new Uint8Array(totalSize);

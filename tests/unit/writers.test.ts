@@ -42,6 +42,26 @@ function findRecord(emfBytes: Uint8Array, targetType: number): { offset: number;
   return null;
 }
 
+function findAllRecords(emfBytes: Uint8Array, targetType: number): Array<{ offset: number; size: number }> {
+  const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+  const records: Array<{ offset: number; size: number }> = [];
+  let offset = 0;
+
+  while (offset + 8 <= emfBytes.byteLength) {
+    const type = view.getUint32(offset, true);
+    const size = view.getUint32(offset + 4, true);
+    if (type === targetType) {
+      records.push({ offset, size });
+    }
+    if (size < 8) {
+      break;
+    }
+    offset += size;
+  }
+
+  return records;
+}
+
 function countRecords(emfBytes: Uint8Array, targetType: number): number {
   const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
   let offset = 0;
@@ -370,6 +390,38 @@ test.describe("Writer Output", () => {
     expect(emfBytes.length).toBeGreaterThan(80);
   });
 
+  test("EMF writer caps tall-page frame metadata for compatibility", async () => {
+    const writer = new EMFWriter({ width: 1280, height: 2484 });
+    const emfBytes = await renderIR([], writer);
+    const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+    const frameWidth = view.getInt32(32, true);
+    const frameHeight = view.getInt32(36, true);
+
+    expect(frameWidth).toBeLessThanOrEqual(0xffff);
+    expect(frameHeight).toBeLessThanOrEqual(0xffff);
+    expect(frameHeight).toBe(0xffff);
+    expect(frameWidth / frameHeight).toBeCloseTo(1280 / 2484, 3);
+    expect(view.getInt32(72, true)).toBeGreaterThan(0);
+    expect(view.getInt32(76, true)).toBeGreaterThan(0);
+  });
+
+  test("EMF+ writer caps tall-page frame metadata for compatibility", async () => {
+    const writer = new EMFPlusWriter({ width: 1280, height: 11095 });
+    const emfBytes = await renderIR([], writer);
+    const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+    const frameWidth = view.getInt32(32, true);
+    const frameHeight = view.getInt32(36, true);
+
+    expect(frameWidth).toBeLessThanOrEqual(0xffff);
+    expect(frameHeight).toBeLessThanOrEqual(0xffff);
+    expect(frameHeight).toBe(0xffff);
+    expect(frameWidth / frameHeight).toBeCloseTo(1280 / 11095, 3);
+    expect(view.getInt32(80, true)).toBeGreaterThan(0);
+    expect(view.getInt32(84, true)).toBeGreaterThan(0);
+    expect(view.getInt32(72, true)).toBe(1280);
+    expect(view.getInt32(76, true)).toBe(11095);
+  });
+
   test("EMF writer uses spec-sized font and bitmap records", async ({ page }) => {
     await setupPage(
       page,
@@ -419,6 +471,38 @@ test.describe("Writer Output", () => {
     expect(view.getUint32(dibRecord.offset + 56, true)).toBe(120);
     const offBmi = view.getUint32(dibRecord.offset + 48, true);
     expect(view.getInt32(dibRecord.offset + offBmi + 8, true)).toBe(24);
+  });
+
+  test("EMF writer emits positive page scales for text records", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="target" style="width:220px;height:80px;background:#fff;color:#111;font-size:14px;">
+          <p style="margin:0;position:absolute;left:12px;top:14px;">Hello EMF</p>
+        </div>
+      </body></html>`
+    );
+
+    const ir: IRNode[] = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+    });
+
+    const writer = new EMFWriter({ width: 220, height: 80 });
+    const emfBytes = await renderIR(ir, writer);
+    const textRecord = findAllRecords(emfBytes, 0x0054)[0];
+
+    expect(textRecord).toBeDefined();
+    if (!textRecord) {
+      return;
+    }
+
+    const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+    expect(view.getFloat32(textRecord.offset + 28, true)).toBeGreaterThan(0);
+    expect(view.getFloat32(textRecord.offset + 32, true)).toBeGreaterThan(0);
   });
 
   test("EMF writer keeps outlined pill shapes as rounded rectangles", async () => {

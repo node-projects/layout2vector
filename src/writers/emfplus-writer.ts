@@ -160,6 +160,8 @@ const BRUSH_GRAPHICS_VERSION = 0xDBC01002;
 const EMFPLUS_HEADER_FLAG_DUAL = 0x0001;
 const EMFPLUS_FLAGS_DISPLAY = 0x00000001;
 const DEFAULT_DPI = 96;
+const PX_TO_HUNDREDTH_MM = 2646 / 100;
+const MAX_COMPAT_FRAME_HUNDREDTH_MM = 0xffff;
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 const BRUSH_TYPE_PATH_GRADIENT = 0x03;
 const BRUSH_TYPE_LINEAR_GRADIENT = 0x04;
@@ -250,6 +252,30 @@ function clamp(value: number, min: number, max: number): number {
 
 function distance(from: Point, to: Point): number {
   return Math.hypot(to.x - from.x, to.y - from.y);
+}
+
+function getCompatibleFrameMetrics(width: number, height: number): {
+  frameWidth: number;
+  frameHeight: number;
+  millimeterWidth: number;
+  millimeterHeight: number;
+  micrometerWidth: number;
+  micrometerHeight: number;
+} {
+  const rawFrameWidth = Math.max(1, Math.round(width * PX_TO_HUNDREDTH_MM));
+  const rawFrameHeight = Math.max(1, Math.round(height * PX_TO_HUNDREDTH_MM));
+  const scale = Math.min(1, MAX_COMPAT_FRAME_HUNDREDTH_MM / Math.max(rawFrameWidth, rawFrameHeight));
+  const frameWidth = Math.max(1, Math.round(rawFrameWidth * scale));
+  const frameHeight = Math.max(1, Math.round(rawFrameHeight * scale));
+
+  return {
+    frameWidth,
+    frameHeight,
+    millimeterWidth: Math.max(1, Math.round(frameWidth / 100)),
+    millimeterHeight: Math.max(1, Math.round(frameHeight / 100)),
+    micrometerWidth: frameWidth * 10,
+    micrometerHeight: frameHeight * 10,
+  };
 }
 
 function normalize(point: Point): Point {
@@ -1669,17 +1695,16 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
     const totalSize = headerRecordSize + bodySize;
     const headerData = new Uint8Array(headerDataSize);
     const view = new DataView(headerData.buffer);
+    const frameMetrics = getCompatibleFrameMetrics(this.width, this.height);
 
     view.setInt32(0, 0, true);
     view.setInt32(4, 0, true);
     view.setInt32(8, this.width - 1, true);
     view.setInt32(12, this.height - 1, true);
-
-    const pxToHundredthMm = 2646 / 100;
     view.setInt32(16, 0, true);
     view.setInt32(20, 0, true);
-    view.setInt32(24, Math.round(this.width * pxToHundredthMm), true);
-    view.setInt32(28, Math.round(this.height * pxToHundredthMm), true);
+    view.setInt32(24, frameMetrics.frameWidth, true);
+    view.setInt32(28, frameMetrics.frameHeight, true);
     view.setUint32(32, 0x464D4520, true);
     view.setUint32(36, 0x00010000, true);
     view.setUint32(40, totalSize, true);
@@ -1689,15 +1714,15 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
     view.setUint32(52, 0, true);
     view.setUint32(56, 0, true);
     view.setUint32(60, 0, true);
-    view.setInt32(64, 1920, true);
-    view.setInt32(68, 1080, true);
-    view.setInt32(72, 508, true);
-    view.setInt32(76, 285, true);
+    view.setInt32(64, this.width, true);
+    view.setInt32(68, this.height, true);
+    view.setInt32(72, frameMetrics.millimeterWidth, true);
+    view.setInt32(76, frameMetrics.millimeterHeight, true);
     view.setUint32(80, 0, true);
     view.setUint32(84, 0, true);
     view.setUint32(88, 0, true);
-    view.setInt32(92, 508000, true);
-    view.setInt32(96, 285000, true);
+    view.setInt32(92, frameMetrics.micrometerWidth, true);
+    view.setInt32(96, frameMetrics.micrometerHeight, true);
 
     const output = new Uint8Array(totalSize);
     const headerRecord = new Uint8Array(headerRecordSize);
