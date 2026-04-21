@@ -82,6 +82,8 @@ const EMR = {
   EXTTEXTOUTW: 0x0054,
   POLYGON16: 0x0056,
   POLYLINE16: 0x0057,
+  POLYPOLYLINE16: 0x005A,
+  POLYPOLYGON16: 0x005B,
   EXTCREATEFONTINDIRECTW: 0x0052,
   STRETCHDIBITS: 0x0051,
   INTERSECTCLIPRECT: 0x001E,
@@ -479,40 +481,32 @@ export class EMFWriter implements Writer<Uint8Array> {
 
     if (style.pathSubpaths?.length) {
       const drawableSubpaths = style.pathSubpaths.filter((subpath) => subpath.points.length >= 2);
-      const hasFilledSubpath = fillColor !== null && drawableSubpaths.some((subpath) => subpath.closed && subpath.points.length >= 3);
+      const filledSubpaths = fillColor !== null
+        ? drawableSubpaths.filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        : [];
+      const hasFilledSubpath = filledSubpaths.length > 0;
+      const strokeSubpaths = drawableSubpaths.filter((subpath) => !filledSubpaths.includes(subpath));
       const brushHandle = this.createBrush(hasFilledSubpath ? fillColor : null);
+      const effectiveStroke = stroke ?? (!hasFilledSubpath && fillColor !== null ? { color: fillColor, width: 1 } : null);
       const penHandle = this.createPenStyled(
-        stroke ?? (!hasFilledSubpath && fillColor !== null ? { color: fillColor, width: 1 } : null),
+        effectiveStroke,
         style.strokeDasharray,
       );
       this.selectObject(brushHandle);
       this.selectObject(penHandle);
-      this.records.writeRecord(
-        EMR.SETPOLYFILLMODE,
-        uint32Array(style.fillRule === "evenodd" ? ALTERNATE : WINDING),
-      );
-      this.records.writeRecord(EMR.BEGINPATH, null);
-      for (const subpath of drawableSubpaths) {
-        const bounds = this.computeBoundsFromPoints(subpath.points);
-        const ptData = int16Array(
-          ...subpath.points.flatMap((point) => [Math.round(point.x), Math.round(point.y)])
+
+      if (hasFilledSubpath) {
+        // Paint rejects EMR_FILLPATH-based painting here; classic POLYPOLYGON16
+        // output keeps compound fills importable while clip-path can still use paths.
+        this.records.writeRecord(
+          EMR.SETPOLYFILLMODE,
+          uint32Array(style.fillRule === "evenodd" ? ALTERNATE : WINDING),
         );
-        this.records.writeRecord(EMR.POLYLINE16, concat(
-          int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
-          uint32Array(subpath.points.length),
-          ptData
-        ));
-        if (subpath.closed) {
-          this.records.writeRecord(EMR.CLOSEFIGURE, null);
-        }
+        this.writeMultiPolylineRecord(EMR.POLYPOLYGON16, filledSubpaths);
       }
-      this.records.writeRecord(EMR.ENDPATH, null);
-      if (hasFilledSubpath && stroke) {
-        this.records.writeRecord(EMR.STROKEANDFILLPATH, null);
-      } else if (hasFilledSubpath) {
-        this.records.writeRecord(EMR.FILLPATH, null);
-      } else {
-        this.records.writeRecord(EMR.STROKEPATH, null);
+
+      if (effectiveStroke && strokeSubpaths.length > 0) {
+        this.writeMultiPolylineRecord(EMR.POLYPOLYLINE16, strokeSubpaths);
       }
 
       this.deleteObject(brushHandle);
@@ -1292,6 +1286,29 @@ export class EMFWriter implements Writer<Uint8Array> {
 
   private deleteObject(handle: number): void {
     this.records.writeRecord(EMR.DELETEOBJECT, uint32Array(handle));
+  }
+
+  private writeMultiPolylineRecord(
+    type: number,
+    subpaths: Array<{ points: Point[] }>,
+  ): void {
+    if (subpaths.length === 0) return;
+
+    const allPoints = subpaths.flatMap((subpath) => subpath.points);
+    const counts = subpaths.map((subpath) => subpath.points.length);
+    const bounds = this.computeBoundsFromPoints(allPoints);
+    const countData = uint32Array(...counts);
+    const pointData = int16Array(
+      ...allPoints.flatMap((point) => [Math.round(point.x), Math.round(point.y)]),
+    );
+
+    this.records.writeRecord(type, concat(
+      int32Array(bounds.left, bounds.top, bounds.right, bounds.bottom),
+      uint32Array(subpaths.length),
+      uint32Array(allPoints.length),
+      countData,
+      pointData,
+    ));
   }
 
   private computeBounds(quad: Quad): { left: number; top: number; right: number; bottom: number } {

@@ -1,0 +1,157 @@
+[
+  {
+    "file": "01-basic-polygon.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Filled polygon only; isolates basic brush, pen, and POLYGON16 output.",
+    "keyRecords": [
+      "POLYGON16"
+    ]
+  },
+  {
+    "file": "02-basic-text.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Text only; isolates EXTCREATEFONTINDIRECTW and EXTTEXTOUTW handling.",
+    "keyRecords": [
+      "EXTCREATEFONTINDIRECTW",
+      "EXTTEXTOUTW"
+    ]
+  },
+  {
+    "file": "03-polygon-and-text.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Simple shape and text together; checks whether Paint fails only once text is combined with normal drawing.",
+    "keyRecords": [
+      "POLYGON16",
+      "EXTCREATEFONTINDIRECTW",
+      "EXTTEXTOUTW"
+    ]
+  },
+  {
+    "file": "04-roundrect.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Rounded rectangle only; isolates ROUNDRECT records.",
+    "keyRecords": [
+      "ROUNDRECT"
+    ]
+  },
+  {
+    "file": "05-clipped-polygon.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Polygon clipped with CSS clip-path; isolates path clipping records.",
+    "keyRecords": [
+      "SETPOLYFILLMODE",
+      "BEGINPATH",
+      "POLYGON16",
+      "ENDPATH",
+      "SELECTCLIPPATH"
+    ]
+  },
+  {
+    "file": "06-bitmap.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Bitmap only; isolates STRETCHDIBITS without transforms.",
+    "keyRecords": [
+      "STRETCHDIBITS"
+    ]
+  },
+  {
+    "file": "07-rotated-bitmap.emf",
+    "width": 220,
+    "height": 160,
+    "purpose": "Bitmap with rotation; isolates SETWORLDTRANSFORM plus STRETCHDIBITS.",
+    "keyRecords": [
+      "SETWORLDTRANSFORM",
+      "STRETCHDIBITS"
+    ]
+  },
+  {
+    "file": "08-dashed-polyline.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Stroke-only dashed line; isolates dashed CREATEPEN style and POLYLINE16 output.",
+    "keyRecords": [
+      "POLYLINE16"
+    ]
+  },
+  {
+    "file": "09-tall-polygon.emf",
+    "width": 220,
+    "height": 3000,
+    "purpose": "Very tall page with shape only; isolates Paint behavior on capped tall-page headers without text.",
+    "keyRecords": [
+      "POLYGON16"
+    ]
+  },
+  {
+    "file": "10-tall-text.emf",
+    "width": 220,
+    "height": 3000,
+    "purpose": "Very tall page with text only; isolates tall-page header plus EMF text records.",
+    "keyRecords": [
+      "EXTCREATEFONTINDIRECTW",
+      "EXTTEXTOUTW"
+    ]
+  },
+  {
+    "file": "11-evenodd-compound-path.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Compound evenodd fill; checks whether Paint fails on multi-subpath fill content without text or images.",
+    "keyRecords": [
+      "SETPOLYFILLMODE",
+      "BEGINPATH",
+      "POLYLINE16",
+      "CLOSEFIGURE",
+      "ENDPATH",
+      "FILLPATH"
+    ]
+  },
+  {
+    "file": "12-single-path-winding-fill.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Single closed path filled via FILLPATH with winding fill; isolates whether Paint accepts path painting at all.",
+    "keyRecords": [
+      "SETPOLYFILLMODE",
+      "BEGINPATH",
+      "POLYLINE16",
+      "CLOSEFIGURE",
+      "ENDPATH",
+      "FILLPATH"
+    ]
+  },
+  {
+    "file": "13-single-path-evenodd-fill.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Single closed path filled via FILLPATH with evenodd fill; isolates whether Paint rejects ALTERNATE fill mode even without compound geometry.",
+    "keyRecords": [
+      "SETPOLYFILLMODE",
+      "BEGINPATH",
+      "POLYLINE16",
+      "CLOSEFIGURE",
+      "ENDPATH",
+      "FILLPATH"
+    ]
+  },
+  {
+    "file": "14-compound-path-winding-fill.emf",
+    "width": 220,
+    "height": 140,
+    "purpose": "Compound path filled with winding fill; isolates whether the failure needs multiple subpaths or specifically evenodd compound filling.",
+    "keyRecords": [
+      "SETPOLYFILLMODE",
+      "BEGINPATH",
+      "POLYLINE16",
+      "CLOSEFIGURE",
+      "ENDPATH",
+      "FILLPATH"
+    ]
+  }
+]

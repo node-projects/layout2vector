@@ -14,6 +14,8 @@ const EMR_COMMENT = 0x0046;
 const EMR_EXTCREATEFONTINDIRECTW = 0x0052;
 const EMR_STRETCHDIBITS = 0x0051;
 const EMR_ROUNDRECT = 0x002C;
+const EMR_FILLPATH = 0x003E;
+const EMR_POLYPOLYGON16 = 0x005B;
 const EMFPLUS_COMMENT_IDENTIFIER = 0x2B464D45;
 const EMFPLUS_HEADER = 0x4001;
 const EMFPLUS_EOF = 0x4002;
@@ -529,6 +531,41 @@ test.describe("Writer Output", () => {
     const emfBytes = await renderIR(ir, writer);
 
     expect(countRecords(emfBytes, EMR_ROUNDRECT)).toBeGreaterThanOrEqual(2);
+  });
+
+  test("EMF writer uses polypolygon records for compound path fills", async () => {
+    const outer = [
+      { x: 0, y: 0 },
+      { x: 40, y: 0 },
+      { x: 40, y: 40 },
+      { x: 0, y: 40 },
+    ];
+    const inner = [
+      { x: 10, y: 10 },
+      { x: 30, y: 10 },
+      { x: 30, y: 30 },
+      { x: 10, y: 30 },
+    ];
+    const ir: IRNode[] = [{
+      type: "polyline",
+      points: [...outer, ...inner],
+      closed: true,
+      style: {
+        fill: "#999999",
+        fillRule: "evenodd",
+        pathSubpaths: [
+          { points: outer, closed: true },
+          { points: inner, closed: true },
+        ],
+      },
+      zIndex: 0,
+    }];
+
+    const writer = new EMFWriter({ width: 40, height: 40 });
+    const emfBytes = await renderIR(ir, writer);
+
+    expect(countRecords(emfBytes, EMR_POLYPOLYGON16)).toBeGreaterThan(0);
+    expect(countRecords(emfBytes, EMR_FILLPATH)).toBe(0);
   });
 
   test("EMF+ writer keeps filled pill shapes as rounded rectangles", async () => {
