@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "5.13.0",
+  "version": "5.14.0",
   "description": "DOM → Geometry → DXF/PDF/PNG library",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "esbuild": "^0.28.0"
   },
   "peerDependencies": {
-    "@chenglou/pretext": "^0.0.5"
+    "@chenglou/pretext": ">0.0.5"
   },
   "peerDependenciesMeta": {
     "@chenglou/pretext": {
