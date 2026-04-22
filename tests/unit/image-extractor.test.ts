@@ -262,6 +262,71 @@ test.describe("Image Extraction", () => {
     expect(extracted?.center[3]).toBe(255);
   });
 
+  test("preserves transparency for large PNG images", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:512px;height:512px;display:block;" />
+      </body></html>`
+    );
+
+    await page.evaluate(() => {
+      const img = document.getElementById("target") as HTMLImageElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, 512, 512);
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(128, 128, 256, 256);
+      img.src = canvas.toDataURL("image/png");
+    });
+
+    await page.waitForFunction(() => {
+      const img = document.getElementById("target") as HTMLImageElement | null;
+      return !!img && img.complete && img.naturalWidth > 0;
+    });
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((n: any) => n.type === "image");
+      if (!imageNode) return null;
+
+      const decoded = await new Promise<{ corner: number[]; center: number[]; mimeType: string | null }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            corner: Array.from(ctx.getImageData(0, 0, 1, 1).data),
+            center: Array.from(ctx.getImageData(256, 256, 1, 1).data),
+            mimeType: imageNode.dataUrl.match(/^data:([^;,]+)/)?.[1] ?? null,
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted image"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return decoded;
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.mimeType).toBe("image/png");
+    expect(extracted?.corner[3]).toBe(0);
+    expect(extracted?.center[0]).toBeGreaterThan(200);
+    expect(extracted?.center[1]).toBeLessThan(50);
+    expect(extracted?.center[2]).toBeLessThan(50);
+    expect(extracted?.center[3]).toBe(255);
+  });
+
   test("converts SVG data URL (base64) to vector geometry", async ({ page }) => {
     await setupPage(
       page,
@@ -708,13 +773,10 @@ test.describe("Image Extraction", () => {
   });
 
   test("extracts CSS background-image url() as image IR node", async ({ page }) => {
-    const RED_PIXEL_DATA_URL =
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAADklEQVQIW2P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
-
     await setupPage(
       page,
       `<html><body style="margin:0;padding:0;">
-        <div id="target" style="width:120px;height:80px;background-image:url('${RED_PIXEL_DATA_URL}');background-size:cover;"></div>
+        <div id="target" style="width:120px;height:80px;background-image:url('${RED_PIXEL_PNG}');background-size:cover;"></div>
       </body></html>`
     );
 
@@ -734,6 +796,69 @@ test.describe("Image Extraction", () => {
     const [tl, tr, _br, bl] = imageNode.quad;
     expect(tr.x - tl.x).toBeCloseTo(120, 0);
     expect(bl.y - tl.y).toBeCloseTo(80, 0);
+  });
+
+  test("extracts repeated CSS background-image tiles instead of stretching a single copy", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:16px;height:16px;"></div>
+      </body></html>`
+    );
+
+    await page.evaluate(() => {
+      const el = document.getElementById("target") as HTMLDivElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 4;
+      canvas.height = 4;
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, 4, 4);
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(0, 0, 4, 2);
+
+      el.style.backgroundImage = `url('${canvas.toDataURL("image/png")}')`;
+      el.style.backgroundRepeat = "repeat";
+      el.style.backgroundPosition = "0px 0px";
+      el.style.backgroundSize = "auto";
+    });
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((n: any) => n.type === "image");
+      if (!imageNode) return null;
+
+      const decoded = await new Promise<{ topBand: number[]; gapBand: number[]; repeatedBand: number[] }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            topBand: Array.from(ctx.getImageData(1, 1, 1, 1).data),
+            gapBand: Array.from(ctx.getImageData(1, 6, 1, 1).data),
+            repeatedBand: Array.from(ctx.getImageData(1, 9, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted background image"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return decoded;
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.topBand[0]).toBeGreaterThan(200);
+    expect(extracted?.topBand[3]).toBe(255);
+    expect(extracted?.gapBand[3]).toBe(0);
+    expect(extracted?.repeatedBand[0]).toBeGreaterThan(200);
+    expect(extracted?.repeatedBand[3]).toBe(255);
   });
 
   test("extracts CSS background-image SVG data URL as vector geometry", async ({ page }) => {

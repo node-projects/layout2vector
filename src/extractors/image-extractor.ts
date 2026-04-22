@@ -145,25 +145,22 @@ export async function preloadImages(root: Element): Promise<void> {
       continue;
     }
 
-    // Data URL PNG/WebP — pre-decode and convert to JPEG for PDF compat
+    // Data URL PNG/WebP — pre-decode so background rendering can draw synchronously
     if (!url.startsWith("data:image/png") && !url.startsWith("data:image/webp")) continue;
     try {
       const img = new Image();
       img.src = url;
-      await img.decode();
-      // Skip JPEG conversion for very small images (JPEG block size is 8×8,
-      // converting smaller images produces severe artifacts)
-      if (img.naturalWidth <= 16 && img.naturalHeight <= 16) continue;
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth || 1;
-      canvas.height = img.naturalHeight || 1;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) continue;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-      const jpegUrl = canvas.toDataURL("image/jpeg", 0.92);
-      preloadedUrlMap.set(url, jpegUrl);
+      try {
+        await img.decode();
+        preloadedImageElems.set(url, img);
+      } catch {
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error("load failed"));
+          if (img.complete && img.naturalWidth > 0) resolve();
+        });
+        preloadedImageElems.set(url, img);
+      }
     } catch { /* ignore */ }
   }
 }
@@ -267,21 +264,18 @@ export function extractBackgroundImage(
       }
     }
     if (url.startsWith("data:image/")) {
-      // Raster data URL — re-render at target size with nearest-neighbor scaling
       const imageScale = _options.imageScale ?? 1;
       const rw = Math.min(Math.round(w * imageScale), 4096);
       const rh = Math.min(Math.round(h * imageScale), 4096);
-      const rendered = rasterToRendered(url, rw, rh);
-      // For SVG sources, keep the original SVG data URL (browsers/SVG viewers render it natively);
-      // writers that need pixel data use rgbData.
-      const effectiveDataUrl = url.startsWith("data:image/svg+xml") ? url : (rendered?.dataUrl ?? url);
+      const rendered = renderBackgroundImage(el, url, rw, rh);
+      if (!rendered) return [];
       return [{
         type: "image",
         quad,
-        dataUrl: effectiveDataUrl,
+        dataUrl: rendered.dataUrl,
         width: rw,
         height: rh,
-        rgbData: rendered?.rgbData,
+        rgbData: rendered.rgbData,
         style,
         zIndex: globalIndex,
       }];
@@ -302,22 +296,16 @@ export function extractBackgroundImage(
   const imageScale = _options.imageScale ?? 1;
   const rasterW = Math.min(Math.round(w * imageScale), 4096);
   const rasterH = Math.min(Math.round(h * imageScale), 4096);
-  const dataUrl = rasterizeBackgroundImage(el, rasterW, rasterH);
-  if (!dataUrl) return [];
-
-  // For SVG sources, prefer the original SVG data URL (browsers render it natively)
-  let effectiveDataUrl = dataUrl;
-  if (isSvgSource(originalUrl)) {
-    const cached = preloadedUrlMap.get(originalUrl);
-    if (cached?.startsWith("data:image/svg+xml")) effectiveDataUrl = cached;
-  }
+  const rendered = renderBackgroundImage(el, url, rasterW, rasterH);
+  if (!rendered) return [];
 
   return [{
     type: "image",
     quad,
-    dataUrl: effectiveDataUrl,
+    dataUrl: rendered.dataUrl,
     width: rasterW,
     height: rasterH,
+    rgbData: rendered.rgbData,
     style,
     zIndex: globalIndex,
   }];
@@ -424,7 +412,7 @@ function renderDataUrlWithSampling(
     const inspection = inspectRasterImageData(ctx.getImageData(0, 0, w, h), pixels <= 250000);
     if (!inspection.hasVisibleContent) return null;
 
-    const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+    const preserveTransparency = inspection.hasTransparency;
     return {
       dataUrl: preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
       rgbData: inspection.rgbData,
@@ -599,60 +587,291 @@ function convertBgSvgToGeometry(
   }
 }
 
-/**
- * Rasterize an element's background image by drawing it onto a canvas.
- * Uses a temporary Image element loaded synchronously via XHR.
- */
-function rasterizeBackgroundImage(el: Element, elWidth: number, elHeight: number): string | null {
+type BackgroundRepeatMode = {
+  repeatX: boolean;
+  repeatY: boolean;
+};
+
+type BackgroundPositionSpec = {
+  type: "percent" | "px";
+  value: number;
+};
+
+function renderBackgroundImage(
+  el: Element,
+  url: string,
+  elWidth: number,
+  elHeight: number
+): { dataUrl: string; rgbData?: number[] } | null {
   const w = Math.round(elWidth) || 1;
   const h = Math.round(elHeight) || 1;
   const cs = getComputedStyle(el);
-  const bgImage = cs.backgroundImage;
-  const url = extractCssUrlValue(bgImage);
-  if (!url) return null;
+  const repeat = (cs.backgroundRepeat || "repeat").split(",")[0]?.trim().toLowerCase() || "repeat";
+  const size = (cs.backgroundSize || "auto").split(",")[0]?.trim().toLowerCase() || "auto";
+  const position = (cs.backgroundPosition || "0% 0%").split(",")[0]?.trim().toLowerCase() || "0% 0%";
+  const attachment = (cs.backgroundAttachment || "scroll").split(",")[0]?.trim().toLowerCase() || "scroll";
+  const cacheKey = `bgRender|${url.length}|${w}|${h}|${repeat}|${size}|${position}|${attachment}|${url.slice(0, 100)}`;
+  const cached = imageDataCache.get(cacheKey);
+  if (cached !== undefined) return cached;
 
-  const cacheKey = `bgRaster|${url.length}|${w}|${h}|${url.slice(0, 100)}`;
-  if (imageDataCache.has(cacheKey)) {
-    return imageDataCache.get(cacheKey)?.dataUrl ?? null;
-  }
-
-  const result = rasterizeBackgroundImageUncached(url, w, h);
-  imageDataCache.set(cacheKey, result ? { dataUrl: result } : null);
+  const result = renderBackgroundImageUncached(el, url, w, h, repeat, size, position, attachment);
+  imageDataCache.set(cacheKey, result);
   return result;
 }
 
-function rasterizeBackgroundImageUncached(url: string, w: number, h: number): string | null {
+function parseBackgroundRepeat(value: string): BackgroundRepeatMode {
+  const tokens = value.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return { repeatX: true, repeatY: true };
+
+  const parseAxis = (token: string): boolean => token !== "no-repeat";
+
+  if (tokens.length === 1) {
+    switch (tokens[0]) {
+      case "repeat-x":
+        return { repeatX: true, repeatY: false };
+      case "repeat-y":
+        return { repeatX: false, repeatY: true };
+      case "no-repeat":
+        return { repeatX: false, repeatY: false };
+      default:
+        return { repeatX: true, repeatY: true };
+    }
+  }
+
+  return {
+    repeatX: parseAxis(tokens[0]),
+    repeatY: parseAxis(tokens[1]),
+  };
+}
+
+function parseBackgroundLengthToken(token: string | undefined, reference: number, scale: number): number | null {
+  if (!token || token === "auto") return null;
+  if (token.endsWith("%")) {
+    const percentage = parseFloat(token);
+    return Number.isFinite(percentage) ? (reference * percentage) / 100 : null;
+  }
+  const value = parseFloat(token);
+  return Number.isFinite(value) ? value * scale : null;
+}
+
+function resolveBackgroundSize(
+  value: string,
+  imageWidth: number,
+  imageHeight: number,
+  boxWidth: number,
+  boxHeight: number,
+  scaleX: number,
+  scaleY: number
+): { width: number; height: number } {
+  const tokens = value.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0 || (tokens[0] === "auto" && (tokens[1] === undefined || tokens[1] === "auto"))) {
+    return { width: imageWidth * scaleX, height: imageHeight * scaleY };
+  }
+
+  if (tokens[0] === "cover" || tokens[0] === "contain") {
+    const scaledImageWidth = imageWidth * scaleX;
+    const scaledImageHeight = imageHeight * scaleY;
+    const scale = tokens[0] === "cover"
+      ? Math.max(boxWidth / Math.max(scaledImageWidth, 1), boxHeight / Math.max(scaledImageHeight, 1))
+      : Math.min(boxWidth / Math.max(scaledImageWidth, 1), boxHeight / Math.max(scaledImageHeight, 1));
+    return {
+      width: Math.max(1, scaledImageWidth * scale),
+      height: Math.max(1, scaledImageHeight * scale),
+    };
+  }
+
+  const resolvedWidth = parseBackgroundLengthToken(tokens[0], boxWidth, scaleX);
+  const resolvedHeight = parseBackgroundLengthToken(tokens[1] ?? "auto", boxHeight, scaleY);
+  const scaledImageWidth = imageWidth * scaleX;
+  const scaledImageHeight = imageHeight * scaleY;
+
+  if (resolvedWidth == null && resolvedHeight == null) {
+    return { width: scaledImageWidth, height: scaledImageHeight };
+  }
+  if (resolvedWidth == null) {
+    const height = Math.max(1, resolvedHeight ?? scaledImageHeight);
+    const factor = scaledImageHeight > 0 ? height / scaledImageHeight : 1;
+    return { width: Math.max(1, scaledImageWidth * factor), height };
+  }
+  if (resolvedHeight == null) {
+    const width = Math.max(1, resolvedWidth);
+    const factor = scaledImageWidth > 0 ? width / scaledImageWidth : 1;
+    return { width, height: Math.max(1, scaledImageHeight * factor) };
+  }
+
+  return {
+    width: Math.max(1, resolvedWidth),
+    height: Math.max(1, resolvedHeight),
+  };
+}
+
+function parseBackgroundPositionToken(token: string | undefined, axis: "x" | "y"): BackgroundPositionSpec {
+  if (!token) return { type: "percent", value: axis === "x" ? 0 : 0 };
+
+  switch (token) {
+    case "left":
+    case "top":
+      return { type: "percent", value: 0 };
+    case "center":
+      return { type: "percent", value: 0.5 };
+    case "right":
+    case "bottom":
+      return { type: "percent", value: 1 };
+  }
+
+  if (token.endsWith("%")) {
+    const percentage = parseFloat(token);
+    return { type: "percent", value: Number.isFinite(percentage) ? percentage / 100 : 0 };
+  }
+
+  const value = parseFloat(token);
+  return { type: "px", value: Number.isFinite(value) ? value : 0 };
+}
+
+function resolveBackgroundPosition(value: string): { x: BackgroundPositionSpec; y: BackgroundPositionSpec } {
+  const tokens = value.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) {
+    return {
+      x: { type: "percent", value: 0 },
+      y: { type: "percent", value: 0 },
+    };
+  }
+
+  if (tokens.length === 1) {
+    const token = tokens[0];
+    if (token === "top" || token === "bottom") {
+      return {
+        x: { type: "percent", value: 0.5 },
+        y: parseBackgroundPositionToken(token, "y"),
+      };
+    }
+    return {
+      x: parseBackgroundPositionToken(token, "x"),
+      y: { type: "percent", value: 0.5 },
+    };
+  }
+
+  return {
+    x: parseBackgroundPositionToken(tokens[0], "x"),
+    y: parseBackgroundPositionToken(tokens[1], "y"),
+  };
+}
+
+function resolveBackgroundOffset(spec: BackgroundPositionSpec, boxSize: number, tileSize: number, scale: number): number {
+  if (spec.type === "percent") return (boxSize - tileSize) * spec.value;
+  return spec.value * scale;
+}
+
+function getRepeatStart(offset: number, step: number): number {
+  if (!Number.isFinite(step) || step <= 0) return offset;
+  const remainder = offset % step;
+  return remainder <= 0 ? remainder : remainder - step;
+}
+
+function renderBackgroundImageUncached(
+  el: Element,
+  url: string,
+  w: number,
+  h: number,
+  repeatValue: string,
+  sizeValue: string,
+  positionValue: string,
+  attachmentValue: string
+): { dataUrl: string; rgbData?: number[] } | null {
   try {
+    let source: CanvasImageSource | null = null;
+    let sourceWidth = 0;
+    let sourceHeight = 0;
+
+    if (url.startsWith("data:image/png")) {
+      const decoded = decodePngDataUrl(url);
+      if (decoded) {
+        const tmpCanvas = document.createElement("canvas");
+        tmpCanvas.width = decoded.width;
+        tmpCanvas.height = decoded.height;
+        const tmpCtx = tmpCanvas.getContext("2d");
+        if (tmpCtx) {
+          const imgData = tmpCtx.createImageData(decoded.width, decoded.height);
+          imgData.data.set(decoded.rgba);
+          tmpCtx.putImageData(imgData, 0, 0);
+          source = tmpCanvas;
+          sourceWidth = decoded.width;
+          sourceHeight = decoded.height;
+        }
+      }
+    }
+
+    if (!source) {
+      const preloaded = preloadedImageElems.get(url);
+      const img = preloaded ?? new Image();
+      if (!preloaded) img.src = url;
+      source = img;
+      sourceWidth = img.naturalWidth || 0;
+      sourceHeight = img.naturalHeight || 0;
+      if (!sourceWidth || !sourceHeight || !img.complete) return null;
+    }
+
+    if (!source || sourceWidth === 0 || sourceHeight === 0) return null;
+
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    // Synchronous fetch for same-origin images
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", url, false);
-      xhr.responseType = "blob";
-      xhr.send();
-      if (xhr.status === 200) {
-        // Convert blob to data URL synchronously via canvas
-        const img = new Image();
-        const blobUrl = URL.createObjectURL(xhr.response);
-        img.src = blobUrl;
-        // If the image is cached, it may be available immediately
-        if (img.complete && img.naturalWidth > 0) {
-          ctx.drawImage(img, 0, 0, w, h);
-          URL.revokeObjectURL(blobUrl);
-          return canvas.toDataURL("image/jpeg", 0.92);
-        }
-        URL.revokeObjectURL(blobUrl);
-      }
-    } catch {
-      // Cross-origin or network error
+    const htmlEl = el as HTMLElement;
+    const cssBoxWidth = htmlEl.offsetWidth || w;
+    const cssBoxHeight = htmlEl.offsetHeight || h;
+    const scaleX = cssBoxWidth > 0 ? w / cssBoxWidth : 1;
+    const scaleY = cssBoxHeight > 0 ? h / cssBoxHeight : 1;
+    const repeat = parseBackgroundRepeat(repeatValue);
+    const backgroundSize = resolveBackgroundSize(sizeValue, sourceWidth, sourceHeight, w, h, scaleX, scaleY);
+    const position = resolveBackgroundPosition(positionValue);
+
+    let offsetX = resolveBackgroundOffset(position.x, w, backgroundSize.width, scaleX);
+    let offsetY = resolveBackgroundOffset(position.y, h, backgroundSize.height, scaleY);
+
+    if (attachmentValue === "fixed") {
+      const rect = el.getBoundingClientRect();
+      offsetX -= rect.left * scaleX;
+      offsetY -= rect.top * scaleY;
     }
 
-    return null;
+    const xPositions = repeat.repeatX
+      ? (() => {
+        const positions: number[] = [];
+        for (let x = getRepeatStart(offsetX, backgroundSize.width); x < w; x += backgroundSize.width) {
+          positions.push(x);
+        }
+        return positions;
+      })()
+      : [offsetX];
+
+    const yPositions = repeat.repeatY
+      ? (() => {
+        const positions: number[] = [];
+        for (let y = getRepeatStart(offsetY, backgroundSize.height); y < h; y += backgroundSize.height) {
+          positions.push(y);
+        }
+        return positions;
+      })()
+      : [offsetY];
+
+    for (const y of yPositions) {
+      for (const x of xPositions) {
+        ctx.drawImage(source, x, y, backgroundSize.width, backgroundSize.height);
+      }
+    }
+
+    const pixels = w * h;
+    const inspection = inspectRasterImageData(ctx.getImageData(0, 0, w, h), pixels <= 250000);
+    if (!inspection.hasVisibleContent) return null;
+
+    const preserveTransparency = inspection.hasTransparency;
+    return {
+      dataUrl: preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
+      rgbData: inspection.rgbData,
+    };
   } catch {
     return null;
   }
@@ -773,7 +992,7 @@ export function extractImageGeometry(
       const canvasWorked = inspection.hasVisibleContent;
 
       if (canvasWorked) {
-        const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+        const preserveTransparency = inspection.hasTransparency;
         dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
         rgbData = inspection.rgbData;
       }
@@ -811,7 +1030,7 @@ export function extractImageGeometry(
               imageDataCache.set(imgCacheKey, null);
               return [];
             }
-            const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+            const preserveTransparency = inspection.hasTransparency;
             dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
             rgbData = inspection.rgbData;
           }
@@ -998,7 +1217,7 @@ export async function extractVideoGeometry(
           return [];
         }
 
-        const preserveTransparency = inspection.hasTransparency && inspection.rgbData !== undefined;
+        const preserveTransparency = inspection.hasTransparency;
         dataUrl = preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92);
         rgbData = inspection.rgbData;
       }

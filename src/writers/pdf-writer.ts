@@ -19,6 +19,7 @@ import {
   PdfPage,
   PdfPages,
 } from "../pdf-objects.js";
+import { inflateZlibSync } from "../shared/zlib-inflate.js";
 import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
 import {
@@ -217,6 +218,169 @@ function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } 
   return { data: bytes, mimeType };
 }
 
+const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+
+type PngImage = {
+  width: number;
+  height: number;
+  rgba: Uint8Array;
+};
+
+function readUint32BE(bytes: Uint8Array, offset: number): number {
+  return (
+    (bytes[offset] << 24)
+    | (bytes[offset + 1] << 16)
+    | (bytes[offset + 2] << 8)
+    | bytes[offset + 3]
+  ) >>> 0;
+}
+
+function paethPredictor(a: number, b: number, c: number): number {
+  const prediction = a + b - c;
+  const pa = Math.abs(prediction - a);
+  const pb = Math.abs(prediction - b);
+  const pc = Math.abs(prediction - c);
+  if (pa <= pb && pa <= pc) return a;
+  if (pb <= pc) return b;
+  return c;
+}
+
+function decodePng(data: Uint8Array): PngImage | null {
+  if (data.byteLength < PNG_SIGNATURE.byteLength) return null;
+  for (let index = 0; index < PNG_SIGNATURE.byteLength; index += 1) {
+    if (data[index] !== PNG_SIGNATURE[index]) return null;
+  }
+
+  let offset = PNG_SIGNATURE.byteLength;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
+  const idatChunks: Uint8Array[] = [];
+
+  while (offset + 12 <= data.byteLength) {
+    const chunkLength = readUint32BE(data, offset);
+    offset += 4;
+    const chunkType = String.fromCharCode(
+      data[offset],
+      data[offset + 1],
+      data[offset + 2],
+      data[offset + 3],
+    );
+    offset += 4;
+    if (offset + chunkLength + 4 > data.byteLength) return null;
+    const chunkData = data.subarray(offset, offset + chunkLength);
+    offset += chunkLength + 4;
+
+    if (chunkType === "IHDR") {
+      width = readUint32BE(chunkData, 0);
+      height = readUint32BE(chunkData, 4);
+      bitDepth = chunkData[8] ?? 0;
+      colorType = chunkData[9] ?? 0;
+      interlace = chunkData[12] ?? 0;
+    } else if (chunkType === "IDAT") {
+      idatChunks.push(chunkData);
+    } else if (chunkType === "IEND") {
+      break;
+    }
+  }
+
+  if (width <= 0 || height <= 0 || bitDepth !== 8 || interlace !== 0) return null;
+  if (colorType !== 2 && colorType !== 6) return null;
+
+  const channelCount = colorType === 6 ? 4 : 3;
+  const rowBytes = width * channelCount;
+  const combinedIdat = new Uint8Array(idatChunks.reduce((size, chunk) => size + chunk.length, 0));
+  let combinedOffset = 0;
+  for (const chunk of idatChunks) {
+    combinedIdat.set(chunk, combinedOffset);
+    combinedOffset += chunk.length;
+  }
+  const decoded = inflateZlibSync(combinedIdat);
+  if (!decoded || decoded.byteLength < height * (rowBytes + 1)) return null;
+
+  const rgba = new Uint8Array(width * height * 4);
+  let sourceOffset = 0;
+  let previousRow = new Uint8Array(rowBytes);
+
+  for (let y = 0; y < height; y += 1) {
+    const filterType = decoded[sourceOffset];
+    sourceOffset += 1;
+    const row = decoded.subarray(sourceOffset, sourceOffset + rowBytes);
+    sourceOffset += rowBytes;
+
+    const unfiltered = new Uint8Array(rowBytes);
+    for (let index = 0; index < rowBytes; index += 1) {
+      const left = index >= channelCount ? unfiltered[index - channelCount] : 0;
+      const up = previousRow[index] ?? 0;
+      const upLeft = index >= channelCount ? previousRow[index - channelCount] : 0;
+      let value = row[index];
+
+      switch (filterType) {
+        case 0:
+          break;
+        case 1:
+          value = (value + left) & 0xFF;
+          break;
+        case 2:
+          value = (value + up) & 0xFF;
+          break;
+        case 3:
+          value = (value + Math.floor((left + up) / 2)) & 0xFF;
+          break;
+        case 4:
+          value = (value + paethPredictor(left, up, upLeft)) & 0xFF;
+          break;
+        default:
+          return null;
+      }
+
+      unfiltered[index] = value;
+    }
+
+    const destRow = y * width * 4;
+    if (colorType === 6) {
+      rgba.set(unfiltered, destRow);
+    } else {
+      for (let x = 0; x < width; x += 1) {
+        const src = x * 3;
+        const dest = destRow + x * 4;
+        rgba[dest] = unfiltered[src];
+        rgba[dest + 1] = unfiltered[src + 1];
+        rgba[dest + 2] = unfiltered[src + 2];
+        rgba[dest + 3] = 255;
+      }
+    }
+
+    previousRow = unfiltered;
+  }
+
+  return { width, height, rgba };
+}
+
+function splitPngChannels(png: PngImage): { rgb: Uint8Array; alphaMask?: Uint8Array } {
+  const rgb = new Uint8Array(png.width * png.height * 3);
+  const alphaMask = new Uint8Array(png.width * png.height);
+  let hasTransparency = false;
+
+  for (let pixel = 0; pixel < png.width * png.height; pixel += 1) {
+    const rgbaOffset = pixel * 4;
+    const rgbOffset = pixel * 3;
+    rgb[rgbOffset] = png.rgba[rgbaOffset];
+    rgb[rgbOffset + 1] = png.rgba[rgbaOffset + 1];
+    rgb[rgbOffset + 2] = png.rgba[rgbaOffset + 2];
+    const alpha = png.rgba[rgbaOffset + 3];
+    alphaMask[pixel] = alpha;
+    if (alpha < 255) hasTransparency = true;
+  }
+
+  return {
+    rgb,
+    alphaMask: hasTransparency ? alphaMask : undefined,
+  };
+}
+
 // ── Gradient parsing (identical logic to jspdf-writer) ──────────────
 
 interface GradientStop { offset: number; color: ParsedColor; }
@@ -402,6 +566,7 @@ interface ImageDef {
   width: number;
   height: number;
   filter: string | null; // "DCTDecode" for JPEG, null for raw RGB
+  softMask?: Uint8Array;
 }
 
 // ── PDF-Lite Writer ─────────────────────────────────────────────────
@@ -1404,7 +1569,32 @@ export class PDFWriter implements Writer<PdfDocument> {
   async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void> {
     const imgName = `Im${++this.imageCounter}`;
 
-    if (rgbData) {
+    const decoded = decodeDataUrl(dataUrl);
+
+    if (decoded?.mimeType === "image/png") {
+      const png = decodePng(decoded.data);
+      if (png) {
+        const channels = splitPngChannels(png);
+        this.images.push({
+          name: imgName,
+          data: channels.rgb,
+          width: png.width,
+          height: png.height,
+          filter: null,
+          softMask: channels.alphaMask,
+        });
+      } else if (rgbData) {
+        this.images.push({
+          name: imgName,
+          data: new Uint8Array(rgbData),
+          width,
+          height,
+          filter: null,
+        });
+      } else {
+        return;
+      }
+    } else if (rgbData) {
       // Use raw RGB pixel data (lossless, no compression artifacts)
       this.images.push({
         name: imgName,
@@ -1415,7 +1605,6 @@ export class PDFWriter implements Writer<PdfDocument> {
       });
     } else {
       // Decode the data URL to raw bytes
-      const decoded = decodeDataUrl(dataUrl);
       if (!decoded) return;
       if (decoded.mimeType === "image/jpeg") {
         // JPEG — embed directly with DCTDecode
@@ -1536,6 +1725,22 @@ export class PDFWriter implements Writer<PdfDocument> {
         imgDict.set("ColorSpace", new PdfName("DeviceRGB"));
         imgDict.set("BitsPerComponent", new PdfNumber(8));
         if (img.filter) imgDict.set("Filter", new PdfName(img.filter));
+
+        if (img.softMask) {
+          const maskDict = new PdfDictionary();
+          maskDict.set("Type", new PdfName("XObject"));
+          maskDict.set("Subtype", new PdfName("Image"));
+          maskDict.set("Width", new PdfNumber(img.width));
+          maskDict.set("Height", new PdfNumber(img.height));
+          maskDict.set("ColorSpace", new PdfName("DeviceGray"));
+          maskDict.set("BitsPerComponent", new PdfNumber(8));
+
+          const maskObj = new PdfIndirectObject({
+            content: new PdfStream({ header: maskDict, binary: img.softMask }),
+          });
+          doc.add(maskObj);
+          imgDict.set("SMask", maskObj.reference);
+        }
 
         const imgObj = new PdfIndirectObject({
           content: new PdfStream({ header: imgDict, binary: img.data }),
