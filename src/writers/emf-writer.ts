@@ -21,6 +21,15 @@ type RenderedOutline = {
   offset: number;
 };
 
+type ParsedBoxShadow = {
+  inset: boolean;
+  offsetX: number;
+  offsetY: number;
+  blur: number;
+  spread: number;
+  color: string;
+};
+
 function getVisibleOutline(style: Style): RenderedOutline | null {
   if (!style.outlineWidth) return null;
   const width = parseFloat(style.outlineWidth);
@@ -39,6 +48,58 @@ function getVisibleOutline(style: Style): RenderedOutline | null {
     style: outlineStyle,
     offset: Number.isFinite(offset) ? offset : 0,
   };
+}
+
+function parseBoxShadow(boxShadow: string | undefined): ParsedBoxShadow[] {
+  if (!boxShadow || boxShadow === "none") return [];
+
+  const shadows: ParsedBoxShadow[] = [];
+  const parts: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const ch of boxShadow) {
+    if (ch === "(") depth += 1;
+    else if (ch === ")") depth -= 1;
+    else if (ch === "," && depth === 0) {
+      parts.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  if (current.trim()) parts.push(current.trim());
+
+  for (const part of parts) {
+    const inset = /\binset\b/i.test(part);
+    const cleaned = part.replace(/\binset\b/gi, "").trim();
+    let color = "rgba(0,0,0,0.5)";
+    let numericPart = cleaned;
+    const rgbaMatch = cleaned.match(/rgba?\([^)]+\)/);
+    if (rgbaMatch) {
+      color = rgbaMatch[0];
+      numericPart = cleaned.replace(rgbaMatch[0], "").trim();
+    } else {
+      const hexMatch = cleaned.match(/#[0-9a-fA-F]{3,8}/);
+      if (hexMatch) {
+        color = hexMatch[0];
+        numericPart = cleaned.replace(hexMatch[0], "").trim();
+      }
+    }
+
+    const nums = numericPart.match(/-?[\d.]+px/g)?.map(value => Number.parseFloat(value)) ?? [];
+    if (nums.length >= 2) {
+      shadows.push({
+        inset,
+        offsetX: nums[0],
+        offsetY: nums[1],
+        blur: nums[2] ?? 0,
+        spread: nums[3] ?? 0,
+        color,
+      });
+    }
+  }
+
+  return shadows;
 }
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -319,6 +380,7 @@ export class EMFWriter implements Writer<Uint8Array> {
         this.restoreState();
       }
       this.drawPerSideBorders(points, style);
+      this.drawInsetBoxShadows(points, style);
       return;
     }
 
@@ -356,6 +418,7 @@ export class EMFWriter implements Writer<Uint8Array> {
         this.deleteObject(penHandle);
       }
 
+      this.drawInsetBoxShadows(points, style);
       if (outline) this.drawOutline(points, style, outline);
       this.restoreState();
       return;
@@ -402,6 +465,7 @@ export class EMFWriter implements Writer<Uint8Array> {
         this.deleteObject(penHandle);
       }
 
+      this.drawInsetBoxShadows(points, style);
       if (outline) this.drawOutline(points, style, outline);
       this.restoreState();
       return;
@@ -428,8 +492,85 @@ export class EMFWriter implements Writer<Uint8Array> {
       this.deleteObject(penHandle);
     }
 
+    this.drawInsetBoxShadows(points, style);
     if (outline) this.drawOutline(points, style, outline);
     this.restoreState();
+  }
+
+  private drawInsetBoxShadows(points: Quad, style: Style): void {
+    if (!style.boxShadow || !isAxisAlignedRect(points) || style.cornerShapes) return;
+
+    const bounds = getQuadBounds(points);
+    const radius = parseBorderRadius(style.borderRadius, bounds.w, bounds.h);
+    const hasStyleClip = !!style.clipBounds || !!style.clipPath || !!style.clipQuads?.length;
+
+    for (const shadow of parseBoxShadow(style.boxShadow)) {
+      if (!shadow.inset || shadow.blur > 0) continue;
+
+      const color = cssColorToColorRef(shadow.color);
+      if (color === null) continue;
+
+      const innerX = bounds.x + shadow.spread + shadow.offsetX;
+      const innerY = bounds.y + shadow.spread + shadow.offsetY;
+      const innerW = bounds.w - shadow.spread * 2;
+      const innerH = bounds.h - shadow.spread * 2;
+      const pad = Math.max(Math.abs(shadow.spread) + Math.max(Math.abs(shadow.offsetX), Math.abs(shadow.offsetY)), 1) + 100;
+
+      const clipPoints = this.buildRoundedRectClipPoints(
+        bounds.x,
+        bounds.y,
+        bounds.w,
+        bounds.h,
+        radius,
+        radius,
+      );
+      const outerPoints = [
+        { x: bounds.x - pad, y: bounds.y - pad },
+        { x: bounds.x + bounds.w + pad, y: bounds.y - pad },
+        { x: bounds.x + bounds.w + pad, y: bounds.y + bounds.h + pad },
+        { x: bounds.x - pad, y: bounds.y + bounds.h + pad },
+      ];
+      const innerPoints = innerW > 0 && innerH > 0
+        ? this.buildRoundedRectClipPoints(
+          innerX,
+          innerY,
+          innerW,
+          innerH,
+          Math.min(radius, innerW / 2),
+          Math.min(radius, innerH / 2),
+        )
+        : [];
+
+      const brushHandle = this.createBrush(color);
+      const penHandle = this.createPen(null);
+      this.selectObject(brushHandle);
+      this.selectObject(penHandle);
+      this.records.writeRecord(EMR.SETPOLYFILLMODE, uint32Array(ALTERNATE));
+      this.applyPolygonClipPath(clipPoints, hasStyleClip ? RGN_AND : RGN_COPY);
+      this.records.writeRecord(EMR.BEGINPATH, null);
+      this.records.writeRecord(EMR.POLYGON16, concat(
+        int32Array(
+          Math.round(bounds.x - pad),
+          Math.round(bounds.y - pad),
+          Math.round(bounds.x + bounds.w + pad),
+          Math.round(bounds.y + bounds.h + pad),
+        ),
+        uint32Array(outerPoints.length),
+        int16Array(...outerPoints.flatMap(point => [Math.round(point.x), Math.round(point.y)])),
+      ));
+      if (innerPoints.length > 0) {
+        const innerBounds = this.computeBoundsFromPoints(innerPoints);
+        this.records.writeRecord(EMR.POLYGON16, concat(
+          int32Array(innerBounds.left, innerBounds.top, innerBounds.right, innerBounds.bottom),
+          uint32Array(innerPoints.length),
+          int16Array(...innerPoints.flatMap(point => [Math.round(point.x), Math.round(point.y)])),
+        ));
+      }
+      this.records.writeRecord(EMR.ENDPATH, null);
+      this.records.writeRecord(EMR.FILLPATH, null);
+      this.deleteObject(brushHandle);
+      this.deleteObject(penHandle);
+    }
   }
 
   private drawOutline(points: Quad, style: Style, outline: RenderedOutline): void {

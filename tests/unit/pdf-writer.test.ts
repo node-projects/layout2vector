@@ -263,4 +263,31 @@ test.describe("PDF writer regressions", () => {
     expect(images[0].filter).toBeNull();
     expect(Array.from(images[0].data)).toEqual([0, 255, 255]);
   });
+
+  test("renders inset box shadows as clipped even-odd fills", async () => {
+    const writer = new PDFWriter({ pageWidth: 30, pageHeight: 20 });
+    await renderIR([{
+      type: "polygon",
+      points: [
+        { x: 4, y: 4 },
+        { x: 24, y: 4 },
+        { x: 24, y: 14 },
+        { x: 4, y: 14 },
+      ],
+      style: {
+        fill: "rgb(128, 128, 128)",
+        boxShadow: "inset 0px 3px 0px rgb(233, 30, 99)",
+      },
+      zIndex: 0,
+    } satisfies IRNode], writer);
+
+    const ops = ((writer as any).ops as string[]).join("\n");
+    const grayFillIndex = ops.indexOf("0.502 0.502 0.502 rg");
+    const pinkFillIndex = ops.lastIndexOf("0.9137 0.1176 0.3882 rg");
+
+    expect(ops).toContain("0.9137 0.1176 0.3882 rg");
+    expect(ops).toContain("f*");
+    expect(grayFillIndex).toBeGreaterThanOrEqual(0);
+    expect(pinkFillIndex).toBeGreaterThan(grayFillIndex);
+  });
 });

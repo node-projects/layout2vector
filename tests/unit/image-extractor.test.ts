@@ -886,6 +886,77 @@ test.describe("Image Extraction", () => {
     expect(polygonNodes.length).toBeGreaterThanOrEqual(2);
   });
 
+  test("rasterizes CSS background-image SVG data URL when element effects require an image layer", async ({ page }) => {
+    const SVG_BG = "data:image/svg+xml," +
+      encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="black"/></svg>');
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;background:black;">
+        <div id="target" style="width:100px;height:100px;background-image:url('${SVG_BG}');background-size:cover;filter:invert(1);"></div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNodes = ir.filter((n: any) => n.type === "image");
+    const polygonNodes = ir.filter((n: any) => n.type === "polygon" || n.type === "polyline");
+
+    expect(imageNodes.length).toBeGreaterThan(0);
+    expect(imageNodes[0].dataUrl).toMatch(/^data:image\//);
+    expect(polygonNodes.length).toBe(1);
+  });
+
+  test("rasterized CSS background-image SVG preserves percentage-sized SVG viewport sizing", async ({ page }) => {
+    const SVG_BG = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none"><rect x="400" y="0" width="100" height="200" fill="black"/></svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:200px;height:80px;background-image:url('${SVG_BG}');background-repeat:no-repeat;filter:invert(1);"></div>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+      const imageNode = ir.find((node: any) => node.type === "image");
+      if (!imageNode) return null;
+
+      return new Promise<{ rightAlpha: number; midAlpha: number }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            rightAlpha: ctx.getImageData(190, 40, 1, 1).data[3],
+            midAlpha: ctx.getImageData(150, 40, 1, 1).data[3],
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted background image"));
+        img.src = imageNode.dataUrl;
+      });
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.rightAlpha).toBeGreaterThan(200);
+    expect(extracted?.midAlpha).toBe(0);
+  });
+
   test("extracts quoted background-image SVG data URL with embedded quotes", async ({ page }) => {
     const SVG_BG = "data:image/svg+xml,<svg focusable=\\\"false\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\" viewBox=\\\"0 0 100 100\\\"><rect width=\\\"100\\\" height=\\\"100\\\" fill=\\\"%2300f\\\"></rect></svg>";
 

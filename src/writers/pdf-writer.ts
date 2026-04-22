@@ -297,6 +297,7 @@ function decodePng(data: Uint8Array): PngImage | null {
     combinedIdat.set(chunk, combinedOffset);
     combinedOffset += chunk.length;
   }
+
   const decoded = inflateZlibSync(combinedIdat);
   if (!decoded || decoded.byteLength < height * (rowBytes + 1)) return null;
 
@@ -1434,9 +1435,11 @@ export class PDFWriter implements Writer<PdfDocument> {
   // ── Drawing methods ─────────────────────────────────────────────
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
-    // Draw box-shadow(s) before the element itself
-    if (style.boxShadow && style.boxShadow !== "none") {
-      this.drawBoxShadows(points, style);
+    const hasBoxShadows = !!style.boxShadow && style.boxShadow !== "none";
+
+    // Draw outer box shadows before the element itself.
+    if (hasBoxShadows) {
+      this.drawBoxShadows(points, style, "outer");
     }
 
     const outline = getVisibleOutline(style);
@@ -1444,6 +1447,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     const gradients = parseGradients(style.backgroundImage);
     if (gradients.length > 0) {
       this.drawGradientPolygon(points, gradients, style);
+      if (hasBoxShadows) this.drawBoxShadows(points, style, "inset");
       if (outline) this.drawOutline(points, style, outline);
       return;
     }
@@ -1471,13 +1475,14 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
       // Draw each border side independently
       this.drawPerSideBorders(points, style);
+      if (hasBoxShadows) this.drawBoxShadows(points, style, "inset");
       if (outline) this.drawOutline(points, style, outline);
       this.ops.push("Q");
       return;
     }
 
     const paintOp = this.applyStyleOps(style);
-    if (!paintOp && !outline) { this.ops.push("Q"); return; }
+    if (!paintOp && !outline && !hasBoxShadows) { this.ops.push("Q"); return; }
 
     if (paintOp) {
       const elW = Math.abs(points[1].x - points[0].x);
@@ -1530,6 +1535,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.ops.push(paintOp);
     }
 
+    if (hasBoxShadows) this.drawBoxShadows(points, style, "inset");
     if (outline) this.drawOutline(points, style, outline);
     this.ops.push("Q");
   }
@@ -2408,17 +2414,92 @@ export class PDFWriter implements Writer<PdfDocument> {
   /**
    * Parse and draw CSS box-shadow(s) behind a polygon.
    * Each shadow is drawn as a filled shape offset from the element.
-   * Inset shadows are skipped (they require clipping inside the element).
+   * Inset shadows are drawn as clipped even-odd frames for axis-aligned boxes.
    * Blur is approximated with multiple expanding semi-transparent layers.
    */
-  private drawBoxShadows(points: Quad, style: Style): void {
+  private drawBoxShadows(points: Quad, style: Style, mode: "all" | "outer" | "inset" = "all"): void {
     const shadows = parseBoxShadow(style.boxShadow!);
     const clipBounds = getQuadBounds(points);
+    const axisAlignedBounds = isAxisAlignedRect(points) && !style.cornerShapes ? getQuadBounds(points) : null;
+    const axisAlignedRadius = axisAlignedBounds ? parseBorderRadius(style.borderRadius, axisAlignedBounds.w, axisAlignedBounds.h) : null;
     for (const shadow of shadows) {
-      if (shadow.inset) continue;
+      if (mode === "outer" && shadow.inset) continue;
+      if (mode === "inset" && !shadow.inset) continue;
 
       const { offsetX, offsetY, blur, spread, color } = shadow;
       if (!color || color.a <= 0) continue;
+      const elementOpacity = style.opacity ?? 1;
+
+      if (shadow.inset) {
+        if (!axisAlignedBounds) continue;
+
+        const clipLeft = this.ptX(axisAlignedBounds.x);
+        const clipTop = this.ptY(axisAlignedBounds.y);
+        const clipW = pxToPt(axisAlignedBounds.w);
+        const clipH = pxToPt(axisAlignedBounds.h);
+        const clipRx = axisAlignedRadius ? pxToPt(Math.min(axisAlignedRadius.rx, axisAlignedBounds.w / 2)) : 0;
+        const clipRy = axisAlignedRadius ? pxToPt(Math.min(axisAlignedRadius.ry, axisAlignedBounds.h / 2)) : 0;
+        const layers = blur > 0 ? 3 : 1;
+        const pad = Math.max(blur, 50) + Math.abs(spread) + Math.max(Math.abs(offsetX), Math.abs(offsetY)) + 100;
+
+        for (let i = layers; i >= 1; i--) {
+          const expand = blur > 0 ? (blur * i) / layers : 0;
+          const layerA = blur > 0
+            ? (color.a / layers) * (1 - (i - 1) / layers) * elementOpacity
+            : color.a * elementOpacity;
+          if (layerA <= 0) continue;
+
+          const innerX = axisAlignedBounds.x + spread + offsetX + expand;
+          const innerY = axisAlignedBounds.y + spread + offsetY + expand;
+          const innerW = axisAlignedBounds.w - spread * 2 - expand * 2;
+          const innerH = axisAlignedBounds.h - spread * 2 - expand * 2;
+
+          this.ops.push("q");
+          this.emitClip(style, clipBounds);
+          if (axisAlignedRadius) {
+            this.emitRoundedRectPath(clipLeft, clipTop, clipW, clipH, clipRx, clipRy);
+          } else {
+            this.emitRectPath(clipLeft, clipTop, clipW, clipH);
+          }
+          this.ops.push("W n");
+
+          if (layerA < 1) {
+            const gsName = this.getGStateResName(layerA, layerA);
+            this.ops.push(`/${gsName} gs`);
+          }
+
+          this.setFill(color);
+          this.emitRectPath(
+            this.ptX(axisAlignedBounds.x - pad),
+            this.ptY(axisAlignedBounds.y - pad),
+            pxToPt(axisAlignedBounds.w + pad * 2),
+            pxToPt(axisAlignedBounds.h + pad * 2),
+          );
+
+          if (innerW > 0 && innerH > 0) {
+            const innerLeft = this.ptX(innerX);
+            const innerTop = this.ptY(innerY);
+            const innerWidthPt = pxToPt(innerW);
+            const innerHeightPt = pxToPt(innerH);
+            if (axisAlignedRadius) {
+              this.emitRoundedRectPath(
+                innerLeft,
+                innerTop,
+                innerWidthPt,
+                innerHeightPt,
+                pxToPt(Math.min(axisAlignedRadius.rx, innerW / 2)),
+                pxToPt(Math.min(axisAlignedRadius.ry, innerH / 2)),
+              );
+            } else {
+              this.emitRectPath(innerLeft, innerTop, innerWidthPt, innerHeightPt);
+            }
+          }
+
+          this.ops.push("f*");
+          this.ops.push("Q");
+        }
+        continue;
+      }
 
       // Expand the quad by spread and offset
       const sx = spread; // spread in all directions
@@ -2428,9 +2509,6 @@ export class PDFWriter implements Writer<PdfDocument> {
         { x: points[2].x + sx + offsetX, y: points[2].y + sx + offsetY },
         { x: points[3].x - sx + offsetX, y: points[3].y + sx + offsetY },
       ];
-
-      const elementOpacity = style.opacity ?? 1;
-
       if (blur <= 0) {
         // Sharp shadow: single filled quad
         this.ops.push("q");

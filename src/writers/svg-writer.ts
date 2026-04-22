@@ -186,6 +186,26 @@ function roundedQuadToPath(points: Quad, radius: number, cornerShapes?: [number,
   }).join(" ") + " Z";
 }
 
+function roundedRectPathData(x: number, y: number, w: number, h: number, r: number): string {
+  const radius = Math.min(Math.max(r, 0), w / 2, h / 2);
+  if (radius <= 0) {
+    return `M${n(x)},${n(y)} H${n(x + w)} V${n(y + h)} H${n(x)} Z`;
+  }
+
+  return [
+    `M${n(x + radius)},${n(y)}`,
+    `H${n(x + w - radius)}`,
+    `A${n(radius)},${n(radius)} 0 0 1 ${n(x + w)},${n(y + radius)}`,
+    `V${n(y + h - radius)}`,
+    `A${n(radius)},${n(radius)} 0 0 1 ${n(x + w - radius)},${n(y + h)}`,
+    `H${n(x + radius)}`,
+    `A${n(radius)},${n(radius)} 0 0 1 ${n(x)},${n(y + h - radius)}`,
+    `V${n(y + radius)}`,
+    `A${n(radius)},${n(radius)} 0 0 1 ${n(x + radius)},${n(y)}`,
+    "Z",
+  ].join(" ");
+}
+
 // ── Gradient parsing (subset of png-writer logic) ───────────────────
 
 interface GradientStop { offset: number; color: string; }
@@ -583,10 +603,10 @@ export class SVGWriter implements Writer<string> {
 
     const opacity = (style.opacity !== undefined && style.opacity < 1) ? style.opacity : undefined;
 
-    if (radius > 0 && isAxisAlignedRect(points) && !style.cornerShapes) {
+    if (isAxisAlignedRect(points) && !style.cornerShapes) {
       const x = Math.min(points[0].x, points[1].x, points[2].x, points[3].x);
       const y = Math.min(points[0].y, points[1].y, points[2].y, points[3].y);
-      const r = Math.min(radius, w / 2, h / 2);
+      const r = radius > 0 ? Math.min(radius, w / 2, h / 2) : 0;
 
       const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w, h);
       const baseElement = this.buildLayeredShape(
@@ -1098,31 +1118,38 @@ export class SVGWriter implements Writer<string> {
   ): void {
     for (const s of shadows) {
       if (!s.inset) continue;
-      // Create a filter for the inset shadow effect
       const clipId = this.nextId("ic");
-      const filtId = this.nextId("is");
-
-      // Clip path matching the shape
       if (r > 0) {
         this.defs.push(`<clipPath id="${clipId}"><rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"/></clipPath>`);
       } else {
         this.defs.push(`<clipPath id="${clipId}"><rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}"/></clipPath>`);
       }
 
-      // Inset shadow filter: invert the drop shadow
-      const std = n(s.blur / 2);
-      this.defs.push(
-        `<filter id="${filtId}" x="-50%" y="-50%" width="200%" height="200%">` +
-        `<feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer>` +
-        `<feGaussianBlur stdDeviation="${std}"/>` +
-        `<feOffset dx="${n(s.offsetX)}" dy="${n(s.offsetY)}" result="offsetblur"/>` +
-        `<feFlood flood-color="${escXml(s.color)}" result="color"/>` +
-        `<feComposite in2="offsetblur" operator="in"/>` +
-        `<feComposite in2="SourceAlpha" operator="in"/>` +
-        `</filter>`
-      );
+      let filterAttr = "";
+      if (s.blur > 0) {
+        const filterId = this.nextId("is");
+        this.defs.push(
+          `<filter id="${filterId}" x="-50%" y="-50%" width="200%" height="200%">` +
+          `<feGaussianBlur stdDeviation="${n(s.blur / 2)}"/>` +
+          `</filter>`
+        );
+        filterAttr = ` filter="url(#${filterId})"`;
+      }
 
-      this.elements.push(`<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}" fill="none" clip-path="url(#${clipId})" filter="url(#${filtId})"/>`);
+      const pad = Math.max(s.blur, 50) + Math.abs(s.spread) + Math.max(Math.abs(s.offsetX), Math.abs(s.offsetY)) + 100;
+      const innerX = x + s.spread + s.offsetX;
+      const innerY = y + s.spread + s.offsetY;
+      const innerW = w - s.spread * 2;
+      const innerH = h - s.spread * 2;
+      const innerR = Math.min(r, Math.max(innerW, 0) / 2, Math.max(innerH, 0) / 2);
+      const outerPath = roundedRectPathData(x - pad, y - pad, w + pad * 2, h + pad * 2, 0);
+      const innerPath = innerW > 0 && innerH > 0
+        ? ` ${roundedRectPathData(innerX, innerY, innerW, innerH, innerR)}`
+        : "";
+
+      this.elements.push(
+        `<path d="${outerPath}${innerPath}" fill="${escXml(s.color)}" fill-rule="evenodd" clip-path="url(#${clipId})"${filterAttr}/>`
+      );
     }
   }
 

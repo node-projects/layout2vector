@@ -11,6 +11,7 @@ import type { IRNode } from "../../src/types.js";
 import { DwgReader, Hatch } from "@node-projects/acad-ts";
 
 const EMR_COMMENT = 0x0046;
+const EMR_CREATEBRUSHINDIRECT = 0x0027;
 const EMR_EXTCREATEFONTINDIRECTW = 0x0052;
 const EMR_STRETCHDIBITS = 0x0051;
 const EMR_ROUNDRECT = 0x002C;
@@ -326,6 +327,54 @@ test.describe("Writer Output", () => {
 
     const svg = await renderIR(ir, new SVGWriter({ width: 20, height: 20 }));
     expect(svg).toContain('style="filter:blur(12px);mix-blend-mode:plus-lighter"');
+  });
+
+  test("SVG writer renders inset box shadows as clipped overlays", async () => {
+    const ir: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 20, y: 20 },
+        { x: 120, y: 20 },
+        { x: 120, y: 80 },
+        { x: 20, y: 80 },
+      ],
+      style: {
+        fill: "rgb(128, 128, 128)",
+        boxShadow: "inset 0px 3px 0px rgb(233, 30, 99)",
+      },
+      zIndex: 0,
+    }];
+
+    const svg = await renderIR(ir, new SVGWriter({ width: 140, height: 100 }));
+
+    expect(svg).toContain('fill="rgb(233, 30, 99)"');
+    expect(svg).toContain('fill-rule="evenodd"');
+    expect(svg).toContain('clip-path="url(#ic');
+    expect(svg).not.toContain('fill="none" clip-path="url(#ic');
+  });
+
+  test("EMF writer renders inset box shadows as filled paths", async () => {
+    const emfBytes = await renderIR([{
+      type: "polygon",
+      points: [
+        { x: 20, y: 20 },
+        { x: 120, y: 20 },
+        { x: 120, y: 80 },
+        { x: 20, y: 80 },
+      ],
+      style: {
+        fill: "rgb(128, 128, 128)",
+        boxShadow: "inset 0px 3px 0px rgb(233, 30, 99)",
+      },
+      zIndex: 0,
+    } satisfies IRNode], new EMFWriter({ width: 140, height: 100 }));
+
+    const brushRecords = findAllRecords(emfBytes, EMR_CREATEBRUSHINDIRECT);
+    const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
+    const pinkBrush = brushRecords.find((record) => view.getUint32(record.offset + 16, true) === 0x00631EE9);
+
+    expect(countRecords(emfBytes, EMR_FILLPATH)).toBeGreaterThan(0);
+    expect(pinkBrush).toBeDefined();
   });
 
   test("EMF writer produces valid binary output", async ({ page }) => {

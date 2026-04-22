@@ -18,6 +18,9 @@ const imageDataCache = new Map<string, { dataUrl: string; rgbData?: number[] } |
 /** Cache for SVG content strings, keyed by source URL. Avoids repeated sync XHR or base64 decoding. */
 const svgContentCache = new Map<string, string | null>();
 
+/** Cache for parsed intrinsic SVG sizes used during raster fallback. */
+const svgIntrinsicSizeCache = new Map<string, { width: number; height: number } | null>();
+
 /** Pre-fetched image elements for canvas drawing (keyed by original src URL). */
 const preloadedImageElems = new Map<string, HTMLImageElement>();
 /** Pre-fetched URL mappings: original URL → data URL. Populated by preloadImages without modifying the page. */
@@ -27,6 +30,7 @@ const preloadedUrlMap = new Map<string, string>();
 export function clearImageCache(): void {
   imageDataCache.clear();
   svgContentCache.clear();
+  svgIntrinsicSizeCache.clear();
   preloadedImageElems.clear();
   preloadedUrlMap.clear();
 }
@@ -239,6 +243,7 @@ export function extractBackgroundImage(
 
   let url = parsedUrl;
   const originalUrl = url;
+  const preferVectorSvg = !requiresRasterSvgImage(style);
 
   // Resolve from preloaded cache (external URLs fetched during preloadImages)
   const cachedUrl = preloadedUrlMap.get(url);
@@ -247,7 +252,7 @@ export function extractBackgroundImage(
   // If it's already a data URL, try to rasterize directly
   if (url.startsWith("data:")) {
     // For SVG data URLs, try vector extraction first
-    if (url.startsWith("data:image/svg+xml")) {
+    if (preferVectorSvg && url.startsWith("data:image/svg+xml")) {
       const svgContent = decodeBgSvgDataUrl(url);
       if (svgContent) {
         const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
@@ -256,7 +261,7 @@ export function extractBackgroundImage(
     }
     // The original URL may be an SVG but the MIME was wrong in the data URL.
     // Check if the original URL looks like an SVG and try to extract content.
-    if (!url.startsWith("data:image/svg+xml") && isSvgSource(originalUrl)) {
+    if (preferVectorSvg && !url.startsWith("data:image/svg+xml") && isSvgSource(originalUrl)) {
       const svgContent = decodeBgSvgDataUrl(url) ?? extractSvgContent(originalUrl);
       if (svgContent && svgContent.includes("<svg")) {
         const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
@@ -283,7 +288,7 @@ export function extractBackgroundImage(
   }
 
   // For external SVG URLs, try vector conversion first
-  if (isSvgSource(url) || isSvgSource(originalUrl)) {
+  if (preferVectorSvg && (isSvgSource(url) || isSvgSource(originalUrl))) {
     const svgContent = extractSvgContent(url) ?? extractSvgContent(originalUrl);
     if (svgContent) {
       const svgNodes = convertBgSvgToGeometry(svgContent, el, quad, globalIndex, _options);
@@ -456,6 +461,76 @@ function decodeCssEscapes(value: string): string {
       return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : "";
     })
     .replace(/\\(.)/g, "$1");
+}
+
+function parseSvgLength(value: string | null): number | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.endsWith("%")) return null;
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseSvgViewBoxSize(value: string | null): { width: number; height: number } | null {
+  if (!value) return null;
+  const parts = value.trim().split(/[\s,]+/).map(Number);
+  if (parts.length !== 4) return null;
+  const width = parts[2];
+  const height = parts[3];
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  return { width, height };
+}
+
+function resolveSvgRasterSourceSize(src: string, boxWidth: number, boxHeight: number): { width: number; height: number } | null {
+  const cacheKey = `${src}|${Math.round(boxWidth)}|${Math.round(boxHeight)}`;
+  const cached = svgIntrinsicSizeCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const svgContent = extractSvgContent(src);
+  if (!svgContent) {
+    svgIntrinsicSizeCache.set(cacheKey, null);
+    return null;
+  }
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(stripXmlPreamble(svgContent), "image/svg+xml");
+    const parsedSvg = doc.documentElement;
+    if (parsedSvg.tagName.toLowerCase() !== "svg" || parsedSvg.querySelector("parsererror")) {
+      svgIntrinsicSizeCache.set(cacheKey, null);
+      return null;
+    }
+
+    const widthAttr = parsedSvg.getAttribute("width")?.trim() ?? null;
+    const heightAttr = parsedSvg.getAttribute("height")?.trim() ?? null;
+    const viewBox = parseSvgViewBoxSize(parsedSvg.getAttribute("viewBox"));
+
+    let result: { width: number; height: number } | null = null;
+    if (widthAttr?.endsWith("%") && heightAttr?.endsWith("%")) {
+      result = {
+        width: Math.max(boxWidth, 1),
+        height: Math.max(boxHeight, 1),
+      };
+    } else {
+      const width = parseSvgLength(widthAttr);
+      const height = parseSvgLength(heightAttr);
+      if (width && height) {
+        result = { width, height };
+      } else if (viewBox && width) {
+        result = { width, height: width * (viewBox.height / viewBox.width) };
+      } else if (viewBox && height) {
+        result = { width: height * (viewBox.width / viewBox.height), height };
+      } else if (viewBox) {
+        result = viewBox;
+      }
+    }
+
+    svgIntrinsicSizeCache.set(cacheKey, result);
+    return result;
+  } catch {
+    svgIntrinsicSizeCache.set(cacheKey, null);
+    return null;
+  }
 }
 
 
@@ -782,6 +857,9 @@ function renderBackgroundImageUncached(
     let source: CanvasImageSource | null = null;
     let sourceWidth = 0;
     let sourceHeight = 0;
+    const htmlEl = el as HTMLElement;
+    const cssBoxWidth = htmlEl.offsetWidth || w;
+    const cssBoxHeight = htmlEl.offsetHeight || h;
 
     if (url.startsWith("data:image/png")) {
       const decoded = decodePngDataUrl(url);
@@ -811,6 +889,12 @@ function renderBackgroundImageUncached(
       if (!sourceWidth || !sourceHeight || !img.complete) return null;
     }
 
+    const svgSourceSize = resolveSvgRasterSourceSize(url, cssBoxWidth, cssBoxHeight);
+    if (svgSourceSize) {
+      sourceWidth = svgSourceSize.width;
+      sourceHeight = svgSourceSize.height;
+    }
+
     if (!source || sourceWidth === 0 || sourceHeight === 0) return null;
 
     const canvas = document.createElement("canvas");
@@ -819,9 +903,6 @@ function renderBackgroundImageUncached(
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
 
-    const htmlEl = el as HTMLElement;
-    const cssBoxWidth = htmlEl.offsetWidth || w;
-    const cssBoxHeight = htmlEl.offsetHeight || h;
     const scaleX = cssBoxWidth > 0 ? w / cssBoxWidth : 1;
     const scaleY = cssBoxHeight > 0 ? h / cssBoxHeight : 1;
     const repeat = parseBackgroundRepeat(repeatValue);
