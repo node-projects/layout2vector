@@ -62,6 +62,46 @@ test.describe("PNG Writer Output", () => {
     expect(result.hasText).toBe(true);
   });
 
+  test("draws underlines near the text baseline in PNG output", async ({ page }) => {
+    await setupPage(page, "<html><body style=\"margin:0;\"></body></html>");
+
+    const result = await page.evaluate(async () => {
+      const writer = new (window as any).__HC.PNGWriter(140, 60);
+      const pngResult = await (window as any).__HC.renderIR([{
+        type: "text",
+        quad: [
+          { x: 10, y: 10 },
+          { x: 110, y: 10 },
+          { x: 110, y: 40 },
+          { x: 10, y: 40 },
+        ],
+        text: "M M",
+        style: {
+          color: "rgb(0, 0, 0)",
+          fontSize: "30px",
+          fontFamily: "Georgia, serif",
+          textDecoration: "underline",
+          whiteSpace: "nowrap",
+        },
+        zIndex: 0,
+      }], writer);
+
+      await pngResult.finalize();
+      const ctx = pngResult.getCanvas().getContext("2d")!;
+      return {
+        topSample: Array.from(ctx.getImageData(90, 15, 1, 1).data),
+        underlineSample: Array.from(ctx.getImageData(90, 38, 1, 1).data),
+      };
+    });
+
+    expect(result.topSample[0]).toBeGreaterThan(220);
+    expect(result.topSample[1]).toBeGreaterThan(220);
+    expect(result.topSample[2]).toBeGreaterThan(220);
+    expect(result.underlineSample[0]).toBeLessThan(80);
+    expect(result.underlineSample[1]).toBeLessThan(80);
+    expect(result.underlineSample[2]).toBeLessThan(80);
+  });
+
   test("renders polylines and filled shapes", async ({ page }) => {
     await setupPage(
       page,

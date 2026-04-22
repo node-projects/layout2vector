@@ -1268,7 +1268,7 @@ export class ImageWriter implements Writer<ImageResult> {
     ctx: CanvasRenderingContext2D,
     style: Style,
     textX: number,
-    baselineY: number,
+    textTopY: number,
     textWidth: number,
     fontSize: number,
     color: string,
@@ -1276,16 +1276,26 @@ export class ImageWriter implements Writer<ImageResult> {
     const dec = style.textDecoration;
     if (!dec || dec === "none") return;
 
-    // Measure actual text width for accurate line placement
-    const measuredWidth = Math.min(textWidth, ctx.measureText("").width || textWidth);
+    const previousBaseline = ctx.textBaseline;
+    ctx.textBaseline = "alphabetic";
+    const metrics = ctx.measureText("Mg");
+    ctx.textBaseline = previousBaseline;
+    const ascent = metrics.fontBoundingBoxAscent
+      || metrics.actualBoundingBoxAscent
+      || fontSize * 0.8;
+    const descent = metrics.fontBoundingBoxDescent
+      || metrics.actualBoundingBoxDescent
+      || fontSize * 0.2;
     const lineWidth = Math.max(1, fontSize / 14);
+    const baselineY = textTopY + ascent;
+    const overlineY = Math.max(textTopY + fontSize * 0.08, baselineY - ascent + lineWidth / 2);
 
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
     ctx.setLineDash([]);  // solid line
 
     if (dec.includes("underline")) {
-      const y = baselineY + fontSize * 0.15;
+      const y = Math.min(textTopY + fontSize, baselineY + Math.max(lineWidth, descent * 0.45));
       ctx.beginPath();
       ctx.moveTo(textX, y);
       ctx.lineTo(textX + textWidth, y);
@@ -1293,14 +1303,14 @@ export class ImageWriter implements Writer<ImageResult> {
     }
     if (dec.includes("line-through")) {
       // Line-through at ~40% above baseline (middle of x-height)
-      const y = baselineY - fontSize * 0.3;
+      const y = baselineY - ascent * 0.45;
       ctx.beginPath();
       ctx.moveTo(textX, y);
       ctx.lineTo(textX + textWidth, y);
       ctx.stroke();
     }
     if (dec.includes("overline")) {
-      const y = baselineY - fontSize * 0.85;
+      const y = overlineY;
       ctx.beginPath();
       ctx.moveTo(textX, y);
       ctx.lineTo(textX + textWidth, y);
