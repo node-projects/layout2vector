@@ -179,10 +179,10 @@ test.describe("HTML Geometry Extraction", () => {
       </body></html>`
     );
 
-    const summary = await page.evaluate(() => {
+    const summary = await page.evaluate(async () => {
       const root = document.getElementById("target")!;
       const item = document.getElementById("item")!;
-      const ir = (window as any).__HC.extractIR(root, {
+      const ir = await (window as any).__HC.extractIR(root, {
         boxType: "border",
         includeText: true,
         includePseudoElements: true,
@@ -218,6 +218,34 @@ test.describe("HTML Geometry Extraction", () => {
     const height = polygon.points[3].y - polygon.points[0].y;
     expect(width).toBeCloseTo(100, 0);
     expect(height).toBeCloseTo(100, 0);
+  });
+
+  test("does not use SVG currentColor as an HTML box background for root svg elements", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;background:white;">
+        <svg id="target" width="32" height="32" viewBox="0 0 16 16" style="color: rgb(13, 17, 23);">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-opacity="0.25" stroke-width="2" fill="none"></circle>
+          <path d="M15 8a7.002 7.002 0 00-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeText: false,
+      });
+
+      return {
+        polygon: ir.find((node: any) => node.type === "polygon"),
+        polylineCount: ir.filter((node: any) => node.type === "polyline").length,
+      };
+    });
+
+    expect(summary.polylineCount).toBeGreaterThan(0);
+    expect(summary.polygon).toBeDefined();
+    expect(summary.polygon.style.fill === undefined || summary.polygon.style.fill === "rgba(0, 0, 0, 0)").toBe(true);
   });
 
   test("preserves preformatted whitespace for transformed pre blocks", async ({ page }) => {

@@ -143,6 +143,25 @@ function createOutlinedPillNodes(): IRNode[] {
   }];
 }
 
+function createCircularBadgeShadowNodes(): IRNode[] {
+  return [{
+    type: "polygon",
+    points: [
+      { x: 10, y: 10 },
+      { x: 26, y: 10 },
+      { x: 26, y: 26 },
+      { x: 10, y: 26 },
+    ],
+    style: {
+      fill: "rgb(13, 17, 23)",
+      color: "rgb(171, 125, 248)",
+      borderRadius: "9999px",
+      boxShadow: "rgb(1, 4, 9) 0px 0px 0px 2px",
+    },
+    zIndex: 0,
+  }];
+}
+
 test.describe("PDF writer regressions", () => {
   test("preserves rgba fill alpha and fits extracted monospace text widths", async () => {
     const writer = new PDFWriter({ pageWidth: 20, pageHeight: 20 });
@@ -177,6 +196,14 @@ test.describe("PDF writer regressions", () => {
     expect(content).toContain("0.0392 0.0784 0.1176 RG");
     expect(content).toContain("1.5 w");
     expect(content).toMatch(/20\.625 165\.6 m\s+99\.375 165\.6 l/);
+  });
+
+  test("renders sharp outer box shadows with rounded corners for circular badges", async () => {
+    const writer = new PDFWriter({ pageWidth: 30, pageHeight: 30 });
+    await renderIR(createCircularBadgeShadowNodes(), writer);
+
+    const ops = ((writer as any).ops as string[]).join("\n");
+    expect(ops.match(/\bc\b/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
   });
 
   test("clips rounded images before drawing JPEG XObjects", async () => {

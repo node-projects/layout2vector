@@ -2519,7 +2519,21 @@ export class PDFWriter implements Writer<PdfDocument> {
           this.ops.push(`/${gsName} gs`);
         }
         this.setFill(color);
-        this.emitQuadPath(expanded);
+
+        const shadowElW = Math.abs(expanded[1].x - expanded[0].x);
+        const shadowElH = Math.abs(expanded[3].y - expanded[0].y);
+        const radius = parseBorderRadius(style.borderRadius, shadowElW, shadowElH);
+        if (radius && isAxisAlignedRect(expanded)) {
+          const left = this.ptX(Math.min(expanded[0].x, expanded[1].x));
+          const top = this.ptY(Math.min(expanded[0].y, expanded[3].y));
+          const w = pxToPt(shadowElW);
+          const h = pxToPt(shadowElH);
+          const rx = pxToPt(Math.min(radius.rx, shadowElW / 2));
+          const ry = pxToPt(Math.min(radius.ry, shadowElH / 2));
+          this.emitRoundedRectPath(left, top, w, h, rx, ry);
+        } else {
+          this.emitQuadPath(expanded);
+        }
         this.ops.push("f");
         this.ops.push("Q");
       } else {

@@ -279,65 +279,11 @@ export class ImageResult {
   constructor(
     private canvas: HTMLCanvasElement,
     private ctx: CanvasRenderingContext2D,
-    private pendingImages: PendingImage[],
   ) {}
 
   /** Load and draw pending raster images onto the canvas. */
   async finalize(): Promise<void> {
-    for (const img of this.pendingImages) {
-      await this.drawImageAsync(img);
-    }
-  }
-
-  private async drawImageAsync(img: PendingImage): Promise<void> {
-    const imgEl = new Image();
-    imgEl.src = img.dataUrl;
-    await new Promise<void>((resolve) => {
-      imgEl.onload = () => resolve();
-      imgEl.onerror = () => resolve(); // skip failed images
-    });
-
-    if (!imgEl.naturalWidth) return; // failed to load
-
-    const ctx = this.ctx;
-    ctx.save();
-
-    // Apply clip bounds from ancestor with overflow:hidden
-    this.applyClipQuads(ctx, img.style);
-    this.applyClipBounds(ctx, img.style);
-    this.applyClipPath(ctx, quadBounds(img.quad), img.style);
-    this.applyBorderRadiusClip(ctx, img.quad, img.style);
-
-    if (img.style.opacity !== undefined && img.style.opacity < 1) {
-      ctx.globalAlpha = img.style.opacity;
-    }
-    applyRenderEffects(ctx, img.style);
-
-    // Compute transform for potentially rotated quad
-    const q = img.quad;
-    const dx = q[1].x - q[0].x;
-    const dy = q[1].y - q[0].y;
-    const topEdge = Math.sqrt(dx * dx + dy * dy);
-    const ldx = q[3].x - q[0].x;
-    const ldy = q[3].y - q[0].y;
-    const leftEdge = Math.sqrt(ldx * ldx + ldy * ldy);
-
-    if (topEdge > 0 && leftEdge > 0) {
-      const ir = img.style.imageRendering;
-      if (ir === "pixelated" || ir === "crisp-edges" || ir === "-moz-crisp-edges") {
-        ctx.imageSmoothingEnabled = false;
-      }
-      const angle = Math.atan2(dy, dx);
-      if (Math.abs(angle) > 0.01) {
-        ctx.translate(q[0].x, q[0].y);
-        ctx.rotate(angle);
-        ctx.drawImage(imgEl, 0, 0, topEdge, leftEdge);
-      } else {
-        ctx.drawImage(imgEl, q[0].x, q[0].y, topEdge, leftEdge);
-      }
-    }
-
-    ctx.restore();
+    return Promise.resolve();
   }
 
   private applyClipBounds(ctx: CanvasRenderingContext2D, style: Style): void {
@@ -542,7 +488,6 @@ export class ImageWriter implements Writer<ImageResult> {
   private height: number;
   private scale: number;
   private targetCanvas?: HTMLCanvasElement;
-  private pendingImages: PendingImage[] = [];
 
   /**
    * @param optionsOrWidth Options object, or canvas width in CSS pixels (positional form).
@@ -575,7 +520,6 @@ export class ImageWriter implements Writer<ImageResult> {
 
     this.ctx = this.canvas.getContext("2d")!;
     this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    this.pendingImages = [];
 
     // White background
     this.ctx.fillStyle = "#ffffff";
@@ -754,11 +698,55 @@ export class ImageWriter implements Writer<ImageResult> {
   }
 
   async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, _rgbData?: number[]): Promise<void> {
-    this.pendingImages.push({ quad, dataUrl, width, height, style });
+    const imgEl = new Image();
+    imgEl.src = dataUrl;
+    await new Promise<void>((resolve) => {
+      imgEl.onload = () => resolve();
+      imgEl.onerror = () => resolve();
+    });
+
+    if (!imgEl.naturalWidth) return;
+
+    const ctx = this.ctx;
+    ctx.save();
+
+    this.applyClipQuads(ctx, style);
+    this.applyClipBounds(ctx, style);
+    this.applyClipPath(ctx, quadBounds(quad), style);
+    this.applyBorderRadiusClip(ctx, quad, style);
+
+    if (style.opacity !== undefined && style.opacity < 1) {
+      ctx.globalAlpha = style.opacity;
+    }
+    applyRenderEffects(ctx, style);
+
+    const dx = quad[1].x - quad[0].x;
+    const dy = quad[1].y - quad[0].y;
+    const topEdge = Math.sqrt(dx * dx + dy * dy);
+    const ldx = quad[3].x - quad[0].x;
+    const ldy = quad[3].y - quad[0].y;
+    const leftEdge = Math.sqrt(ldx * ldx + ldy * ldy);
+
+    if (topEdge > 0 && leftEdge > 0) {
+      const imageRendering = style.imageRendering;
+      if (imageRendering === "pixelated" || imageRendering === "crisp-edges" || imageRendering === "-moz-crisp-edges") {
+        ctx.imageSmoothingEnabled = false;
+      }
+      const angle = Math.atan2(dy, dx);
+      if (Math.abs(angle) > 0.01) {
+        ctx.translate(quad[0].x, quad[0].y);
+        ctx.rotate(angle);
+        ctx.drawImage(imgEl, 0, 0, topEdge, leftEdge);
+      } else {
+        ctx.drawImage(imgEl, quad[0].x, quad[0].y, topEdge, leftEdge);
+      }
+    }
+
+    ctx.restore();
   }
 
   async end(): Promise<ImageResult> {
-    return new ImageResult(this.canvas, this.ctx, this.pendingImages);
+    return new ImageResult(this.canvas, this.ctx);
   }
 
   // ── Private helpers ─────────────────────────────────────────────
@@ -797,6 +785,20 @@ export class ImageWriter implements Writer<ImageResult> {
 
     const fillRule = this.traceClipPath(ctx, clipPath, bounds);
     if (fillRule) ctx.clip(fillRule);
+  }
+
+  private applyBorderRadiusClip(ctx: CanvasRenderingContext2D, quad: Quad, style: Style): void {
+    const topEdge = Math.hypot(quad[1].x - quad[0].x, quad[1].y - quad[0].y);
+    const leftEdge = Math.hypot(quad[3].x - quad[0].x, quad[3].y - quad[0].y);
+    const radius = Math.min(
+      parseMinDimensionBorderRadius(style.borderRadius, topEdge, leftEdge),
+      topEdge / 2,
+      leftEdge / 2,
+    );
+    if (!Number.isFinite(radius) || radius <= 0) return;
+
+    traceClipQuadPath(ctx, { points: quad, radius });
+    ctx.clip();
   }
 
   private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {

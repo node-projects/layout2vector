@@ -40,6 +40,9 @@ export interface ConversionSummary {
     dwg: number;
     acadDxf: number;
   };
+  errors: {
+    png: string | null;
+  };
 }
 
 export function ensureDirectory(dirPath: string): void {
@@ -67,6 +70,55 @@ export function sanitizeOutputName(value: string): string {
     .slice(0, 96);
 
   return sanitized || "page";
+}
+
+const remoteIrImageCache = new Map<string, string | null>();
+
+function guessImageMimeType(url: string): string {
+  try {
+    const { pathname } = new URL(url);
+    const lowerPath = pathname.toLowerCase();
+    if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg")) return "image/jpeg";
+    if (lowerPath.endsWith(".gif")) return "image/gif";
+    if (lowerPath.endsWith(".webp")) return "image/webp";
+    if (lowerPath.endsWith(".svg")) return "image/svg+xml";
+  } catch {
+    // Fall back to PNG below.
+  }
+  return "image/png";
+}
+
+async function resolveRemoteIrImageDataUrl(url: string): Promise<string | null> {
+  if (url.startsWith("data:")) return url;
+  const cached = remoteIrImageCache.get(url);
+  if (cached !== undefined) return cached;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      remoteIrImageCache.set(url, null);
+      return null;
+    }
+
+    const mimeType = (response.headers.get("content-type") || guessImageMimeType(url)).split(";")[0] || guessImageMimeType(url);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const dataUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
+    remoteIrImageCache.set(url, dataUrl);
+    return dataUrl;
+  } catch {
+    remoteIrImageCache.set(url, null);
+    return null;
+  }
+}
+
+async function inlineRemoteIrImages(nodes: IRNode[]): Promise<void> {
+  for (const node of nodes) {
+    if (node.type !== "image") continue;
+    if (node.dataUrl.startsWith("data:")) continue;
+
+    const dataUrl = await resolveRemoteIrImageDataUrl(node.dataUrl);
+    if (dataUrl) node.dataUrl = dataUrl;
+  }
 }
 
 async function waitForDemoReadySignal(page: Page): Promise<void> {
@@ -339,6 +391,8 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   });
   expect(ir.length).toBeGreaterThan(0);
 
+  await inlineRemoteIrImages(ir);
+
   if (dumpIR) {
     fs.writeFileSync(path.join(outputDir, `${name}-ir.json`), JSON.stringify(ir, null, 2), "utf-8");
   }
@@ -413,6 +467,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   fs.writeFileSync(pdfPath, pdfDoc.toBytes());
 
   let pngSize: number | null = null;
+  let pngError: string | null = null;
   const pngPath = path.join(outputDir, `${name}.png`);
   try {
     const pngDataUrl: string = await page.evaluate(async ({ irNodes, viewportSize }) => {
@@ -429,8 +484,10 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     const pngBase64 = pngDataUrl.split(",")[1];
     fs.writeFileSync(pngPath, Buffer.from(pngBase64, "base64"));
     pngSize = fs.statSync(pngPath).size;
-  } catch {
+  } catch (error) {
     // PNG output can still be blocked by browser canvas security rules.
+    pngError = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    fs.writeFileSync(path.join(outputDir, `${name}-png-error.txt`), `${pngError}\n`, "utf-8");
   }
 
   const svgWriter = new SVGWriter(viewport.width, viewport.height);
@@ -506,6 +563,9 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
       emfPlus: emfPlusSize,
       dwg: dwgSize,
       acadDxf: acadDxfSize,
+    },
+    errors: {
+      png: pngError,
     },
   };
 }

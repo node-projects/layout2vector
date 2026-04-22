@@ -53,7 +53,9 @@ function extractGradientColor(bgImage: string): string | undefined {
 export function extractStyle(cs: CSSStyleDeclaration): Style {
   // Determine fill: prefer backgroundColor, fall back to gradient first color stop
   const bgColor = cs.backgroundColor;
-  let fill: string | undefined = bgColor || cs.fill || undefined;
+  let fill: string | undefined = bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent"
+    ? bgColor
+    : undefined;
   const bgImage = cs.backgroundImage;
   const bgImageVal = bgImage || undefined;
   const maskVal = cs.getPropertyValue("mask") || cs.getPropertyValue("-webkit-mask") || undefined;
@@ -74,8 +76,8 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
 
   const result: Style = {
     fill,
-    stroke: cs.borderColor || cs.stroke || undefined,
-    strokeWidth: cs.borderWidth || cs.strokeWidth || undefined,
+    stroke: cs.borderColor || undefined,
+    strokeWidth: cs.borderWidth || undefined,
 
     fontSize: cs.fontSize || undefined,
     fontFamily: cs.fontFamily || undefined,

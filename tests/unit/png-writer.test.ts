@@ -173,6 +173,52 @@ test.describe("PNG Writer Output", () => {
     expect(result.corner[3]).toBe(255);
   });
 
+  test("keeps image and vector paint order in PNG output", async ({ page }) => {
+    await setupPage(page, "<html><body style=\"margin:0;\"></body></html>");
+
+    const result = await page.evaluate(async (dataUrl) => {
+      const writer = new (window as any).__HC.PNGWriter(80, 80);
+      const pngResult = await (window as any).__HC.renderIR([
+        {
+          type: "image",
+          quad: [
+            { x: 10, y: 10 },
+            { x: 50, y: 10 },
+            { x: 50, y: 50 },
+            { x: 10, y: 50 },
+          ],
+          dataUrl,
+          width: 2,
+          height: 2,
+          style: {},
+          zIndex: 0,
+        },
+        {
+          type: "polygon",
+          points: [
+            { x: 30, y: 30 },
+            { x: 70, y: 30 },
+            { x: 70, y: 70 },
+            { x: 30, y: 70 },
+          ],
+          style: {
+            fill: "rgb(0, 0, 255)",
+          },
+          zIndex: 1,
+        },
+      ], writer);
+
+      await pngResult.finalize();
+      const ctx = pngResult.getCanvas().getContext("2d")!;
+      return Array.from(ctx.getImageData(40, 40, 1, 1).data);
+    }, RED_PIXEL_PNG);
+
+    expect(result[0]).toBeLessThan(80);
+    expect(result[1]).toBeLessThan(80);
+    expect(result[2]).toBeGreaterThan(200);
+    expect(result[3]).toBe(255);
+  });
+
   test("applies blur filters to filled shapes in PNG output", async ({ page }) => {
     await setupPage(page, "<html><body style=\"margin:0;\"></body></html>");
 
