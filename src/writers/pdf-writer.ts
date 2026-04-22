@@ -381,6 +381,204 @@ function splitPngChannels(png: PngImage): { rgb: Uint8Array; alphaMask?: Uint8Ar
   };
 }
 
+type SupportedImageColorFilterOp =
+  | { kind: "linear-rgb"; slope: number; intercept: number }
+  | { kind: "matrix-rgb"; matrix: [number, number, number, number, number, number, number, number, number] };
+
+function clampUnit(value: number): number {
+  if (value <= 0) return 0;
+  if (value >= 1) return 1;
+  return value;
+}
+
+function parseUnitInterval(rawValue: string, defaultValue: number): number | undefined {
+  const value = rawValue.trim();
+  if (!value) return defaultValue;
+  const parsed = parseFloat(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return clampUnit(value.endsWith("%") ? parsed / 100 : parsed);
+}
+
+function parseNonNegativeFilterNumber(rawValue: string, defaultValue: number): number | undefined {
+  const value = rawValue.trim();
+  if (!value) return defaultValue;
+  const parsed = parseFloat(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.max(0, value.endsWith("%") ? parsed / 100 : parsed);
+}
+
+function parseAngleDegrees(rawValue: string): number | undefined {
+  const value = rawValue.trim();
+  if (!value) return 0;
+  const parsed = parseFloat(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  if (value.endsWith("rad")) return parsed * (180 / Math.PI);
+  if (value.endsWith("turn")) return parsed * 360;
+  if (value.endsWith("grad")) return parsed * 0.9;
+  return parsed;
+}
+
+function buildSaturateMatrix(amount: number): [number, number, number, number, number, number, number, number, number] {
+  return [
+    0.213 + 0.787 * amount, 0.715 - 0.715 * amount, 0.072 - 0.072 * amount,
+    0.213 - 0.213 * amount, 0.715 + 0.285 * amount, 0.072 - 0.072 * amount,
+    0.213 - 0.213 * amount, 0.715 - 0.715 * amount, 0.072 + 0.928 * amount,
+  ];
+}
+
+function buildGrayscaleMatrix(amount: number): [number, number, number, number, number, number, number, number, number] {
+  return [
+    1 - 0.7874 * amount, 0.7152 * amount, 0.0722 * amount,
+    0.2126 * amount, 1 - 0.2848 * amount, 0.0722 * amount,
+    0.2126 * amount, 0.7152 * amount, 1 - 0.9278 * amount,
+  ];
+}
+
+function buildSepiaMatrix(amount: number): [number, number, number, number, number, number, number, number, number] {
+  return [
+    1 - 0.607 * amount, 0.769 * amount, 0.189 * amount,
+    0.349 * amount, 1 - 0.314 * amount, 0.168 * amount,
+    0.272 * amount, 0.534 * amount, 1 - 0.869 * amount,
+  ];
+}
+
+function buildHueRotateMatrix(angleDeg: number): [number, number, number, number, number, number, number, number, number] {
+  const angle = (angleDeg * Math.PI) / 180;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return [
+    0.213 + cos * 0.787 - sin * 0.213,
+    0.715 - cos * 0.715 - sin * 0.715,
+    0.072 - cos * 0.072 + sin * 0.928,
+    0.213 - cos * 0.213 + sin * 0.143,
+    0.715 + cos * 0.285 + sin * 0.14,
+    0.072 - cos * 0.072 - sin * 0.283,
+    0.213 - cos * 0.213 - sin * 0.787,
+    0.715 - cos * 0.715 + sin * 0.715,
+    0.072 + cos * 0.928 + sin * 0.072,
+  ];
+}
+
+function parseSupportedImageColorFilters(filter: string | undefined): SupportedImageColorFilterOp[] {
+  const value = filter?.trim();
+  if (!value || value === "none") return [];
+
+  const operations: SupportedImageColorFilterOp[] = [];
+  let index = 0;
+
+  while (index < value.length) {
+    while (index < value.length && /\s/.test(value[index])) index += 1;
+    if (index >= value.length) break;
+
+    const nameStart = index;
+    while (index < value.length && /[a-z-]/i.test(value[index])) index += 1;
+    if (nameStart === index) break;
+
+    const name = value.slice(nameStart, index).toLowerCase();
+    while (index < value.length && /\s/.test(value[index])) index += 1;
+    if (value[index] !== "(") break;
+
+    index += 1;
+    const argStart = index;
+    let depth = 1;
+    while (index < value.length && depth > 0) {
+      const char = value[index];
+      if (char === "(") depth += 1;
+      else if (char === ")") depth -= 1;
+      index += 1;
+    }
+    if (depth !== 0) break;
+
+    const rawArg = value.slice(argStart, index - 1).trim();
+
+    switch (name) {
+      case "invert": {
+        const amount = parseUnitInterval(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "linear-rgb", slope: 1 - 2 * amount, intercept: amount });
+        break;
+      }
+      case "brightness": {
+        const amount = parseNonNegativeFilterNumber(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "linear-rgb", slope: amount, intercept: 0 });
+        break;
+      }
+      case "contrast": {
+        const amount = parseNonNegativeFilterNumber(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "linear-rgb", slope: amount, intercept: 0.5 * (1 - amount) });
+        break;
+      }
+      case "saturate": {
+        const amount = parseNonNegativeFilterNumber(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "matrix-rgb", matrix: buildSaturateMatrix(amount) });
+        break;
+      }
+      case "grayscale": {
+        const amount = parseUnitInterval(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "matrix-rgb", matrix: buildGrayscaleMatrix(amount) });
+        break;
+      }
+      case "sepia": {
+        const amount = parseUnitInterval(rawArg, 1);
+        if (amount !== undefined) operations.push({ kind: "matrix-rgb", matrix: buildSepiaMatrix(amount) });
+        break;
+      }
+      case "hue-rotate": {
+        const angleDeg = parseAngleDegrees(rawArg);
+        if (angleDeg !== undefined) operations.push({ kind: "matrix-rgb", matrix: buildHueRotateMatrix(angleDeg) });
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return operations;
+}
+
+function applySupportedImageColorFilters(
+  rgb: Uint8Array,
+  filter: string | undefined,
+  alphaMask?: Uint8Array,
+): { rgb: Uint8Array; alphaMask?: Uint8Array } {
+  const operations = parseSupportedImageColorFilters(filter);
+  if (operations.length === 0) return { rgb, alphaMask };
+
+  const filteredRgb = new Uint8Array(rgb.length);
+  const filteredAlpha = alphaMask ? new Uint8Array(alphaMask) : undefined;
+
+  for (let offset = 0; offset < rgb.length; offset += 3) {
+    let r = rgb[offset] / 255;
+    let g = rgb[offset + 1] / 255;
+    let b = rgb[offset + 2] / 255;
+
+    for (const operation of operations) {
+      if (operation.kind === "linear-rgb") {
+        r = clampUnit(r * operation.slope + operation.intercept);
+        g = clampUnit(g * operation.slope + operation.intercept);
+        b = clampUnit(b * operation.slope + operation.intercept);
+        continue;
+      }
+
+      const [m0, m1, m2, m3, m4, m5, m6, m7, m8] = operation.matrix;
+      const nextR = clampUnit(r * m0 + g * m1 + b * m2);
+      const nextG = clampUnit(r * m3 + g * m4 + b * m5);
+      const nextB = clampUnit(r * m6 + g * m7 + b * m8);
+      r = nextR;
+      g = nextG;
+      b = nextB;
+    }
+
+    filteredRgb[offset] = Math.round(r * 255);
+    filteredRgb[offset + 1] = Math.round(g * 255);
+    filteredRgb[offset + 2] = Math.round(b * 255);
+  }
+
+  return {
+    rgb: filteredRgb,
+    alphaMask: filteredAlpha,
+  };
+}
+
 // ── Gradient parsing (identical logic to jspdf-writer) ──────────────
 
 interface GradientStop { offset: number; color: ParsedColor; }
@@ -1575,18 +1773,20 @@ export class PDFWriter implements Writer<PdfDocument> {
       const png = decodePng(decoded.data);
       if (png) {
         const channels = splitPngChannels(png);
+        const filteredChannels = applySupportedImageColorFilters(channels.rgb, style.filter, channels.alphaMask);
         this.images.push({
           name: imgName,
-          data: channels.rgb,
+          data: filteredChannels.rgb,
           width: png.width,
           height: png.height,
           filter: null,
-          softMask: channels.alphaMask,
+          softMask: filteredChannels.alphaMask,
         });
       } else if (rgbData) {
+        const filteredRgb = applySupportedImageColorFilters(new Uint8Array(rgbData), style.filter).rgb;
         this.images.push({
           name: imgName,
-          data: new Uint8Array(rgbData),
+          data: filteredRgb,
           width,
           height,
           filter: null,
@@ -1596,9 +1796,10 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
     } else if (rgbData) {
       // Use raw RGB pixel data (lossless, no compression artifacts)
+      const filteredRgb = applySupportedImageColorFilters(new Uint8Array(rgbData), style.filter).rgb;
       this.images.push({
         name: imgName,
-        data: new Uint8Array(rgbData),
+        data: filteredRgb,
         width,
         height,
         filter: null,

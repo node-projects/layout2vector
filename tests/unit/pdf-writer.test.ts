@@ -236,4 +236,31 @@ test.describe("PDF writer regressions", () => {
     expect(content).toContain("/ColorSpace /DeviceGray");
     expect(content.match(/\/Subtype \/Image/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   });
+
+  test("applies supported CSS color filters to embedded image RGB data", async () => {
+    const writer = new PDFWriter({ pageWidth: 20, pageHeight: 20 });
+    await renderIR([{
+      type: "image",
+      quad: [
+        { x: 2, y: 2 },
+        { x: 10, y: 2 },
+        { x: 10, y: 10 },
+        { x: 2, y: 10 },
+      ],
+      dataUrl: RED_PIXEL_JPEG,
+      width: 1,
+      height: 1,
+      rgbData: [255, 0, 0],
+      style: {
+        filter: "invert(100%)",
+      },
+      zIndex: 0,
+    } satisfies IRNode], writer);
+
+    const images = (writer as any).images as Array<{ data: Uint8Array; filter: string | null }>;
+
+    expect(images).toHaveLength(1);
+    expect(images[0].filter).toBeNull();
+    expect(Array.from(images[0].data)).toEqual([0, 255, 255]);
+  });
 });
