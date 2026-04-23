@@ -42,7 +42,7 @@
     "esbuild": "^0.28.0"
   },
   "peerDependencies": {
-    "@chenglou/pretext": ">0.0.5"
+    "@chenglou/pretext": ">=0.0.6"
   },
   "peerDependenciesMeta": {
     "@chenglou/pretext": {
@@ -50,10 +50,10 @@
     }
   },
   "devDependencies": {
-    "@chenglou/pretext": "^0.0.5",
+    "@chenglou/pretext": ">=0.0.6",
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
-    "get-box-quads-polyfill": "^4.33.0",
+    "get-box-quads-polyfill": "^4.36.0",
     "typescript": "^6.0.3"
   }
 }
