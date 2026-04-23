@@ -15,6 +15,7 @@
 import type { Quad, Style, IRNode, Options } from "../types.js";
 import { extractStyle } from "../traversal.js";
 import { getElementQuads } from "../geometry.js";
+import { extractBackgroundImage, extractMaskedElementImage, hasBackgroundImage } from "./image-extractor.js";
 
 /**
  * Computed-style properties copied to the replacement element so that
@@ -619,36 +620,47 @@ function extractOnePseudo(
     el.appendChild(temp);
   }
 
-  // ── Measure geometry ─────────────────────────────────────────
+  try {
+    const boxType = options.boxType ?? "border";
+    const quads = getElementQuads(temp, boxType) as Quad[];
 
-  const boxType = options.boxType ?? "border";
-  const quads = getElementQuads(temp, boxType) as Quad[];
-  const results: IRNode[] = [];
+    if (!hasText && options.includeImages) {
+      if (pseudoStyle.mask && pseudoStyle.mask !== "none") {
+        const maskedNodes = extractMaskedElementImage(temp, pseudoStyle, globalIndex, options);
+        if (maskedNodes.length > 0) return maskedNodes;
+      }
 
-  for (const quad of quads) {
-    results.push({
-      type: "polygon",
-      points: quad,
-      style: pseudoStyle,
-      zIndex: globalIndex,
-    });
+      if (hasBackgroundImage(pseudoStyle)) {
+        const backgroundNodes = extractBackgroundImage(temp, pseudoStyle, globalIndex, options);
+        if (backgroundNodes.length > 0) return backgroundNodes;
+      }
+    }
+
+    const results: IRNode[] = [];
+
+    for (const quad of quads) {
+      results.push({
+        type: "polygon",
+        points: quad,
+        style: pseudoStyle,
+        zIndex: globalIndex,
+      });
+    }
+
+    if (hasText && quads.length > 0) {
+      results.push({
+        type: "text",
+        quad: quads[0],
+        text,
+        style: pseudoStyle,
+        zIndex: globalIndex,
+      });
+    }
+
+    return results;
+  } finally {
+    temp.remove();
+    suppressSheet.remove();
+    el.removeAttribute(attr);
   }
-
-  if (hasText && quads.length > 0) {
-    results.push({
-      type: "text",
-      quad: quads[0],
-      text,
-      style: pseudoStyle,
-      zIndex: globalIndex,
-    });
-  }
-
-  // ── Restore DOM ──────────────────────────────────────────────
-
-  temp.remove();
-  suppressSheet.remove();
-  el.removeAttribute(attr);
-
-  return results;
 }

@@ -80,6 +80,11 @@ function extractInputGeometry(
   globalIndex: number
 ): IRNode[] | null {
   const type = input.type.toLowerCase();
+  const cs = getComputedStyle(input);
+
+  if (isVisuallyHiddenControl(cs)) {
+    return [];
+  }
 
   if (type === "checkbox") {
     return extractCheckboxGeometry(input, node, globalIndex);
@@ -504,6 +509,12 @@ function shouldUseFallbackControlFill(cs: CSSStyleDeclaration): boolean {
 function shouldUseFallbackFill(style: Style): boolean {
   if (style.backgroundImage && style.backgroundImage !== "none") return false;
   return !isVisibleColor(style.fill);
+}
+
+function isVisuallyHiddenControl(cs: CSSStyleDeclaration): boolean {
+  if (cs.display === "none" || cs.visibility === "hidden") return true;
+  const opacity = parseFloat(cs.opacity);
+  return Number.isFinite(opacity) && opacity <= 0.01;
 }
 
 function shouldRenderSyntheticControlBox(baseStyle: Style, cs: CSSStyleDeclaration): boolean {

@@ -377,6 +377,46 @@ test.describe("Image Extraction", () => {
     expect(imageNodes.length).toBe(0);
   });
 
+  test("remaps compound SVG path subpaths into the image quad", async ({ page }) => {
+    const SVG_COMPOUND_DATA_URL = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="red" d="M5 5H25V15H5Z M40 5H60V15H40Z"/></svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;position:relative;">
+        <img id="target" src="${SVG_COMPOUND_DATA_URL}" style="position:absolute;left:144px;top:15px;width:120px;height:24px;" />
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const ir = await (window as any).__HC.extractIR(document.body, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const compoundPath = ir.find((node: any) => node.type === "polyline" && node.style?.pathSubpaths?.length > 1);
+      if (!compoundPath) return null;
+
+      const flattenedMinX = Math.min(...compoundPath.points.map((point: any) => point.x));
+      const subpathMinX = Math.min(
+        ...compoundPath.style.pathSubpaths.flatMap((subpath: any) => subpath.points.map((point: any) => point.x))
+      );
+
+      return {
+        flattenedMinX,
+        subpathMinX,
+        subpathCount: compoundPath.style.pathSubpaths.length,
+      };
+    });
+
+    expect(summary).not.toBeNull();
+    expect(summary?.subpathCount).toBe(2);
+    expect(summary?.flattenedMinX).toBeGreaterThan(140);
+    expect(summary?.subpathMinX).toBeGreaterThan(140);
+    expect(Math.abs((summary?.flattenedMinX ?? 0) - (summary?.subpathMinX ?? 0))).toBeLessThan(1);
+  });
+
   test("rasterizes SVG data URL when element effects require an image layer", async ({ page }) => {
     await setupPage(
       page,
@@ -927,7 +967,7 @@ test.describe("Image Extraction", () => {
 
     const extracted = await page.evaluate(async () => {
       const el = document.getElementById("target")!;
-      const ir = (window as any).__HC.extractIR(el, {
+      const ir = await (window as any).__HC.extractIR(el, {
         includeImages: true,
         includeText: false,
       });
@@ -1037,6 +1077,147 @@ test.describe("Image Extraction", () => {
 
     const imageNodes = ir.filter((n: any) => n.type === "image");
     expect(imageNodes.length).toBe(0);
+  });
+
+  test("extracts leaf masked elements as image IR nodes instead of solid boxes", async ({ page }) => {
+    const MASK_SVG = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6" fill="black"/></svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <span id="target" style="display:block;width:20px;height:20px;background-color:rgb(32, 33, 34);mask-image:url('${MASK_SVG}');-webkit-mask-image:url('${MASK_SVG}');mask-position:center;-webkit-mask-position:center;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-size:20px;-webkit-mask-size:20px;"></span>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((node: any) => node.type === "image");
+      const polygonCount = ir.filter((node: any) => node.type === "polygon").length;
+      if (!imageNode) {
+        return { imageCount: 0, polygonCount, samples: null };
+      }
+
+      const samples = await new Promise<{ center: number[]; corner: number[] }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            center: Array.from(ctx.getImageData(10, 10, 1, 1).data),
+            corner: Array.from(ctx.getImageData(1, 1, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted masked element"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return {
+        imageCount: ir.filter((node: any) => node.type === "image").length,
+        polygonCount,
+        samples,
+      };
+    });
+
+    expect(extracted.imageCount).toBe(1);
+    expect(extracted.polygonCount).toBe(0);
+    expect(extracted.samples).not.toBeNull();
+    expect(extracted.samples?.center[3]).toBeGreaterThan(200);
+    expect(extracted.samples?.center[0]).toBeLessThan(80);
+    expect(extracted.samples?.center[1]).toBeLessThan(80);
+    expect(extracted.samples?.center[2]).toBeLessThan(80);
+    expect(extracted.samples?.corner[3]).toBe(0);
+  });
+
+  test("extracts masked elements when computed mask-image contains escaped SVG quotes", async ({ page }) => {
+    const UTF8_MASK_SVG = 'data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 20 20\\"><circle cx=\\"10\\" cy=\\"10\\" r=\\"6\\" fill=\\"black\\"/></svg>';
+
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          display: block;
+          width: 20px;
+          height: 20px;
+          background-color: rgb(32, 33, 34);
+          mask-image: url("${UTF8_MASK_SVG}");
+          -webkit-mask-image: url("${UTF8_MASK_SVG}");
+          mask-position: center;
+          -webkit-mask-position: center;
+          mask-repeat: no-repeat;
+          -webkit-mask-repeat: no-repeat;
+          mask-size: 20px;
+          -webkit-mask-size: 20px;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <span id="target"></span>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target") as HTMLElement;
+
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      return {
+        imageCount: ir.filter((node: any) => node.type === "image").length,
+        polygonCount: ir.filter((node: any) => node.type === "polygon").length,
+      };
+    });
+
+    expect(extracted.imageCount).toBe(1);
+    expect(extracted.polygonCount).toBe(0);
+  });
+
+  test("extracts pseudo-element background images through the image pipeline", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          width: 20px;
+          height: 20px;
+        }
+        #target::before {
+          content: "";
+          display: block;
+          width: 20px;
+          height: 20px;
+          background-image: url('${RED_PIXEL_PNG}');
+          background-repeat: no-repeat;
+          background-size: cover;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <div id="target"></div>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      return {
+        imageCount: ir.filter((node: any) => node.type === "image").length,
+        polygonCount: ir.filter((node: any) => node.type === "polygon").length,
+      };
+    });
+
+    expect(summary.imageCount).toBe(1);
+    expect(summary.polygonCount).toBeLessThanOrEqual(1);
   });
 
   test("hasBackgroundImage utility works", async ({ page }) => {

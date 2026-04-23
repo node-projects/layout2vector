@@ -115,57 +115,96 @@ export async function preloadImages(root: Element): Promise<void> {
     }
   }
 
-  // Pre-fetch background-image URLs (including inside shadow DOM).
-  // Populate caches without modifying element styles.
+  // Pre-fetch CSS images (backgrounds, masks, and pseudo-element assets).
   for (const el of allElements) {
-    const bg = getComputedStyle(el).backgroundImage;
-    if (!bg || bg === "none") continue;
-    const url = extractCssUrlValue(bg);
-    if (!url) continue;
-
-    // External URL (not a data URL) — fetch and cache
-    if (!url.startsWith("data:")) {
-      try {
-        const resp = await fetch(url);
-        if (!resp.ok) continue;
-        const blob = await resp.blob();
-        let dataUrl = await blobToDataUrl(blob);
-        // If the content is SVG but MIME type is wrong (e.g. text/xml,
-        // application/xml), fix the data URL to use image/svg+xml so
-        // downstream SVG detection works correctly.
-        if (!dataUrl.startsWith("data:image/svg+xml") && isSvgUrl(url)) {
-          const raw = await blob.text();
-          if (raw.includes("<svg")) {
-            dataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(raw)));
-          }
-        }
-        preloadedUrlMap.set(url, dataUrl);
-        // Pre-decode into an Image element so rasterToRendered can draw it synchronously
-        const tmpImg = new Image();
-        tmpImg.src = dataUrl;
-        try { await tmpImg.decode(); } catch { /* ignore */ }
-        preloadedImageElems.set(dataUrl, tmpImg);
-      } catch { /* network error — sync XHR fallback during extraction */ }
-      continue;
+    for (const cs of getPreloadableStyles(el)) {
+      for (const url of collectCssImageUrls(cs)) {
+        await preloadCssImageUrl(url);
+      }
     }
+  }
+}
 
-    // Data URL PNG/WebP — pre-decode so background rendering can draw synchronously
-    if (!url.startsWith("data:image/png") && !url.startsWith("data:image/webp")) continue;
+function getPreloadableStyles(el: Element): CSSStyleDeclaration[] {
+  const styles = [getComputedStyle(el)];
+  for (const pseudo of ["::before", "::after"] as const) {
+    try {
+      styles.push(getComputedStyle(el, pseudo));
+    } catch {
+      // Ignore pseudo-style lookup failures for unusual or disconnected nodes.
+    }
+  }
+  return styles;
+}
+
+function collectCssImageUrls(cs: CSSStyleDeclaration): string[] {
+  const urls = new Set<string>();
+  for (const value of [
+    cs.backgroundImage,
+    cs.getPropertyValue("mask-image"),
+    cs.getPropertyValue("-webkit-mask-image"),
+  ]) {
+    if (!value || value === "none") continue;
+    const url = extractCssUrlValue(value);
+    if (url) urls.add(url);
+  }
+  return [...urls];
+}
+
+async function preloadCssImageUrl(url: string): Promise<void> {
+  if (!url) return;
+
+  if (url.startsWith("data:")) {
+    if (!url.startsWith("data:image/")) return;
+    if (preloadedImageElems.has(url)) return;
+
     try {
       const img = new Image();
       img.src = url;
       try {
         await img.decode();
-        preloadedImageElems.set(url, img);
       } catch {
         await new Promise<void>((resolve, reject) => {
           img.onload = () => resolve();
           img.onerror = () => reject(new Error("load failed"));
           if (img.complete && img.naturalWidth > 0) resolve();
         });
-        preloadedImageElems.set(url, img);
       }
-    } catch { /* ignore */ }
+      preloadedImageElems.set(url, img);
+    } catch {
+      // Ignore data URL decode failures; extraction will fall back if needed.
+    }
+    return;
+  }
+
+  if (preloadedUrlMap.has(url)) return;
+
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const blob = await resp.blob();
+    let dataUrl = await blobToDataUrl(blob);
+    if (!dataUrl.startsWith("data:image/svg+xml") && isSvgUrl(url)) {
+      const raw = await blob.text();
+      if (raw.includes("<svg")) {
+        dataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(raw)));
+      }
+    }
+    preloadedUrlMap.set(url, dataUrl);
+    const tmpImg = new Image();
+    tmpImg.src = dataUrl;
+    try {
+      await tmpImg.decode();
+    } catch {
+      await new Promise<void>((resolve, reject) => {
+        tmpImg.onload = () => resolve();
+        tmpImg.onerror = () => reject(new Error("load failed"));
+        if (tmpImg.complete && tmpImg.naturalWidth > 0) resolve();
+      });
+    }
+    preloadedImageElems.set(dataUrl, tmpImg);
+  } catch {
+    // Network error — extraction will fall back to direct loading when possible.
   }
 }
 
@@ -202,7 +241,7 @@ function extractCssUrlValue(value: string): string | null {
       continue;
     }
     if (quote ? ch === quote : ch === ")") {
-      return result.trim();
+      return decodeCssEscapes(result.trim());
     }
     result += ch;
   }
@@ -314,6 +353,46 @@ export function extractBackgroundImage(
     style,
     zIndex: globalIndex,
   }];
+}
+
+export function extractMaskedElementImage(
+  el: Element,
+  style: Style,
+  globalIndex: number,
+  options: Options
+): IRNode[] {
+  const quad = getElementQuad(el);
+  if (!quad) return [];
+
+  const htmlEl = el as HTMLElement;
+  const displayWidth = htmlEl.offsetWidth || Math.abs(quad[1].x - quad[0].x);
+  const displayHeight = htmlEl.offsetHeight || Math.abs(quad[3].y - quad[0].y);
+  if (displayWidth <= 0 || displayHeight <= 0) return [];
+
+  const imageScale = options.imageScale ?? 1;
+  const rasterWidth = Math.min(Math.round(displayWidth * imageScale), 4096);
+  const rasterHeight = Math.min(Math.round(displayHeight * imageScale), 4096);
+  const rendered = renderMaskedElement(el, style, rasterWidth, rasterHeight);
+  if (!rendered) return [];
+
+  return [{
+    type: "image",
+    quad,
+    dataUrl: rendered.dataUrl,
+    width: rasterWidth,
+    height: rasterHeight,
+    rgbData: rendered.rgbData,
+    style: getRasterizedMaskStyle(style),
+    zIndex: globalIndex,
+  }];
+}
+
+function getRasterizedMaskStyle(style: Style): Style {
+  return {
+    ...style,
+    mask: undefined,
+    backgroundImage: undefined,
+  };
 }
 
 /**
@@ -561,7 +640,15 @@ function remapIRNodes(nodes: IRNode[], w: number, h: number, targetQuad: Quad): 
         node.points = node.points.map(remap) as Quad;
         break;
       case "polyline":
-        node.points = node.points.map(remap);
+        if (node.style.pathSubpaths?.length) {
+          node.style.pathSubpaths = node.style.pathSubpaths.map((subpath) => ({
+            ...subpath,
+            points: subpath.points.map(remap),
+          }));
+          node.points = node.style.pathSubpaths.flatMap((subpath) => subpath.points);
+        } else {
+          node.points = node.points.map(remap);
+        }
         break;
       case "text":
         node.quad = node.quad.map(remap) as Quad;
@@ -956,6 +1043,133 @@ function renderBackgroundImageUncached(
   } catch {
     return null;
   }
+}
+
+function renderMaskedElement(
+  el: Element,
+  style: Style,
+  w: number,
+  h: number
+): { dataUrl: string; rgbData?: number[] } | null {
+  try {
+    const cs = getComputedStyle(el);
+    const maskImageValue = cs.getPropertyValue("mask-image") || cs.getPropertyValue("-webkit-mask-image") || "";
+    if (!maskImageValue || maskImageValue === "none") return null;
+
+    const maskSource = extractCssUrlValue(maskImageValue);
+    if (!maskSource) return null;
+
+    const fillColor = resolveMaskFillColor(style, cs);
+    if (!fillColor) return null;
+
+    const resolvedSource = preloadedUrlMap.get(maskSource) ?? maskSource;
+    const sizeValue = cs.getPropertyValue("mask-size") || cs.getPropertyValue("-webkit-mask-size") || "auto";
+    const positionValue = cs.getPropertyValue("mask-position") || cs.getPropertyValue("-webkit-mask-position") || "50% 50%";
+    const repeatValue = cs.getPropertyValue("mask-repeat") || cs.getPropertyValue("-webkit-mask-repeat") || "repeat";
+    const attachmentValue = cs.getPropertyValue("mask-attachment") || cs.getPropertyValue("-webkit-mask-attachment") || "scroll";
+
+    const htmlEl = el as HTMLElement;
+    const cssBoxWidth = htmlEl.offsetWidth || w;
+    const cssBoxHeight = htmlEl.offsetHeight || h;
+
+    const preloaded = preloadedImageElems.get(resolvedSource);
+    const img = preloaded ?? new Image();
+    if (!preloaded) img.src = resolvedSource;
+    if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) return null;
+
+    let sourceWidth = img.naturalWidth;
+    let sourceHeight = img.naturalHeight;
+    const svgSourceSize = resolveSvgRasterSourceSize(resolvedSource, cssBoxWidth, cssBoxHeight);
+    if (svgSourceSize) {
+      sourceWidth = svgSourceSize.width;
+      sourceHeight = svgSourceSize.height;
+    }
+    if (sourceWidth === 0 || sourceHeight === 0) return null;
+
+    const maskCanvas = document.createElement("canvas");
+    maskCanvas.width = w;
+    maskCanvas.height = h;
+    const maskCtx = maskCanvas.getContext("2d");
+    if (!maskCtx) return null;
+
+    const scaleX = cssBoxWidth > 0 ? w / cssBoxWidth : 1;
+    const scaleY = cssBoxHeight > 0 ? h / cssBoxHeight : 1;
+    const repeat = parseBackgroundRepeat(repeatValue);
+    const maskSize = resolveBackgroundSize(sizeValue, sourceWidth, sourceHeight, w, h, scaleX, scaleY);
+    const position = resolveBackgroundPosition(positionValue);
+
+    let offsetX = resolveBackgroundOffset(position.x, w, maskSize.width, scaleX);
+    let offsetY = resolveBackgroundOffset(position.y, h, maskSize.height, scaleY);
+
+    if (attachmentValue === "fixed") {
+      const rect = el.getBoundingClientRect();
+      offsetX -= rect.left * scaleX;
+      offsetY -= rect.top * scaleY;
+    }
+
+    const xPositions = repeat.repeatX
+      ? (() => {
+        const positions: number[] = [];
+        for (let x = getRepeatStart(offsetX, maskSize.width); x < w; x += maskSize.width) {
+          positions.push(x);
+        }
+        return positions;
+      })()
+      : [offsetX];
+
+    const yPositions = repeat.repeatY
+      ? (() => {
+        const positions: number[] = [];
+        for (let y = getRepeatStart(offsetY, maskSize.height); y < h; y += maskSize.height) {
+          positions.push(y);
+        }
+        return positions;
+      })()
+      : [offsetY];
+
+    for (const y of yPositions) {
+      for (const x of xPositions) {
+        maskCtx.drawImage(img, x, y, maskSize.width, maskSize.height);
+      }
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(maskCanvas, 0, 0);
+
+    const pixels = w * h;
+    const inspection = inspectRasterImageData(ctx.getImageData(0, 0, w, h), pixels <= 250000);
+    if (!inspection.hasVisibleContent) return null;
+
+    return {
+      dataUrl: inspection.hasTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
+      rgbData: inspection.rgbData,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function resolveMaskFillColor(style: Style, cs: CSSStyleDeclaration): string | null {
+  for (const color of [style.fill, cs.backgroundColor, cs.color]) {
+    if (isVisibleCssColor(color)) return color;
+  }
+  return null;
+}
+
+function isVisibleCssColor(color: string | undefined): color is string {
+  if (!color || color === "transparent" || color === "none") return false;
+  const rgbaMatch = color.match(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+(?:\s*,\s*([\d.]+))?\s*\)/);
+  if (rgbaMatch?.[1] !== undefined && parseFloat(rgbaMatch[1]) <= 0) return false;
+  if (color.startsWith("#") && color.length === 9 && parseInt(color.slice(7, 9), 16) === 0) return false;
+  return true;
 }
 
 function requiresRasterSvgImage(style: Style): boolean {

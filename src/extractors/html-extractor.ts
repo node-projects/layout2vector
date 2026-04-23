@@ -6,6 +6,7 @@ import type { StackingNode } from "../traversal.js";
 import { isSVGElement } from "../traversal.js";
 import { getBoxQuadsOptions, getElementQuad, getElementQuads, getNodeQuads, quadSize } from "../geometry.js";
 import { extractFormControlGeometry, shouldSkipFormControlDescendant } from "./form-controls.js";
+import { extractMaskedElementImage } from "./image-extractor.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 
 /** Characters that MathML stretches vertically. */
@@ -31,6 +32,14 @@ function isStretchedMathOperator(el: Element): boolean {
   return rect.height > fontSize * 1.5;
 }
 
+function shouldExtractMaskedLeafImage(node: StackingNode, options: Options): boolean {
+  if (!options.includeImages) return false;
+  if (!(node.element instanceof HTMLElement)) return false;
+  if (!node.extractedStyle.mask || node.extractedStyle.mask === "none") return false;
+  if (node.element.children.length > 0) return false;
+  return !node.textNodes.some((textNode) => (textNode.textContent ?? "").trim().length > 0);
+}
+
 /**
  * Extract geometry from an HTML element using getBoxQuads.
  * Returns IR nodes for the element's box and its text nodes.
@@ -51,6 +60,11 @@ export async function extractHTMLGeometry(
   // Skip non-root SVG elements — they're handled by SVG subtree extraction.
   // SVG roots are kept because they participate in HTML layout (background, borders).
   if (isSVGElement(el) && el.tagName.toLowerCase() !== 'svg') return results;
+
+  if (shouldExtractMaskedLeafImage(node, options)) {
+    const maskedNodes = extractMaskedElementImage(el, node.extractedStyle, globalIndex, options);
+    if (maskedNodes.length > 0) return maskedNodes;
+  }
 
   // Extract element box quads (always via getBoxQuads for consistency)
   const boxType = options.boxType ?? "border";

@@ -237,9 +237,7 @@ function transformIRGeometry(nodes: IRNode[], transform: StackingNode["coordinat
         }
         break;
       case "polyline":
-        for (const point of node.points) {
-          applyTransformToPoint(point, transform);
-        }
+        forEachPolylinePoint(node, (point) => applyTransformToPoint(point, transform));
         break;
       case "text":
         for (const point of node.quad) {
@@ -265,6 +263,27 @@ function applyTransformToPoint(
   point.y = nextY;
 }
 
+function forEachPolylinePoint(
+  node: Extract<IRNode, { type: "polyline" }>,
+  visitor: (point: { x: number; y: number }) => void,
+): void {
+  const seen = new Set<object>();
+
+  for (const point of node.points) {
+    if (seen.has(point)) continue;
+    seen.add(point);
+    visitor(point);
+  }
+
+  for (const subpath of node.style.pathSubpaths ?? []) {
+    for (const point of subpath.points) {
+      if (seen.has(point)) continue;
+      seen.add(point);
+      visitor(point);
+    }
+  }
+}
+
 /**
  * Subtract (ox, oy) from every coordinate in the IR node list,
  * converting from absolute page coordinates to root-relative coordinates.
@@ -281,7 +300,10 @@ function offsetIRNodes(nodes: IRNode[], ox: number, oy: number): void {
         for (const p of node.points) { p.x -= ox; p.y -= oy; }
         break;
       case "polyline":
-        for (const p of node.points) { p.x -= ox; p.y -= oy; }
+        forEachPolylinePoint(node, (point) => {
+          point.x -= ox;
+          point.y -= oy;
+        });
         break;
       case "text":
         for (const p of node.quad) { p.x -= ox; p.y -= oy; }
@@ -321,7 +343,10 @@ function scaleIRNodes(nodes: IRNode[], zoom: number): void {
         for (const p of node.points) { p.x *= zoom; p.y *= zoom; }
         break;
       case "polyline":
-        for (const p of node.points) { p.x *= zoom; p.y *= zoom; }
+        forEachPolylinePoint(node, (point) => {
+          point.x *= zoom;
+          point.y *= zoom;
+        });
         break;
       case "text":
         for (const p of node.quad) { p.x *= zoom; p.y *= zoom; }
@@ -380,7 +405,10 @@ function offsetAndScaleIRNodes(nodes: IRNode[], ox: number, oy: number, zoom: nu
         for (const p of node.points) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
         break;
       case "polyline":
-        for (const p of node.points) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }
+        forEachPolylinePoint(node, (point) => {
+          point.x = (point.x - ox) * zoom;
+          point.y = (point.y - oy) * zoom;
+        });
         break;
       case "text":
         for (const p of node.quad) { p.x = (p.x - ox) * zoom; p.y = (p.y - oy) * zoom; }

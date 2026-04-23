@@ -175,4 +175,30 @@ test.describe("Form control conversion", () => {
     expect(summary.texts[0].text).toBe("google");
     expect(summary.texts[0].style.color).toBe("rgb(232, 234, 237)");
   });
+
+  test("skips fully transparent proxy checkboxes", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;font-family:Arial,sans-serif;">
+        <input id="proxy-checkbox" type="checkbox" style="position:absolute;left:0;top:0;width:32px;height:32px;opacity:0;">
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const HC = (window as any).__HC;
+      const el = document.getElementById("proxy-checkbox")!;
+      const ir = await HC.extractIR(el, {
+        includeText: false,
+        convertFormControls: true,
+      });
+
+      return {
+        count: ir.length,
+        types: ir.map((node: any) => node.type),
+      };
+    });
+
+    expect(summary.count).toBe(0);
+    expect(summary.types).toEqual([]);
+  });
 });
