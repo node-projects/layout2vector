@@ -36,6 +36,14 @@ const COPY_PROPERTIES = [
   "line-height", "letter-spacing", "word-spacing",
   "text-decoration", "text-transform", "white-space",
   "color", "background-color", "background-image",
+  "mask", "-webkit-mask",
+  "mask-image", "-webkit-mask-image",
+  "mask-position", "-webkit-mask-position",
+  "mask-repeat", "-webkit-mask-repeat",
+  "mask-size", "-webkit-mask-size",
+  "mask-attachment", "-webkit-mask-attachment",
+  "mask-origin", "-webkit-mask-origin",
+  "mask-clip", "-webkit-mask-clip",
   "opacity", "transform",
   "overflow", "text-overflow",
   "top", "right", "bottom", "left",
@@ -628,6 +636,7 @@ function extractOnePseudo(
       if (pseudoStyle.mask && pseudoStyle.mask !== "none") {
         const maskedNodes = extractMaskedElementImage(temp, pseudoStyle, globalIndex, options);
         if (maskedNodes.length > 0) return maskedNodes;
+        return [];
       }
 
       if (hasBackgroundImage(pseudoStyle)) {

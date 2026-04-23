@@ -58,7 +58,11 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     : undefined;
   const bgImage = cs.backgroundImage;
   const bgImageVal = bgImage || undefined;
-  const maskVal = cs.getPropertyValue("mask") || cs.getPropertyValue("-webkit-mask") || undefined;
+  const maskVal = cs.getPropertyValue("mask")
+    || cs.getPropertyValue("-webkit-mask")
+    || cs.getPropertyValue("mask-image")
+    || cs.getPropertyValue("-webkit-mask-image")
+    || undefined;
 
   // If backgroundColor is transparent but there's a gradient, extract its first color
   if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImageVal && bgImageVal !== "none") {

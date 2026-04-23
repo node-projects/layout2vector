@@ -1220,6 +1220,144 @@ test.describe("Image Extraction", () => {
     expect(summary.polygonCount).toBeLessThanOrEqual(1);
   });
 
+  test("extracts masked pseudo-elements through the image pipeline", async ({ page }) => {
+    const MASK_SVG = "data:image/svg+xml," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M4 7l6 6 6-6" fill="none" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    );
+
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          position: relative;
+          width: 24px;
+          height: 24px;
+        }
+        #target::after {
+          content: "";
+          display: block;
+          width: 20px;
+          height: 20px;
+          background-color: rgb(32, 33, 34);
+          mask-image: url('${MASK_SVG}');
+          -webkit-mask-image: url('${MASK_SVG}');
+          mask-position: center;
+          -webkit-mask-position: center;
+          mask-repeat: no-repeat;
+          -webkit-mask-repeat: no-repeat;
+          mask-size: 20px;
+          -webkit-mask-size: 20px;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <div id="target"></div>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+        includePseudoElements: true,
+      });
+
+      const imageNode = ir.find((node: any) => node.type === "image");
+      const fallbackPolygonCount = ir.filter((node: any) => {
+        if (node.type !== "polygon") return false;
+        const width = Math.round(Math.abs(node.points[1].x - node.points[0].x));
+        const height = Math.round(Math.abs(node.points[3].y - node.points[0].y));
+        return node.style?.fill === "rgb(32, 33, 34)" && width === 20 && height === 20;
+      }).length;
+
+      if (!imageNode) {
+        return { imageCount: 0, fallbackPolygonCount, samples: null };
+      }
+
+      const samples = await new Promise<{ center: number[]; corner: number[] }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            center: Array.from(ctx.getImageData(10, 10, 1, 1).data),
+            corner: Array.from(ctx.getImageData(1, 1, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted masked pseudo element"));
+        img.src = imageNode.dataUrl;
+      });
+
+      return {
+        imageCount: ir.filter((node: any) => node.type === "image").length,
+        fallbackPolygonCount,
+        samples,
+      };
+    });
+
+    expect(extracted.imageCount).toBe(1);
+    expect(extracted.fallbackPolygonCount).toBe(0);
+    expect(extracted.samples).not.toBeNull();
+    expect(extracted.samples?.center[3]).toBeGreaterThan(0);
+    expect(extracted.samples?.corner[3]).toBe(0);
+  });
+
+  test("skips masked pseudo-elements when the mask asset cannot be loaded", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><head><style>
+        #target {
+          position: relative;
+          width: 16px;
+          height: 16px;
+        }
+        #target::after {
+          content: "";
+          display: block;
+          width: 12px;
+          height: 12px;
+          background-color: rgb(51, 102, 204);
+          mask-image: url('file:///__html-converter-tests__/missing-arrow.svg');
+          -webkit-mask-image: url('file:///__html-converter-tests__/missing-arrow.svg');
+          mask-position: center;
+          -webkit-mask-position: center;
+          mask-repeat: no-repeat;
+          -webkit-mask-repeat: no-repeat;
+          mask-size: 12px;
+          -webkit-mask-size: 12px;
+        }
+      </style></head><body style="margin:0;padding:0;">
+        <div id="target"></div>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+        includePseudoElements: true,
+      });
+
+      const fallbackPolygonCount = ir.filter((node: any) => {
+        if (node.type !== "polygon") return false;
+        const width = Math.round(Math.abs(node.points[1].x - node.points[0].x));
+        const height = Math.round(Math.abs(node.points[3].y - node.points[0].y));
+        return node.style?.fill === "rgb(51, 102, 204)" && width === 12 && height === 12;
+      }).length;
+
+      return {
+        imageCount: ir.filter((node: any) => node.type === "image").length,
+        fallbackPolygonCount,
+      };
+    });
+
+    expect(extracted.imageCount).toBe(0);
+    expect(extracted.fallbackPolygonCount).toBe(0);
+  });
+
   test("hasBackgroundImage utility works", async ({ page }) => {
     await setupPage(
       page,
