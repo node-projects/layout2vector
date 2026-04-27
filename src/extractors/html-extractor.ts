@@ -62,7 +62,7 @@ export async function extractHTMLGeometry(
   if (isSVGElement(el) && el.tagName.toLowerCase() !== 'svg') return results;
 
   if (shouldExtractMaskedLeafImage(node, options)) {
-    const maskedNodes = extractMaskedElementImage(el, node.extractedStyle, globalIndex, options);
+    const maskedNodes = await extractMaskedElementImage(el, node.extractedStyle, globalIndex, options);
     if (maskedNodes.length > 0) return maskedNodes;
   }
 

@@ -480,6 +480,118 @@ test.describe("Image Extraction", () => {
     expect(imageNode.dataUrl).not.toBe("https://assets.example.test/icon.svg");
   });
 
+  test("extractImageGeometry loads remote SVG without explicit preload", async ({ page }) => {
+    await page.route("https://assets.example.test/direct-image.svg", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20"><rect x="4" y="4" width="32" height="12" fill="#0a84ff"/></svg>',
+      });
+    });
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" src="https://assets.example.test/direct-image.svg" style="width:120px;height:60px;display:block;" />
+      </body></html>`
+    );
+
+    await page.waitForFunction(() => {
+      const img = document.getElementById("target") as HTMLImageElement | null;
+      return !!img && img.complete && img.naturalWidth > 0;
+    });
+
+    const nodeTypes = await page.evaluate(async () => {
+      const hc = (window as any).__HC;
+      const el = document.getElementById("target")!;
+      const style = hc.extractStyle(getComputedStyle(el));
+      const nodes = await hc.extractImageGeometry(el, style, 0, {
+        includeImages: true,
+        includeText: false,
+      });
+      return nodes.map((node: any) => node.type);
+    });
+
+    expect(nodeTypes).toContain("polygon");
+    expect(nodeTypes).not.toContain("image");
+  });
+
+  test("extractBackgroundImage loads remote SVG without explicit preload", async ({ page }) => {
+    await page.route("https://assets.example.test/direct-background.svg", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20"><rect x="2" y="2" width="36" height="16" fill="#ff6a00"/></svg>',
+      });
+    });
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:120px;height:60px;background-image:url('https://assets.example.test/direct-background.svg');background-size:cover;background-repeat:no-repeat;"></div>
+      </body></html>`
+    );
+
+    const nodeTypes = await page.evaluate(async () => {
+      const hc = (window as any).__HC;
+      const el = document.getElementById("target")!;
+      const style = hc.extractStyle(getComputedStyle(el));
+      const nodes = await hc.extractBackgroundImage(el, style, 0, {
+        includeImages: true,
+        includeText: false,
+      });
+      return nodes.map((node: any) => node.type);
+    });
+
+    expect(nodeTypes).toContain("polygon");
+    expect(nodeTypes).not.toContain("image");
+  });
+
+  test("extractBackgroundImage times out stalled remote fetches instead of hanging", async ({ page }) => {
+    await page.route("https://assets.example.test/stalled-background.svg", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 20"><rect x="2" y="2" width="36" height="16" fill="#ff0000"/></svg>',
+      });
+    });
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:120px;height:60px;background-image:url('https://assets.example.test/stalled-background.svg');background-size:cover;background-repeat:no-repeat;"></div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      (globalThis as any).__HC_IMAGE_FETCH_TIMEOUT_MS = 50;
+
+      const hc = (window as any).__HC;
+      const el = document.getElementById("target")!;
+      const style = hc.extractStyle(getComputedStyle(el));
+      const startedAt = performance.now();
+      const nodes = await hc.extractBackgroundImage(el, style, 0, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      return {
+        durationMs: performance.now() - startedAt,
+        nodeCount: nodes.length,
+      };
+    });
+
+    expect(result.durationMs).toBeLessThan(500);
+    expect(result.nodeCount).toBe(0);
+  });
+
   test("does NOT extract images when includeImages is false/unset", async ({ page }) => {
     await setupPage(
       page,

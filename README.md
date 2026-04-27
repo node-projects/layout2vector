@@ -508,6 +508,8 @@ import {
 } from "@node-projects/layout2vector";
 ```
 
+`extractHTMLGeometry()`, `extractPseudoElements()`, `extractImageGeometry()`, and `extractBackgroundImage()` are async. If you build a custom extraction pipeline instead of calling `extractIR()`, await those helpers directly. `preloadImages()` is still available, but it is now an optional optimization rather than a correctness requirement.
+
 ## Features
 
 ### HTML Geometry
@@ -538,7 +540,7 @@ import {
 
 ### Image Handling
 
-Enable with `includeImages: true`. All image preloading and embedding is now **automatic** and handled internally by `extractIR` (no need to call any preload function). The DOM is **not mutated** during preloading.
+Enable with `includeImages: true`. All image preloading and embedding is now **automatic** and handled internally by `extractIR` (no need to call any preload function). For custom pipelines, the async image helpers can also fetch/decode what they need on demand; `preloadImages()` is only an optimization. The DOM is **not mutated** during preloading.
 
 - **All images** (including `<img>` and CSS `background-image: url()`, even in Shadow DOM) are embedded as data URLs in all output formats (DXF, PDF, PNG, SVG, HTML).
 - **SVG images** (`data:image/svg+xml`, `.svg` URLs): automatically converted to vector geometry (polygons, polylines, text) — no rasterization.

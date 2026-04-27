@@ -57,15 +57,15 @@ const COPY_PROPERTIES = [
  * the given element.  Returns an empty array when there is nothing
  * to extract.
  */
-export function extractPseudoElements(
+export async function extractPseudoElements(
   el: Element,
   parentStyle: Style,
   globalIndex: number,
   options: Options,
-): IRNode[] {
+): Promise<IRNode[]> {
   const results: IRNode[] = [];
   for (const pseudo of ["::before", "::after"] as const) {
-    const nodes = extractOnePseudo(el, pseudo, parentStyle, globalIndex + results.length, options);
+    const nodes = await extractOnePseudo(el, pseudo, parentStyle, globalIndex + results.length, options);
     results.push(...nodes);
   }
   const markerNodes = extractMarkerPseudo(el, parentStyle, globalIndex + results.length, options);
@@ -574,13 +574,13 @@ function resolveQuote(el: Element, isOpen: boolean): string {
 
 // ─── single pseudo extraction ────────────────────────────────
 
-function extractOnePseudo(
+async function extractOnePseudo(
   el: Element,
   pseudo: "::before" | "::after",
   parentStyle: Style,
   globalIndex: number,
   options: Options,
-): IRNode[] {
+): Promise<IRNode[]> {
   const pseudoCs = getComputedStyle(el, pseudo);
 
   // Skip when pseudo-element isn't generated
@@ -634,13 +634,13 @@ function extractOnePseudo(
 
     if (!hasText && options.includeImages) {
       if (pseudoStyle.mask && pseudoStyle.mask !== "none") {
-        const maskedNodes = extractMaskedElementImage(temp, pseudoStyle, globalIndex, options);
+        const maskedNodes = await extractMaskedElementImage(temp, pseudoStyle, globalIndex, options);
         if (maskedNodes.length > 0) return maskedNodes;
         return [];
       }
 
       if (hasBackgroundImage(pseudoStyle)) {
-        const backgroundNodes = extractBackgroundImage(temp, pseudoStyle, globalIndex, options);
+        const backgroundNodes = await extractBackgroundImage(temp, pseudoStyle, globalIndex, options);
         if (backgroundNodes.length > 0) return backgroundNodes;
       }
     }

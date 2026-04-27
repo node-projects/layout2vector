@@ -15,7 +15,7 @@ import { inflateZlibSync } from "../shared/zlib-inflate.js";
  */
 const imageDataCache = new Map<string, { dataUrl: string; rgbData?: number[] } | null>();
 
-/** Cache for SVG content strings, keyed by source URL. Avoids repeated sync XHR or base64 decoding. */
+/** Cache for decoded SVG content strings, keyed by source URL. */
 const svgContentCache = new Map<string, string | null>();
 
 /** Cache for parsed intrinsic SVG sizes used during raster fallback. */
@@ -25,6 +25,13 @@ const svgIntrinsicSizeCache = new Map<string, { width: number; height: number } 
 const preloadedImageElems = new Map<string, HTMLImageElement>();
 /** Pre-fetched URL mappings: original URL → data URL. Populated by preloadImages without modifying the page. */
 const preloadedUrlMap = new Map<string, string>();
+/** In-flight async image loads keyed by the source/cache slot they populate. */
+const imageLoadTasks = new Map<string, Promise<void>>();
+const PRELOAD_CONCURRENCY = 8;
+const IMAGE_FETCH_TIMEOUT_MS = 12000;
+const IMAGE_DECODE_TIMEOUT_MS = 8000;
+const VIDEO_READY_TIMEOUT_MS = 8000;
+const VIDEO_SEEK_TIMEOUT_MS = 3000;
 
 /** Clear the image rasterization cache. Called at the start of each extraction run. */
 export function clearImageCache(): void {
@@ -33,6 +40,7 @@ export function clearImageCache(): void {
   svgIntrinsicSizeCache.clear();
   preloadedImageElems.clear();
   preloadedUrlMap.clear();
+  imageLoadTasks.clear();
 }
 
 /** Check if an element is an <img> element. */
@@ -71,58 +79,210 @@ export async function preloadImages(root: Element): Promise<void> {
   // Include root itself
   allElements.unshift(root);
 
+  const imageSources = new Set<string>();
+  const cssImageUrls = new Set<string>();
+
   // Pre-fetch <img> elements — populate caches without modifying the DOM
   for (const el of allElements) {
     if (el.tagName !== "IMG") continue;
     const img = el as HTMLImageElement;
     const src = img.currentSrc || img.src;
     if (!src) continue;
-    if (src.startsWith("data:")) {
-      // Data URL images may not be decoded yet — force decode so
-      // canvas.drawImage works synchronously during extraction.
-      try {
-        await img.decode();
-      } catch {
-        // img.decode() may fail for small images in some browsers.
-        // Create a pre-decoded copy for canvas drawing (no DOM mutation).
-        try {
-          const tmpImg = new Image();
-          tmpImg.src = src;
-          await new Promise<void>((resolve, reject) => {
-            tmpImg.onload = () => resolve();
-            tmpImg.onerror = () => reject(new Error("load failed"));
-            if (tmpImg.complete && tmpImg.naturalWidth > 0) resolve();
-          });
-          preloadedImageElems.set(src, tmpImg);
-        } catch { /* give up */ }
-      }
-      continue;
-    }
-    // External URL — fetch and cache as data URL (do NOT modify img.src)
-    try {
-      const resp = await fetch(src);
-      if (!resp.ok) continue;
-      const blob = await resp.blob();
-      const dataUrl = await blobToDataUrl(blob);
-      preloadedUrlMap.set(src, dataUrl);
-      // Pre-decode into an Image element for canvas drawing
-      const tmpImg = new Image();
-      tmpImg.src = dataUrl;
-      try { await tmpImg.decode(); } catch { /* ignore */ }
-      preloadedImageElems.set(src, tmpImg);
-    } catch {
-      // Network error — sync XHR fallback will be attempted during extraction
-    }
+    imageSources.add(src);
   }
 
   // Pre-fetch CSS images (backgrounds, masks, and pseudo-element assets).
   for (const el of allElements) {
     for (const cs of getPreloadableStyles(el)) {
       for (const url of collectCssImageUrls(cs)) {
-        await preloadCssImageUrl(url);
+        cssImageUrls.add(url);
       }
     }
   }
+
+  await Promise.all([
+    mapWithConcurrency([...imageSources], PRELOAD_CONCURRENCY, ensureImageElementSourceReady),
+    mapWithConcurrency([...cssImageUrls], PRELOAD_CONCURRENCY, preloadCssImageUrl),
+  ]);
+}
+
+async function mapWithConcurrency<T>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<void>
+): Promise<void> {
+  if (items.length === 0) return;
+
+  const limit = Math.max(1, Math.min(concurrency, items.length));
+  let nextIndex = 0;
+
+  const runners = Array.from({ length: limit }, async () => {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= items.length) return;
+      await worker(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(runners);
+}
+
+function getConfiguredTimeout(name: string, fallbackMs: number): number {
+  const configured = (globalThis as Record<string, unknown>)[name];
+  return typeof configured === "number" && Number.isFinite(configured) && configured > 0 ? configured : fallbackMs;
+}
+
+async function fetchWithTimeout(url: string, timeoutMs: number, init: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
+}
+
+function runImageLoadTask(key: string, load: () => Promise<void>): Promise<void> {
+  const existing = imageLoadTasks.get(key);
+  if (existing) return existing;
+
+  const task = load().finally(() => {
+    imageLoadTasks.delete(key);
+  });
+  imageLoadTasks.set(key, task);
+  return task;
+}
+
+async function waitForImageDecode(img: HTMLImageElement): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    let settled = false;
+    const timeoutId = globalThis.setTimeout(() => {
+      finishReject(new Error("image load timed out"));
+    }, getConfiguredTimeout("__HC_IMAGE_DECODE_TIMEOUT_MS", IMAGE_DECODE_TIMEOUT_MS));
+
+    const cleanup = () => {
+      globalThis.clearTimeout(timeoutId);
+      img.removeEventListener("load", onLoad);
+      img.removeEventListener("error", onError);
+    };
+
+    const finishResolve = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve();
+    };
+    const finishReject = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    const onLoad = () => {
+      finishResolve();
+    };
+    const onError = () => {
+      finishReject(new Error("load failed"));
+    };
+
+    img.addEventListener("load", onLoad);
+    img.addEventListener("error", onError);
+
+    if (img.complete) {
+      if (img.naturalWidth > 0) {
+        finishResolve();
+      } else {
+        finishReject(new Error("load failed"));
+      }
+      return;
+    }
+
+    try {
+      void img.decode().then(() => {
+        if (img.naturalWidth > 0) finishResolve();
+      }).catch(() => {
+        // Some browsers reject decode() while still dispatching load/error events.
+      });
+    } catch {
+      // Ignore decode() availability/usage errors and rely on events + timeout.
+    }
+  });
+}
+
+async function createDecodedImage(src: string): Promise<HTMLImageElement | null> {
+  try {
+    const img = new Image();
+    img.src = src;
+    await waitForImageDecode(img);
+    return img;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchExternalImageDataUrl(url: string): Promise<string | null> {
+  const cached = preloadedUrlMap.get(url);
+  if (cached?.startsWith("data:image/")) return cached;
+
+  try {
+    const resp = await fetchWithTimeout(
+      url,
+      getConfiguredTimeout("__HC_IMAGE_FETCH_TIMEOUT_MS", IMAGE_FETCH_TIMEOUT_MS),
+      {
+        redirect: "follow",
+      }
+    );
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    let dataUrl = await blobToDataUrl(blob);
+    if (!dataUrl.startsWith("data:image/svg+xml") && isSvgUrl(url)) {
+      const raw = await blob.text();
+      if (raw.includes("<svg")) {
+        dataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(raw)));
+      }
+    }
+    return dataUrl;
+  } catch {
+    return null;
+  }
+}
+
+async function ensureImageElementSourceReady(src: string): Promise<void> {
+  if (!src) return;
+
+  if (src.startsWith("data:")) {
+    if (!src.startsWith("data:image/") || preloadedImageElems.has(src)) return;
+
+    await runImageLoadTask(`img-data:${src}`, async () => {
+      if (preloadedImageElems.has(src)) return;
+      const decoded = await createDecodedImage(src);
+      if (decoded) preloadedImageElems.set(src, decoded);
+    });
+    return;
+  }
+
+  if (preloadedImageElems.has(src) && preloadedUrlMap.has(src)) return;
+
+  await runImageLoadTask(`img:${src}`, async () => {
+    if (preloadedImageElems.has(src) && preloadedUrlMap.has(src)) return;
+
+    const dataUrl = preloadedUrlMap.get(src) ?? await fetchExternalImageDataUrl(src);
+    if (!dataUrl) return;
+
+    preloadedUrlMap.set(src, dataUrl);
+    const decoded = await createDecodedImage(dataUrl);
+    if (!decoded) return;
+
+    preloadedImageElems.set(src, decoded);
+    if (!preloadedImageElems.has(dataUrl)) {
+      preloadedImageElems.set(dataUrl, decoded);
+    }
+  });
 }
 
 function getPreloadableStyles(el: Element): CSSStyleDeclaration[] {
@@ -158,54 +318,38 @@ async function preloadCssImageUrl(url: string): Promise<void> {
     if (!url.startsWith("data:image/")) return;
     if (preloadedImageElems.has(url)) return;
 
-    try {
-      const img = new Image();
-      img.src = url;
-      try {
-        await img.decode();
-      } catch {
-        await new Promise<void>((resolve, reject) => {
-          img.onload = () => resolve();
-          img.onerror = () => reject(new Error("load failed"));
-          if (img.complete && img.naturalWidth > 0) resolve();
-        });
-      }
-      preloadedImageElems.set(url, img);
-    } catch {
-      // Ignore data URL decode failures; extraction will fall back if needed.
+    await runImageLoadTask(`css-data:${url}`, async () => {
+      if (preloadedImageElems.has(url)) return;
+      const decoded = await createDecodedImage(url);
+      if (decoded) preloadedImageElems.set(url, decoded);
+    });
+    return;
+  }
+
+  const cachedUrl = preloadedUrlMap.get(url);
+  if (cachedUrl) {
+    if (cachedUrl.startsWith("data:image/") && !preloadedImageElems.has(cachedUrl)) {
+      await runImageLoadTask(`css-decoded:${cachedUrl}`, async () => {
+        if (preloadedImageElems.has(cachedUrl)) return;
+        const decoded = await createDecodedImage(cachedUrl);
+        if (decoded) preloadedImageElems.set(cachedUrl, decoded);
+      });
     }
     return;
   }
 
-  if (preloadedUrlMap.has(url)) return;
+  await runImageLoadTask(`css:${url}`, async () => {
+    if (preloadedUrlMap.has(url)) return;
 
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return;
-    const blob = await resp.blob();
-    let dataUrl = await blobToDataUrl(blob);
-    if (!dataUrl.startsWith("data:image/svg+xml") && isSvgUrl(url)) {
-      const raw = await blob.text();
-      if (raw.includes("<svg")) {
-        dataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(raw)));
-      }
-    }
+    const dataUrl = await fetchExternalImageDataUrl(url);
+    if (!dataUrl) return;
+
     preloadedUrlMap.set(url, dataUrl);
-    const tmpImg = new Image();
-    tmpImg.src = dataUrl;
-    try {
-      await tmpImg.decode();
-    } catch {
-      await new Promise<void>((resolve, reject) => {
-        tmpImg.onload = () => resolve();
-        tmpImg.onerror = () => reject(new Error("load failed"));
-        if (tmpImg.complete && tmpImg.naturalWidth > 0) resolve();
-      });
-    }
-    preloadedImageElems.set(dataUrl, tmpImg);
-  } catch {
-    // Network error — extraction will fall back to direct loading when possible.
-  }
+    if (!dataUrl.startsWith("data:image/")) return;
+
+    const decoded = await createDecodedImage(dataUrl);
+    if (decoded) preloadedImageElems.set(dataUrl, decoded);
+  });
 }
 
 function blobToDataUrl(blob: Blob): Promise<string> {
@@ -260,17 +404,19 @@ export function hasBackgroundImage(style: Style): boolean {
  * Extract a background-image url() as an image IR node.
  * Rasterizes the element's background to a canvas to capture the rendered result.
  */
-export function extractBackgroundImage(
+export async function extractBackgroundImage(
   el: Element,
   style: Style,
   globalIndex: number,
   _options: Options
-): IRNode[] {
+): Promise<IRNode[]> {
   const bg = style.backgroundImage;
   if (!bg || bg === "none") return [];
 
   const parsedUrl = extractCssUrlValue(bg);
   if (!parsedUrl) return [];
+
+  await preloadCssImageUrl(parsedUrl);
 
   const quad = getElementQuad(el);
   if (!quad) return [];
@@ -355,12 +501,12 @@ export function extractBackgroundImage(
   }];
 }
 
-export function extractMaskedElementImage(
+export async function extractMaskedElementImage(
   el: Element,
   style: Style,
   globalIndex: number,
   options: Options
-): IRNode[] {
+): Promise<IRNode[]> {
   const quad = getElementQuad(el);
   if (!quad) return [];
 
@@ -372,7 +518,7 @@ export function extractMaskedElementImage(
   const imageScale = options.imageScale ?? 1;
   const rasterWidth = Math.min(Math.round(displayWidth * imageScale), 4096);
   const rasterHeight = Math.min(Math.round(displayHeight * imageScale), 4096);
-  const rendered = renderMaskedElement(el, style, rasterWidth, rasterHeight);
+  const rendered = await renderMaskedElement(el, style, rasterWidth, rasterHeight);
   if (!rendered) return [];
 
   return [{
@@ -1045,12 +1191,12 @@ function renderBackgroundImageUncached(
   }
 }
 
-function renderMaskedElement(
+async function renderMaskedElement(
   el: Element,
   style: Style,
   w: number,
   h: number
-): { dataUrl: string; rgbData?: number[] } | null {
+): Promise<{ dataUrl: string; rgbData?: number[] } | null> {
   try {
     const cs = getComputedStyle(el);
     const maskImageValue = cs.getPropertyValue("mask-image") || cs.getPropertyValue("-webkit-mask-image") || "";
@@ -1058,6 +1204,8 @@ function renderMaskedElement(
 
     const maskSource = extractCssUrlValue(maskImageValue);
     if (!maskSource) return null;
+
+    await preloadCssImageUrl(maskSource);
 
     const fillColor = resolveMaskFillColor(style, cs);
     if (!fillColor) return null;
@@ -1187,14 +1335,16 @@ function requiresRasterSvgImage(style: Style): boolean {
  * - Simple SVG images: converted to vector geometry (polygon/polyline/text IR nodes)
  * - Effected/clipped SVGs and raster images: emitted as `image` IR nodes with embedded data URL
  */
-export function extractImageGeometry(
+export async function extractImageGeometry(
   el: HTMLImageElement,
   style: Style,
   globalIndex: number,
   options: Options
-): IRNode[] {
+): Promise<IRNode[]> {
   const src = el.currentSrc || el.src;
   if (!src) return [];
+
+  await ensureImageElementSourceReady(src);
 
   // Check for a pre-fetched version of this image (from preloadImages)
   const preloadedEl = preloadedImageElems.get(src);
@@ -1342,7 +1492,7 @@ export function extractImageGeometry(
       imageDataCache.set(imgCacheKey, null);
       return [];
     }
-    dataUrl = getImageDataUrl(drawEl);
+    dataUrl = await getImageDataUrl(drawEl);
     if (!dataUrl) dataUrl = src;
     if (!dataUrl) {
       imageDataCache.set(imgCacheKey, null);
@@ -1689,7 +1839,13 @@ async function waitForVideoReady(video: HTMLVideoElement): Promise<void> {
   }
 
   await new Promise<void>((resolve, reject) => {
+    const timeoutId = globalThis.setTimeout(() => {
+      cleanup();
+      reject(new Error("video load timed out"));
+    }, getConfiguredTimeout("__HC_VIDEO_READY_TIMEOUT_MS", VIDEO_READY_TIMEOUT_MS));
+
     const cleanup = () => {
+      globalThis.clearTimeout(timeoutId);
       video.removeEventListener("loadeddata", onLoadedData);
       video.removeEventListener("error", onError);
     };
@@ -1720,7 +1876,13 @@ async function seekVideoToStart(video: HTMLVideoElement): Promise<void> {
   if (Math.abs(video.currentTime) < 0.001 && !video.seeking) return;
 
   await new Promise<void>((resolve) => {
+    const timeoutId = globalThis.setTimeout(() => {
+      cleanup();
+      resolve();
+    }, getConfiguredTimeout("__HC_VIDEO_SEEK_TIMEOUT_MS", VIDEO_SEEK_TIMEOUT_MS));
+
     const cleanup = () => {
+      globalThis.clearTimeout(timeoutId);
       video.removeEventListener("seeked", onSeeked);
       video.removeEventListener("error", onError);
     };
@@ -1865,7 +2027,7 @@ function isSvgSource(src: string): boolean {
   }
 }
 
-/** Extract SVG markup from a data URL or fetch it synchronously. Results are cached. */
+/** Extract SVG markup from a data URL or async preload caches. Results are cached. */
 function extractSvgContent(src: string): string | null {
   const cached = svgContentCache.get(src);
   if (cached !== undefined) return cached;
@@ -1874,20 +2036,13 @@ function extractSvgContent(src: string): string | null {
   if (src.startsWith("data:image/svg+xml")) {
     result = decodeSvgDataUrl(src);
   } else {
-    // Try synchronous XHR for same-origin SVG URLs
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open("GET", src, false);
-      xhr.send();
-      if (xhr.status === 200 && xhr.responseText.includes("<svg")) {
-        result = xhr.responseText;
-      }
-    } catch {
-      // Cross-origin or network error — fall through to rasterize
+    const preloadedDataUrl = preloadedUrlMap.get(src);
+    if (preloadedDataUrl?.startsWith("data:image/svg+xml")) {
+      result = decodeSvgDataUrl(preloadedDataUrl);
     }
   }
 
-  svgContentCache.set(src, result);
+  if (result !== null) svgContentCache.set(src, result);
   return result;
 }
 
@@ -1973,7 +2128,7 @@ function convertSvgToGeometry(
  * Get image data as a data URL.
  * Always converts to JPEG for broad writer compatibility.
  */
-function getImageDataUrl(img: HTMLImageElement): string | null {
+async function getImageDataUrl(img: HTMLImageElement): Promise<string | null> {
   const src = img.currentSrc || img.src;
   if (!src) return null;
 
@@ -2001,39 +2156,22 @@ function getImageDataUrl(img: HTMLImageElement): string | null {
     if (src.startsWith("data:image/") && !src.startsWith("data:image/svg")) {
       return src;
     }
-    return fetchImageAsDataUrl(src);
+    const preloadedDataUrl = preloadedUrlMap.get(src);
+    if (preloadedDataUrl?.startsWith("data:image/")) {
+      return preloadedDataUrl;
+    }
+    return await fetchImageAsDataUrl(src);
   }
 }
 
 /**
- * Fetch an image URL synchronously and return it as a data URL.
- * Used as fallback when canvas.toDataURL fails due to cross-origin tainting.
+ * Resolve an image URL from async preload caches.
+ * When the source was not preloaded, return null and let callers fall back to the original URL.
  */
-function fetchImageAsDataUrl(url: string): string | null {
-  try {
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    // Synchronous XHR doesn't support responseType="arraybuffer",
-    // so override the charset to get raw binary data as a string
-    xhr.overrideMimeType("text/plain; charset=x-user-defined");
-    xhr.send();
-    if (xhr.status === 200 || xhr.status === 0) {
-      const raw = xhr.responseText;
-      // Detect MIME type from magic bytes
-      let mime = "image/png";
-      if (raw.charCodeAt(0) === 0xFF && raw.charCodeAt(1) === 0xD8) mime = "image/jpeg";
-      else if (raw.charCodeAt(0) === 0x47 && raw.charCodeAt(1) === 0x49) mime = "image/gif";
-      // Convert raw binary string to base64
-      let binary = "";
-      for (let i = 0; i < raw.length; i++) {
-        binary += String.fromCharCode(raw.charCodeAt(i) & 0xFF);
-      }
-      return `data:${mime};base64,${btoa(binary)}`;
-    }
-  } catch {
-    // Network error
-  }
-  return null;
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  await ensureImageElementSourceReady(url);
+  const preloadedDataUrl = preloadedUrlMap.get(url);
+  return preloadedDataUrl?.startsWith("data:image/") ? preloadedDataUrl : null;
 }
 
 /**

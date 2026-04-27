@@ -71,9 +71,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
   // Pre-fetch external images into internal caches (non-destructive to page DOM)
   if (options.includeImages) {
-    for (const rootEl of roots) {
-      await preloadImages(rootEl);
-    }
+    await Promise.all(roots.map((rootEl) => preloadImages(rootEl)));
   }
 
   const irNodes: IRNode[] = [];
@@ -157,7 +155,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
       // ::before / ::after pseudo-element extraction
       if (options.includePseudoElements !== false) {
-        const pseudoNodes = extractPseudoElements(el, getPseudoInheritedStyle(node), globalIndex, options);
+        const pseudoNodes = await extractPseudoElements(el, getPseudoInheritedStyle(node), globalIndex, options);
         attachSourceMetadata(pseudoNodes, el, options, `${el.tagName.toLowerCase()}::pseudo`);
         transformIRGeometry(pseudoNodes, node.coordinateTransform);
         irNodes.push(...pseudoNodes);
@@ -166,7 +164,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
       // Image element extraction (on top of HTML geometry)
       if (options.includeImages && isImageElement(el)) {
-        const imageNodes = extractImageGeometry(el, node.extractedStyle, globalIndex, options);
+        const imageNodes = await extractImageGeometry(el, node.extractedStyle, globalIndex, options);
         attachSourceMetadata(imageNodes, el, options, "img");
         transformIRGeometry(imageNodes, node.coordinateTransform);
         irNodes.push(...imageNodes);
@@ -193,7 +191,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
 
       // CSS background-image url() extraction
       if (options.includeImages && hasBackgroundImage(node.extractedStyle)) {
-        const bgNodes = extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
+        const bgNodes = await extractBackgroundImage(el, node.extractedStyle, globalIndex, options);
         attachSourceMetadata(bgNodes, el, options, "background-image");
         transformIRGeometry(bgNodes, node.coordinateTransform);
         irNodes.push(...bgNodes);
