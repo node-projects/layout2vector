@@ -66,6 +66,28 @@ function createTransparentPngDataUrl(): string {
 
 const TRANSPARENT_PIXEL_PNG = createTransparentPngDataUrl();
 
+function createOpaqueRedGifDataUrl(): string {
+  const gifBytes = Buffer.from([
+    0x47, 0x49, 0x46, 0x38, 0x39, 0x61,
+    0x01, 0x00, 0x01, 0x00,
+    0x80, 0x00, 0x00,
+    0xFF, 0x00, 0x00,
+    0x00, 0x00, 0x00,
+    0x2C,
+    0x00, 0x00, 0x00, 0x00,
+    0x01, 0x00, 0x01, 0x00,
+    0x00,
+    0x02,
+    0x02,
+    0x44, 0x01,
+    0x00,
+    0x3B,
+  ]);
+  return `data:image/gif;base64,${gifBytes.toString("base64")}`;
+}
+
+const OPAQUE_RED_GIF = createOpaqueRedGifDataUrl();
+
 const chipQuad: Quad = [
   { x: 0, y: 0 },
   { x: 42.2833, y: 0 },
@@ -262,6 +284,30 @@ test.describe("PDF writer regressions", () => {
     expect(content).toContain("/SMask");
     expect(content).toContain("/ColorSpace /DeviceGray");
     expect(content.match(/\/Subtype \/Image/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+  });
+
+  test("embeds GIF data URLs even when rgbData is absent", async () => {
+    const writer = new PDFWriter({ pageWidth: 20, pageHeight: 20 });
+    await renderIR([{
+      type: "image",
+      quad: [
+        { x: 2, y: 2 },
+        { x: 10, y: 2 },
+        { x: 10, y: 10 },
+        { x: 2, y: 10 },
+      ],
+      dataUrl: OPAQUE_RED_GIF,
+      width: 1,
+      height: 1,
+      style: {},
+      zIndex: 0,
+    } satisfies IRNode], writer);
+
+    const images = (writer as any).images as Array<{ data: Uint8Array; filter: string | null }>;
+
+    expect(images).toHaveLength(1);
+    expect(images[0].filter).toBeNull();
+    expect(Array.from(images[0].data)).toEqual([255, 0, 0]);
   });
 
   test("applies supported CSS color filters to embedded image RGB data", async () => {

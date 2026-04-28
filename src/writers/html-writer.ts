@@ -583,9 +583,9 @@ export class HTMLWriter implements Writer<string> {
 
     const opacity = style.opacity;
     const d = style.pathSubpaths?.length ? subpathsToSvgPath(style.pathSubpaths) : pointsToSvgPath(points, closed);
-    const hasClosedSubpath = closed || !!style.pathSubpaths?.some((subpath) => subpath.closed);
+    const canFillPath = closed || !!style.pathSubpaths?.length;
     const svgAttrs: string[] = [];
-    if (fill && hasClosedSubpath) svgAttrs.push(`fill="${escHtml(fill)}"`);
+    if (fill && canFillPath) svgAttrs.push(`fill="${escHtml(fill)}"`);
     else svgAttrs.push(`fill="none"`);
     if (style.fillRule === "evenodd") svgAttrs.push('fill-rule="evenodd"');
     if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);

@@ -492,7 +492,7 @@ function isVisibleNode(node: IRNode): boolean {
     }
     case "polyline": {
       const s = node.style;
-      if (node.closed && isVisibleColor(s.fill)) return true;
+      if ((node.closed || !!s.pathSubpaths?.length) && isVisibleColor(s.fill)) return true;
       if (isVisibleColor(s.stroke) && s.strokeWidth && parseFloat(s.strokeWidth) > 0) return true;
       return false;
     }

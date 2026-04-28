@@ -57,6 +57,35 @@ function createCompoundPathNodes(): IRNode[] {
   }];
 }
 
+function createOpenCompoundPathNodes(): IRNode[] {
+  const outer = [
+    { x: 0, y: 0 },
+    { x: 40, y: 0 },
+    { x: 40, y: 40 },
+    { x: 0, y: 40 },
+  ];
+  const inner = [
+    { x: 10, y: 10 },
+    { x: 30, y: 10 },
+    { x: 30, y: 30 },
+    { x: 10, y: 30 },
+  ];
+
+  return [{
+    type: "polyline",
+    points: [...outer, ...inner],
+    closed: false,
+    style: {
+      fill: "#999999",
+      pathSubpaths: [
+        { points: outer, closed: false },
+        { points: inner, closed: false },
+      ],
+    },
+    zIndex: 0,
+  }];
+}
+
 function listEmfRecordTypes(bytes: Uint8Array): number[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const types: number[] = [];
@@ -104,6 +133,22 @@ test.describe("Writer clip-path support", () => {
 
     expect(svg).toContain('fill-rule="evenodd"');
     expect(svg).toContain('M0,0 L40,0 L40,40 L0,40 Z M10,10 L30,10 L30,30 L10,30 Z');
+  });
+
+  test("HTML writer keeps filled open compound polylines", async () => {
+    const writer = new HTMLWriter({ width: 40, height: 40 });
+    const html = await renderIR(createOpenCompoundPathNodes(), writer);
+
+    expect(html).toContain('fill="#999999"');
+    expect(html).toContain('M0,0 L40,0 L40,40 L0,40 M10,10 L30,10 L30,30 L10,30');
+  });
+
+  test("SVG writer keeps filled open compound polylines", async () => {
+    const writer = new SVGWriter({ width: 40, height: 40 });
+    const svg = await renderIR(createOpenCompoundPathNodes(), writer);
+
+    expect(svg).toContain('fill="#999999"');
+    expect(svg).toContain('M0,0 L40,0 L40,40 L0,40 M10,10 L30,10 L30,30 L10,30');
   });
 
   test("PDF writer emits clip operators for clip-path shapes", async () => {

@@ -40,6 +40,48 @@ function shouldExtractMaskedLeafImage(node: StackingNode, options: Options): boo
   return !node.textNodes.some((textNode) => (textNode.textContent ?? "").trim().length > 0);
 }
 
+function isVisiblePaint(value: string | undefined): boolean {
+  if (!value) return false;
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized || normalized === "none" || normalized === "transparent") return false;
+  if (/^rgba\((?:[^)]*,){3}\s*0(?:\.0+)?\s*\)$/.test(normalized)) return false;
+  if (/^hsla\((?:[^)]*,){3}\s*0(?:\.0+)?\s*\)$/.test(normalized)) return false;
+
+  return true;
+}
+
+function hasVisibleBorder(style: Style): boolean {
+  const sides: Array<[string | undefined, string | undefined, string | undefined]> = [
+    [style.borderTopWidth, style.borderTopStyle, style.borderTopColor],
+    [style.borderRightWidth, style.borderRightStyle, style.borderRightColor],
+    [style.borderBottomWidth, style.borderBottomStyle, style.borderBottomColor],
+    [style.borderLeftWidth, style.borderLeftStyle, style.borderLeftColor],
+  ];
+
+  return sides.some(([width, borderStyle, color]) => {
+    if (!width || parseFloat(width) <= 0) return false;
+    if (!borderStyle || borderStyle === "none" || borderStyle === "hidden") return false;
+    return isVisiblePaint(color);
+  });
+}
+
+function hasVisibleOutline(style: Style): boolean {
+  if (!style.outlineWidth || parseFloat(style.outlineWidth) <= 0) return false;
+  if (!style.outlineStyle || style.outlineStyle === "none" || style.outlineStyle === "hidden") return false;
+  return isVisiblePaint(style.outlineColor);
+}
+
+function shouldExtractElementBox(style: Style): boolean {
+  if (isVisiblePaint(style.fill)) return true;
+  if (hasVisibleBorder(style)) return true;
+  if (hasVisibleOutline(style)) return true;
+  if (style.boxShadow && style.boxShadow !== "none") return true;
+  if (style.filter && style.filter !== "none") return true;
+  if (style.mixBlendMode && style.mixBlendMode !== "normal") return true;
+  return false;
+}
+
 /**
  * Extract geometry from an HTML element using getBoxQuads.
  * Returns IR nodes for the element's box and its text nodes.
@@ -66,17 +108,19 @@ export async function extractHTMLGeometry(
     if (maskedNodes.length > 0) return maskedNodes;
   }
 
-  // Extract element box quads (always via getBoxQuads for consistency)
-  const boxType = options.boxType ?? "border";
-  const quads = getElementQuads(el, boxType) as Quad[];
+  if (shouldExtractElementBox(node.extractedStyle)) {
+    // Extract element box quads only for visibly painted boxes.
+    const boxType = options.boxType ?? "border";
+    const quads = getElementQuads(el, boxType) as Quad[];
 
-  for (const quad of quads) {
-    results.push({
-      type: "polygon",
-      points: quad,
-      style: node.extractedStyle,
-      zIndex: globalIndex,
-    });
+    for (const quad of quads) {
+      results.push({
+        type: "polygon",
+        points: quad,
+        style: node.extractedStyle,
+        zIndex: globalIndex,
+      });
+    }
   }
 
   // Extract text node geometry

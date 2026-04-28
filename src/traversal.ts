@@ -245,7 +245,7 @@ export function traverseDOM(
   includeInvisible = false,
   walkIframes = false
 ): StackingNode {
-  return buildStackingNode(root, includeInvisible, 1, undefined, IDENTITY_TRANSFORM, walkIframes, undefined);
+  return buildStackingNode(root, includeInvisible, 1, undefined, undefined, IDENTITY_TRANSFORM, walkIframes, undefined);
 }
 
 function buildStackingNode(
@@ -253,12 +253,16 @@ function buildStackingNode(
   includeInvisible: boolean,
   parentOpacity: number,
   parentClipBounds: StackingNode["clipBounds"],
+  parentClipPath: string | undefined,
   coordinateTransform: CoordinateTransform,
   walkIframes: boolean,
   parentClipQuads: ClipQuad[] | undefined
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
+  if (!extractedStyleVal.clipPath && parentClipPath) {
+    extractedStyleVal.clipPath = parentClipPath;
+  }
   const isCtx = createsStackingContext(cs);
 
   // Compute effective opacity by multiplying with parent's accumulated opacity
@@ -309,6 +313,7 @@ function buildStackingNode(
       : ownClipBounds;
   }
   node.childClipBounds = childClipBounds;
+  const childClipPath = extractedStyleVal.clipPath ?? parentClipPath;
 
   // Determine which root to traverse children from
   const childRoot = (element.shadowRoot as ShadowRoot | null) ?? element;
@@ -340,7 +345,7 @@ function buildStackingNode(
         continue;
       }
 
-      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds, coordinateTransform, walkIframes, parentClipQuads));
+      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds, childClipPath, coordinateTransform, walkIframes, parentClipQuads));
     }
   }
 
@@ -359,6 +364,7 @@ function buildStackingNode(
             includeInvisible,
             effectiveOpacity,
             intersectClipBounds(childClipBounds, iframeViewport.clipBounds),
+            childClipPath,
             iframeViewport.transform,
             walkIframes,
             iframeClipQuads,

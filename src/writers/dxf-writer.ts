@@ -282,7 +282,7 @@ export class DXFWriter implements Writer<string> {
     const subpaths = style.pathSubpaths?.length ? style.pathSubpaths : [{ points, closed }];
     if (style.pathSubpaths?.length && fillVisible && fillColor !== undefined) {
       const hatchPaths = style.pathSubpaths
-        .filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        .filter((subpath) => subpath.points.length >= 3)
         .map((subpath) => subpath.points.map((point) => ({ x: point.x, y: point.y })));
       this.addSolidHatchPaths(hatchPaths, fillColor);
     }

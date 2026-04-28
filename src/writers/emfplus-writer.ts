@@ -1086,7 +1086,7 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
       const figures = style.pathSubpaths
         .map((subpath) => figureFromPoints(subpath.points, subpath.closed))
         .filter((figure): figure is PathFigure => figure !== null);
-      const hasFilledFigure = fillColor !== null && figures.some((figure) => figure.closed && figure.segments.length >= 2);
+      const hasFilledFigure = fillColor !== null && figures.some((figure) => figure.segments.length >= 2);
       const effectiveStroke = stroke ?? (!hasFilledFigure && fillColor !== null ? { color: fillColor, width: 1, dasharray: style.strokeDasharray } : null);
       this.emitFigures(figures, hasFilledFigure ? fillColor : null, effectiveStroke, style.fillRule, style.strokeDasharray);
       this.restoreState();

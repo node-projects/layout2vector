@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Page, type Response as PlaywrightResponse } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +25,8 @@ export interface ConvertPageToAllWritersOptions {
   convertFormControls?: boolean;
   dumpIR?: boolean;
   fontDirectory?: string;
+  walkIframes?: boolean;
+  skipPng?: boolean;
 }
 
 export interface ConversionSummary {
@@ -73,6 +75,8 @@ export function sanitizeOutputName(value: string): string {
 }
 
 const remoteIrImageCache = new Map<string, string | null>();
+const REMOTE_IR_IMAGE_FETCH_TIMEOUT_MS = 8_000;
+const REMOTE_IR_IMAGE_INLINE_CONCURRENCY = 24;
 
 function guessImageMimeType(url: string): string {
   try {
@@ -88,20 +92,33 @@ function guessImageMimeType(url: string): string {
   return "image/png";
 }
 
-async function resolveRemoteIrImageDataUrl(url: string): Promise<string | null> {
+async function resolveRemoteIrImageDataUrl(url: string, capturedImageDataUrls?: Map<string, string>): Promise<string | null> {
   if (url.startsWith("data:")) return url;
+  const capturedDataUrl = capturedImageDataUrls?.get(url);
+  if (capturedDataUrl?.startsWith("data:image/")) {
+    remoteIrImageCache.set(url, capturedDataUrl);
+    return capturedDataUrl;
+  }
   const cached = remoteIrImageCache.get(url);
   if (cached !== undefined) return cached;
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
+    const controller = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => controller.abort(), REMOTE_IR_IMAGE_FETCH_TIMEOUT_MS);
+    const response = await fetch(url, { signal: controller.signal }).finally(() => {
+      globalThis.clearTimeout(timeoutId);
+    });
+    const mimeType = (response.headers.get("content-type") || guessImageMimeType(url)).split(";")[0] || guessImageMimeType(url);
+    if (!mimeType.startsWith("image/")) {
       remoteIrImageCache.set(url, null);
       return null;
     }
 
-    const mimeType = (response.headers.get("content-type") || guessImageMimeType(url)).split(";")[0] || guessImageMimeType(url);
     const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length === 0) {
+      remoteIrImageCache.set(url, null);
+      return null;
+    }
     const dataUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
     remoteIrImageCache.set(url, dataUrl);
     return dataUrl;
@@ -111,12 +128,44 @@ async function resolveRemoteIrImageDataUrl(url: string): Promise<string | null> 
   }
 }
 
-async function inlineRemoteIrImages(nodes: IRNode[]): Promise<void> {
-  for (const node of nodes) {
-    if (node.type !== "image") continue;
-    if (node.dataUrl.startsWith("data:")) continue;
+async function mapWithConcurrency<T, TResult>(
+  items: T[],
+  concurrency: number,
+  worker: (item: T) => Promise<TResult>,
+): Promise<TResult[]> {
+  if (items.length === 0) return [];
 
-    const dataUrl = await resolveRemoteIrImageDataUrl(node.dataUrl);
+  const results = new Array<TResult>(items.length);
+  const limit = Math.max(1, Math.min(concurrency, items.length));
+  let nextIndex = 0;
+
+  const runners = Array.from({ length: limit }, async () => {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      if (currentIndex >= items.length) return;
+      results[currentIndex] = await worker(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(runners);
+  return results;
+}
+
+async function inlineRemoteIrImages(nodes: IRNode[], capturedImageDataUrls?: Map<string, string>): Promise<void> {
+  const imageNodes = nodes.filter((node): node is Extract<IRNode, { type: "image" }> => {
+    return node.type === "image" && !node.dataUrl.startsWith("data:");
+  });
+  if (imageNodes.length === 0) return;
+
+  const uniqueUrls = [...new Set(imageNodes.map((node) => node.dataUrl))];
+  const resolvedUrls = await mapWithConcurrency(uniqueUrls, REMOTE_IR_IMAGE_INLINE_CONCURRENCY, async (url) => {
+    return [url, await resolveRemoteIrImageDataUrl(url, capturedImageDataUrls)] as const;
+  });
+  const resolvedUrlMap = new Map(resolvedUrls);
+
+  for (const node of imageNodes) {
+    const dataUrl = resolvedUrlMap.get(node.dataUrl);
     if (dataUrl) node.dataUrl = dataUrl;
   }
 }
@@ -359,17 +408,50 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     convertFormControls = false,
     dumpIR = false,
     fontDirectory,
+    walkIframes: walkIframesOverride,
+    skipPng = false,
   } = options;
 
   ensureDirectory(outputDir);
 
+  const capturedImageDataUrls = new Map<string, string>();
+  const captureTasks = new Set<Promise<void>>();
+  const captureRemoteImageResponse = (response: PlaywrightResponse): void => {
+    if (response.request().resourceType() !== "image") return;
+
+    const responseUrl = response.url();
+    const requestUrl = response.request().url();
+    if (!/^https?:/i.test(responseUrl) && !/^https?:/i.test(requestUrl)) return;
+
+    const task = (async () => {
+      try {
+        const mimeType = (response.headers()["content-type"] || guessImageMimeType(responseUrl)).split(";")[0] || guessImageMimeType(responseUrl);
+        if (!mimeType.startsWith("image/")) return;
+
+        const buffer = await response.body();
+        if (buffer.length === 0) return;
+
+        const dataUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
+        capturedImageDataUrls.set(responseUrl, dataUrl);
+        capturedImageDataUrls.set(requestUrl, dataUrl);
+      } catch {
+        // Ignore image responses whose bodies are unavailable to Playwright.
+      }
+    })();
+
+    captureTasks.add(task);
+    void task.finally(() => captureTasks.delete(task));
+  };
+  page.on("response", captureRemoteImageResponse);
+
   await waitForDemoReadySignal(page);
   await stabilizePageForCapture(page);
+  await Promise.all([...captureTasks]);
 
   await injectBoxQuadsPolyfill(page);
   await injectLibrary(page);
 
-  const walkIframes = await page.evaluate(() => document.querySelector("iframe") !== null);
+  const walkIframes = walkIframesOverride ?? await page.evaluate(() => document.querySelector("iframe") !== null);
   await inlineLocalFileAssets(page);
 
   const ir: IRNode[] = await page.evaluate(({ shouldConvertFormControls, shouldWalkIframes, shouldIncludeSourceMetadata }) => {
@@ -391,7 +473,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   });
   expect(ir.length).toBeGreaterThan(0);
 
-  await inlineRemoteIrImages(ir);
+  await inlineRemoteIrImages(ir, capturedImageDataUrls);
 
   if (dumpIR) {
     fs.writeFileSync(path.join(outputDir, `${name}-ir.json`), JSON.stringify(ir, null, 2), "utf-8");
@@ -469,25 +551,27 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   let pngSize: number | null = null;
   let pngError: string | null = null;
   const pngPath = path.join(outputDir, `${name}.png`);
-  try {
-    const pngDataUrl: string = await page.evaluate(async ({ irNodes, viewportSize }) => {
-      const writer = new (window as any).__HC.PNGWriter(viewportSize.width, viewportSize.height);
-      const pngResult = await (window as any).__HC.renderIR(irNodes, writer);
-      await pngResult.finalize();
-      return pngResult.toDataURL();
-    }, {
-      irNodes: ir,
-      viewportSize: viewport,
-    });
+  if (!skipPng) {
+    try {
+      const pngDataUrl: string = await page.evaluate(async ({ irNodes, viewportSize }) => {
+        const writer = new (window as any).__HC.PNGWriter(viewportSize.width, viewportSize.height);
+        const pngResult = await (window as any).__HC.renderIR(irNodes, writer);
+        await pngResult.finalize();
+        return pngResult.toDataURL();
+      }, {
+        irNodes: ir,
+        viewportSize: viewport,
+      });
 
-    expect(pngDataUrl).toMatch(/^data:image\/png;base64,/);
-    const pngBase64 = pngDataUrl.split(",")[1];
-    fs.writeFileSync(pngPath, Buffer.from(pngBase64, "base64"));
-    pngSize = fs.statSync(pngPath).size;
-  } catch (error) {
-    // PNG output can still be blocked by browser canvas security rules.
-    pngError = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-    fs.writeFileSync(path.join(outputDir, `${name}-png-error.txt`), `${pngError}\n`, "utf-8");
+      expect(pngDataUrl).toMatch(/^data:image\/png;base64,/);
+      const pngBase64 = pngDataUrl.split(",")[1];
+      fs.writeFileSync(pngPath, Buffer.from(pngBase64, "base64"));
+      pngSize = fs.statSync(pngPath).size;
+    } catch (error) {
+      // PNG output can still be blocked by browser canvas security rules.
+      pngError = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+      fs.writeFileSync(path.join(outputDir, `${name}-png-error.txt`), `${pngError}\n`, "utf-8");
+    }
   }
 
   const svgWriter = new SVGWriter(viewport.width, viewport.height);

@@ -10,6 +10,7 @@ import { buildSourceMetadata } from "../shared/source-metadata.js";
 /** Number of sample points for path/circle/ellipse approximation. */
 const PATH_SAMPLE_COUNT = 64;
 const CIRCLE_SEGMENTS = 32;
+const sampledPathGeometryCache = new Map<string, { points: Point[]; closed: boolean } | null>();
 
 /**
  * Extract geometry from an entire SVG subtree.
@@ -786,30 +787,43 @@ function samplePathGeometry(
   transformEl: SVGGraphicsElement,
   ctm: DOMMatrix
 ): NonNullable<Style["pathSubpaths"]>[number] | null {
-  let totalLength: number;
-  try {
-    totalLength = pathEl.getTotalLength();
-  } catch {
-    return null;
-  }
-
-  if (totalLength === 0) return null;
-
-  // Detect if the path is closed by checking for Z/z command in path data
   const pathData = pathEl.getAttribute("d") ?? "";
-  const closed = /[Zz]\s*$/.test(pathData.trim()) || /[Zz]/.test(pathData);
+  let sampled = pathData ? sampledPathGeometryCache.get(pathData) : undefined;
 
-  const points: Point[] = [];
-  const sampleCount = Math.max(PATH_SAMPLE_COUNT, Math.ceil(totalLength / 2));
+  if (sampled === undefined) {
+    let totalLength: number;
+    try {
+      totalLength = pathEl.getTotalLength();
+    } catch {
+      sampled = null;
+      if (pathData) sampledPathGeometryCache.set(pathData, sampled);
+      return null;
+    }
 
-  for (let i = 0; i <= sampleCount; i++) {
-    const len = (totalLength * i) / sampleCount;
-    const pt = pathEl.getPointAtLength(len);
-    points.push({ x: pt.x, y: pt.y });
+    if (totalLength === 0) {
+      sampled = null;
+      if (pathData) sampledPathGeometryCache.set(pathData, sampled);
+      return null;
+    }
+
+    const closed = /[Zz]\s*$/.test(pathData.trim()) || /[Zz]/.test(pathData);
+    const points: Point[] = [];
+    const sampleCount = Math.max(PATH_SAMPLE_COUNT, Math.ceil(totalLength / 2));
+
+    for (let i = 0; i <= sampleCount; i++) {
+      const len = (totalLength * i) / sampleCount;
+      const pt = pathEl.getPointAtLength(len);
+      points.push({ x: pt.x, y: pt.y });
+    }
+
+    sampled = { points, closed };
+    if (pathData) sampledPathGeometryCache.set(pathData, sampled);
   }
 
-  const transformed = transformPoints(points, transformEl, ctm);
-  return { points: transformed, closed };
+  if (!sampled) return null;
+
+  const transformed = transformPoints(sampled.points, transformEl, ctm);
+  return { points: transformed, closed: sampled.closed };
 }
 
 /**

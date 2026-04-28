@@ -220,11 +220,15 @@ function decodeDataUrl(dataUrl: string): { data: Uint8Array; mimeType: string } 
 
 const PNG_SIGNATURE = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
 
-type PngImage = {
+type RasterImage = {
   width: number;
   height: number;
   rgba: Uint8Array;
 };
+
+function readUint16LE(bytes: Uint8Array, offset: number): number {
+  return bytes[offset] | (bytes[offset + 1] << 8);
+}
 
 function readUint32BE(bytes: Uint8Array, offset: number): number {
   return (
@@ -245,7 +249,7 @@ function paethPredictor(a: number, b: number, c: number): number {
   return c;
 }
 
-function decodePng(data: Uint8Array): PngImage | null {
+function decodePng(data: Uint8Array): RasterImage | null {
   if (data.byteLength < PNG_SIGNATURE.byteLength) return null;
   for (let index = 0; index < PNG_SIGNATURE.byteLength; index += 1) {
     if (data[index] !== PNG_SIGNATURE[index]) return null;
@@ -360,18 +364,260 @@ function decodePng(data: Uint8Array): PngImage | null {
   return { width, height, rgba };
 }
 
-function splitPngChannels(png: PngImage): { rgb: Uint8Array; alphaMask?: Uint8Array } {
-  const rgb = new Uint8Array(png.width * png.height * 3);
-  const alphaMask = new Uint8Array(png.width * png.height);
+function readGifSubBlocks(bytes: Uint8Array, offset: number): { data: Uint8Array; offset: number } | null {
+  const chunks: Uint8Array[] = [];
+  let totalLength = 0;
+  let cursor = offset;
+
+  while (cursor < bytes.length) {
+    const blockSize = bytes[cursor++];
+    if (blockSize === 0) {
+      const data = new Uint8Array(totalLength);
+      let destOffset = 0;
+      for (const chunk of chunks) {
+        data.set(chunk, destOffset);
+        destOffset += chunk.length;
+      }
+      return { data, offset: cursor };
+    }
+    if (cursor + blockSize > bytes.length) return null;
+    const chunk = bytes.subarray(cursor, cursor + blockSize);
+    chunks.push(chunk);
+    totalLength += chunk.length;
+    cursor += blockSize;
+  }
+
+  return null;
+}
+
+function decodeGifLzw(data: Uint8Array, minCodeSize: number, pixelCount: number): Uint8Array | null {
+  if (minCodeSize < 1 || minCodeSize > 8) return null;
+
+  const clearCode = 1 << minCodeSize;
+  const endCode = clearCode + 1;
+  const prefix = new Int32Array(4096);
+  const suffix = new Uint8Array(4096);
+  const pixelStack = new Uint8Array(4097);
+
+  for (let index = 0; index < clearCode; index += 1) {
+    suffix[index] = index;
+  }
+
+  let available = clearCode + 2;
+  let codeSize = minCodeSize + 1;
+  let codeMask = (1 << codeSize) - 1;
+  let oldCode = -1;
+  let first = 0;
+  let datum = 0;
+  let bits = 0;
+  let byteIndex = 0;
+  let stackSize = 0;
+  let outputIndex = 0;
+  const output = new Uint8Array(pixelCount);
+
+  while (outputIndex < pixelCount) {
+    if (stackSize === 0) {
+      while (bits < codeSize) {
+        if (byteIndex >= data.length) return null;
+        datum |= data[byteIndex] << bits;
+        bits += 8;
+        byteIndex += 1;
+      }
+
+      let code = datum & codeMask;
+      datum >>= codeSize;
+      bits -= codeSize;
+
+      if (code === clearCode) {
+        available = clearCode + 2;
+        codeSize = minCodeSize + 1;
+        codeMask = (1 << codeSize) - 1;
+        oldCode = -1;
+        continue;
+      }
+      if (code === endCode) break;
+      if (code > available || code >= 4096) return null;
+
+      if (oldCode === -1) {
+        output[outputIndex++] = suffix[code];
+        oldCode = code;
+        first = code;
+        continue;
+      }
+
+      const inCode = code;
+      if (code === available) {
+        pixelStack[stackSize++] = first;
+        code = oldCode;
+      }
+
+      while (code >= clearCode) {
+        if (code >= 4096 || stackSize >= pixelStack.length) return null;
+        pixelStack[stackSize++] = suffix[code];
+        code = prefix[code];
+      }
+
+      first = suffix[code];
+      pixelStack[stackSize++] = first;
+
+      if (available < 4096) {
+        prefix[available] = oldCode;
+        suffix[available] = first;
+        available += 1;
+        if (available === (1 << codeSize) && codeSize < 12) {
+          codeSize += 1;
+          codeMask = (1 << codeSize) - 1;
+        }
+      }
+
+      oldCode = inCode;
+    }
+
+    stackSize -= 1;
+    output[outputIndex++] = pixelStack[stackSize];
+  }
+
+  return outputIndex === pixelCount ? output : null;
+}
+
+function decodeGif(data: Uint8Array): RasterImage | null {
+  if (data.length < 13) return null;
+
+  const signature = String.fromCharCode(
+    data[0],
+    data[1],
+    data[2],
+    data[3],
+    data[4],
+    data[5],
+  );
+  if (signature !== "GIF87a" && signature !== "GIF89a") return null;
+
+  let offset = 6;
+  const canvasWidth = readUint16LE(data, offset);
+  const canvasHeight = readUint16LE(data, offset + 2);
+  offset += 4;
+  if (canvasWidth <= 0 || canvasHeight <= 0) return null;
+
+  const packed = data[offset++];
+  const hasGlobalColorTable = (packed & 0x80) !== 0;
+  const globalColorTableSize = 1 << ((packed & 0x07) + 1);
+  offset += 2; // background color index + pixel aspect ratio
+
+  let globalColorTable: Uint8Array | null = null;
+  if (hasGlobalColorTable) {
+    const tableLength = globalColorTableSize * 3;
+    if (offset + tableLength > data.length) return null;
+    globalColorTable = data.subarray(offset, offset + tableLength);
+    offset += tableLength;
+  }
+
+  let transparentIndex: number | null = null;
+
+  while (offset < data.length) {
+    const blockType = data[offset++];
+
+    if (blockType === 0x3B) break;
+
+    if (blockType === 0x21) {
+      if (offset >= data.length) return null;
+      const extensionType = data[offset++];
+      if (extensionType === 0xF9) {
+        const blockSize = data[offset++];
+        if (blockSize !== 4 || offset + blockSize + 1 > data.length) return null;
+        const controlPacked = data[offset];
+        transparentIndex = (controlPacked & 0x01) !== 0 ? data[offset + 3] : null;
+        offset += blockSize;
+        if (data[offset++] !== 0) return null;
+      } else {
+        const subBlocks = readGifSubBlocks(data, offset);
+        if (!subBlocks) return null;
+        offset = subBlocks.offset;
+      }
+      continue;
+    }
+
+    if (blockType !== 0x2C || offset + 9 > data.length) return null;
+
+    const left = readUint16LE(data, offset);
+    const top = readUint16LE(data, offset + 2);
+    const width = readUint16LE(data, offset + 4);
+    const height = readUint16LE(data, offset + 6);
+    const imagePacked = data[offset + 8];
+    offset += 9;
+
+    if (width <= 0 || height <= 0) return null;
+
+    const hasLocalColorTable = (imagePacked & 0x80) !== 0;
+    const interlaced = (imagePacked & 0x40) !== 0;
+    const localColorTableSize = 1 << ((imagePacked & 0x07) + 1);
+
+    let colorTable = globalColorTable;
+    if (hasLocalColorTable) {
+      const tableLength = localColorTableSize * 3;
+      if (offset + tableLength > data.length) return null;
+      colorTable = data.subarray(offset, offset + tableLength);
+      offset += tableLength;
+    }
+    if (!colorTable) return null;
+
+    const lzwMinCodeSize = data[offset++];
+    const subBlocks = readGifSubBlocks(data, offset);
+    if (!subBlocks) return null;
+    offset = subBlocks.offset;
+
+    const indexStream = decodeGifLzw(subBlocks.data, lzwMinCodeSize, width * height);
+    if (!indexStream) return null;
+
+    const rgba = new Uint8Array(canvasWidth * canvasHeight * 4);
+    const rowOrder: number[] = [];
+    if (interlaced) {
+      for (const [start, step] of [[0, 8], [4, 8], [2, 4], [1, 2]] as const) {
+        for (let y = start; y < height; y += step) rowOrder.push(y);
+      }
+    } else {
+      for (let y = 0; y < height; y += 1) rowOrder.push(y);
+    }
+
+    let sourceIndex = 0;
+    const colorCount = colorTable.length / 3;
+    for (const sourceY of rowOrder) {
+      const destY = top + sourceY;
+      for (let x = 0; x < width; x += 1) {
+        const colorIndex = indexStream[sourceIndex++];
+        const destX = left + x;
+        if (destX >= canvasWidth || destY >= canvasHeight || colorIndex >= colorCount) continue;
+        const destOffset = (destY * canvasWidth + destX) * 4;
+        if (transparentIndex !== null && colorIndex === transparentIndex) {
+          rgba[destOffset + 3] = 0;
+          continue;
+        }
+        const colorOffset = colorIndex * 3;
+        rgba[destOffset] = colorTable[colorOffset];
+        rgba[destOffset + 1] = colorTable[colorOffset + 1];
+        rgba[destOffset + 2] = colorTable[colorOffset + 2];
+        rgba[destOffset + 3] = 255;
+      }
+    }
+
+    return { width: canvasWidth, height: canvasHeight, rgba };
+  }
+
+  return null;
+}
+
+function splitRasterChannels(image: RasterImage): { rgb: Uint8Array; alphaMask?: Uint8Array } {
+  const rgb = new Uint8Array(image.width * image.height * 3);
+  const alphaMask = new Uint8Array(image.width * image.height);
   let hasTransparency = false;
 
-  for (let pixel = 0; pixel < png.width * png.height; pixel += 1) {
+  for (let pixel = 0; pixel < image.width * image.height; pixel += 1) {
     const rgbaOffset = pixel * 4;
     const rgbOffset = pixel * 3;
-    rgb[rgbOffset] = png.rgba[rgbaOffset];
-    rgb[rgbOffset + 1] = png.rgba[rgbaOffset + 1];
-    rgb[rgbOffset + 2] = png.rgba[rgbaOffset + 2];
-    const alpha = png.rgba[rgbaOffset + 3];
+    rgb[rgbOffset] = image.rgba[rgbaOffset];
+    rgb[rgbOffset + 1] = image.rgba[rgbaOffset + 1];
+    rgb[rgbOffset + 2] = image.rgba[rgbaOffset + 2];
+    const alpha = image.rgba[rgbaOffset + 3];
     alphaMask[pixel] = alpha;
     if (alpha < 255) hasTransparency = true;
   }
@@ -1778,13 +2024,38 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (decoded?.mimeType === "image/png") {
       const png = decodePng(decoded.data);
       if (png) {
-        const channels = splitPngChannels(png);
+        const channels = splitRasterChannels(png);
         const filteredChannels = applySupportedImageColorFilters(channels.rgb, style.filter, channels.alphaMask);
         this.images.push({
           name: imgName,
           data: filteredChannels.rgb,
           width: png.width,
           height: png.height,
+          filter: null,
+          softMask: filteredChannels.alphaMask,
+        });
+      } else if (rgbData) {
+        const filteredRgb = applySupportedImageColorFilters(new Uint8Array(rgbData), style.filter).rgb;
+        this.images.push({
+          name: imgName,
+          data: filteredRgb,
+          width,
+          height,
+          filter: null,
+        });
+      } else {
+        return;
+      }
+    } else if (decoded?.mimeType === "image/gif") {
+      const gif = decodeGif(decoded.data);
+      if (gif) {
+        const channels = splitRasterChannels(gif);
+        const filteredChannels = applySupportedImageColorFilters(channels.rgb, style.filter, channels.alphaMask);
+        this.images.push({
+          name: imgName,
+          data: filteredChannels.rgb,
+          width: gif.width,
+          height: gif.height,
           filter: null,
           softMask: filteredChannels.alphaMask,
         });

@@ -698,10 +698,10 @@ export class SVGWriter implements Writer<string> {
     }
     const d = style.pathSubpaths?.length ? subpathsToPath(style.pathSubpaths) : pointsToPath(points, closed);
     const gradientIds = this.addGradientDefs(style.backgroundImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
-    const hasClosedSubpath = closed || !!style.pathSubpaths?.some((subpath) => subpath.closed);
+    const canFillPath = closed || !!style.pathSubpaths?.length;
     const element = this.buildLayeredShape(
       (attrs) => `<path d="${d}"${style.fillRule === "evenodd" ? ' fill-rule="evenodd"' : ""}${attrs}/>` ,
-      hasClosedSubpath ? fill : null,
+      canFillPath ? fill : null,
       stroke,
       style,
       gradientIds,

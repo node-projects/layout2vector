@@ -623,7 +623,7 @@ export class EMFWriter implements Writer<Uint8Array> {
     if (style.pathSubpaths?.length) {
       const drawableSubpaths = style.pathSubpaths.filter((subpath) => subpath.points.length >= 2);
       const filledSubpaths = fillColor !== null
-        ? drawableSubpaths.filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        ? drawableSubpaths.filter((subpath) => subpath.points.length >= 3)
         : [];
       const hasFilledSubpath = filledSubpaths.length > 0;
       const strokeSubpaths = drawableSubpaths.filter((subpath) => !filledSubpaths.includes(subpath));

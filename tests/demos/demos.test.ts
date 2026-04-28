@@ -23,11 +23,18 @@ const demoFiles = fs
 for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
   const convertFormControls = name === "form-controls" || name === "form2" || name === "github" || name === "google" || name === "test8";
+  const isolateRemoteRuntime = name === "bild";
+  const walkIframes = name === "bild" ? false : undefined;
 
   test(`convert demo: ${name}`, async ({ page, browserName }) => {
-    // Complex pages (e.g. github.html with external CSS) need more time,
+    const timeoutMs = name === "bild"
+      ? browserName === "firefox"
+        ? 420_000
+        : 300_000
+      : 120_000;
+    // Complex pages with large remote-backed fixtures need more time,
     // especially on Firefox which loads resources differently.
-    test.setTimeout(120_000);
+    test.setTimeout(timeoutMs);
 
     const projectOutputDir = getProjectOutputDir(browserName);
 
@@ -39,6 +46,28 @@ for (const demoFile of demoFiles) {
 
     // Use goto with file URL so relative paths (e.g. img src) resolve correctly
     const fileUrl = pathToFileURL(path.join(demosDir, demoFile)).href;
+    if (isolateRemoteRuntime) {
+      await page.route("**/*", async (route) => {
+        const request = route.request();
+        const url = request.url();
+        const isRemote = /^https?:/i.test(url);
+        const isRemoteSubframe = request.isNavigationRequest()
+          && request.frame() !== page.mainFrame()
+          && isRemote;
+        const isRemoteScript = isRemote
+          && (request.resourceType() === "script"
+            || request.resourceType() === "fetch"
+            || request.resourceType() === "xhr"
+            || /\.m?js(?:[?#].*)?$/i.test(url));
+
+        if (isRemoteSubframe || isRemoteScript) {
+          await route.abort();
+          return;
+        }
+
+        await route.continue();
+      });
+    }
     await page.goto(fileUrl, { waitUntil: "load" });
 
     // Copy HTML to output dir (and any referenced subdirectories)
@@ -75,6 +104,8 @@ for (const demoFile of demoFiles) {
       name,
       outputDir: projectOutputDir,
       convertFormControls,
+      walkIframes,
+      skipPng: name === "bild" && browserName === "firefox",
       dumpIR: name === "comprehensive" || name === "images" || name === "test4" || name === "github" || name === "github-glow",
       fontDirectory: demosDir,
     });

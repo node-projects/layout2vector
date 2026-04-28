@@ -259,12 +259,12 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
 
     if (!fillVisible && !stroke) return;
 
-    if (style.pathSubpaths?.length && fillVisible && fillColor) {
+    if (style.pathSubpaths?.length && fillVisible && fillColor !== undefined) {
       const hatchPaths = style.pathSubpaths
-        .filter((subpath) => subpath.closed && subpath.points.length >= 3)
+        .filter((subpath) => subpath.points.length >= 3)
         .map((subpath) => subpath.points.map((point) => ({ x: point.x, y: point.y })));
       this.addSolidHatchPaths(hatchPaths, fillColor);
-    } else if (closed && fillVisible && fillColor && points.length >= 3) {
+    } else if (closed && fillVisible && fillColor !== undefined && points.length >= 3) {
       this.addSolidHatchPaths([
         points.map(p => ({ x: p.x, y: p.y })),
       ], fillColor);
