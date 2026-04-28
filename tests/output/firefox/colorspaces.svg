@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="1282" viewBox="0 0 1280 1282">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds2" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds3" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds6" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds8" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds9" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds10" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds11" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds12" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds13" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds14" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds15" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds16" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds17" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds18" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds19" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds20" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="rgba(0, 0, 0, 0.06)" result="s0"/></filter>
+<filter id="ds21" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="6" stdDeviation="9" flood-color="rgba(0,0,0,0.5)" result="s0"/></filter>
+</defs>
+<text x="24" y="26" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial, sans-serif">CSS Color Spaces &amp; Functions</text>
+<text x="24" y="58.8" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-size="14px" font-family="Arial, sans-serif">Exercises all predefined color() profiles, plus hsl(), hwb(), lab(), lch(), oklab(), oklch().</text>
+<text x="24" y="95.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">color() &#x2014; Predefined RGB Profiles</text>
+<g filter="url(#ds1)"><g><rect x="24" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(srgb 1 0.3 0.2)"/><rect x="24" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="38" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">SRGB</text>
+<text x="38" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(srgb 1 0.3 0.2)</text>
+<g filter="url(#ds2)"><g><rect x="231.67" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(srgb-linear 1 0.1 0.05)"/><rect x="231.67" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="245.67" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">SRGB-LINEAR</text>
+<text x="245.67" y="177.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(srgb-linear 1 0.1</text>
+<text x="245.67" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">0.05)</text>
+<g filter="url(#ds3)"><g><rect x="439.33" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(display-p3 0.95 0.3 0.2)"/><rect x="439.33" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="453.33" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">DISPLAY-P3</text>
+<text x="453.33" y="177.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(display-p3 0.95 0.3</text>
+<text x="453.33" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">0.2)</text>
+<g filter="url(#ds4)"><g><rect x="647" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(a98-rgb 0.85 0.2 0.15)"/><rect x="647" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="661" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">A98-RGB</text>
+<text x="661" y="177.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(a98-rgb 0.85 0.2</text>
+<text x="661" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">0.15)</text>
+<g filter="url(#ds5)"><g><rect x="854.67" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(prophoto-rgb 0.7 0.2 0.1)"/><rect x="854.67" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="868.67" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">PROPHOTO-RGB</text>
+<text x="868.67" y="177.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(prophoto-rgb 0.7 0.2</text>
+<text x="868.67" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">0.1)</text>
+<g filter="url(#ds6)"><g><rect x="1062.33" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="color(rec2020 0.85 0.2 0.15)"/><rect x="1062.33" y="121.6" width="193.67" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="1076.33" y="136.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">REC2020</text>
+<text x="1076.33" y="177.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(rec2020 0.85 0.2</text>
+<text x="1076.33" y="193.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">0.15)</text>
+<text x="24" y="243.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">color() &#x2014; XYZ Profiles</text>
+<g filter="url(#ds7)"><g><rect x="24" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="color(xyz-d65 0.41 0.21 0.02)"/><rect x="24" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="38" y="284.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">XYZ-D65</text>
+<text x="38" y="341.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(xyz-d65 0.41 0.21 0.02)</text>
+<g filter="url(#ds8)"><g><rect x="439.33" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="color(xyz-d50 0.44 0.22 0.01)"/><rect x="439.33" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="453.33" y="284.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">XYZ-D50</text>
+<text x="453.33" y="341.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(xyz-d50 0.44 0.22 0.01)</text>
+<g filter="url(#ds9)"><g><rect x="854.67" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="color(xyz-d65 0.15 0.25 0.4)"/><rect x="854.67" y="269.6" width="401.33" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="868.67" y="284.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">XYZ (ALIAS FOR XYZ-D65)</text>
+<text x="868.67" y="341.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">color(xyz 0.15 0.25 0.4)</text>
+<text x="24" y="391.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">color() with Alpha</text>
+<g><rect x="24" y="417.6" width="110" height="60" rx="30" ry="30" fill="color(display-p3 0 0.8 0.4 / 0.7)"/><rect x="24" y="417.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="56.82" y="442.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">p3 &#x3B1;=0.7</text>
+<g><rect x="146" y="417.6" width="110" height="60" rx="30" ry="30" fill="color(a98-rgb 0.5 0.1 0.9 / 0.5)"/><rect x="146" y="417.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="176.07" y="442.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">a98 &#x3B1;=0.5</text>
+<g><rect x="268" y="417.6" width="110" height="60" rx="30" ry="30" fill="color(rec2020 0.3 0.7 0.2 / 0.8)"/><rect x="268" y="417.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="295" y="442.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">2020 &#x3B1;=0.8</text>
+<g><rect x="390" y="417.6" width="110" height="60" rx="30" ry="30" fill="color(srgb 0.1 0.4 0.95 / 0.6)"/><rect x="390" y="417.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="417.32" y="442.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">srgb &#x3B1;=0.6</text>
+<text x="24" y="497.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">color() with Percentage Values</text>
+<g><rect x="24" y="523.6" width="110" height="60" rx="30" ry="30" fill="color(display-p3 0.9 0.3 0.2)"/><rect x="24" y="523.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="66.17" y="548.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">p3 %</text>
+<g><rect x="146" y="523.6" width="110" height="60" rx="30" ry="30" fill="color(srgb 0.2 0.6 0.8)"/><rect x="146" y="523.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="182.67" y="548.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">srgb %</text>
+<text x="24" y="603.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">lab() &amp; lch()</text>
+<g filter="url(#ds10)"><g><rect x="24" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="lab(54 81 70)"/><rect x="24" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="38" y="644.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">LAB()</text>
+<text x="38" y="701.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">lab(54% 81 70)</text>
+<g filter="url(#ds11)"><g><rect x="335.5" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="lch(54 107 41)"/><rect x="335.5" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="349.5" y="644.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">LCH()</text>
+<text x="349.5" y="701.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">lch(54% 107 41)</text>
+<g filter="url(#ds12)"><g><rect x="647" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="lab(75 -40 60)"/><rect x="647" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="661" y="644.6" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">LAB() GREEN-YELLOW</text>
+<text x="661" y="701.1" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">lab(75% -40 60)</text>
+<g filter="url(#ds13)"><g><rect x="958.5" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="lch(65 80 290)"/><rect x="958.5" y="629.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="972.5" y="644.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">LCH() VIOLET</text>
+<text x="972.5" y="701.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">lch(65% 80 290)</text>
+<text x="24" y="751.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">oklab() &amp; oklch()</text>
+<g filter="url(#ds14)"><g><rect x="24" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="oklab(0.63 0.22 0.13)"/><rect x="24" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="38" y="792.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">OKLAB()</text>
+<text x="38" y="849.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">oklab(0.63 0.22 0.13)</text>
+<g filter="url(#ds15)"><g><rect x="335.5" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="oklch(0.63 0.26 29)"/><rect x="335.5" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="349.5" y="792.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">OKLCH()</text>
+<text x="349.5" y="849.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">oklch(0.63 0.26 29)</text>
+<g filter="url(#ds16)"><g><rect x="647" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="oklab(0.8 -0.1 0.1)"/><rect x="647" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="661" y="792.6" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">OKLAB() LIME</text>
+<text x="661" y="849.1" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">oklab(0.80 -0.10 0.10)</text>
+<g filter="url(#ds17)"><g><rect x="958.5" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="oklch(0.55 0.2 270)"/><rect x="958.5" y="777.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="972.5" y="792.6" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">OKLCH() PURPLE</text>
+<text x="972.5" y="849.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">oklch(0.55 0.20 270)</text>
+<text x="24" y="899.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">hsl() &amp; hsla()</text>
+<g><rect x="24" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgb(255, 0, 0)"/><rect x="24" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="70.43" y="950.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">red</text>
+<g><rect x="146" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgb(20, 184, 20)"/><rect x="146" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="186.02" y="950.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">green</text>
+<g><rect x="268" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgb(61, 61, 245)"/><rect x="268" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="311.7" y="950.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">blue</text>
+<g><rect x="390" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgb(255, 255, 0)"/><rect x="390" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="428.2" y="950.1" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">yellow</text>
+<g><rect x="512" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgba(221, 60, 221, 0.7)"/><rect x="512" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="539.47" y="950.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">magenta &#x3B1;</text>
+<g><rect x="634" y="925.6" width="110" height="60" rx="30" ry="30" fill="rgba(51, 153, 204, 0.5)"/><rect x="634" y="925.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="674.62" y="950.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">teal &#x3B1;</text>
+<text x="24" y="1005.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">hwb()</text>
+<g><rect x="24" y="1031.6" width="110" height="60" rx="30" ry="30" fill="rgb(255, 0, 0)"/><rect x="24" y="1031.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="57" y="1056.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">pure red</text>
+<g><rect x="146" y="1031.6" width="110" height="60" rx="30" ry="30" fill="rgb(26, 230, 26)"/><rect x="146" y="1031.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="186.02" y="1056.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">green</text>
+<g><rect x="268" y="1031.6" width="110" height="60" rx="30" ry="30" fill="rgb(51, 51, 204)"/><rect x="268" y="1031.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="311.7" y="1056.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">blue</text>
+<g><rect x="390" y="1031.6" width="110" height="60" rx="30" ry="30" fill="rgb(230, 230, 77)"/><rect x="390" y="1031.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="410.17" y="1056.1" fill="rgb(17, 17, 17)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">muted yellow</text>
+<g><rect x="512" y="1031.6" width="110" height="60" rx="30" ry="30" fill="rgba(0, 179, 179, 0.8)"/><rect x="512" y="1031.6" width="110" height="60" rx="30" ry="30" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
+<text x="536.42" y="1056.1" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif">dark cyan &#x3B1;</text>
+<text x="24" y="1111.1" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="17px" font-family="Arial, sans-serif">Mixed Usage</text>
+<g filter="url(#ds18)"><g><rect x="24" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="24" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="color(display-p3 0.9 0.1 0.3)" stroke-width="4"/></g></g>
+<text x="40" y="1154.6" fill="color(display-p3 0.6 0 0.15)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">P3 BORDER &amp; TEXT</text>
+<text x="40" y="1207.1" fill="color(display-p3 0.6 0 0.15)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">display-p3 on border color and text color</text>
+<g filter="url(#ds19)"><g><rect x="335.5" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="oklch(0.92 0.04 90)"/><rect x="335.5" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="oklch(0.5 0.15 30)" stroke-width="3"/></g></g>
+<text x="350.5" y="1153.6" fill="oklch(0.3 0.1 30)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">OKLCH EVERYWHERE</text>
+<text x="350.5" y="1208.1" fill="oklch(0.3 0.1 30)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">bg + border + text all oklch</text>
+<g filter="url(#ds20)"><g><rect x="647" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="rgb(13, 121, 230)"/><rect x="647" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="lab(85 -20 50)" stroke-width="3"/></g></g>
+<text x="662" y="1153.6" fill="rgb(255, 255, 179)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">MIXED FUNCTIONS</text>
+<text x="662" y="1208.1" fill="rgb(255, 255, 179)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">hwb bg + hsl text + lab border</text>
+<g filter="url(#ds21)"><g><rect x="958.5" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="color(prophoto-rgb 0.5 0.35 0.15)"/><rect x="958.5" y="1137.6" width="297.5" height="100" rx="14" ry="14" fill="none" stroke="rgba(0, 0, 0, 0.12)" stroke-width="2"/></g></g>
+<text x="972.5" y="1152.6" fill="color(rec2020 0.95 0.95 0.85)" dominant-baseline="text-before-edge" font-weight="700" font-size="11px" font-family="Arial, sans-serif" letter-spacing="0.44px" opacity="0.85">WIDE-GAMUT TRIO</text>
+<text x="972.5" y="1209.1" fill="color(rec2020 0.95 0.95 0.85)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">prophoto bg + rec2020 text + a98 shadow</text>
+</svg>

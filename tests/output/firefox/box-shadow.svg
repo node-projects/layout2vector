@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
+<defs>
+<clipPath id="ic1"><rect x="40" y="40" width="100" height="18"/></clipPath>
+</defs>
+<rect x="40" y="40" width="100" height="18" rx="0" ry="0" fill="rgb(128, 128, 128)"/>
+<path d="M-113,-113 H293 V211 H-113 Z M40,43 H140 V61 H40 Z" fill="rgb(233, 30, 99)" fill-rule="evenodd" clip-path="url(#ic1)"/>
+<text x="40" y="41" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">test</text>
+</svg>

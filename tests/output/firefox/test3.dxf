@@ -3757,7 +3757,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image1.jpg
+test3-dxf-assets/image1.jpg
 10
 30
 20
@@ -3813,7 +3813,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image2.jpg
+test3-dxf-assets/image2.png
 10
 22
 20

@@ -1881,7 +1881,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image1.jpg
+clip-path-dxf-assets/image1.png
 10
 180
 20
@@ -1937,7 +1937,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image2.jpg
+clip-path-dxf-assets/image2.png
 10
 180
 20

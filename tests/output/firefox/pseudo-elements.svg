@@ -1,76 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="1435" viewBox="0 0 1280 1435">
-<text x="20" y="46" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="Arial">Pseudo-Elements &amp; Counters Demo</text>
-<text x="20" y="97.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Simple ::before</text>
-<text x="40.45" y="127" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This has an arrow before</text>
-<text x="20" y="127" fill="rgb(231, 76, 60)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">&#x2192;</text>
-<text x="40.45" y="145" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Another item with arrow</text>
-<text x="20" y="145" fill="rgb(231, 76, 60)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">&#x2192;</text>
-<text x="20" y="187.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Simple ::after</text>
-<text x="20" y="219.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Task completed</text>
-<text x="131.18" y="219.5" fill="rgb(39, 174, 96)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">&#x2713;</text>
-<text x="20" y="240.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Another task done</text>
-<text x="149.9" y="240.5" fill="rgb(39, 174, 96)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">&#x2713;</text>
-<text x="20" y="283.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Styled Pseudo-Element</text>
-<text x="77.33" y="313" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This is an important notice</text>
+<text x="20" y="46" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="Arial, sans-serif">Pseudo-Elements &amp; Counters Demo</text>
+<text x="20" y="97.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Simple ::before</text>
+<text x="40.45" y="127" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This has an arrow before</text>
+<text x="20" y="127" fill="rgb(231, 76, 60)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">&#x2192;</text>
+<text x="40.45" y="145" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Another item with arrow</text>
+<text x="20" y="145" fill="rgb(231, 76, 60)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">&#x2192;</text>
+<text x="20" y="187.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Simple ::after</text>
+<text x="20" y="219.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Task completed</text>
+<text x="131.18" y="219.5" fill="rgb(39, 174, 96)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">&#x2713;</text>
+<text x="20" y="240.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Another task done</text>
+<text x="149.9" y="240.5" fill="rgb(39, 174, 96)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">&#x2713;</text>
+<text x="20" y="283.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Styled Pseudo-Element</text>
+<text x="77.33" y="313" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This is an important notice</text>
 <rect x="20" y="313" width="49.33" height="19" rx="4" ry="4" fill="rgb(52, 152, 219)"/>
-<text x="20" y="316.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">NOTE</text>
-<text x="20" y="357.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">counter() &#x2013; Numbered List</text>
-<text x="37.8" y="395" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">First item</text>
-<text x="20" y="395" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">1.</text>
-<text x="37.8" y="417" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Second item</text>
-<text x="20" y="417" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">2.</text>
-<text x="37.8" y="439" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Third item</text>
-<text x="20" y="439" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">3.</text>
-<text x="37.8" y="461" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Fourth item</text>
-<text x="20" y="461" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">4.</text>
-<text x="20" y="503.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">counters() &#x2013; Nested Numbering</text>
-<text x="33.35" y="541" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Introduction</text>
-<text x="20" y="541" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">1</text>
-<text x="70.7" y="559" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Background</text>
-<text x="44" y="559" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">1.1</text>
-<text x="70.7" y="581" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Motivation</text>
-<text x="44" y="581" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">1.2</text>
-<text x="33.35" y="603" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Methods</text>
-<text x="20" y="603" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">2</text>
-<text x="70.7" y="621" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Data Collection</text>
-<text x="44" y="621" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">2.1</text>
-<text x="70.7" y="643" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Analysis</text>
-<text x="44" y="643" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">2.2</text>
-<text x="70.7" y="665" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Validation</text>
-<text x="44" y="665" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">2.3</text>
-<text x="33.35" y="687" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Results</text>
-<text x="20" y="687" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">3</text>
-<text x="20" y="729.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">open-quote / close-quote</text>
-<text x="30.68" y="770" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This text has fancy quote marks</text>
-<text x="20" y="767.4" fill="rgb(230, 126, 34)" dominant-baseline="text-before-edge" font-size="19.2px" font-family="Arial">&#xAB;</text>
-<text x="256.62" y="767.4" fill="rgb(230, 126, 34)" dominant-baseline="text-before-edge" font-size="19.2px" font-family="Arial">&#xBB;</text>
-<text x="20" y="813.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">attr() Function</text>
-<text x="20" y="843" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">This shows an attribute value</text>
-<text x="227.25" y="843" fill="rgb(127, 140, 141)" dominant-baseline="text-before-edge" font-style="italic" font-size="16px" font-family="Arial">[important]</text>
-<text x="20" y="903.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Decorative Pseudo-Elements</text>
-<g><path d="M20,934 L1260,934 L1260,996 L20,996 Z" fill="rgb(249, 249, 249)"/><path d="M20,934 L1260,934 L1260,996 L20,996 Z" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
-<text x="41" y="958" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">A card with a decorative top bar and bottom line</text>
-<path d="M41,945 L81,945 L81,949 L41,949 Z" fill="rgb(231, 76, 60)"/>
-<path d="M41,983 L1239,983 L1239,985 L41,985 Z" fill="rgb(52, 152, 219)"/>
-<text x="20" y="1021.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Transformed Element</text>
+<text x="20" y="316.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif">NOTE</text>
+<text x="20" y="357.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">counter() &#x2013; Numbered List</text>
+<text x="37.8" y="395" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">First item</text>
+<text x="20" y="395" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">1.</text>
+<text x="37.8" y="417" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Second item</text>
+<text x="20" y="417" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">2.</text>
+<text x="37.8" y="439" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Third item</text>
+<text x="20" y="439" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">3.</text>
+<text x="37.8" y="461" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Fourth item</text>
+<text x="20" y="461" fill="rgb(44, 62, 80)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">4.</text>
+<text x="20" y="503.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">counters() &#x2013; Nested Numbering</text>
+<text x="33.35" y="541" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Introduction</text>
+<text x="20" y="541" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">1</text>
+<text x="70.7" y="559" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Background</text>
+<text x="44" y="559" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">1.1</text>
+<text x="70.7" y="581" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Motivation</text>
+<text x="44" y="581" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">1.2</text>
+<text x="33.35" y="603" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Methods</text>
+<text x="20" y="603" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">2</text>
+<text x="70.7" y="621" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Data Collection</text>
+<text x="44" y="621" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">2.1</text>
+<text x="70.7" y="643" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Analysis</text>
+<text x="44" y="643" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">2.2</text>
+<text x="70.7" y="665" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Validation</text>
+<text x="44" y="665" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">2.3</text>
+<text x="33.35" y="687" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Results</text>
+<text x="20" y="687" fill="rgb(142, 68, 173)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">3</text>
+<text x="20" y="729.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">open-quote / close-quote</text>
+<text x="30.68" y="770" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This text has fancy quote marks</text>
+<text x="20" y="767.4" fill="rgb(230, 126, 34)" dominant-baseline="text-before-edge" font-size="19.2px" font-family="Arial, sans-serif">&#xAB;</text>
+<text x="256.62" y="767.4" fill="rgb(230, 126, 34)" dominant-baseline="text-before-edge" font-size="19.2px" font-family="Arial, sans-serif">&#xBB;</text>
+<text x="20" y="813.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">attr() Function</text>
+<text x="20" y="843" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This shows an attribute value</text>
+<text x="227.25" y="843" fill="rgb(127, 140, 141)" dominant-baseline="text-before-edge" font-style="italic" font-size="16px" font-family="Arial, sans-serif">[important]</text>
+<text x="20" y="903.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Decorative Pseudo-Elements</text>
+<g><rect x="20" y="934" width="1240" height="62" rx="0" ry="0" fill="rgb(249, 249, 249)"/><rect x="20" y="934" width="1240" height="62" rx="0" ry="0" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
+<text x="41" y="958" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">A card with a decorative top bar and bottom line</text>
+<rect x="41" y="945" width="40" height="4" rx="0" ry="0" fill="rgb(231, 76, 60)"/>
+<rect x="41" y="983" width="1198" height="2" rx="0" ry="0" fill="rgb(52, 152, 219)"/>
+<text x="20" y="1021.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Transformed Element</text>
 <g><path d="M41.27,1064.4 L256.28,1075.66 L254.03,1118.6 L39.02,1107.34 Z" fill="rgb(255, 243, 205)"/><path d="M41.27,1064.4 L256.28,1075.66 L254.03,1118.6 L39.02,1107.34 Z" fill="none" stroke="rgb(255, 193, 7)" stroke-width="1"/></g>
-<text x="75.7" y="1080.72" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial" transform="rotate(3,75.7,1080.72)">Warning: tilted element</text>
-<text x="57.49" y="1079.77" fill="rgb(133, 100, 4)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial" transform="rotate(3,57.49,1079.77)">&#x26A0;</text>
-<text x="20" y="1176.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Chapter Numbering</text>
-<text x="98.38" y="1206.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">Getting Started</text>
-<text x="20" y="1206.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Chapter 1:</text>
-<text x="98.38" y="1232.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">Installation Guide</text>
-<text x="20" y="1232.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Chapter 2:</text>
-<text x="98.38" y="1258.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial">Configuration</text>
-<text x="20" y="1258.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Chapter 3:</text>
-<text x="20" y="1300.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial">Both ::before &amp; ::after</text>
-<g><path d="M20,1333 L223.05,1333 L223.05,1368 L20,1368 Z" fill="rgb(234, 242, 248)"/><path d="M20,1333 L223.05,1333 L223.05,1368 L20,1368 Z" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
-<text x="51.23" y="1343.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Surrounded content</text>
-<text x="33" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25B6;</text>
-<text x="191.82" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25C0;</text>
-<g><path d="M20,1376 L258.62,1376 L258.62,1411 L20,1411 Z" fill="rgb(234, 242, 248)"/><path d="M20,1376 L258.62,1376 L258.62,1411 L20,1411 Z" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
-<text x="51.23" y="1386.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Another surrounded item</text>
-<text x="33" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25B6;</text>
-<text x="227.38" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">&#x25C0;</text>
+<text x="0" y="0.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,75.73,1080.22)">Warning: tilted element</text>
+<text x="0" y="0.5" fill="rgb(133, 100, 4)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,57.52,1079.27)">&#x26A0;</text>
+<text x="20" y="1176.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Chapter Numbering</text>
+<text x="98.38" y="1206.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">Getting Started</text>
+<text x="20" y="1206.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Chapter 1:</text>
+<text x="98.38" y="1232.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">Installation Guide</text>
+<text x="20" y="1232.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Chapter 2:</text>
+<text x="98.38" y="1258.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">Configuration</text>
+<text x="20" y="1258.5" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Chapter 3:</text>
+<text x="20" y="1300.64" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Both ::before &amp; ::after</text>
+<g><rect x="20" y="1333" width="203.05" height="35" rx="0" ry="0" fill="rgb(234, 242, 248)"/><rect x="20" y="1333" width="203.05" height="35" rx="0" ry="0" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
+<text x="51.23" y="1343.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Surrounded content</text>
+<text x="33" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25B6;</text>
+<text x="191.82" y="1343.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25C0;</text>
+<g><rect x="20" y="1376" width="238.62" height="35" rx="0" ry="0" fill="rgb(234, 242, 248)"/><rect x="20" y="1376" width="238.62" height="35" rx="0" ry="0" fill="none" stroke="rgb(174, 214, 241)" stroke-width="1"/></g>
+<text x="51.23" y="1386.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Another surrounded item</text>
+<text x="33" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25B6;</text>
+<text x="227.38" y="1386.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25C0;</text>
 </svg>

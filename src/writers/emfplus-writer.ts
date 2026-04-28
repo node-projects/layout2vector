@@ -1499,12 +1499,19 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
   }
 
   private buildImageObject(image: ImageSource): Uint8Array {
-    const bitmapData = concatBytes(
-      uint32Array(image.width, image.height),
-      int32Array(image.stride),
-      uint32Array(image.pixelFormat, image.compressed ? BITMAP_DATA_TYPE_COMPRESSED : BITMAP_DATA_TYPE_PIXEL),
-      image.data,
-    );
+    const bitmapData = image.compressed
+      ? concatBytes(
+          uint32Array(0, 0),
+          int32Array(0),
+          uint32Array(PIXEL_FORMAT_UNDEFINED, BITMAP_DATA_TYPE_COMPRESSED),
+          image.data,
+        )
+      : concatBytes(
+          uint32Array(image.width, image.height),
+          int32Array(image.stride),
+          uint32Array(image.pixelFormat, BITMAP_DATA_TYPE_PIXEL),
+          image.data,
+        );
     return concatBytes(uint32Array(GRAPHICS_VERSION, IMAGE_DATA_TYPE_BITMAP), bitmapData);
   }
 

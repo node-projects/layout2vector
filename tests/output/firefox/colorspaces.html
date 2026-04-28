@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: CSS Color Spaces</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; color: #1f2937; }
+    #root { padding: 24px; }
+    h1 { margin: 0 0 6px; font-size: 22px; }
+    h2 { margin: 18px 0 8px; font-size: 17px; }
+    p { margin: 0 0 14px; line-height: 1.4; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .card {
+      min-height: 100px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .label { font-size: 11px; font-weight: bold; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.85; }
+    .value { font-size: 13px; font-weight: bold; margin-top: 6px; }
+    .swatch-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .swatch {
+      width: 110px;
+      height: 60px;
+      border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>CSS Color Spaces &amp; Functions</h1>
+    <p>Exercises all predefined color() profiles, plus hsl(), hwb(), lab(), lch(), oklab(), oklch().</p>
+
+    <!-- ── color() profiles ────────────────────────────────── -->
+    <h2>color() — Predefined RGB Profiles</h2>
+    <div class="grid">
+      <div class="card" style="background: color(srgb 1 0.3 0.2); color: white;">
+        <div class="label">srgb</div>
+        <div class="value">color(srgb 1 0.3 0.2)</div>
+      </div>
+      <div class="card" style="background: color(srgb-linear 1 0.1 0.05); color: white;">
+        <div class="label">srgb-linear</div>
+        <div class="value">color(srgb-linear 1 0.1 0.05)</div>
+      </div>
+      <div class="card" style="background: color(display-p3 0.95 0.3 0.2); color: white;">
+        <div class="label">display-p3</div>
+        <div class="value">color(display-p3 0.95 0.3 0.2)</div>
+      </div>
+      <div class="card" style="background: color(a98-rgb 0.85 0.2 0.15); color: white;">
+        <div class="label">a98-rgb</div>
+        <div class="value">color(a98-rgb 0.85 0.2 0.15)</div>
+      </div>
+      <div class="card" style="background: color(prophoto-rgb 0.7 0.2 0.1); color: white;">
+        <div class="label">prophoto-rgb</div>
+        <div class="value">color(prophoto-rgb 0.7 0.2 0.1)</div>
+      </div>
+      <div class="card" style="background: color(rec2020 0.85 0.2 0.15); color: white;">
+        <div class="label">rec2020</div>
+        <div class="value">color(rec2020 0.85 0.2 0.15)</div>
+      </div>
+    </div>
+
+    <h2>color() — XYZ Profiles</h2>
+    <div class="grid">
+      <div class="card" style="background: color(xyz-d65 0.41 0.21 0.02); color: white;">
+        <div class="label">xyz-d65</div>
+        <div class="value">color(xyz-d65 0.41 0.21 0.02)</div>
+      </div>
+      <div class="card" style="background: color(xyz-d50 0.44 0.22 0.01); color: white;">
+        <div class="label">xyz-d50</div>
+        <div class="value">color(xyz-d50 0.44 0.22 0.01)</div>
+      </div>
+      <div class="card" style="background: color(xyz 0.15 0.25 0.4); color: white;">
+        <div class="label">xyz (alias for xyz-d65)</div>
+        <div class="value">color(xyz 0.15 0.25 0.4)</div>
+      </div>
+    </div>
+
+    <!-- ── color() with alpha ──────────────────────────────── -->
+    <h2>color() with Alpha</h2>
+    <div class="swatch-row">
+      <div class="swatch" style="background: color(display-p3 0 0.8 0.4 / 0.7); color: white;">p3 α=0.7</div>
+      <div class="swatch" style="background: color(a98-rgb 0.5 0.1 0.9 / 0.5); color: white;">a98 α=0.5</div>
+      <div class="swatch" style="background: color(rec2020 0.3 0.7 0.2 / 0.8); color: white;">2020 α=0.8</div>
+      <div class="swatch" style="background: color(srgb 0.1 0.4 0.95 / 0.6); color: white;">srgb α=0.6</div>
+    </div>
+
+    <!-- ── color() with percentages ────────────────────────── -->
+    <h2>color() with Percentage Values</h2>
+    <div class="swatch-row">
+      <div class="swatch" style="background: color(display-p3 90% 30% 20%); color: white;">p3 %</div>
+      <div class="swatch" style="background: color(srgb 20% 60% 80%); color: white;">srgb %</div>
+    </div>
+
+    <!-- ── Lab / LCH functions ─────────────────────────────── -->
+    <h2>lab() &amp; lch()</h2>
+    <div class="grid">
+      <div class="card" style="background: lab(54% 81 70); color: white;">
+        <div class="label">lab()</div>
+        <div class="value">lab(54% 81 70)</div>
+      </div>
+      <div class="card" style="background: lch(54% 107 41); color: white;">
+        <div class="label">lch()</div>
+        <div class="value">lch(54% 107 41)</div>
+      </div>
+      <div class="card" style="background: lab(75% -40 60); color: #111;">
+        <div class="label">lab() green-yellow</div>
+        <div class="value">lab(75% -40 60)</div>
+      </div>
+      <div class="card" style="background: lch(65% 80 290); color: white;">
+        <div class="label">lch() violet</div>
+        <div class="value">lch(65% 80 290)</div>
+      </div>
+    </div>
+
+    <!-- ── OKLab / OKLCH functions ─────────────────────────── -->
+    <h2>oklab() &amp; oklch()</h2>
+    <div class="grid">
+      <div class="card" style="background: oklab(0.63 0.22 0.13); color: white;">
+        <div class="label">oklab()</div>
+        <div class="value">oklab(0.63 0.22 0.13)</div>
+      </div>
+      <div class="card" style="background: oklch(0.63 0.26 29); color: white;">
+        <div class="label">oklch()</div>
+        <div class="value">oklch(0.63 0.26 29)</div>
+      </div>
+      <div class="card" style="background: oklab(0.80 -0.10 0.10); color: #111;">
+        <div class="label">oklab() lime</div>
+        <div class="value">oklab(0.80 -0.10 0.10)</div>
+      </div>
+      <div class="card" style="background: oklch(0.55 0.20 270); color: white;">
+        <div class="label">oklch() purple</div>
+        <div class="value">oklch(0.55 0.20 270)</div>
+      </div>
+    </div>
+
+    <!-- ── HSL / HSLA ──────────────────────────────────────── -->
+    <h2>hsl() &amp; hsla()</h2>
+    <div class="swatch-row">
+      <div class="swatch" style="background: hsl(0 100% 50%); color: white;">red</div>
+      <div class="swatch" style="background: hsl(120 80% 40%); color: white;">green</div>
+      <div class="swatch" style="background: hsl(240 90% 60%); color: white;">blue</div>
+      <div class="swatch" style="background: hsl(60 100% 50%); color: #111;">yellow</div>
+      <div class="swatch" style="background: hsla(300, 70%, 55%, 0.7); color: white;">magenta α</div>
+      <div class="swatch" style="background: hsl(200 60% 50% / 0.5); color: white;">teal α</div>
+    </div>
+
+    <!-- ── HWB ─────────────────────────────────────────────── -->
+    <h2>hwb()</h2>
+    <div class="swatch-row">
+      <div class="swatch" style="background: hwb(0 0% 0%); color: white;">pure red</div>
+      <div class="swatch" style="background: hwb(120 10% 10%); color: white;">green</div>
+      <div class="swatch" style="background: hwb(240 20% 20%); color: white;">blue</div>
+      <div class="swatch" style="background: hwb(60 30% 10%); color: #111;">muted yellow</div>
+      <div class="swatch" style="background: hwb(180 0% 30% / 0.8); color: white;">dark cyan α</div>
+    </div>
+
+    <!-- ── Mixed usage (borders, shadows, text) ────────────── -->
+    <h2>Mixed Usage</h2>
+    <div class="grid">
+      <div class="card" style="background: white; border: 4px solid color(display-p3 0.9 0.1 0.3); color: color(display-p3 0.6 0 0.15);">
+        <div class="label">P3 border &amp; text</div>
+        <div class="value">display-p3 on border color and text color</div>
+      </div>
+      <div class="card" style="background: oklch(0.92 0.04 90); border: 3px solid oklch(0.50 0.15 30); color: oklch(0.30 0.10 30);">
+        <div class="label">oklch everywhere</div>
+        <div class="value">bg + border + text all oklch</div>
+      </div>
+      <div class="card" style="background: hwb(210 5% 10%); color: hsl(60 100% 85%); border: 3px solid lab(85% -20 50);">
+        <div class="label">mixed functions</div>
+        <div class="value">hwb bg + hsl text + lab border</div>
+      </div>
+      <div class="card" style="background: color(prophoto-rgb 0.5 0.35 0.15); color: color(rec2020 0.95 0.95 0.85); box-shadow: 0 6px 18px color(a98-rgb 0.2 0.1 0.05 / 0.4);">
+        <div class="label">wide-gamut trio</div>
+        <div class="value">prophoto bg + rec2020 text + a98 shadow</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

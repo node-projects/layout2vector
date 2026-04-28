@@ -74,6 +74,7 @@ function hasVisibleOutline(style: Style): boolean {
 
 function shouldExtractElementBox(style: Style): boolean {
   if (isVisiblePaint(style.fill)) return true;
+  if (style.backgroundImage && style.backgroundImage !== "none") return true;
   if (hasVisibleBorder(style)) return true;
   if (hasVisibleOutline(style)) return true;
   if (style.boxShadow && style.boxShadow !== "none") return true;
@@ -93,6 +94,7 @@ export async function extractHTMLGeometry(
 ): Promise<IRNode[]> {
   const el = node.element;
   const results: IRNode[] = [];
+  const isRootSvg = isSVGElement(el) && el.tagName.toLowerCase() === "svg";
 
   if (shouldSkipFormControlDescendant(el, options)) return results;
 
@@ -108,7 +110,7 @@ export async function extractHTMLGeometry(
     if (maskedNodes.length > 0) return maskedNodes;
   }
 
-  if (shouldExtractElementBox(node.extractedStyle)) {
+  if (isRootSvg || shouldExtractElementBox(node.extractedStyle)) {
     // Extract element box quads only for visibly painted boxes.
     const boxType = options.boxType ?? "border";
     const quads = getElementQuads(el, boxType) as Quad[];

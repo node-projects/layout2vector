@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
+<defs>
+<clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="773" y="307" width="246.58" height="114"/></clipPath>
+</defs>
+<rect x="773" y="307" width="246.58" height="114" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<g clip-path="url(#clip1)"><text x="774" y="310" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;">Alte Not-Halt Mobile Panel Steckplatz</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="342" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;">und F&#xF6;rdererstich AE11/AE12.</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="374" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text></g>
+<g clip-path="url(#clip1)"><text x="774" y="406" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;">Diagnose, falls sie mal ausgel&#xF6;st werden!</text></g>
+</svg>

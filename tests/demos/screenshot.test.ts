@@ -11,7 +11,7 @@ test("generate HTML and PDF previews", async ({ page }) => {
 
   const htmlFiles = fs
     .readdirSync(outputDir)
-    .filter((file) => file.endsWith(".html") && file !== "viewer.html")
+    .filter((file) => file.endsWith("-ir.html"))
     .sort();
   const pdfFiles = fs
     .readdirSync(outputDir)
@@ -25,18 +25,20 @@ test("generate HTML and PDF previews", async ({ page }) => {
     const name = path.basename(htmlFile, ".html");
     const htmlUrl = pathToFileURL(path.join(outputDir, htmlFile)).href;
 
-    await page.goto(htmlUrl, { waitUntil: "load" });
+    await page.goto(htmlUrl, { waitUntil: "commit" });
+    await page.locator("body").waitFor({ state: "attached" });
     await page.evaluate(async () => {
       if (document.fonts?.ready) {
         await document.fonts.ready;
       }
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     });
     await page.waitForFunction(() => Array.from(document.images).every((img) => img.complete), { timeout: 10000 });
-    // Firefox treats file:// body as hidden; skip visibility check there
-    const isFirefox = page.context().browser()?.browserType().name() === "firefox";
-    if (!isFirefox) {
-      await expect(page.locator("body")).toBeVisible();
-    }
+    await page.waitForFunction(() => {
+      const root = document.documentElement;
+      if (!root) return false;
+      return Math.max(root.clientWidth, root.scrollWidth) > 0 && Math.max(root.clientHeight, root.scrollHeight) > 0;
+    }, { timeout: 10000 });
 
     await page.screenshot({
       path: path.join(outputDir, `${name}-html-preview.png`),

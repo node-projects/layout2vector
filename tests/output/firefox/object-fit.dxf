@@ -2213,7 +2213,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image1.jpg
+object-fit-dxf-assets/image1.jpg
 10
 150
 20
@@ -2269,7 +2269,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image2.jpg
+object-fit-dxf-assets/image2.jpg
 10
 368
 20
@@ -2325,7 +2325,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image3.jpg
+object-fit-dxf-assets/image3.png
 10
 128
 20

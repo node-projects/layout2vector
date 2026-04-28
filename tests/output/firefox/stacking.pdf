@@ -40,7 +40,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 834.5909 Td
+0 834.2639 Td
 (Z-Index Stacking) Tj
 ET
 Q
@@ -59,7 +59,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-0 809.0429 Td
+0 808.8794 Td
 (z:1) Tj
 ET
 Q
@@ -78,7 +78,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-22.5 786.5429 Td
+22.5 786.3794 Td
 (z:2) Tj
 ET
 Q
@@ -97,7 +97,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-45 764.0429 Td
+45 763.8794 Td
 (z:3) Tj
 ET
 Q
@@ -105,7 +105,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 646.3409 Td
+0 646.0139 Td
 (Opacity Levels) Tj
 ET
 Q
@@ -129,7 +129,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-22.7 597.8699 Td
+22.7 597.5429 Td
 (1.0) Tj
 ET
 Q
@@ -155,7 +155,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-87.2875 597.8699 Td
+87.2875 597.5429 Td
 (0.75) Tj
 ET
 Q
@@ -181,7 +181,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-157.7 597.8699 Td
+157.7 597.5429 Td
 (0.5) Tj
 ET
 Q
@@ -207,7 +207,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-222.2875 597.8699 Td
+222.2875 597.5429 Td
 (0.25) Tj
 ET
 Q
@@ -233,7 +233,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-292.7 597.8699 Td
+292.7 597.5429 Td
 (0.1) Tj
 ET
 Q
@@ -241,7 +241,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 548.0909 Td
+0 547.7639 Td
 (Isolation: Isolate) Tj
 ET
 Q
@@ -271,7 +271,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-24 500.7929 Td
+24 500.6294 Td
 (B \(z:1\)) Tj
 ET
 Q
@@ -290,7 +290,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-9 515.7929 Td
+9 515.6294 Td
 (A \(z:2\)) Tj
 ET
 Q
@@ -298,7 +298,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 422.0909 Td
+0 421.7639 Td
 (Mix-Blend-Mode) Tj
 ET
 Q
@@ -328,7 +328,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-15 383.7929 Td
+15 383.6294 Td
 (Multiply) Tj
 ET
 Q
@@ -336,7 +336,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 296.0909 Td
+0 295.7639 Td
 (Will-Change) Tj
 ET
 Q
@@ -355,7 +355,7 @@ q
 BT
 1 1 1 rg
 /F1 12 Tf
-4.825 242.0429 Td
+4.825 241.8794 Td
 (will-change) Tj
 ET
 Q
@@ -363,7 +363,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 185.0909 Td
+0 184.7639 Td
 (Filter) Tj
 ET
 Q
@@ -387,7 +387,7 @@ q
 BT
 1 1 1 rg
 /F1 12 Tf
-24.9875 138.5429 Td
+24.9875 138.3794 Td
 (filtered) Tj
 ET
 Q
@@ -395,7 +395,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 89.0909 Td
+0 88.7639 Td
 (Contain: Paint) Tj
 ET
 Q
@@ -414,7 +414,7 @@ q
 BT
 1 1 1 rg
 /F2 12 Tf
-7.5 58.2929 Td
+7.5 58.1294 Td
 (contain:paint) Tj
 ET
 Q

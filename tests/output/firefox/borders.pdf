@@ -16,7 +16,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 225.4764 Td
+0 225.1494 Td
 (Borders & Border Radius) Tj
 ET
 Q
@@ -35,7 +35,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-17.25 139.5534 Td
+17.25 139.3899 Td
 (Solid border) Tj
 ET
 Q
@@ -54,7 +54,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-184.8375 139.5534 Td
+184.8375 139.3899 Td
 (Dashed border) Tj
 ET
 Q
@@ -73,7 +73,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-353.175 139.5534 Td
+353.175 139.3899 Td
 (Dotted border) Tj
 ET
 Q
@@ -126,7 +126,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-520.7625 139.5534 Td
+520.7625 139.3899 Td
 (Mixed borders) Tj
 ET
 Q
@@ -150,7 +150,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-689.85 139.5534 Td
+689.85 139.3899 Td
 (Rounded corners) Tj
 ET
 Q
@@ -190,7 +190,7 @@ q
 BT
 1 1 1 rg
 /F2 10.5 Tf
-58.8625 37.5054 Td
+58.8625 37.1784 Td
 (Pill Shape) Tj
 ET
 Q
@@ -209,7 +209,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-198.3375 51.0534 Td
+198.3375 50.8899 Td
 (Thick border) Tj
 ET
 Q
@@ -217,7 +217,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-198.3375 37.5534 Td
+198.3375 37.3899 Td
 (+ padding) Tj
 ET
 Q

@@ -1,0 +1,19 @@
+<style>
+    :host { container-name: page; }
+:host > * { position: absolute; }
+@container page style(--ts-theme: nomoves) {
+  ui-move { display: none; }
+}
+:host svg { pointer-events: none; overflow: visible; }
+:host > svg { position: absolute; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+:host > svg * { pointer-events: auto; }
+</style>
+<ui-text-block id="ID_acd89" style="left:773px;top:307px;"><template shadowrootmode="open" shadowrootserializable="">
+    <style>
+        :host { position: absolute; overflow: hidden; border: 1px solid black; font-size: 12px; font-family: "Segoe UI"; white-space: nowrap; }
+    </style>
+    <div>
+      <slot></slot>
+    </div></template>
+    Alte Not-Halt Mobile Panel Steckplatz<br><br>und Fördererstich AE11/AE12.<br><br>Am Pnoz gebrückt. Im Programm nur noch für<br><br>Diagnose, falls sie mal ausgelöst werden!
+</ui-text-block>

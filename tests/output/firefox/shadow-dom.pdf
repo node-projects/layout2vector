@@ -37,7 +37,7 @@ q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 294.4894 Td
+0 294.1624 Td
 (Declarative Shadow DOM) Tj
 ET
 Q
@@ -157,7 +157,7 @@ W n
 BT
 1 1 1 rg
 /F1 13.5 Tf
-12 259.2394 Td
+12 258.9124 Td
 (Shadow Card Title) Tj
 ET
 Q
@@ -176,7 +176,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 220.1434 Td
+12 219.8164 Td
 (This content is inside a declarative) Tj
 ET
 Q
@@ -195,7 +195,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 204.3934 Td
+12 204.0664 Td
 (shadow DOM. It demonstrates) Tj
 ET
 Q
@@ -214,7 +214,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 188.6434 Td
+12 188.3164 Td
 (encapsulated styling and layout) Tj
 ET
 Q
@@ -233,7 +233,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 172.8934 Td
+12 172.5664 Td
 (extraction.) Tj
 ET
 Q
@@ -280,7 +280,7 @@ W n
 BT
 0.5333 0.5333 0.5333 rg
 /F2 9 Tf
-12 137.9704 Td
+12 137.6434 Td
 (Footer text) Tj
 ET
 Q
@@ -349,7 +349,7 @@ q
 BT
 1 1 1 rg
 /F2 10.5 Tf
-18 91.5184 Td
+18 91.0279 Td
 (Shadow Button) Tj
 ET
 Q
@@ -389,7 +389,7 @@ q
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-136.85 91.1434 Td
+136.85 90.8164 Td
 (Online) Tj
 ET
 Q
@@ -413,7 +413,7 @@ q
 BT
 0.0824 0.3961 0.7529 rg
 /F1 12 Tf
-1.5 46.5664 Td
+1.5 46.4029 Td
 (Outer Shadow Root) Tj
 ET
 Q
@@ -437,7 +437,7 @@ q
 BT
 0.902 0.3176 0 rg
 /F2 9.75 Tf
-11.25 15.5569 Td
+11.25 15.2299 Td
 (Nested inner shadow DOM content) Tj
 ET
 Q

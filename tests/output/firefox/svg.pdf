@@ -7,19 +7,25 @@ endobj
 <</Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding>>
 endobj
 3 0 obj
-<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [30.073725 85.50171 113.926275 1.64916] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.4 0.494118 0.917647] /C1 [0.462745 0.294118 0.635294] /N 1>> /Extend [true true]>>
+<</Type /ExtGState /ca 0.3 /CA 1>>
 endobj
 4 0 obj
-<</Font <</F1 1 0 R /F2 2 0 R>> /Shading <</SH1 3 0 R>>>>
+<</Type /ExtGState /ca 0.5 /CA 1>>
 endobj
 5 0 obj
-<</Length 11277>>
+<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [30.073725 85.50171 113.926275 1.64916] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.4 0.494118 0.917647] /C1 [0.462745 0.294118 0.635294] /N 1>> /Extend [true true]>>
+endobj
+6 0 obj
+<</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R>> /Shading <</SH1 5 0 R>>>>
+endobj
+7 0 obj
+<</Length 11301>>
 stream
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 390.5074 Td
+0 390.1804 Td
 (SVG Shapes) Tj
 ET
 Q
@@ -434,6 +440,7 @@ q
 S
 Q
 q
+/GS1 gs
 0.298 0.6863 0.3137 rg
 0.298 0.6863 0.3137 RG
 1.5 w
@@ -539,7 +546,7 @@ q
 BT
 1 1 1 rg
 /F1 10.5 Tf
-158.25 161.2864 Td
+158.25 160.9594 Td
 (Group) Tj
 ET
 Q
@@ -558,7 +565,7 @@ q
 BT
 0.2 0.2 0.2 rg
 /F1 18 Tf
-15.75 102.2764 Td
+15.75 101.7859 Td
 (SVG Text) Tj
 ET
 Q
@@ -566,7 +573,7 @@ q
 BT
 0.4 0.4 0.4 rg
 /F2 10.5 Tf
-15.75 78.7864 Td
+15.75 78.4594 Td
 (Italic smaller text) Tj
 ET
 Q
@@ -638,6 +645,7 @@ h
 f
 Q
 q
+/GS2 gs
 0.1294 0.5882 0.9529 rg
 0.0824 0.3961 0.7529 RG
 0.75 w
@@ -649,6 +657,7 @@ h
 B
 Q
 q
+/GS2 gs
 0.9569 0.2627 0.2118 rg
 0.7765 0.1569 0.1569 RG
 0.75 w
@@ -671,28 +680,30 @@ S
 Q
 endstream
 endobj
-6 0 obj
-<</Type /Page /Parent 7 0 R /MediaBox [0 0 930.17484 401.325435] /Resources 4 0 R /Contents 5 0 R>>
-endobj
-7 0 obj
-<</Type /Pages /Kids [6 0 R] /Count 1>>
-endobj
 8 0 obj
-<</Type /Catalog /Pages 7 0 R>>
+<</Type /Page /Parent 9 0 R /MediaBox [0 0 930.17484 401.325435] /Resources 6 0 R /Contents 7 0 R>>
+endobj
+9 0 obj
+<</Type /Pages /Kids [8 0 R] /Count 1>>
+endobj
+10 0 obj
+<</Type /Catalog /Pages 9 0 R>>
 endobj
 xref
-0 9
+0 11
 0000000000 65535 f 
 0000000015 00000 n 
 0000000115 00000 n 
 0000000210 00000 n 
-0000000445 00000 n 
-0000000518 00000 n 
-0000011846 00000 n 
-0000011961 00000 n 
-0000012016 00000 n 
+0000000260 00000 n 
+0000000310 00000 n 
+0000000545 00000 n 
+0000000655 00000 n 
+0000012007 00000 n 
+0000012122 00000 n 
+0000012177 00000 n 
 trailer
-<</Root 8 0 R /Size 9>>
+<</Root 10 0 R /Size 11>>
 startxref
-12063
+12225
 %%EOF

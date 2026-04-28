@@ -519,7 +519,10 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   if (viewport.width <= 1 && irBounds.width > 0) viewport.width = irBounds.width;
   if (viewport.height <= 1 && irBounds.height > 0) viewport.height = irBounds.height;
 
-  const dxfWriter = new DXFWriter(viewport.height);
+  const dxfWriter = new DXFWriter({
+    maxY: viewport.height,
+    imageBasePath: `${name}-dxf-assets`,
+  });
   const dxfContent = await renderIR(ir, dxfWriter);
   expect(dxfContent).toBeTruthy();
   expect(dxfContent.length).toBeGreaterThan(100);

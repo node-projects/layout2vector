@@ -7,27 +7,27 @@
 <filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0, 0, 0, 0.08)" result="s0"/></filter>
 <filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="rgba(0, 0, 0, 0.08)" result="s0"/></filter>
 </defs>
-<text x="24" y="25.5" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial">Modern CSS Color Functions</text>
-<text x="24" y="62.5" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">These tiles exercise color(), lab(), lch(), oklab(), and oklch() across fills, borders, and text.</text>
-<g filter="url(#ds1)"><rect x="24" y="100" width="234" height="120" rx="16" ry="16" fill="color(srgb 1 0.32 0.24 / 0.95)"/><rect x="24" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g>
-<text x="41" y="118" fill="color(srgb 1 1 1)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">COLOR(SRGB)</text>
-<text x="41" y="187" fill="color(srgb 1 1 1)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Accent surface</text>
-<g filter="url(#ds2)"><rect x="274" y="100" width="234" height="120" rx="16" ry="16" fill="lab(54.2917 80.8125 69.8851)"/><rect x="274" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g>
-<text x="291" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">LAB()</text>
-<text x="291" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Perceptual red</text>
-<g filter="url(#ds3)"><rect x="523" y="100" width="234" height="120" rx="16" ry="16" fill="lch(54.2917 106.839 40.853)"/><rect x="523" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g>
-<text x="540" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">LCH()</text>
-<text x="540" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">Polar lightness</text>
-<g filter="url(#ds4)"><rect x="773" y="100" width="234" height="120" rx="16" ry="16" fill="oklab(0.62796 0.22486 0.12585)"/><rect x="773" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g>
-<text x="790" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">OKLAB()</text>
-<text x="790" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">OKLab card</text>
-<g filter="url(#ds5)"><rect x="1022" y="100" width="234" height="120" rx="16" ry="16" fill="oklch(0.62796 0.25768 29.234)"/><rect x="1022" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g>
-<text x="1039" y="118" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial">OKLCH()</text>
-<text x="1039" y="187" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial">OKLCH card</text>
+<text x="24" y="25.5" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-weight="700" font-size="22px" font-family="Arial, sans-serif">Modern CSS Color Functions</text>
+<text x="24" y="62.5" fill="rgb(31, 41, 55)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">These tiles exercise color(), lab(), lch(), oklab(), and oklch() across fills, borders, and text.</text>
+<g filter="url(#ds1)"><g><rect x="24" y="100" width="234" height="120" rx="16" ry="16" fill="color(srgb 1 0.32 0.24 / 0.95)"/><rect x="24" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g></g>
+<text x="41" y="118.39" fill="color(srgb 1 1 1)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.48px">COLOR(SRGB)</text>
+<text x="41" y="187.39" fill="color(srgb 1 1 1)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Accent surface</text>
+<g filter="url(#ds2)"><g><rect x="274" y="100" width="234" height="120" rx="16" ry="16" fill="lab(54.2917 80.8125 69.8851)"/><rect x="274" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g></g>
+<text x="290.59" y="118.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.48px">LAB()</text>
+<text x="290.59" y="187.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Perceptual red</text>
+<g filter="url(#ds3)"><g><rect x="523" y="100" width="234" height="120" rx="16" ry="16" fill="lch(54.2917 106.839 40.853)"/><rect x="523" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g></g>
+<text x="540.19" y="118.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.48px">LCH()</text>
+<text x="540.19" y="187.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Polar lightness</text>
+<g filter="url(#ds4)"><g><rect x="773" y="100" width="234" height="120" rx="16" ry="16" fill="oklab(0.62796 0.22486 0.12585)"/><rect x="773" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g></g>
+<text x="789.8" y="118.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.48px">OKLAB()</text>
+<text x="789.8" y="187.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">OKLab card</text>
+<g filter="url(#ds5)"><g><rect x="1022" y="100" width="234" height="120" rx="16" ry="16" fill="oklch(0.62796 0.25768 29.234)"/><rect x="1022" y="100" width="234" height="120" rx="16" ry="16" fill="none" stroke="color(srgb 0.15 0.15 0.15 / 0.2)" stroke-width="3"/></g></g>
+<text x="1039.39" y="118.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.48px">OKLCH()</text>
+<text x="1039.39" y="187.39" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">OKLCH card</text>
 <g><rect x="24" y="240" width="120" height="70" rx="35" ry="35" fill="color(srgb 0.18 0.66 0.35)"/><rect x="24" y="240" width="120" height="70" rx="35" ry="35" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
-<text x="60.33" y="270.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">success</text>
+<text x="58.33" y="268.89" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">success</text>
 <g><rect x="158" y="240" width="120" height="70" rx="35" ry="35" fill="lab(70 -10 60)"/><rect x="158" y="240" width="120" height="70" rx="35" ry="35" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
-<text x="203.02" y="270.5" fill="rgb(16, 16, 16)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">warm</text>
+<text x="201.02" y="268.89" fill="rgb(16, 16, 16)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">warm</text>
 <g><rect x="292" y="240" width="120" height="70" rx="35" ry="35" fill="oklch(0.82 0.12 120)"/><rect x="292" y="240" width="120" height="70" rx="35" ry="35" fill="none" stroke="rgba(0, 0, 0, 0.08)" stroke-width="2"/></g>
-<text x="340.27" y="270.5" fill="rgb(16, 32, 20)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial">mint</text>
+<text x="338.27" y="268.89" fill="rgb(16, 32, 20)" dominant-baseline="text-before-edge" font-weight="700" font-size="13px" font-family="Arial, sans-serif">mint</text>
 </svg>

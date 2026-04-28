@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="733" height="484" viewBox="0 0 733 484">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
 <defs>
 <clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="68" y="205" width="182" height="15.6"/></clipPath>
 <clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="409.99" y="50" width="152.69" height="14"/></clipPath>
 </defs>
-<g><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(233, 233, 237)"/><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
+<g><rect x="62" y="59" width="200" height="53" rx="0" ry="0" fill="rgb(233, 233, 237)"/><rect x="62" y="59" width="200" height="53" rx="0" ry="0" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
 <text x="142.58" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">Button</text>
 <g><rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
 <path d="M246.33,154.39 L250,157.61 L253.67,154.39" fill="none" stroke="rgb(80, 80, 80)" stroke-width="1.47"/>
@@ -15,7 +15,7 @@
 <g><rect x="62" y="381" width="211" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="381" width="211" height="21" rx="2" ry="2" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
 <g><rect x="404" y="46" width="164.67" height="22" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="404" y="46" width="164.67" height="22" rx="2" ry="2" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
 <g clip-path="url(#clip2)"><text x="409.99" y="50.33" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">mnnmnmnm</text></g>
-<g><path d="M404,82 L733,82 L733,311 L404,311 Z" fill="rgba(194, 31, 31, 0.52)"/><path d="M404,82 L733,82 L733,311 L404,311 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
+<g><rect x="404" y="82" width="329" height="229" rx="0" ry="0" fill="rgba(194, 31, 31, 0.52)"/><rect x="404" y="82" width="329" height="229" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
 <text x="405" y="84" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
 <text x="405" y="99" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
 <text x="405" y="114" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf</text>

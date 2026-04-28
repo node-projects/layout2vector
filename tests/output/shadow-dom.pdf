@@ -31,13 +31,13 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>> /ExtGState <</GS1 3 0 R /GS2 4 0 R /GS3 5 0 R /GS4 6 0 R /GS5 7 0 R /GS6 8 0 R>> /Shading <</SH1 9 0 R>>>>
 endobj
 11 0 obj
-<</Length 6579>>
+<</Length 6581>>
 stream
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 292.614 Td
+0 292.287 Td
 (Declarative Shadow DOM) Tj
 ET
 Q
@@ -157,7 +157,7 @@ W n
 BT
 1 1 1 rg
 /F1 13.5 Tf
-12 257.364 Td
+12 257.037 Td
 (Shadow Card Title) Tj
 ET
 Q
@@ -176,7 +176,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 218.268 Td
+12 217.941 Td
 (This content is inside a declarative) Tj
 ET
 Q
@@ -195,7 +195,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 202.518 Td
+12 202.191 Td
 (shadow DOM. It demonstrates) Tj
 ET
 Q
@@ -214,7 +214,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 186.768 Td
+12 186.441 Td
 (encapsulated styling and layout) Tj
 ET
 Q
@@ -233,7 +233,7 @@ W n
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-12 171.018 Td
+12 170.691 Td
 (extraction.) Tj
 ET
 Q
@@ -280,7 +280,7 @@ W n
 BT
 0.5333 0.5333 0.5333 rg
 /F2 9 Tf
-12 135.345 Td
+12 135.768 Td
 (Footer text) Tj
 ET
 Q
@@ -349,7 +349,7 @@ q
 BT
 1 1 1 rg
 /F2 10.5 Tf
-18 90.018 Td
+18 89.691 Td
 (Shadow Button) Tj
 ET
 Q
@@ -389,7 +389,7 @@ q
 BT
 0.2 0.2 0.2 rg
 /F2 10.5 Tf
-132.75 90.018 Td
+132.832 89.691 Td
 (Online) Tj
 ET
 Q
@@ -413,7 +413,7 @@ q
 BT
 0.0824 0.3961 0.7529 rg
 /F1 12 Tf
-1.5 45.816 Td
+1.5 45.6525 Td
 (Outer Shadow Root) Tj
 ET
 Q
@@ -437,7 +437,7 @@ q
 BT
 0.902 0.3176 0 rg
 /F2 9.75 Tf
-11.25 14.8065 Td
+11.25 14.4795 Td
 (Nested inner shadow DOM content) Tj
 ET
 Q
@@ -466,11 +466,11 @@ xref
 0000000574 00000 n 
 0000000813 00000 n 
 0000000968 00000 n 
-0000007598 00000 n 
-0000007717 00000 n 
-0000007774 00000 n 
+0000007600 00000 n 
+0000007719 00000 n 
+0000007776 00000 n 
 trailer
 <</Root 14 0 R /Size 15>>
 startxref
-7823
+7825
 %%EOF

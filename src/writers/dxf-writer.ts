@@ -56,6 +56,10 @@ function dataUrlToExtension(dataUrl: string): string {
   return "jpg";
 }
 
+function normalizeImageBasePath(basePath: string | undefined): string {
+  return (basePath ?? "images").replace(/\\/g, "/").replace(/\/+$/, "");
+}
+
 
 /** Generate arc points for a rounded corner. */
 function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAngle: number, segments: number): { x: number; y: number }[] {
@@ -73,6 +77,8 @@ export type DXFWriterOptions = {
   maxY?: number;
   /** Scale factor applied to the maxY coordinate. */
   zoom?: number;
+  /** Base directory used for extracted raster image assets referenced by the DXF. */
+  imageBasePath?: string;
   /**
    * When true, raster images are embedded directly in the DXF file as data URLs
    * in the IMAGEDEF path field. This avoids the need for external image files,
@@ -87,6 +93,7 @@ export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriterType;
   private maxY: number;
   private embedImages: boolean;
+  private imageBasePath: string;
   private imageCounter = 0;
   private fontStyles = new Map<string, string>();
 
@@ -107,10 +114,12 @@ export class DXFWriter implements Writer<string> {
       const z = optionsOrMaxY.zoom ?? 1;
       this.maxY = (optionsOrMaxY.maxY ?? 1000) * z;
       this.embedImages = optionsOrMaxY.embedImages ?? false;
+      this.imageBasePath = normalizeImageBasePath(optionsOrMaxY.imageBasePath);
     } else {
       const z = zoom ?? 1;
       this.maxY = (optionsOrMaxY ?? 1000) * z;
       this.embedImages = false;
+      this.imageBasePath = "images";
     }
   }
 
@@ -359,7 +368,8 @@ export class DXFWriter implements Writer<string> {
     } else {
       // Reference as external file
       const ext = dataUrlToExtension(dataUrl);
-      const fileName = `images/image${idx}.${ext}`;
+      const basePath = this.imageBasePath ? `${this.imageBasePath}/` : "";
+      const fileName = `${basePath}image${idx}.${ext}`;
       this.imageFiles.set(fileName, dataUrl);
       imagePath = fileName;
     }

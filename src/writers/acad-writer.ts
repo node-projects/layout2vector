@@ -66,6 +66,32 @@ async function ensureAcadLoaded() {
   }
 }
 
+const STABLE_CAD_DATE_MS = Date.UTC(2000, 0, 1, 0, 0, 0);
+const STABLE_CAD_FINGERPRINT_GUID = "00000000-0000-0000-0000-000000000000";
+const STABLE_CAD_VERSION_GUID = "00000000-0000-0000-0000-000000000001";
+
+function cloneStableCadDate(): Date {
+  return new Date(STABLE_CAD_DATE_MS);
+}
+
+function normalizeCadMetadata(doc: InstanceType<typeof CadDocumentType>): void {
+  if (doc.header) {
+    doc.header.createDateTime = cloneStableCadDate();
+    doc.header.universalCreateDateTime = cloneStableCadDate();
+    doc.header.universalUpdateDateTime = cloneStableCadDate();
+    doc.header.updateDateTime = cloneStableCadDate();
+    doc.header.fingerPrintGuid = STABLE_CAD_FINGERPRINT_GUID;
+    doc.header.totalEditingTime = 0;
+    doc.header.userElapsedTimeSpan = 0;
+    doc.header.versionGuid = STABLE_CAD_VERSION_GUID;
+  }
+
+  if (doc.summaryInfo) {
+    doc.summaryInfo.createdDate = cloneStableCadDate();
+    doc.summaryInfo.modifiedDate = cloneStableCadDate();
+  }
+}
+
 /** Convert CSS color to acad-ts Color (true color). Returns undefined for invisible colors. */
 function cssToAcadColor(color: string | undefined): InstanceType<typeof ColorType> | undefined {
   const parsed = parseCssColor(color);
@@ -146,6 +172,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     await ensureAcadLoaded();
     this.doc = new CadDocument!(this.acadVersion ?? ACadVersion!.AC1018);
     this.doc.createDefaults();
+    normalizeCadMetadata(this.doc);
   }
 
   /** Flip Y coordinate for DXF/DWG (Y-up) coordinate system. */

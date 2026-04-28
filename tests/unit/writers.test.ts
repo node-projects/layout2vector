@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
+import { DXFWriter } from "../../src/writers/dxf-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
 import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
 import { DWGWriter } from "../../src/writers/acad-writer.js";
@@ -8,7 +9,7 @@ import { renderIR } from "../../src/pipeline.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import type { IRNode } from "../../src/types.js";
-import { DwgReader, Hatch } from "@node-projects/acad-ts";
+import { CadUtils, DwgReader, Hatch } from "@node-projects/acad-ts";
 
 const EMR_COMMENT = 0x0046;
 const EMR_CREATEBRUSHINDIRECT = 0x0027;
@@ -25,6 +26,7 @@ const EMFPLUS_FILL_PATH = 0x4014;
 const EMFPLUS_DRAW_PATH = 0x4015;
 const EMFPLUS_DRAW_IMAGE_POINTS = 0x401B;
 const EMFPLUS_DRAW_STRING = 0x401C;
+const STABLE_CAD_DATE = new Date(Date.UTC(2000, 0, 1, 0, 0, 0));
 
 function findRecord(emfBytes: Uint8Array, targetType: number): { offset: number; size: number } | null {
   const view = new DataView(emfBytes.buffer, emfBytes.byteOffset, emfBytes.byteLength);
@@ -179,6 +181,11 @@ function getAllEmfPlusRecords(emfBytes: Uint8Array): Array<{
   return records;
 }
 
+function extractDxfHeaderNumber(dxf: string, variable: string): number | null {
+  const match = dxf.match(new RegExp(`\\n\\s*9\\r?\\n\\$${variable}\\r?\\n\\s*40\\r?\\n([^\\r\\n]+)`));
+  return match ? parseFloat(match[1]) : null;
+}
+
 test.describe("Writer Output", () => {
   test("DXF writer produces valid string output", async ({ page }) => {
     // We test DXF writer Node-side since it doesn't need a browser
@@ -206,6 +213,27 @@ test.describe("Writer Output", () => {
     expect(polygon.points).toHaveLength(4);
     expect(polygon.points[0]).toHaveProperty("x");
     expect(polygon.points[0]).toHaveProperty("y");
+  });
+
+  test("DXF writer namespaces extracted image assets when imageBasePath is provided", async () => {
+    const writer = new DXFWriter({ maxY: 20, imageBasePath: "demo-assets" });
+    const dxf = await renderIR([{
+      type: "image",
+      quad: [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+      ],
+      dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Z0uoAAAAASUVORK5CYII=",
+      width: 1,
+      height: 1,
+      style: {},
+      zIndex: 0,
+    }], writer);
+
+    expect(Array.from(writer.imageFiles.keys())).toEqual(["demo-assets/image1.png"]);
+    expect(dxf).toContain("demo-assets/image1.png");
   });
 
   test("PDF writer compatible IR structure", async ({ page }) => {
@@ -716,6 +744,41 @@ test.describe("Writer Output", () => {
     expect(emfPlusTypes).toContain(EMFPLUS_DRAW_IMAGE_POINTS);
   });
 
+  test("EMF+ writer zeroes compressed bitmap headers for image objects", async () => {
+    const ir: IRNode[] = [{
+      type: "image",
+      quad: [
+        { x: 10, y: 10 },
+        { x: 42, y: 10 },
+        { x: 42, y: 42 },
+        { x: 10, y: 42 },
+      ],
+      dataUrl: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==",
+      width: 1,
+      height: 1,
+      style: {},
+      zIndex: 0,
+    }];
+
+    const writer = new EMFPlusWriter({ width: 64, height: 64 });
+    const emfBytes = await renderIR(ir, writer);
+    const imageObject = getAllEmfPlusRecords(emfBytes).find((record) =>
+      record.emfPlusType === EMFPLUS_OBJECT && ((record.emfPlusFlags >> 8) & 0x7F) === 0x05,
+    );
+
+    expect(imageObject).toBeDefined();
+    if (!imageObject) {
+      return;
+    }
+
+    const view = new DataView(imageObject.data.buffer, imageObject.data.byteOffset, imageObject.data.byteLength);
+    expect(view.getUint32(8, true)).toBe(0);
+    expect(view.getUint32(12, true)).toBe(0);
+    expect(view.getInt32(16, true)).toBe(0);
+    expect(view.getUint32(20, true)).toBe(0);
+    expect(view.getUint32(24, true)).toBe(1);
+  });
+
   test("EMF+ writer emits gradient brush records and vector conic fills", async ({ page }) => {
     await setupPage(
       page,
@@ -779,6 +842,49 @@ test.describe("Writer Output", () => {
     const rotationMatch = entityMatch![1].match(/\n 50\n([^\r\n]+)/);
     expect(rotationMatch).not.toBeNull();
     expect(parseFloat(rotationMatch![1])).toBeCloseTo(-90, 3);
+  });
+
+  test("Acad writers keep timestamps deterministic across repeated renders", async () => {
+    const ir: IRNode[] = [{
+      type: "polygon",
+      points: [
+        { x: 10, y: 10 },
+        { x: 60, y: 10 },
+        { x: 60, y: 40 },
+        { x: 10, y: 40 },
+      ],
+      style: {
+        fill: "rgb(255, 0, 0)",
+        stroke: "rgb(0, 0, 0)",
+      },
+      zIndex: 0,
+    }];
+
+    const firstDxf = await renderIR(ir, new AcadDXFWriter({ maxY: 100 }));
+    const secondDxf = await renderIR(ir, new AcadDXFWriter({ maxY: 100 }));
+
+    expect(Buffer.from(firstDxf)).toEqual(Buffer.from(secondDxf));
+
+    const dxf = Buffer.from(firstDxf).toString("utf-8");
+    const stableJulian = CadUtils.toJulianCalendar(STABLE_CAD_DATE);
+    for (const variable of ["TDCREATE", "TDUCREATE", "TDUUPDATE", "TDUPDATE"]) {
+      const value = extractDxfHeaderNumber(dxf, variable);
+      expect(value).not.toBeNull();
+      expect(value!).toBeCloseTo(stableJulian, 6);
+    }
+
+    const firstDwg = await renderIR(ir, new DWGWriter({ maxY: 100 }));
+    const secondDwg = await renderIR(ir, new DWGWriter({ maxY: 100 }));
+
+    expect(Buffer.from(firstDwg)).toEqual(Buffer.from(secondDwg));
+
+    const doc = new DwgReader(Buffer.from(firstDwg)).read();
+    const stableTime = STABLE_CAD_DATE.getTime();
+    expect(doc.header!.createDateTime.getTime()).toBe(stableTime);
+    expect(doc.header!.updateDateTime.getTime()).toBe(stableTime);
+    expect(doc.summaryInfo).not.toBeNull();
+    expect(doc.summaryInfo!.createdDate.getTime()).toBe(stableTime);
+    expect(doc.summaryInfo!.modifiedDate.getTime()).toBe(stableTime);
   });
 
   test("DWG writer keeps tiny neutral hatches on adaptive color index 7", async () => {

@@ -1569,7 +1569,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image1.jpg
+test5-dxf-assets/image1.png
 10
 22
 20
@@ -1625,7 +1625,7 @@ IMAGEDEF
 100
 AcDbRasterImageDef
 1
-images/image2.jpg
+test5-dxf-assets/image2.png
 10
 22
 20

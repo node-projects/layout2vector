@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
-<g><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="rgb(240, 240, 240)"/><path d="M62,59 L262,59 L262,112 L62,112 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/></g>
-<text x="144.72" y="80.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text>
-<g><path d="M62,112 L262,112 L262,200 L62,200 Z" fill="rgb(255, 255, 255)"/><path d="M62,112 L262,112 L262,200 L62,200 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g>
-<g><path d="M62,200 L256,200 L256,375 L62,375 Z" fill="rgb(255, 255, 255)"/><path d="M62,200 L256,200 L256,375 L62,375 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g>
-<g><path d="M62,381 L226,381 L226,402 L62,402 Z" fill="rgb(255, 255, 255)"/><path d="M62,381 L226,381 L226,402 L62,402 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g>
-<g><path d="M407,114 L584,114 L584,135 L407,135 Z" fill="rgb(255, 255, 255)"/><path d="M407,114 L584,114 L584,135 L407,135 Z" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g>
-<g><path d="M407,135 L736,135 L736,364 L407,364 Z" fill="rgba(194, 31, 31, 0.52)"/><path d="M407,135 L736,135 L736,364 L407,364 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
-<text x="408" y="137" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text>
-<text x="408" y="152" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text>
-<text x="408" y="167" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf x</text>
-<text x="408" y="182" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfsdfddsfdfssddfs </text>
+<defs>
+<clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="0" y="0" width="1280" height="720"/></clipPath>
+<clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="413" y="118" width="165" height="13"/></clipPath>
+</defs>
+<g clip-path="url(#clip1)"><g><rect x="62" y="59" width="200" height="53" rx="0" ry="0" fill="rgb(240, 240, 240)"/><rect x="62" y="59" width="200" height="53" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/></g></g>
+<g clip-path="url(#clip1)"><text x="142.72" y="78.83" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="Arial">Button</text></g>
+<g clip-path="url(#clip1)"><g><rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="112" width="200" height="88" rx="2" ry="2" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g></g>
+<path d="M246.33,154.39 L250,157.61 L253.67,154.39" fill="none" stroke="rgb(80, 80, 80)" stroke-width="1.47"/>
+<g clip-path="url(#clip1)"><g><rect x="62" y="200" width="194" height="175" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="200" width="194" height="175" rx="2" ry="2" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1"/></g></g>
+<g clip-path="url(#clip1)"><g><rect x="118" y="425" width="59" height="59" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="118" y="425" width="59" height="59" rx="2" ry="2" fill="none" stroke="rgb(118, 118, 118)" stroke-width="1.5"/></g></g>
+<g clip-path="url(#clip1)"><g><rect x="62" y="381" width="164" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="381" width="164" height="21" rx="2" ry="2" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g></g>
+<g clip-path="url(#clip1)"><g><rect x="407" y="114" width="177" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="407" y="114" width="177" height="21" rx="2" ry="2" fill="none" stroke="rgb(118, 118, 118)" stroke-width="2"/></g></g>
+<g clip-path="url(#clip2)"><text x="413" y="118" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial">mnnmnmnm</text></g>
+<g clip-path="url(#clip1)"><g><rect x="407" y="135" width="329" height="229" rx="0" ry="0" fill="rgba(194, 31, 31, 0.52)"/><rect x="407" y="135" width="329" height="229" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g></g>
+<g clip-path="url(#clip1)"><text x="408" y="137" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfd.  fsdfd</text></g>
+<g clip-path="url(#clip1)"><text x="408" y="152" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfs.  dfddsf</text></g>
+<g clip-path="url(#clip1)"><text x="408" y="167" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    sdf x</text></g>
+<g clip-path="url(#clip1)"><text x="408" y="182" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace" xml:space="preserve">    dsfdfsdfddsfdfssddfs </text></g>
 </svg>

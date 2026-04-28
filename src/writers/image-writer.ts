@@ -1280,12 +1280,8 @@ export class ImageWriter implements Writer<ImageResult> {
     ctx.textBaseline = "alphabetic";
     const metrics = ctx.measureText("Mg");
     ctx.textBaseline = previousBaseline;
-    const ascent = metrics.fontBoundingBoxAscent
-      || metrics.actualBoundingBoxAscent
-      || fontSize * 0.8;
-    const descent = metrics.fontBoundingBoxDescent
-      || metrics.actualBoundingBoxDescent
-      || fontSize * 0.2;
+    const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+    const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
     const lineWidth = Math.max(1, fontSize / 14);
     const baselineY = textTopY + ascent;
     const overlineY = Math.max(textTopY + fontSize * 0.08, baselineY - ascent + lineWidth / 2);
@@ -1295,7 +1291,7 @@ export class ImageWriter implements Writer<ImageResult> {
     ctx.setLineDash([]);  // solid line
 
     if (dec.includes("underline")) {
-      const y = Math.min(textTopY + fontSize, baselineY + Math.max(lineWidth, descent * 0.45));
+      const y = textTopY + fontSize - lineWidth;
       ctx.beginPath();
       ctx.moveTo(textX, y);
       ctx.lineTo(textX + textWidth, y);

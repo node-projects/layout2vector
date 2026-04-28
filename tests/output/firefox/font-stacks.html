@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Font Stacks and Transformed Text</title>
+  <style>
+    :root {
+      color-scheme: only light;
+      --paper: #f4efe6;
+      --ink: #12355b;
+      --muted: rgba(18, 53, 91, 0.72);
+      --accent: #c97b63;
+      --deep: #2f4858;
+      --card: rgba(255, 252, 247, 0.8);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(201, 123, 99, 0.22), transparent 26%),
+        radial-gradient(circle at 86% 10%, rgba(64, 145, 108, 0.14), transparent 20%),
+        linear-gradient(160deg, #f8f2ea 0%, #f1e7dc 52%, #ede4d8 100%);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    #root {
+      width: 1320px;
+      min-height: 980px;
+      margin: 0 auto;
+      padding: 56px;
+      background:
+        radial-gradient(circle at 12% 14%, rgba(201, 123, 99, 0.22), transparent 26%),
+        radial-gradient(circle at 86% 10%, rgba(64, 145, 108, 0.14), transparent 20%),
+        linear-gradient(160deg, #f8f2ea 0%, #f1e7dc 52%, #ede4d8 100%);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 36px;
+      align-items: start;
+      margin-bottom: 34px;
+    }
+
+    .hero-copy h1 {
+      display: inline-block;
+      margin: 0;
+      white-space: nowrap;
+      color: var(--ink);
+      font-family: "Mona Sans", "Segoe UI", sans-serif;
+      font-size: 76px;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+      transform: rotate(-6deg) skewX(-8deg);
+      transform-origin: top left;
+    }
+
+    .hero-copy p {
+      max-width: 36rem;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font: 500 22px/1.55 "Aptos", "Segoe UI", sans-serif;
+    }
+
+    .tag-wall {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .tag {
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      outline: 2px solid rgba(18, 53, 91, 0.14);
+      outline-offset: 3px;
+      color: var(--deep);
+      font: 700 13px/1 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .panel {
+      position: relative;
+      min-height: 300px;
+      padding: 28px;
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: 0 24px 60px rgba(70, 49, 30, 0.12);
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0 0 18px;
+      color: rgba(18, 53, 91, 0.76);
+      font: 700 13px/1 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .ribbon {
+      display: inline-block;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #12355b, #406e8e);
+      color: #fffaf3;
+      font-family: "Aptos Display", "Segoe UI", sans-serif;
+      font-size: 22px;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform: rotate(8deg) skewX(-14deg);
+      transform-origin: top left;
+    }
+
+    .serif-note {
+      width: 440px;
+      margin: 0;
+      color: #573824;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 30px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1.35;
+      word-spacing: 0.22em;
+      text-decoration: underline wavy rgba(201, 123, 99, 0.9) 2px;
+    }
+
+    .spec-row {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 26px;
+      align-items: start;
+      margin-top: 26px;
+    }
+
+    .mono-block {
+      margin: 0;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: #14213d;
+      color: #e5ecf4;
+      font-family: "Monaspace Neon", "Cascadia Code", Consolas, monospace;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.6;
+      letter-spacing: 0.04em;
+      white-space: pre-wrap;
+    }
+
+    .vertical-tag {
+      height: 220px;
+      padding: 16px 0;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(64, 145, 108, 0.16), rgba(201, 123, 99, 0.2));
+      color: var(--deep);
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-align: center;
+      text-transform: uppercase;
+      direction: rtl;
+      writing-mode: vertical-rl;
+      transform: rotate(6deg);
+      transform-origin: top left;
+    }
+
+    .deck {
+      display: grid;
+      gap: 18px;
+    }
+
+    .deck-card {
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.74);
+    }
+
+    .deck-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #29465b;
+      font: 700 13px/1 "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .deck-card p {
+      margin: 0;
+      color: #29465b;
+      font: 600 22px/1.35 "Mona Sans", "Segoe UI", sans-serif;
+    }
+
+    .quote {
+      margin: 0;
+      color: #274156;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      font-size: 24px;
+      font-weight: 500;
+      line-height: 1.6;
+      text-align: justify;
+      text-indent: 52px;
+      transform: rotate(-2deg);
+      transform-origin: top left;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Editorial Systems</h1>
+        <p>Font stacks, weight and style cues, vertical writing, and transformed text should survive into the exported HTML and SVG without collapsing back to a single fallback face.</p>
+      </div>
+      <div class="tag-wall">
+        <div class="tag">font-family</div>
+        <div class="tag">font-weight</div>
+        <div class="tag">font-style</div>
+        <div class="tag">letter-spacing</div>
+        <div class="tag">word-spacing</div>
+        <div class="tag">writing-mode</div>
+        <div class="tag">transform</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Display and Editorial Copy</h2>
+        <div class="ribbon">Variable cadence</div>
+        <p class="serif-note">A serif note can keep its rhythm, ornament, and spacing even after the line is extracted into vector-safe text output.</p>
+        <div class="spec-row">
+          <pre class="mono-block">font-family: "Monaspace Neon", "Cascadia Code", Consolas, monospace;
+font-style: normal;
+font-weight: 600;
+letter-spacing: 0.04em;</pre>
+          <div class="vertical-tag">RTL Signal</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Mixed Text Roles</h2>
+        <div class="deck">
+          <div class="deck-card">
+            <strong>Interface Stack</strong>
+            <p>"Mona Sans", "Segoe UI", sans-serif keeps a humanist fallback instead of collapsing to a generic face.</p>
+          </div>
+          <div class="deck-card">
+            <strong>Document Stack</strong>
+            <p style="font-family: Georgia, 'Times New Roman', serif; font-style: italic;">Georgia and Times stay available when the preferred face is missing.</p>
+          </div>
+          <div class="deck-card">
+            <strong>System Note</strong>
+            <p class="quote">Native quads carry rotated text geometry, so transformed runs can keep their live layout when the browser exposes `getBoxQuads()` directly.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

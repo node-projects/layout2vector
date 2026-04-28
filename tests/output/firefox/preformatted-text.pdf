@@ -1,10 +1,10 @@
 %PDF-1.4
 %âãÏÓ
 1 0 obj
-<</Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding>>
+<</Type /Font /Subtype /Type1 /BaseFont /Times-Bold /Encoding /WinAnsiEncoding>>
 endobj
 2 0 obj
-<</Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding>>
+<</Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding>>
 endobj
 3 0 obj
 <</Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding>>
@@ -19,16 +19,28 @@ endobj
 <</Type /ExtGState /ca 0.046667 /CA 0.046667>>
 endobj
 7 0 obj
-<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [480 820.828313 480 -280.625273] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.972549 0.952941 0.917647] /C1 [0.937255 0.894118 0.823529] /N 1>> /Extend [true true]>>
+<</Type /ExtGState /ca 0.92 /CA 0.16>>
 endobj
 8 0 obj
-<</ShadingType 3 /ColorSpace /DeviceRGB /Coords [480 270.10152 0 480 270.10152 480] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.737255 0.423529 0.145098] /C1 [0 0 0] /N 1>> /Extend [true true]>>
+<</Type /ExtGState /ca 1 /CA 0.18>>
 endobj
 9 0 obj
-<</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>> /ExtGState <</GS1 4 0 R /GS2 5 0 R /GS3 6 0 R>> /Shading <</SH1 7 0 R /SH2 8 0 R>>>>
+<</Type /ExtGState /ca 0.8 /CA 0.8>>
 endobj
 10 0 obj
-<</Length 7039>>
+<</Type /ExtGState /ca 1 /CA 0.35>>
+endobj
+11 0 obj
+<</ShadingType 2 /ColorSpace /DeviceRGB /Coords [480 820.828313 480 -280.625273] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.972549 0.952941 0.917647] /C1 [0.937255 0.894118 0.823529] /N 1>> /Extend [true true]>>
+endobj
+12 0 obj
+<</ShadingType 3 /ColorSpace /DeviceRGB /Coords [480 270.10152 0 480 270.10152 480] /Function <</FunctionType 2 /Domain [0 1] /C0 [0.737255 0.423529 0.145098] /C1 [0 0 0] /N 1>> /Extend [true true]>>
+endobj
+13 0 obj
+<</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>> /ExtGState <</GS1 4 0 R /GS2 5 0 R /GS3 6 0 R /GS4 7 0 R /GS5 8 0 R /GS6 9 0 R /GS7 10 0 R>> /Shading <</SH1 11 0 R /SH2 12 0 R>>>>
+endobj
+14 0 obj
+<</Length 7782>>
 stream
 q
 0.7373 0.4235 0.1451 rg
@@ -103,6 +115,7 @@ h
 f
 Q
 q
+/GS4 gs
 1 0.9882 0.9686 rg
 0.1843 0.2824 0.3451 RG
 0.75 w
@@ -122,7 +135,7 @@ q
 BT
 0.4863 0.3098 0.1647 rg
 /F1 21 Tf
-48.75 480.7735 Td
+48.75 480.9595 Td
 (CODE BLOCK) Tj
 ET
 Q
@@ -130,7 +143,7 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-48.75 454.9615 Td
+48.75 455.0808 Td
 (Padding, indentation, and repeated spaces should) Tj
 ET
 Q
@@ -138,11 +151,12 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-48.75 438.0865 Td
+48.75 438.2058 Td
 (survive extraction and rendering.) Tj
 ET
 Q
 q
+/GS5 gs
 1 0.9922 0.9725 rg
 0.1843 0.2824 0.3451 RG
 1.5 w
@@ -157,12 +171,43 @@ q
 48.75 412.5574 54.7942 418.6015 62.25 418.6015 c
 h
 B
+q
+62.25 418.6015 m
+283.75 418.6015 l
+291.2059 418.6015 297.25 411.1457 297.25 405.1015 c
+297.25 320.8015 l
+297.25 313.3457 291.2059 307.3015 283.75 307.3015 c
+62.25 307.3015 l
+54.7942 307.3015 48.75 313.3457 48.75 320.8015 c
+48.75 405.1015 l
+48.75 412.5574 54.7942 418.6015 62.25 418.6015 c
+h
+W n
+/GS6 gs
+1 1 1 rg
+-64.5 531.8515 m
+410.5 531.8515 l
+410.5 194.0515 l
+-64.5 194.0515 l
+h
+62.25 417.8515 m
+283.75 417.8515 l
+291.2059 417.8515 297.25 410.3957 297.25 404.3515 c
+297.25 320.0515 l
+297.25 312.5957 291.2059 306.5515 283.75 306.5515 c
+62.25 306.5515 l
+54.7942 306.5515 48.75 312.5957 48.75 320.0515 c
+48.75 404.3515 l
+48.75 411.8074 54.7942 417.8515 62.25 417.8515 c
+h
+f*
+Q
 Q
 q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 390.5725 Td
+68.25 390.379 Td
 (function renderBlock\(\) {) Tj
 ET
 Q
@@ -170,7 +215,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 370.9975 Td
+68.25 370.804 Td
 (  const title = "pre  block";) Tj
 ET
 Q
@@ -178,7 +223,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 351.4225 Td
+68.25 351.229 Td
 (    return title.padEnd\(14, " "\);) Tj
 ET
 Q
@@ -186,7 +231,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-68.25 331.8475 Td
+68.25 331.654 Td
 (}) Tj
 ET
 Q
@@ -236,6 +281,7 @@ h
 f
 Q
 q
+/GS4 gs
 1 0.9882 0.9686 rg
 0.1843 0.2824 0.3451 RG
 0.75 w
@@ -255,7 +301,7 @@ q
 BT
 0.4863 0.3098 0.1647 rg
 /F1 21 Tf
-355.75 480.7735 Td
+355.75 480.9595 Td
 (ROTATED PRE) Tj
 ET
 Q
@@ -263,7 +309,7 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-355.75 454.9615 Td
+355.75 455.0808 Td
 (This block is transformed so Firefox uses native) Tj
 ET
 Q
@@ -271,11 +317,12 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-355.75 438.0865 Td
+355.75 438.2058 Td
 (line quads instead of the polyfill path.) Tj
 ET
 Q
 q
+/GS7 gs
 1 0.9725 0.9373 rg
 0.7373 0.4235 0.1451 RG
 1.5 w
@@ -294,7 +341,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 375.0503 391.5168 Tm
+0.9986 0.0523 -0.0523 0.9986 375.0608 391.3162 Tm
 (if \(line.startsWith\("  "\)\) {) Tj
 ET
 Q
@@ -302,7 +349,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 374.3645 371.8791 Tm
+0.9986 0.0523 -0.0523 0.9986 374.375 371.6784 Tm
 (  rows.push\(line\);) Tj
 ET
 Q
@@ -310,7 +357,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 373.6787 352.2412 Tm
+0.9986 0.0523 -0.0523 0.9986 373.6892 352.0406 Tm
 (    render\("keep  spaces"\);) Tj
 ET
 Q
@@ -318,7 +365,7 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9986 0.0523 -0.0523 0.9986 372.9929 332.6034 Tm
+0.9986 0.0523 -0.0523 0.9986 373.0035 332.4028 Tm
 (}) Tj
 ET
 Q
@@ -368,6 +415,7 @@ h
 f
 Q
 q
+/GS4 gs
 1 0.9882 0.9686 rg
 0.1843 0.2824 0.3451 RG
 0.75 w
@@ -387,7 +435,7 @@ q
 BT
 0.4863 0.3098 0.1647 rg
 /F1 21 Tf
-662.75 480.7735 Td
+662.75 480.9595 Td
 (SCALED NOTES) Tj
 ET
 Q
@@ -395,7 +443,7 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-662.75 454.9615 Td
+662.75 455.0808 Td
 (Columns rely on fixed-width spacing and should) Tj
 ET
 Q
@@ -403,11 +451,12 @@ q
 BT
 0.3216 0.3765 0.4275 rg
 /F2 11.25 Tf
-662.75 438.0865 Td
+662.75 438.2058 Td
 (keep their alignment.) Tj
 ET
 Q
 q
+/GS7 gs
 1 0.9804 0.949 rg
 0.498 0.3333 0.2235 RG
 1.5 w
@@ -426,7 +475,8 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 687.8171 380.1005 Tm
+103 Tz
+0.9994 -0.0349 0.0349 0.9994 687.8083 379.8491 Tm
 (column A    column B    column C) Tj
 ET
 Q
@@ -434,7 +484,8 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 687.1134 359.9505 Tm
+103 Tz
+0.9994 -0.0349 0.0349 0.9994 687.1046 359.6991 Tm
 (alpha 01    beta  02    gamma 03) Tj
 ET
 Q
@@ -442,39 +493,44 @@ q
 BT
 0.0627 0.1647 0.2627 rg
 /F3 13.5 Tf
-0.9994 -0.0349 0.0349 0.9994 686.4098 339.8005 Tm
+103 Tz
+0.9994 -0.0349 0.0349 0.9994 686.401 339.5492 Tm
 (  keep this padding ->   exactly here) Tj
 ET
 Q
 endstream
 endobj
-11 0 obj
-<</Type /Page /Parent 12 0 R /MediaBox [0 0 995.437107 540.10152] /Resources 9 0 R /Contents 10 0 R>>
+15 0 obj
+<</Type /Page /Parent 16 0 R /MediaBox [0 0 997.68753 540.10152] /Resources 13 0 R /Contents 14 0 R>>
 endobj
-12 0 obj
-<</Type /Pages /Kids [11 0 R] /Count 1>>
+16 0 obj
+<</Type /Pages /Kids [15 0 R] /Count 1>>
 endobj
-13 0 obj
-<</Type /Catalog /Pages 12 0 R>>
+17 0 obj
+<</Type /Catalog /Pages 16 0 R>>
 endobj
 xref
-0 14
+0 18
 0000000000 65535 f 
 0000000015 00000 n 
-0000000115 00000 n 
-0000000210 00000 n 
-0000000303 00000 n 
-0000000365 00000 n 
-0000000427 00000 n 
-0000000489 00000 n 
-0000000722 00000 n 
-0000000937 00000 n 
-0000001079 00000 n 
-0000008169 00000 n 
-0000008287 00000 n 
-0000008344 00000 n 
+0000000111 00000 n 
+0000000208 00000 n 
+0000000301 00000 n 
+0000000363 00000 n 
+0000000425 00000 n 
+0000000487 00000 n 
+0000000541 00000 n 
+0000000592 00000 n 
+0000000644 00000 n 
+0000000696 00000 n 
+0000000930 00000 n 
+0000001146 00000 n 
+0000001336 00000 n 
+0000009169 00000 n 
+0000009287 00000 n 
+0000009344 00000 n 
 trailer
-<</Root 13 0 R /Size 14>>
+<</Root 17 0 R /Size 18>>
 startxref
-8393
+9393
 %%EOF

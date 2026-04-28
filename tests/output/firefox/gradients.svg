@@ -14,29 +14,29 @@
 <linearGradient id="lg11" x1="783.35" y1="477" x2="783.35" y2="577" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(0, 0, 255, 0.5)"/><stop offset="100%" stop-color="rgba(0, 0, 0, 0)"/></linearGradient>
 <filter id="ds12" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="5" dy="5" stdDeviation="7.5" flood-color="rgba(0, 0, 0, 0.3)" result="s0"/><feDropShadow dx="-2" dy="-2" stdDeviation="4" flood-color="rgba(0, 0, 0, 0.1)" result="s1"/></filter>
 <clipPath id="ic13"><rect x="264.45" y="658" width="200" height="80" rx="8" ry="8"/></clipPath>
-<filter id="is14" x="-50%" y="-50%" width="200%" height="200%"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="5"/><feOffset dx="3" dy="3" result="offsetblur"/><feFlood flood-color="rgba(0, 0, 0, 0.2)" result="color"/><feComposite in2="offsetblur" operator="in"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+<filter id="is14" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
 <clipPath id="ic15"><rect x="264.45" y="658" width="200" height="80" rx="8" ry="8"/></clipPath>
-<filter id="is16" x="-50%" y="-50%" width="200%" height="200%"><feComponentTransfer in="SourceAlpha"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur stdDeviation="5"/><feOffset dx="-3" dy="-3" result="offsetblur"/><feFlood flood-color="rgba(255, 255, 255, 0.5)" result="color"/><feComposite in2="offsetblur" operator="in"/><feComposite in2="SourceAlpha" operator="in"/></filter>
+<filter id="is16" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
 </defs>
-<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Gradients</text>
+<text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial, sans-serif">Gradients</text>
 <g><rect x="10" y="206.5" width="250" height="80" rx="8" ry="8" fill="rgb(102, 126, 234)"/><rect x="10" y="206.5" width="250" height="80" rx="8" ry="8" fill="url(#lg1)"/></g>
-<text x="20" y="217.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial">Linear gradient</text>
+<text x="20" y="217.5" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Linear gradient</text>
 <g><rect x="284.45" y="71" width="150" height="150" rx="75" ry="75" fill="rgb(255, 154, 158)"/><rect x="284.45" y="71" width="150" height="150" rx="75" ry="75" fill="url(#rg2)"/></g>
 <g><rect x="458.9" y="71" width="150" height="150" rx="75" ry="75" fill="rgb(255, 0, 0)"/><rect x="458.9" y="71" width="150" height="150" rx="75" ry="75" fill="url(#cg3)"/></g>
 <g><path d="M641.41,242.16 Q638.07,218.39 661.84,215.05 L832.16,191.12 Q855.93,187.77 859.27,211.54 L869.29,282.84 Q872.63,306.61 848.86,309.95 L678.54,333.88 Q654.77,337.23 651.43,313.46 Z" fill="rgb(255, 107, 107)"/><path d="M641.41,242.16 Q638.07,218.39 661.84,215.05 L832.16,191.12 Q855.93,187.77 859.27,211.54 L869.29,282.84 Q872.63,306.61 848.86,309.95 L678.54,333.88 Q654.77,337.23 651.43,313.46 Z" fill="url(#cg4)"/></g>
-<text x="654.02" y="231.3" fill="rgb(16, 37, 66)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial" transform="rotate(-8,654.02,231.3)">Offset conic</text>
+<text x="0" y="0.5" fill="rgb(16, 37, 66)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif" transform="matrix(0.99,-0.14,0.14,0.99,653.95,230.8)">Offset conic</text>
 <g><rect x="901.8" y="41" width="180" height="180" rx="90" ry="90" fill="rgb(255, 255, 255)"/><rect x="901.8" y="41" width="180" height="180" rx="90" ry="90" fill="url(#cg6)"/><rect x="901.8" y="41" width="180" height="180" rx="90" ry="90" fill="url(#rg5)"/><rect x="901.8" y="41" width="180" height="180" rx="90" ry="90" fill="none" stroke="rgba(15, 76, 117, 0.08)" stroke-width="10"/></g>
 <g><rect x="10" y="342.5" width="150" height="150" rx="75" ry="75" fill="rgb(18, 53, 91)"/><rect x="10" y="342.5" width="150" height="150" rx="75" ry="75" fill="url(#rg7)"/></g>
 <g><rect x="184.45" y="342.5" width="150" height="150" rx="75" ry="75" fill="rgb(11, 57, 84)"/><rect x="184.45" y="342.5" width="150" height="150" rx="75" ry="75" fill="url(#cg8)"/></g>
-<g><path d="M358.9,478 L608.9,478 L608.9,558 L358.9,558 Z" fill="rgb(96, 109, 188)"/><path d="M358.9,478 L608.9,478 L608.9,558 L358.9,558 Z" fill="url(#lg9)"/></g>
-<text x="368.9" y="489" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Repeating stripes</text>
-<g><path d="M633.35,477 L933.35,477 L933.35,577 L633.35,577 Z" fill="rgb(232, 232, 232)"/><path d="M633.35,477 L933.35,477 L933.35,577 L633.35,577 Z" fill="url(#lg11)"/><path d="M633.35,477 L933.35,477 L933.35,577 L633.35,577 Z" fill="url(#lg10)"/><path d="M633.35,477 L933.35,477 L933.35,577 L633.35,577 Z" fill="none" stroke="rgb(204, 204, 204)" stroke-width="1"/></g>
-<text x="644.35" y="489" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Multiple backgrounds</text>
-<text x="0" y="608.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial">Box Shadows</text>
+<g><rect x="358.9" y="478" width="250" height="80" rx="0" ry="0" fill="rgb(96, 109, 188)"/><rect x="358.9" y="478" width="250" height="80" rx="0" ry="0" fill="url(#lg9)"/></g>
+<text x="368.9" y="489" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Repeating stripes</text>
+<g><rect x="633.35" y="477" width="300" height="100" rx="0" ry="0" fill="rgb(232, 232, 232)"/><rect x="633.35" y="477" width="300" height="100" rx="0" ry="0" fill="url(#lg11)"/><rect x="633.35" y="477" width="300" height="100" rx="0" ry="0" fill="url(#lg10)"/><rect x="633.35" y="477" width="300" height="100" rx="0" ry="0" fill="none" stroke="rgb(204, 204, 204)" stroke-width="1"/></g>
+<text x="644.35" y="489" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Multiple backgrounds</text>
+<text x="0" y="608.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial, sans-serif">Box Shadows</text>
 <g filter="url(#ds12)"><rect x="20" y="658" width="200" height="80" rx="8" ry="8" fill="rgb(255, 255, 255)"/></g>
-<text x="30" y="669" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Drop shadow</text>
+<text x="30" y="669" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Drop shadow</text>
 <rect x="264.45" y="658" width="200" height="80" rx="8" ry="8" fill="rgb(236, 239, 241)"/>
-<rect x="264.45" y="658" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic13)" filter="url(#is14)"/>
-<rect x="264.45" y="658" width="200" height="80" rx="8" ry="8" fill="none" clip-path="url(#ic15)" filter="url(#is16)"/>
-<text x="274.45" y="669" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial">Inset shadow</text>
+<path d="M111.45,505 H617.45 V891 H111.45 Z M275.45,661 H459.45 A8,8 0 0 1 467.45,669 V733 A8,8 0 0 1 459.45,741 H275.45 A8,8 0 0 1 267.45,733 V669 A8,8 0 0 1 275.45,661 Z" fill="rgba(0, 0, 0, 0.2)" fill-rule="evenodd" clip-path="url(#ic13)" filter="url(#is14)"/>
+<path d="M111.45,505 H617.45 V891 H111.45 Z M269.45,655 H453.45 A8,8 0 0 1 461.45,663 V727 A8,8 0 0 1 453.45,735 H269.45 A8,8 0 0 1 261.45,727 V663 A8,8 0 0 1 269.45,655 Z" fill="rgba(255, 255, 255, 0.5)" fill-rule="evenodd" clip-path="url(#ic15)" filter="url(#is16)"/>
+<text x="274.45" y="669" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Inset shadow</text>
 </svg>

@@ -10,13 +10,13 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R>>>>
 endobj
 4 0 obj
-<</Length 2414>>
+<</Length 2437>>
 stream
 q
 BT
 0 0 0 rg
 /F1 13.5 Tf
-0 225.8514 Td
+0 225.5244 Td
 (Borders & Border Radius) Tj
 ET
 Q
@@ -35,7 +35,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-19.5 137.3034 Td
+17.25 139.3899 Td
 (Solid border) Tj
 ET
 Q
@@ -54,7 +54,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-186 138.0534 Td
+184.8398 139.3899 Td
 (Dashed border) Tj
 ET
 Q
@@ -73,7 +73,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-354.75 138.0534 Td
+353.1797 139.3899 Td
 (Dotted border) Tj
 ET
 Q
@@ -126,7 +126,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-521.25 136.5534 Td
+520.7695 139.3899 Td
 (Mixed borders) Tj
 ET
 Q
@@ -150,7 +150,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-691.5 138.0534 Td
+689.8594 139.3899 Td
 (Rounded corners) Tj
 ET
 Q
@@ -190,7 +190,7 @@ q
 BT
 1 1 1 rg
 /F2 10.5 Tf
-58.8516 37.5054 Td
+58.8516 37.1784 Td
 (Pill Shape) Tj
 ET
 Q
@@ -209,7 +209,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-198 51.0534 Td
+198.3398 50.8899 Td
 (Thick border) Tj
 ET
 Q
@@ -217,7 +217,7 @@ q
 BT
 0 0 0 rg
 /F2 12 Tf
-198 37.5534 Td
+198.3398 37.3899 Td
 (+ padding) Tj
 ET
 Q
@@ -239,11 +239,11 @@ xref
 0000000115 00000 n 
 0000000210 00000 n 
 0000000259 00000 n 
-0000002723 00000 n 
-0000002838 00000 n 
-0000002893 00000 n 
+0000002746 00000 n 
+0000002861 00000 n 
+0000002916 00000 n 
 trailer
 <</Root 7 0 R /Size 8>>
 startxref
-2940
+2963
 %%EOF

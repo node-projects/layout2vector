@@ -24,13 +24,18 @@ for (const demoFile of demoFiles) {
   const name = path.basename(demoFile, ".html");
   const convertFormControls = name === "form-controls" || name === "form2" || name === "github" || name === "google" || name === "test8";
   const isolateRemoteRuntime = name === "bild";
+  const isRemoteHeavyDemo = name === "bild" || name === "github";
   const walkIframes = name === "bild" ? false : undefined;
 
   test(`convert demo: ${name}`, async ({ page, browserName }) => {
-    const timeoutMs = name === "bild"
+    const timeoutMs = isRemoteHeavyDemo
       ? browserName === "firefox"
-        ? 420_000
-        : 300_000
+        ? name === "bild"
+          ? 420_000
+          : 240_000
+        : name === "bild"
+          ? 300_000
+          : 180_000
       : 120_000;
     // Complex pages with large remote-backed fixtures need more time,
     // especially on Firefox which loads resources differently.

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="461" viewBox="0 0 1264 461">
-<text x="0.65" y="-2.02" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="serif">&#x2696;</text>
-<path d="M765,299 L1011.58,299 L1011.58,413 L765,413 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
-<text x="766" y="302" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Alte Not-Halt Mobile Panel Steckplatz</text>
-<text x="766" y="334" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">und F&#xF6;rdererstich AE11/AE12.</text>
-<text x="766" y="366" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text>
-<text x="766" y="398" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Segoe UI">Diagnose, falls sie mal ausgel&#xF6;st werden!</text>
-<path d="M755,289 L1025,289 L1025,461 L755,461 Z" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2"/>
-<path d="M0,92 L20,92 L20,112 L0,112 Z" fill="rgb(111, 216, 146)"/>
-<text x="2.67" y="95.7" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="serif">ET</text>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="20" viewBox="0 0 1264 20">
+<text  x="0.65" y="-2.02" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="20px" font-family="serif" data-source-xpath="/html/body/div/div[1]/svg/text" data-source-original-type="text">&#x2696;</text>
+<rect  x="765" y="299" width="246.58" height="114" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1" data-source-xpath="/html/body/div/ui-text-block" data-source-original-type="ui-text-block" data-source-id="b"/>
+<text  x="766" y="302" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;" data-source-xpath="/html/body/div/ui-text-block" data-source-original-type="ui-text-block" data-source-id="b">Alte Not-Halt Mobile Panel Steckplatz</text>
+<text  x="766" y="334" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;" data-source-xpath="/html/body/div/ui-text-block" data-source-original-type="ui-text-block" data-source-id="b">und F&#xF6;rdererstich AE11/AE12.</text>
+<text  x="766" y="366" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;" data-source-xpath="/html/body/div/ui-text-block" data-source-original-type="ui-text-block" data-source-id="b">Am Pnoz gebr&#xFC;ckt. Im Programm nur noch f&#xFC;r</text>
+<text  x="766" y="398" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="&quot;Segoe UI&quot;" data-source-xpath="/html/body/div/ui-text-block" data-source-original-type="ui-text-block" data-source-id="b">Diagnose, falls sie mal ausgel&#xF6;st werden!</text>
+<rect  x="755" y="289" width="270" height="172" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="2" data-source-xpath="/html/body/div/svg/rect" data-source-original-type="rect" data-source-id="ID_211d0"/>
+<rect  x="0" y="92" width="20" height="20" rx="0" ry="0" fill="rgb(111, 216, 146)" data-source-xpath="/html/body/div/div[2]/svg" data-source-original-type="svg"/>
+<text  x="2.67" y="95.7" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="serif" data-source-xpath="/html/body/div/div[2]/svg/text" data-source-original-type="text">ET</text>
 </svg>
