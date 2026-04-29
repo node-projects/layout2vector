@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Clip Path Path</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(34, 197, 94, 0.16), transparent 32%),
+        linear-gradient(180deg, #fffdf8, #f4f8fb 55%, #edf2f7);
+      color: #132238;
+    }
+    #root { padding: 28px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { margin: 0 0 22px; max-width: 920px; color: #50657a; line-height: 1.55; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(19, 34, 56, 0.08);
+      box-shadow: 0 18px 38px rgba(19, 34, 56, 0.1);
+    }
+    .shape,
+    .photo {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+      display: block;
+      border: 4px solid rgba(19, 34, 56, 0.1);
+      object-fit: cover;
+    }
+    .shape {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8 45%, #f97316);
+    }
+    .shape.alt {
+      background: conic-gradient(from 180deg, #ef4444, #f59e0b, #84cc16, #3b82f6, #ef4444);
+    }
+    .label { margin-top: 12px; font-size: 14px; font-weight: 700; text-align: center; }
+    .meta { margin-top: 4px; font-size: 12px; color: #6b7f93; line-height: 1.45; text-align: center; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>Complex Clip Paths with <code>path()</code></h1>
+    <p>This demo covers the previously unsupported `clip-path: path(...)` cases: curved paths, compound evenodd windows, and image crops defined by SVG-style path data instead of the basic inset/circle/ellipse/polygon functions.</p>
+
+    <div class="grid">
+      <article class="card">
+        <div class="shape" style='clip-path:path("M20 30 C20 8, 66 0, 90 24 C114 0, 160 8, 160 30 L160 144 C160 166, 114 180, 90 154 C66 180, 20 166, 20 144 Z");'></div>
+        <div class="label">Curved Capsule</div>
+        <div class="meta">A single curved path clipped from a gradient box.</div>
+      </article>
+
+      <article class="card">
+        <div class="shape alt" style='clip-path:path(evenodd, "M0 0 H180 V180 H0 Z M42 42 H138 V138 H42 Z");'></div>
+        <div class="label">Evenodd Window</div>
+        <div class="meta">A compound `path()` clip with an interior cut-out.</div>
+      </article>
+
+      <article class="card">
+        <img class="photo" src="./Rollers.png" alt="Leaf clipped photo" style='clip-path:path("M26 90 C26 34, 64 6, 116 10 C148 14, 168 34, 170 70 C172 118, 142 160, 90 170 C52 176, 26 142, 26 90 Z");'>
+        <div class="label">Organic Photo Crop</div>
+        <div class="meta">An image clipped by a curved leaf-like silhouette.</div>
+      </article>
+
+      <article class="card">
+        <img class="photo" src="./Chains.png" alt="Ticket clipped photo" style='clip-path:path(evenodd, "M12 24 H168 V156 H12 Z M0 56 C18 56, 18 86, 0 86 Z M180 56 C162 56, 162 86, 180 86 Z");'>
+        <div class="label">Ticket Notches</div>
+        <div class="meta">A compound path with side cut-outs using the evenodd rule.</div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

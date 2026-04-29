@@ -1505,6 +1505,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       case "polygon":
         this.emitPolygonPath(clipShape.points, true);
         break;
+      case "path":
+        this.emitCompoundPath(clipShape.subpaths);
+        break;
     }
 
     this.ops.push(clipShape.fillRule === "evenodd" ? "W* n" : "W n");

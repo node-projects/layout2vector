@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Object Position and View Box</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.2), transparent 34%),
+        linear-gradient(180deg, #f6fbff, #edf4ff 58%, #e5eefb);
+      color: #122033;
+    }
+    #root { padding: 28px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { margin: 0 0 20px; max-width: 900px; color: #496078; line-height: 1.55; }
+    .note {
+      margin-bottom: 24px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(18, 32, 51, 0.08);
+      font-size: 13px;
+      color: #34506b;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(18, 32, 51, 0.08);
+      box-shadow: 0 18px 40px rgba(34, 57, 94, 0.1);
+    }
+    .frame {
+      width: 100%;
+      height: 170px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 2px solid rgba(18, 32, 51, 0.12);
+      background:
+        linear-gradient(135deg, rgba(14, 116, 144, 0.14), rgba(168, 85, 247, 0.08)),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9) 12px, rgba(219, 234, 254, 0.9) 12px, rgba(219, 234, 254, 0.9) 24px);
+    }
+    .frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .label { margin-top: 12px; font-size: 14px; font-weight: 700; }
+    .meta { margin-top: 4px; font-size: 12px; color: #617991; line-height: 1.45; }
+    code {
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: #0f3d62;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>Object Fit, Position, and View Box</h1>
+    <p>This demo combines all `object-fit` modes with keyword, percentage, and four-value `object-position` placements. The last row also shows `object-view-box` crops using the three rectangle syntaxes.</p>
+    <div class="note">`object-view-box` is only exposed by Chromium-class browsers today. The demo still loads elsewhere, but those cards will fall back to the uncropped image when the browser does not support the property.</div>
+
+    <div class="grid">
+      <article class="card">
+        <div class="frame">
+          <img src="./scanner.png" alt="Fill sample" style="object-fit:fill; object-position:center;">
+        </div>
+        <div class="label">Fill</div>
+        <div class="meta"><code>object-fit: fill</code><br>Stretches the source to the frame.</div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./scanner.png" alt="None offset sample" style="object-fit:none; object-position:right 18px bottom 12px;">
+        </div>
+        <div class="label">None + Four-Value Offset</div>
+        <div class="meta"><code>object-fit: none</code><br><code>object-position: right 18px bottom 12px</code></div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./scanner.png" alt="Contain top left sample" style="object-fit:contain; object-position:left top;">
+        </div>
+        <div class="label">Contain + Keywords</div>
+        <div class="meta"><code>object-fit: contain</code><br><code>object-position: left top</code></div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./scanner.png" alt="Cover percentage sample" style="object-fit:cover; object-position:18% 78%;">
+        </div>
+        <div class="label">Cover + Percentages</div>
+        <div class="meta"><code>object-fit: cover</code><br><code>object-position: 18% 78%</code></div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./data.png" alt="Scale-down sample" style="object-fit:scale-down; object-position:right 12px bottom 10px;">
+        </div>
+        <div class="label">Scale-Down + Offset</div>
+        <div class="meta"><code>object-fit: scale-down</code><br><code>object-position: right 12px bottom 10px</code></div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./Rollers.png" alt="Inset view box sample" style="object-fit:fill; object-view-box:inset(10% 18% 10% 8%);">
+        </div>
+        <div class="label">View Box via <code>inset()</code></div>
+        <div class="meta">Crops the intrinsic image before fitting it into the frame.</div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./Rollers.png" alt="XYWH view box sample" style="object-fit:cover; object-position:center; object-view-box:xywh(40px 18px 180px 130px);">
+        </div>
+        <div class="label">View Box via <code>xywh()</code></div>
+        <div class="meta">Uses an explicit source rectangle and then applies cover cropping.</div>
+      </article>
+
+      <article class="card">
+        <div class="frame">
+          <img src="./Rollers.png" alt="Rect view box sample" style="object-fit:contain; object-position:center; object-view-box:rect(22px 250px 198px 36px);">
+        </div>
+        <div class="label">View Box via <code>rect()</code></div>
+        <div class="meta">Demonstrates the top/right/bottom/left rectangle form.</div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

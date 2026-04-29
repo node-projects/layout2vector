@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="666" viewBox="0 0 1280 666">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+<filter id="ds2" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+<filter id="ds3" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+<filter id="ds4" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+<filter id="ds5" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+<filter id="ds6" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="rgba(2, 6, 23, 0.28)" result="s0"/></filter>
+</defs>
+<text x="28" y="29.5" fill="rgb(248, 250, 252)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="Arial, sans-serif">Line Clamp Values</text>
+<text x="28" y="68.5" fill="rgba(226, 232, 240, 0.82)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">These cards cover the legacy `-webkit-line-clamp` flow, the modern unprefixed `line-clamp` property, the `no-ellipsis` modifier, and</text>
+<text x="28" y="94.09" fill="rgba(226, 232, 240, 0.82)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">an unclamped control. Browsers that do not support the modern values will simply render those cards without truncation.</text>
+<g filter="url(#ds1)"><g><rect x="28" y="137" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="28" y="137" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="47" y="157.19" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">LEGACY ONE-LINE CLAMP</text>
+<text x="47" y="186.69" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">A single-line clamp should still</text>
+<text x="47" y="211.48" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">append an ellipsis when the copy</text>
+<text x="47" y="236.28" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">runs far beyond the width of the</text>
+<text x="47" y="261.08" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">card and the browser clips the extra</text>
+<text x="47" y="285.88" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">content.</text>
+<text x="47" y="219.98" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">display:-webkit-box</text>
+<text x="47" y="237.38" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">-webkit-line-clamp: 1</text>
+<g filter="url(#ds2)"><g><rect x="339" y="137" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="339" y="137" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="357.5" y="157.19" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">LEGACY TWO-LINE CLAMP</text>
+<text x="357.5" y="186.69" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This two-line example mirrors the</text>
+<text x="357.5" y="211.48" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">pattern used by feed cards, sear&#x2026;</text>
+<text x="357.5" y="244.78" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">-webkit-line-clamp: 2</text>
+<text x="357.5" y="262.17" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif" xml:space="preserve">No explicit </text>
+<text x="416.19" y="262.17" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">text-overflow</text>
+<text x="501.97" y="262.17" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif" xml:space="preserve"> declaration.</text>
+<g filter="url(#ds3)"><g><rect x="649" y="137" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="649" y="137" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="668" y="157.19" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">LEGACY THREE-LINE CLAMP</text>
+<text x="668" y="186.69" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Longer editorial text often wants</text>
+<text x="668" y="211.48" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">one more line of headroom before</text>
+<text x="668" y="236.28" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">the truncation kicks in, especially&#x2026;</text>
+<text x="668" y="269.58" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">-webkit-line-clamp: 3</text>
+<g filter="url(#ds4)"><g><rect x="960" y="137" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="960" y="137" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="978.5" y="157.19" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">MODERN TWO-LINE CLAMP</text>
+<text x="978.5" y="186.69" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">The modern shorthand expresses t</text>
+<text x="978.5" y="343.97" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">line-clamp: 2</text>
+<g filter="url(#ds5)"><g><rect x="28" y="396" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="28" y="396" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="47" y="416.36" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">MODERN NO-ELLIPSIS</text>
+<text x="47" y="445.86" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Some components need the visible</text>
+<text x="47" y="603.14" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">line-clamp: 2 no-ellipsis</text>
+<g filter="url(#ds6)"><g><rect x="339" y="396" width="293" height="241" rx="18" ry="18" fill="rgba(15, 23, 42, 0.68)"/><rect x="339" y="396" width="293" height="241" rx="18" ry="18" fill="none" stroke="rgba(148, 163, 184, 0.2)" stroke-width="1"/></g></g>
+<text x="357.5" y="416.36" fill="rgb(147, 197, 253)" dominant-baseline="text-before-edge" font-size="13px" font-family="Arial, sans-serif" letter-spacing="1.04px">UNCLAMPED CONTROL</text>
+<text x="357.5" y="445.86" fill="rgb(226, 232, 240)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This card uses the same copy as th</text>
+<text x="357.5" y="603.14" fill="rgba(191, 219, 254, 0.78)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">line-clamp: none</text>
+</svg>

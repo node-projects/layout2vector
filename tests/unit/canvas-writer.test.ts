@@ -113,6 +113,12 @@ test.describe("CanvasWriter", () => {
       inside: [50, 80],
       outside: [10, 10],
     },
+    {
+      name: "path()",
+      clipPath: "path(evenodd, 'M0 0 H100 V100 H0 Z M25 25 H75 V75 H25 Z')",
+      inside: [10, 10],
+      outside: [50, 50],
+    },
   ] as const;
 
   for (const clipCase of clipCases) {

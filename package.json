@@ -39,7 +39,8 @@
   "dependencies": {
     "@node-projects/acad-ts": "^2.3.0",
     "@tarikjabiri/dxf": "^2.8.9",
-    "esbuild": "^0.28.0"
+    "esbuild": "^0.28.0",
+    "svg-path-properties": "^2.0.2"
   },
   "peerDependencies": {
     "@chenglou/pretext": ">=0.0.6"

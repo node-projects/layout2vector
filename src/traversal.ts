@@ -281,6 +281,7 @@ function buildStackingNode(
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
+  preserveSpecifiedClipPath(element, extractedStyleVal);
   if (!extractedStyleVal.clipPath && parentClipPath) {
     extractedStyleVal.clipPath = parentClipPath;
   }
@@ -439,6 +440,40 @@ function buildTextStackingNode(
     clipBounds,
     childClipBounds,
   };
+}
+
+function preserveSpecifiedClipPath(element: Element, style: Style): void {
+  const specifiedClipPath = getSpecifiedClipPathValue(element);
+  if (!specifiedClipPath) return;
+
+  if (!style.clipPath) {
+    style.clipPath = specifiedClipPath;
+    return;
+  }
+
+  const specifiedHasExplicitFillRule = /\b(?:evenodd|nonzero)\b/i.test(specifiedClipPath);
+  const computedHasExplicitFillRule = /\b(?:evenodd|nonzero)\b/i.test(style.clipPath);
+  if (specifiedHasExplicitFillRule && !computedHasExplicitFillRule && /^path\(/i.test(specifiedClipPath)) {
+    style.clipPath = specifiedClipPath;
+  }
+}
+
+function getSpecifiedClipPathValue(element: Element): string {
+  const inlineStyle = element.getAttribute("style") || "";
+  const rawInlineClipPath = extractInlineStyleProperty(inlineStyle, "clip-path")
+    || extractInlineStyleProperty(inlineStyle, "-webkit-clip-path");
+  if (rawInlineClipPath) return rawInlineClipPath;
+
+  if (element instanceof HTMLElement || element instanceof SVGElement) {
+    return (element.style.getPropertyValue("clip-path") || element.style.getPropertyValue("-webkit-clip-path")).trim();
+  }
+
+  return "";
+}
+
+function extractInlineStyleProperty(styleText: string, propertyName: string): string {
+  const match = styleText.match(new RegExp(`(?:^|;)\\s*${propertyName}\\s*:\\s*([^;]+)`, "i"));
+  return match ? match[1].trim() : "";
 }
 
 function getScrollExpandedChildTransform(

@@ -409,6 +409,10 @@ export class SVGWriter implements Writer<string> {
         const clipRule = shape.fillRule === "evenodd" ? ' clip-rule="evenodd"' : "";
         return `<path d="${d}"${clipRule}/>`;
       }
+      case "path": {
+        const clipRule = shape.fillRule === "evenodd" ? ' clip-rule="evenodd"' : "";
+        return `<path d="${subpathsToPath(shape.subpaths)}"${clipRule}/>`;
+      }
     }
   }
 

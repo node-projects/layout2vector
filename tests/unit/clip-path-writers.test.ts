@@ -7,6 +7,7 @@ import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
 
 const triangleClipPath = "polygon(50% 0%, 100% 100%, 0% 100%)";
+const compoundPathClipPath = 'path(evenodd, "M0 0 H100 V100 H0 Z M25 25 H75 V75 H25 Z")';
 
 function createPolygonNodes(clipPath: string): IRNode[] {
   const points: Quad = [
@@ -119,6 +120,16 @@ test.describe("Writer clip-path support", () => {
     expect(svg).toContain("<path d=\"M50,0 L100,100 L0,100 Z\"");
   });
 
+  test("SVG writer emits clipPath defs for path() clips", async () => {
+    const writer = new SVGWriter({ width: 100, height: 100 });
+    const svg = await renderIR(createPolygonNodes(compoundPathClipPath), writer);
+
+    expect(svg).toMatch(/clip-path="url\(#clip\d+\)"/);
+    expect(svg).toContain('clip-rule="evenodd"');
+    expect(svg).toContain('<path d="M0,0 L');
+    expect(svg).toContain('M25,25 L');
+  });
+
   test("HTML writer keeps compound path subpaths in one SVG path", async () => {
     const writer = new HTMLWriter({ width: 40, height: 40 });
     const html = await renderIR(createCompoundPathNodes(), writer);
@@ -161,9 +172,29 @@ test.describe("Writer clip-path support", () => {
     expect(content).toContain("W n");
   });
 
+  test("PDF writer emits evenodd clip operators for clip-path path() clips", async () => {
+    const writer = new PDFWriter({ pageWidth: 26.46, pageHeight: 26.46 });
+    const pdf = await renderIR(createPolygonNodes(compoundPathClipPath), writer);
+
+    await pdf.finalize();
+    const content = Buffer.from(pdf.toBytes()).toString("latin1");
+
+    expect(content).toContain("W* n");
+  });
+
   test("EMF writer emits path-based clip records for clip-path shapes", async () => {
     const writer = new EMFWriter({ width: 100, height: 100 });
     const emfBytes = await renderIR(createPolygonNodes(triangleClipPath), writer);
+    const recordTypes = listEmfRecordTypes(emfBytes);
+
+    expect(recordTypes).toContain(0x003B);
+    expect(recordTypes).toContain(0x003C);
+    expect(recordTypes).toContain(0x0043);
+  });
+
+  test("EMF writer emits path-based clip records for clip-path path() clips", async () => {
+    const writer = new EMFWriter({ width: 100, height: 100 });
+    const emfBytes = await renderIR(createPolygonNodes(compoundPathClipPath), writer);
     const recordTypes = listEmfRecordTypes(emfBytes);
 
     expect(recordTypes).toContain(0x003B);

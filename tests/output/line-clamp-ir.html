@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; padding: 0; }
+  .ir-container { position: relative; width: 1280px; height: 666px; overflow: hidden; }
+
+</style>
+</head>
+<body>
+<div class="ir-container">
+<span style="position:absolute;left:28px;top:28px;font-size:24px;font-family:Arial, sans-serif;color:rgb(248, 250, 252);font-weight:700;white-space:normal;line-height:27px">Line Clamp Values</span>
+<span style="position:absolute;left:28px;top:68px;font-size:16px;font-family:Arial, sans-serif;color:rgba(226, 232, 240, 0.82);white-space:nowrap;line-height:17px">These cards cover the legacy `-webkit-line-clamp` flow, the modern unprefixed `line-clamp` property, the `no-ellipsis` modifier, and</span>
+<span style="position:absolute;left:28px;top:93.59px;font-size:16px;font-family:Arial, sans-serif;color:rgba(226, 232, 240, 0.82);white-space:nowrap;line-height:17px">an unclamped control. Browsers that do not support the modern values will simply render those cards without truncation.</span>
+<div style="position:absolute;left:28px;top:137px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:47px;top:156.19px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">LEGACY ONE-LINE CLAMP</span>
+<span style="position:absolute;left:47px;top:186.19px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">A single-line clamp should still</span>
+<span style="position:absolute;left:47px;top:210.98px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">append an ellipsis when the copy</span>
+<span style="position:absolute;left:47px;top:235.78px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">runs far beyond the width of the</span>
+<span style="position:absolute;left:47px;top:260.58px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">card and the browser clips the extra</span>
+<span style="position:absolute;left:47px;top:285.38px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">content.</span>
+<span style="position:absolute;left:47px;top:218.98px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">display:-webkit-box</span>
+<span style="position:absolute;left:47px;top:236.38px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">-webkit-line-clamp: 1</span>
+<div style="position:absolute;left:339px;top:137px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:357.5px;top:156.19px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">LEGACY TWO-LINE CLAMP</span>
+<span style="position:absolute;left:357.5px;top:186.19px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">This two-line example mirrors the</span>
+<span style="position:absolute;left:357.5px;top:210.98px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">pattern used by feed cards, sear&#x2026;</span>
+<span style="position:absolute;left:357.5px;top:243.78px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">-webkit-line-clamp: 2</span>
+<span style="position:absolute;left:357.5px;top:261.17px;font-size:12px;font-family:Arial, sans-serif;color:rgba(191, 219, 254, 0.78);white-space:pre;line-height:14px">No explicit </span>
+<span style="position:absolute;left:416.19px;top:261.17px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">text-overflow</span>
+<span style="position:absolute;left:501.97px;top:261.17px;font-size:12px;font-family:Arial, sans-serif;color:rgba(191, 219, 254, 0.78);white-space:pre;line-height:14px"> declaration.</span>
+<div style="position:absolute;left:649px;top:137px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:668px;top:156.19px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">LEGACY THREE-LINE CLAMP</span>
+<span style="position:absolute;left:668px;top:186.19px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">Longer editorial text often wants</span>
+<span style="position:absolute;left:668px;top:210.98px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">one more line of headroom before</span>
+<span style="position:absolute;left:668px;top:235.78px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:nowrap;line-height:17px">the truncation kicks in, especially&#x2026;</span>
+<span style="position:absolute;left:668px;top:268.58px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">-webkit-line-clamp: 3</span>
+<div style="position:absolute;left:960px;top:137px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:978.5px;top:156.19px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">MODERN TWO-LINE CLAMP</span>
+<span style="position:absolute;left:978.5px;top:186.19px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:normal;line-height:17px">The modern shorthand expresses t</span>
+<span style="position:absolute;left:978.5px;top:342.97px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">line-clamp: 2</span>
+<div style="position:absolute;left:28px;top:396px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:47px;top:415.36px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">MODERN NO-ELLIPSIS</span>
+<span style="position:absolute;left:47px;top:445.36px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:normal;line-height:17px">Some components need the visible</span>
+<span style="position:absolute;left:47px;top:602.14px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">line-clamp: 2 no-ellipsis</span>
+<div style="position:absolute;left:339px;top:396px;width:293px;height:241px;box-sizing:border-box;background-color:rgba(15, 23, 42, 0.68);border-top:1px solid rgba(148, 163, 184, 0.2);border-right:1px solid rgba(148, 163, 184, 0.2);border-bottom:1px solid rgba(148, 163, 184, 0.2);border-left:1px solid rgba(148, 163, 184, 0.2);border-radius:18px;box-shadow:rgba(2, 6, 23, 0.28) 0px 18px 42px 0px"></div>
+<span style="position:absolute;left:357.5px;top:415.36px;font-size:13px;font-family:Arial, sans-serif;color:rgb(147, 197, 253);white-space:normal;letter-spacing:1.04px;line-height:15px">UNCLAMPED CONTROL</span>
+<span style="position:absolute;left:357.5px;top:445.36px;font-size:16px;font-family:Arial, sans-serif;color:rgb(226, 232, 240);white-space:normal;line-height:17px">This card uses the same copy as th</span>
+<span style="position:absolute;left:357.5px;top:602.14px;font-size:12px;font-family:Consolas, monospace;color:rgba(191, 219, 254, 0.78);white-space:normal;line-height:14px">line-clamp: none</span>
+</div>
+</body>
+</html>

@@ -104,6 +104,70 @@ text withlongtoken</p>
     expect(lines[1].endsWith("…")).toBe(true);
   });
 
+  test("extractIR preserves implicit ellipsis for -webkit-line-clamp without text-overflow", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><head><style>
+        #clamp {
+          width: 165px;
+          overflow: hidden;
+          white-space: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          color: rgb(240, 246, 252);
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          line-height: 21px;
+        }
+      </style></head><body style="margin:0;padding:24px;background:rgb(13, 17, 23);">
+        <p id="clamp">This paragraph should still truncate to two lines even though text-overflow stays at the browser default clip value.</p>
+      </body></html>`
+    );
+
+    const lines = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const ir = await extract(document.getElementById("clamp"), { boxType: "border", includeText: true });
+      return ir.filter((node: any) => node.type === "text").map((node: any) => node.text);
+    });
+
+    expect(lines).toHaveLength(2);
+    expect(lines[1].endsWith("…")).toBe(true);
+  });
+
+  test("extractIR respects line-clamp no-ellipsis when supported", async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium", "unprefixed line-clamp value tests require Chromium support");
+
+    const supportsNoEllipsis = await page.evaluate(() => CSS.supports("line-clamp", "2 no-ellipsis"));
+    test.skip(!supportsNoEllipsis, "browser does not support line-clamp: <n> no-ellipsis");
+
+    await setupPage(
+      page,
+      `<html><head><style>
+        #clamp {
+          width: 165px;
+          overflow: hidden;
+          line-clamp: 2 no-ellipsis;
+          color: rgb(240, 246, 252);
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          line-height: 21px;
+        }
+      </style></head><body style="margin:0;padding:24px;background:rgb(13, 17, 23);">
+        <p id="clamp">This paragraph should clamp after two lines while keeping the last visible fragment unadorned.</p>
+      </body></html>`
+    );
+
+    const lines = await page.evaluate(async () => {
+      const extract = (window as any).__HC.extractIR;
+      const ir = await extract(document.getElementById("clamp"), { boxType: "border", includeText: true });
+      return ir.filter((node: any) => node.type === "text").map((node: any) => node.text);
+    });
+
+    expect(lines).toHaveLength(2);
+    expect(lines[1].endsWith("…")).toBe(false);
+  });
+
   test("extractIR does not force ellipsis when single-line text still fits", async ({ page }) => {
     await setupPage(
       page,

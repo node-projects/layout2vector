@@ -37,6 +37,26 @@ async function setGeneratedRasterImage(page: Page, sourceWidth: number, sourceHe
   });
 }
 
+async function setStripedRasterImage(page: Page, sourceWidth: number, sourceHeight: number): Promise<void> {
+  await page.evaluate(({ sourceWidth, sourceHeight }) => {
+    const img = document.getElementById("target") as HTMLImageElement;
+    const canvas = document.createElement("canvas");
+    canvas.width = sourceWidth;
+    canvas.height = sourceHeight;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#ef4444";
+    ctx.fillRect(0, 0, sourceWidth / 2, sourceHeight);
+    ctx.fillStyle = "#3b82f6";
+    ctx.fillRect(sourceWidth / 2, 0, sourceWidth / 2, sourceHeight);
+    img.src = canvas.toDataURL("image/png");
+  }, { sourceWidth, sourceHeight });
+
+  await page.waitForFunction(() => {
+    const img = document.getElementById("target") as HTMLImageElement | null;
+    return !!img && img.complete && img.naturalWidth > 0;
+  });
+}
+
 async function supportsGeneratedVideo(page: Page): Promise<boolean> {
   return page.evaluate(() => {
     if (typeof MediaRecorder === "undefined") return false;
@@ -868,6 +888,76 @@ test.describe("Image Extraction", () => {
     expect(bl.y - tl.y).toBeCloseTo(20, 0);
     expect(tl.x).toBeCloseTo(30, 0);
     expect(tl.y).toBeCloseTo(40, 0);
+  });
+
+  test("positions object-fit:none images with four-value object-position offsets", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:100px;height:100px;object-fit:none;object-position:right 10px bottom 5px;display:block;" />
+      </body></html>`
+    );
+    await setGeneratedRasterImage(page, 40, 20);
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+    });
+
+    const imageNode = ir.find((n: any) => n.type === "image");
+    expect(imageNode).toBeDefined();
+
+    const [tl, tr, _br, bl] = imageNode.quad;
+    expect(tr.x - tl.x).toBeCloseTo(40, 0);
+    expect(bl.y - tl.y).toBeCloseTo(20, 0);
+    expect(tl.x).toBeCloseTo(50, 0);
+    expect(tl.y).toBeCloseTo(75, 0);
+  });
+
+  test("applies object-view-box crops before raster export", async ({ page, browserName }) => {
+    test.skip(browserName !== "chromium", "object-view-box is only supported by Chromium in browser layout");
+
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <img id="target" style="width:100px;height:100px;display:block;object-view-box:xywh(100px 0 100px 100px);" />
+      </body></html>`
+    );
+    await setStripedRasterImage(page, 200, 100);
+
+    const sample = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+      const imageNode = ir.find((n: any) => n.type === "image");
+      if (!imageNode) return null;
+
+      return await new Promise<{ left: number[]; right: number[] }>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          resolve({
+            left: Array.from(ctx.getImageData(15, 50, 1, 1).data),
+            right: Array.from(ctx.getImageData(85, 50, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted object-view-box image"));
+        img.src = imageNode.dataUrl;
+      });
+    });
+
+    expect(sample).not.toBeNull();
+    expect(sample!.left[2]).toBeGreaterThan(sample!.left[0]);
+    expect(sample!.right[2]).toBeGreaterThan(sample!.right[0]);
   });
 
   test("image IR node has correct structure", async ({ page }) => {

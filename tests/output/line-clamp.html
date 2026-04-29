@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo: Line Clamp</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(244, 114, 182, 0.18), transparent 34%),
+        linear-gradient(180deg, #0f172a, #111c36 55%, #132140);
+      color: #f8fafc;
+    }
+    #root { padding: 28px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p.lead { margin: 0 0 22px; max-width: 920px; color: rgba(226, 232, 240, 0.82); line-height: 1.6; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.68);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 18px 42px rgba(2, 6, 23, 0.28);
+    }
+    .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #93c5fd; }
+    .copy {
+      margin-top: 12px;
+      font-size: 16px;
+      line-height: 1.55;
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+    .legacy {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+    }
+    .legacy.one { -webkit-line-clamp: 1; }
+    .legacy.two { -webkit-line-clamp: 2; }
+    .legacy.three { -webkit-line-clamp: 3; }
+    .modern-two { line-clamp: 2; }
+    .modern-no-ellipsis { line-clamp: 2 no-ellipsis; }
+    .modern-none { line-clamp: none; }
+    .meta { margin-top: 10px; font-size: 12px; color: rgba(191, 219, 254, 0.78); line-height: 1.45; }
+    code { font-family: Consolas, monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>Line Clamp Values</h1>
+    <p class="lead">These cards cover the legacy `-webkit-line-clamp` flow, the modern unprefixed `line-clamp` property, the `no-ellipsis` modifier, and an unclamped control. Browsers that do not support the modern values will simply render those cards without truncation.</p>
+
+    <div class="grid">
+      <article class="card">
+        <div class="label">Legacy One-Line Clamp</div>
+        <div class="copy legacy one">A single-line clamp should still append an ellipsis when the copy runs far beyond the width of the card and the browser clips the extra content.</div>
+        <div class="meta"><code>display:-webkit-box</code><br><code>-webkit-line-clamp: 1</code></div>
+      </article>
+
+      <article class="card">
+        <div class="label">Legacy Two-Line Clamp</div>
+        <div class="copy legacy two">This two-line example mirrors the pattern used by feed cards, search results, and changelog teasers where the last visible fragment needs to pick up the ellipsis automatically.</div>
+        <div class="meta"><code>-webkit-line-clamp: 2</code><br>No explicit <code>text-overflow</code> declaration.</div>
+      </article>
+
+      <article class="card">
+        <div class="label">Legacy Three-Line Clamp</div>
+        <div class="copy legacy three">Longer editorial text often wants one more line of headroom before the truncation kicks in, especially in tablet cards or responsive dashboard summaries.</div>
+        <div class="meta"><code>-webkit-line-clamp: 3</code></div>
+      </article>
+
+      <article class="card">
+        <div class="label">Modern Two-Line Clamp</div>
+        <div class="copy modern-two">The modern shorthand expresses the same behavior in one declaration, which makes it easier to combine with container queries and utility-driven component systems.</div>
+        <div class="meta"><code>line-clamp: 2</code></div>
+      </article>
+
+      <article class="card">
+        <div class="label">Modern No-Ellipsis</div>
+        <div class="copy modern-no-ellipsis">Some components need the visible lines clipped cleanly without appending an ellipsis glyph, for example when another affordance already signals that more content exists.</div>
+        <div class="meta"><code>line-clamp: 2 no-ellipsis</code></div>
+      </article>
+
+      <article class="card">
+        <div class="label">Unclamped Control</div>
+        <div class="copy modern-none">This card uses the same copy as the others but leaves the content fully visible, making it easier to compare the truncated and untruncated layouts side by side in the exported output.</div>
+        <div class="meta"><code>line-clamp: none</code></div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

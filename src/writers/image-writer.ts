@@ -21,6 +21,7 @@ import {
   type ParsedGradientAst,
 } from "./shared/gradient-utils.js";
 import { getCssCanvasFilter, mapMixBlendModeToCanvasComposite } from "./shared/filter-effects.js";
+import { parseClipPathShape, type ClipPathShape } from "./shared/clip-path.js";
 import { getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color parsing ───────────────────────────────────────────────────
@@ -246,6 +247,51 @@ function expandInsetValues(values: string[]): [string, string, string, string] {
   return [values[0], values[1], values[2], values[3]];
 }
 
+function traceCanvasClipPath(ctx: CanvasRenderingContext2D, shape: ClipPathShape): CanvasFillRule {
+  ctx.beginPath();
+
+  switch (shape.kind) {
+    case "inset":
+      if (shape.rx > 0 || shape.ry > 0) {
+        const rx = Math.min(shape.rx, shape.w / 2);
+        const ry = Math.min(shape.ry, shape.h / 2);
+        ctx.moveTo(shape.x + rx, shape.y);
+        ctx.lineTo(shape.x + shape.w - rx, shape.y);
+        ctx.ellipse(shape.x + shape.w - rx, shape.y + ry, rx, ry, 0, -Math.PI / 2, 0);
+        ctx.lineTo(shape.x + shape.w, shape.y + shape.h - ry);
+        ctx.ellipse(shape.x + shape.w - rx, shape.y + shape.h - ry, rx, ry, 0, 0, Math.PI / 2);
+        ctx.lineTo(shape.x + rx, shape.y + shape.h);
+        ctx.ellipse(shape.x + rx, shape.y + shape.h - ry, rx, ry, 0, Math.PI / 2, Math.PI);
+        ctx.lineTo(shape.x, shape.y + ry);
+        ctx.ellipse(shape.x + rx, shape.y + ry, rx, ry, 0, Math.PI, Math.PI * 1.5);
+        ctx.closePath();
+      } else {
+        ctx.rect(shape.x, shape.y, shape.w, shape.h);
+      }
+      break;
+    case "ellipse":
+      ctx.ellipse(shape.cx, shape.cy, shape.rx, shape.ry, 0, 0, Math.PI * 2);
+      break;
+    case "polygon":
+      ctx.moveTo(shape.points[0].x, shape.points[0].y);
+      for (let index = 1; index < shape.points.length; index += 1) ctx.lineTo(shape.points[index].x, shape.points[index].y);
+      ctx.closePath();
+      break;
+    case "path":
+      for (const subpath of shape.subpaths) {
+        if (subpath.points.length === 0) continue;
+        ctx.moveTo(subpath.points[0].x, subpath.points[0].y);
+        for (let index = 1; index < subpath.points.length; index += 1) {
+          ctx.lineTo(subpath.points[index].x, subpath.points[index].y);
+        }
+        ctx.closePath();
+      }
+      break;
+  }
+
+  return shape.fillRule === "evenodd" ? "evenodd" : "nonzero";
+}
+
 function tracePolylinePath(ctx: CanvasRenderingContext2D, points: Point[], closed: boolean, style: Style): void {
   const subpaths = style.pathSubpaths;
   if (subpaths?.length) {
@@ -330,90 +376,8 @@ export class ImageResult {
   }
 
   private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {
-    const inset = clipPath.match(/^inset\((.+)\)$/i);
-    if (inset) {
-      const [rawInsets, rawRound] = inset[1].split(/\s+round\s+/i, 2);
-      const values = rawInsets.trim().split(/\s+/).filter(Boolean);
-      if (values.length === 0 || values.length > 4) return null;
-
-      const [topToken, rightToken, bottomToken, leftToken] = expandInsetValues(values);
-      const top = parseClipLength(topToken, bounds.h);
-      const right = parseClipLength(rightToken, bounds.w);
-      const bottom = parseClipLength(bottomToken, bounds.h);
-      const left = parseClipLength(leftToken, bounds.w);
-      const x = bounds.x + left;
-      const y = bounds.y + top;
-      const w = Math.max(0, bounds.w - left - right);
-      const h = Math.max(0, bounds.h - top - bottom);
-      const radius = rawRound ? parseClipLength(rawRound.trim().split(/\s+/)[0], Math.min(bounds.w, bounds.h)) : 0;
-
-      ctx.beginPath();
-      if (radius > 0) {
-        this.traceRoundedRect(ctx, x, y, w, h, radius);
-      } else {
-        ctx.rect(x, y, w, h);
-      }
-      return "nonzero";
-    }
-
-    const circle = clipPath.match(/^circle\((.+)\)$/i);
-    if (circle) {
-      const [radiusToken, centerToken] = circle[1].split(/\s+at\s+/i, 2);
-      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
-      if (center.length !== 2) return null;
-      const cx = bounds.x + parseClipLength(center[0], bounds.w);
-      const cy = bounds.y + parseClipLength(center[1], bounds.h);
-      const radius = parseClipLength(radiusToken.trim(), Math.min(bounds.w, bounds.h));
-
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, radius, radius, 0, 0, Math.PI * 2);
-      return "nonzero";
-    }
-
-    const ellipse = clipPath.match(/^ellipse\((.+)\)$/i);
-    if (ellipse) {
-      const [radiiToken, centerToken] = ellipse[1].split(/\s+at\s+/i, 2);
-      const radii = radiiToken.trim().split(/\s+/).filter(Boolean);
-      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
-      if (radii.length !== 2 || center.length !== 2) return null;
-      const rx = parseClipLength(radii[0], bounds.w);
-      const ry = parseClipLength(radii[1], bounds.h);
-      const cx = bounds.x + parseClipLength(center[0], bounds.w);
-      const cy = bounds.y + parseClipLength(center[1], bounds.h);
-
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-      return "nonzero";
-    }
-
-    const polygon = clipPath.match(/^polygon\((.+)\)$/i);
-    if (polygon) {
-      const parts = polygon[1].split(",").map((part) => part.trim()).filter(Boolean);
-      if (parts.length < 3) return null;
-
-      let fillRule: CanvasFillRule = "nonzero";
-      if (parts[0] === "evenodd" || parts[0] === "nonzero") {
-        fillRule = parts.shift() as CanvasFillRule;
-      }
-      if (parts.length < 3) return null;
-
-      const points = parts
-        .map((part) => part.split(/\s+/).filter(Boolean))
-        .filter((coords) => coords.length >= 2)
-        .map((coords) => ({
-          x: bounds.x + parseClipLength(coords[0], bounds.w),
-          y: bounds.y + parseClipLength(coords[1], bounds.h),
-        }));
-      if (points.length < 3) return null;
-
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-      ctx.closePath();
-      return fillRule;
-    }
-
-    return null;
+    const shape = parseClipPathShape(clipPath, bounds);
+    return shape ? traceCanvasClipPath(ctx, shape) : null;
   }
 
   private traceRoundedRect(
@@ -802,90 +766,8 @@ export class ImageWriter implements Writer<ImageResult> {
   }
 
   private traceClipPath(ctx: CanvasRenderingContext2D, clipPath: string, bounds: Bounds): CanvasFillRule | null {
-    const inset = clipPath.match(/^inset\((.+)\)$/i);
-    if (inset) {
-      const [rawInsets, rawRound] = inset[1].split(/\s+round\s+/i, 2);
-      const values = rawInsets.trim().split(/\s+/).filter(Boolean);
-      if (values.length === 0 || values.length > 4) return null;
-
-      const [topToken, rightToken, bottomToken, leftToken] = expandInsetValues(values);
-      const top = parseClipLength(topToken, bounds.h);
-      const right = parseClipLength(rightToken, bounds.w);
-      const bottom = parseClipLength(bottomToken, bounds.h);
-      const left = parseClipLength(leftToken, bounds.w);
-      const x = bounds.x + left;
-      const y = bounds.y + top;
-      const w = Math.max(0, bounds.w - left - right);
-      const h = Math.max(0, bounds.h - top - bottom);
-      const radius = rawRound ? parseClipLength(rawRound.trim().split(/\s+/)[0], Math.min(bounds.w, bounds.h)) : 0;
-
-      ctx.beginPath();
-      if (radius > 0) {
-        this.traceRoundedRect(ctx, x, y, w, h, radius);
-      } else {
-        ctx.rect(x, y, w, h);
-      }
-      return "nonzero";
-    }
-
-    const circle = clipPath.match(/^circle\((.+)\)$/i);
-    if (circle) {
-      const [radiusToken, centerToken] = circle[1].split(/\s+at\s+/i, 2);
-      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
-      if (center.length !== 2) return null;
-      const cx = bounds.x + parseClipLength(center[0], bounds.w);
-      const cy = bounds.y + parseClipLength(center[1], bounds.h);
-      const radius = parseClipLength(radiusToken.trim(), Math.min(bounds.w, bounds.h));
-
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, radius, radius, 0, 0, Math.PI * 2);
-      return "nonzero";
-    }
-
-    const ellipse = clipPath.match(/^ellipse\((.+)\)$/i);
-    if (ellipse) {
-      const [radiiToken, centerToken] = ellipse[1].split(/\s+at\s+/i, 2);
-      const radii = radiiToken.trim().split(/\s+/).filter(Boolean);
-      const center = centerToken ? centerToken.trim().split(/\s+/).filter(Boolean) : ["50%", "50%"];
-      if (radii.length !== 2 || center.length !== 2) return null;
-      const rx = parseClipLength(radii[0], bounds.w);
-      const ry = parseClipLength(radii[1], bounds.h);
-      const cx = bounds.x + parseClipLength(center[0], bounds.w);
-      const cy = bounds.y + parseClipLength(center[1], bounds.h);
-
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-      return "nonzero";
-    }
-
-    const polygon = clipPath.match(/^polygon\((.+)\)$/i);
-    if (polygon) {
-      const parts = polygon[1].split(",").map((part) => part.trim()).filter(Boolean);
-      if (parts.length < 3) return null;
-
-      let fillRule: CanvasFillRule = "nonzero";
-      if (parts[0] === "evenodd" || parts[0] === "nonzero") {
-        fillRule = parts.shift() as CanvasFillRule;
-      }
-      if (parts.length < 3) return null;
-
-      const points = parts
-        .map((part) => part.split(/\s+/).filter(Boolean))
-        .filter((coords) => coords.length >= 2)
-        .map((coords) => ({
-          x: bounds.x + parseClipLength(coords[0], bounds.w),
-          y: bounds.y + parseClipLength(coords[1], bounds.h),
-        }));
-      if (points.length < 3) return null;
-
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-      ctx.closePath();
-      return fillRule;
-    }
-
-    return null;
+    const shape = parseClipPathShape(clipPath, bounds);
+    return shape ? traceCanvasClipPath(ctx, shape) : null;
   }
 
   private fillAndStroke(

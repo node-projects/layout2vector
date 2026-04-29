@@ -182,13 +182,14 @@ function extractTextNode(
   const allQuads = nativeTextQuads.length === 1 ? nativeTextQuads : getTextNodeQuads(textNode);
   if (allQuads.length === 0) return results;
 
-  const lineClamp = getLineClamp(parentEl);
-  const isMultilineClamp = lineClamp > 1 && parentStyle.overflow === "hidden" && parentStyle.textOverflow === "ellipsis";
+  const lineClamp = getLineClampConfig(parentEl);
+  const hasLineClamp = lineClamp.lines > 0 && parentStyle.overflow === "hidden";
+  const isMultilineClamp = hasLineClamp && lineClamp.lines > 1;
 
   // For overflow:hidden containers, treat as a single line unless the browser is
   // exposing a multi-line clamp via -webkit-line-clamp.
   const isOverflowHidden = parentStyle.overflow === "hidden";
-  const effectiveLineCount = isOverflowHidden && !isMultilineClamp ? 1 : allQuads.length;
+  const effectiveLineCount = isOverflowHidden && !hasLineClamp ? 1 : allQuads.length;
 
   // Split text into per-line segments
   const lineTexts =
@@ -212,7 +213,14 @@ function extractTextNode(
     // Handle text overflow clipping
     let finalQuad = allQuads[0];
     if (parentStyle.overflow === "hidden") {
-      const clipped = clipTextToParent(textNode, text, parentEl, allQuads[0], parentStyle);
+      const clipped = clipTextToParent(
+        textNode,
+        text,
+        parentEl,
+        allQuads[0],
+        parentStyle,
+        hasLineClamp ? lineClamp.marker : undefined,
+      );
       if (!clipped) return results;
       text = clipped.text;
       finalQuad = clipped.quad;
@@ -227,8 +235,12 @@ function extractTextNode(
     });
   } else {
     // Multi-line: use per-line quads from getBoxQuads (transform-aware)
-    const visibleLineCount = isMultilineClamp ? Math.min(lineClamp, allQuads.length, lineTexts.length) : allQuads.length;
-    const hasHiddenClampedLines = isMultilineClamp && Math.max(allQuads.length, lineTexts.length) > visibleLineCount;
+    const visibleLineCount = isMultilineClamp ? Math.min(lineClamp.lines, allQuads.length, lineTexts.length) : allQuads.length;
+    const hasHiddenClampedLines = isMultilineClamp
+      && (
+        Math.max(allQuads.length, lineTexts.length) > visibleLineCount
+        || hasHiddenVerticalOverflow(parentEl)
+      );
 
     for (let i = 0; i < visibleLineCount; i++) {
       const normalized = normalizeCollapsedTextFragment(
@@ -255,7 +267,7 @@ function extractTextNode(
       }
 
       if (hasHiddenClampedLines && i === visibleLineCount - 1) {
-        const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), "force");
+        const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), "force", lineClamp.marker);
         if (!clipped) continue;
         text = clipped.text;
         quad = clipped.quad;
@@ -797,6 +809,7 @@ function clipTextToParent(
   parentEl: Element,
   textQuad: Quad,
   parentStyle: Style,
+  overflowMarker?: string,
 ): { text: string; quad: Quad } | null {
   // Measure parent's inner content width (available space for text)
   const parentRect = parentEl.getBoundingClientRect();
@@ -806,13 +819,16 @@ function clipTextToParent(
   const availableWidth = parentRect.width - padL - padR;
   if (availableWidth <= 0) return null;
 
+  const marker = overflowMarker ?? (parentStyle.textOverflow === "ellipsis" ? "…" : "");
+
   return clipTextToWidth(
     text,
     parentEl,
     textQuad,
     parentStyle,
     availableWidth,
-    parentStyle.textOverflow === "ellipsis" ? "overflow" : "none"
+    marker.length > 0 ? "overflow" : "none",
+    marker,
   );
 }
 
@@ -823,6 +839,7 @@ function clipTextToWidth(
   parentStyle: Style,
   availableWidth: number,
   ellipsisMode: "none" | "overflow" | "force",
+  overflowMarker = "…",
 ): { text: string; quad: Quad } | null {
   if (availableWidth <= 0) return null;
   const cs = getComputedStyle(parentEl);
@@ -849,13 +866,13 @@ function clipTextToWidth(
 
   // Text overflows or must show a clamp ellipsis — find how many characters fit.
   let fitChars = text.length;
-  const addEllipsis = ellipsisMode !== "none";
-  let clippedText = addEllipsis ? `${text.trimEnd()}…` : text;
+  const addEllipsis = ellipsisMode !== "none" && overflowMarker.length > 0;
+  let clippedText = addEllipsis ? `${text.trimEnd()}${overflowMarker}` : text;
   measSpan.textContent = clippedText;
 
   if (measSpan.getBoundingClientRect().width > availableWidth) {
     for (let i = text.length - 1; i >= 0; i--) {
-      const candidate = addEllipsis ? text.substring(0, i).trimEnd() + "…" : text.substring(0, i);
+      const candidate = addEllipsis ? text.substring(0, i).trimEnd() + overflowMarker : text.substring(0, i);
       measSpan.textContent = candidate;
       if (measSpan.getBoundingClientRect().width <= availableWidth) {
         fitChars = i;
@@ -871,7 +888,7 @@ function clipTextToWidth(
   if (fitChars <= 0 && !addEllipsis) return null;
 
   if (fitChars <= 0 && addEllipsis) {
-    clippedText = "…";
+    clippedText = overflowMarker;
   }
 
   // Adjust the quad width proportionally
@@ -934,11 +951,52 @@ function splitTextByLines(textNode: Text, expectedLines: number): string[] {
   return lines;
 }
 
+type LineClampConfig = {
+  lines: number;
+  marker: string;
+};
+
+function hasHiddenVerticalOverflow(el: Element): boolean {
+  const block = el as HTMLElement;
+  return block.scrollHeight > block.clientHeight + 0.5;
+}
+
 function getLineClamp(el: Element): number {
+  return getLineClampConfig(el).lines;
+}
+
+function getLineClampConfig(el: Element): LineClampConfig {
   const cs = getComputedStyle(el);
-  const clampValue = cs.getPropertyValue("-webkit-line-clamp") || cs.getPropertyValue("line-clamp");
-  const parsed = parseInt(clampValue, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  const legacyClampValue = cs.getPropertyValue("-webkit-line-clamp").trim();
+  if (legacyClampValue) {
+    const parsed = parseInt(legacyClampValue, 10);
+    return Number.isFinite(parsed) && parsed > 0
+      ? { lines: parsed, marker: "…" }
+      : { lines: 0, marker: "…" };
+  }
+
+  const clampValue = cs.getPropertyValue("line-clamp").trim();
+  if (!clampValue || clampValue === "none") return { lines: 0, marker: "…" };
+
+  const lineMatch = clampValue.match(/\b(\d+)\b/);
+  const lines = lineMatch ? parseInt(lineMatch[1], 10) : 0;
+  if (!Number.isFinite(lines) || lines <= 0) return { lines: 0, marker: "…" };
+
+  if (/\bno-ellipsis\b/i.test(clampValue)) {
+    return { lines, marker: "" };
+  }
+
+  const customMarker = clampValue.match(/(["'])(.*?)\1/);
+  return {
+    lines,
+    marker: customMarker ? decodeCssStringLiteral(customMarker[2]) : "…",
+  };
+}
+
+function decodeCssStringLiteral(value: string): string {
+  return value
+    .replace(/\\([\\"'])/g, "$1")
+    .replace(/\\a\s?/gi, "\n");
 }
 
 function getQuadWidth(quad: Quad): number {

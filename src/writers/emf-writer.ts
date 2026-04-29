@@ -1160,6 +1160,15 @@ export class EMFWriter implements Writer<Uint8Array> {
       return;
     }
 
+    if (clipShape.kind === "path") {
+      this.records.writeRecord(
+        EMR.SETPOLYFILLMODE,
+        uint32Array(clipShape.fillRule === "evenodd" ? ALTERNATE : WINDING),
+      );
+      this.applyCompoundClipPath(clipShape.subpaths, hasClip ? RGN_AND : RGN_COPY);
+      return;
+    }
+
     switch (clipShape.kind) {
       case "inset":
         this.applyPolygonClipPath(
@@ -1195,6 +1204,26 @@ export class EMFWriter implements Writer<Uint8Array> {
       uint32Array(points.length),
       ptData,
     ));
+    this.records.writeRecord(EMR.ENDPATH, null);
+    this.records.writeRecord(EMR.SELECTCLIPPATH, uint32Array(combineMode));
+  }
+
+  private applyCompoundClipPath(subpaths: Array<{ points: Point[] }>, combineMode: number): void {
+    const drawableSubpaths = subpaths.filter((subpath) => subpath.points.length >= 2);
+    if (drawableSubpaths.length === 0) return;
+
+    this.records.writeRecord(EMR.BEGINPATH, null);
+    for (const subpath of drawableSubpaths) {
+      const shapeBounds = this.computeBoundsFromPoints(subpath.points);
+      const ptData = int16Array(
+        ...subpath.points.flatMap((point) => [Math.round(point.x), Math.round(point.y)]),
+      );
+      this.records.writeRecord(EMR.POLYGON16, concat(
+        int32Array(shapeBounds.left, shapeBounds.top, shapeBounds.right, shapeBounds.bottom),
+        uint32Array(subpath.points.length),
+        ptData,
+      ));
+    }
     this.records.writeRecord(EMR.ENDPATH, null);
     this.records.writeRecord(EMR.SELECTCLIPPATH, uint32Array(combineMode));
   }

@@ -1711,6 +1711,16 @@ type ObjectFitPlan = {
   sourceRect?: { x: number; y: number; width: number; height: number };
 };
 
+type SourceRect = { x: number; y: number; width: number; height: number };
+
+type AxisPosition =
+  | { kind: "fraction"; value: number }
+  | { kind: "start"; offset: number }
+  | { kind: "center"; offset: number }
+  | { kind: "end"; offset: number };
+
+type ObjectPosition = { x: AxisPosition; y: AxisPosition };
+
 /**
  * The extracted media geometry can differ from the element box when object-fit
  * does not stretch the content, and some modes also require source cropping.
@@ -1725,7 +1735,13 @@ function getObjectFitPlan(
   const objectFit = computedStyle.objectFit;
   if (!natW || !natH) return { quad };
 
-  return getObjectFitPlanFromDimensions(quad, natW, natH, objectFit, computedStyle.objectPosition);
+  const baseSourceRect = parseObjectViewBox(computedStyle.getPropertyValue("object-view-box"), natW, natH);
+  const sourceNatW = baseSourceRect?.width ?? natW;
+  const sourceNatH = baseSourceRect?.height ?? natH;
+  const plan = getObjectFitPlanFromDimensions(quad, sourceNatW, sourceNatH, objectFit, computedStyle.objectPosition);
+  const sourceRect = composeSourceRects(baseSourceRect, plan.sourceRect);
+
+  return sourceRect ? { quad: plan.quad, sourceRect } : plan;
 }
 
 function getObjectFitPlanFromDimensions(
@@ -1750,7 +1766,7 @@ function getObjectFitPlanFromDimensions(
 
     if (imgAspect > boxAspect) {
       const cropWidth = natH * boxAspect;
-      const cropX = (natW - cropWidth) * objectPosition.x;
+      const cropX = resolveAxisPosition(objectPosition.x, natW - cropWidth);
       return {
         quad,
         sourceRect: { x: cropX, y: 0, width: cropWidth, height: natH },
@@ -1758,7 +1774,7 @@ function getObjectFitPlanFromDimensions(
     }
 
     const cropHeight = natW / boxAspect;
-    const cropY = (natH - cropHeight) * objectPosition.y;
+    const cropY = resolveAxisPosition(objectPosition.y, natH - cropHeight);
     return {
       quad,
       sourceRect: { x: 0, y: cropY, width: natW, height: cropHeight },
@@ -1780,6 +1796,12 @@ function getObjectFitPlanFromDimensions(
 
     return {
       quad: fitQuadWithinBox(quad, boxW, boxH, natW, natH, objectPosition),
+    };
+  }
+
+  if (objectFit === "none") {
+    return {
+      quad: placeQuadInsideBox(quad, boxW, boxH, natW, natH, objectPosition),
     };
   }
 
@@ -1943,27 +1965,202 @@ function disposeTemporaryVideo(video: HTMLVideoElement): void {
   }
 }
 
-function parseObjectPosition(value: string): { x: number; y: number } {
-  const tokens = value.trim().split(/\s+/).filter(Boolean);
-  const xToken = tokens[0] ?? "50%";
-  const yToken = tokens[1] ?? "50%";
+function parseObjectPosition(value: string): ObjectPosition {
+  const tokens = tokenizeCssValue(value);
+  let x: AxisPosition | null = null;
+  let y: AxisPosition | null = null;
+
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index].toLowerCase();
+    const nextToken = tokens[index + 1];
+
+    if (isHorizontalPositionKeyword(token)) {
+      const hasOffset = nextToken && isObjectPositionLength(nextToken);
+      x = createKeywordAxisPosition(token, hasOffset ? nextToken : undefined);
+      if (hasOffset) index += 1;
+      continue;
+    }
+
+    if (isVerticalPositionKeyword(token)) {
+      const hasOffset = nextToken && isObjectPositionLength(nextToken);
+      y = createKeywordAxisPosition(token, hasOffset ? nextToken : undefined);
+      if (hasOffset) index += 1;
+      continue;
+    }
+
+    if (token === "center") {
+      if (x === null) {
+        x = { kind: "center", offset: 0 };
+      } else if (y === null) {
+        y = { kind: "center", offset: 0 };
+      }
+      continue;
+    }
+
+    if (!isObjectPositionLength(token)) continue;
+
+    const axisValue = parseObjectPositionLength(token);
+    if (x === null) {
+      x = axisValue;
+    } else if (y === null) {
+      y = axisValue;
+    }
+  }
 
   return {
-    x: parseObjectPositionToken(xToken),
-    y: parseObjectPositionToken(yToken),
+    x: x ?? { kind: "center", offset: 0 },
+    y: y ?? { kind: "center", offset: 0 },
   };
 }
 
-function parseObjectPositionToken(token: string): number {
+function tokenizeCssValue(value: string): string[] {
+  return value.trim().match(/(?:[a-z-]+\([^)]*\)|[^\s]+)/gi) ?? [];
+}
+
+function isHorizontalPositionKeyword(token: string): boolean {
+  return token === "left" || token === "right" || token === "x-start" || token === "x-end";
+}
+
+function isVerticalPositionKeyword(token: string): boolean {
+  return token === "top" || token === "bottom" || token === "y-start" || token === "y-end";
+}
+
+function isObjectPositionLength(token: string): boolean {
+  return /^[-+]?\d*\.?\d+(?:[a-z%]+)?$/i.test(token);
+}
+
+function parseObjectPositionLength(token: string): AxisPosition {
   const value = token.toLowerCase();
-  if (value === "left" || value === "top") return 0;
-  if (value === "center") return 0.5;
-  if (value === "right" || value === "bottom") return 1;
   if (value.endsWith("%")) {
     const percent = parseFloat(value);
-    return Number.isNaN(percent) ? 0.5 : Math.max(0, Math.min(1, percent / 100));
+    return { kind: "fraction", value: Number.isNaN(percent) ? 0.5 : percent / 100 };
   }
-  return 0.5;
+
+  const numeric = parseFloat(value);
+  return { kind: "start", offset: Number.isNaN(numeric) ? 0 : numeric };
+}
+
+function createKeywordAxisPosition(keyword: string, offsetToken?: string): AxisPosition {
+  const offset = offsetToken ? parseFloat(offsetToken) : 0;
+  const parsedOffset = Number.isNaN(offset) ? 0 : offset;
+
+  switch (keyword) {
+    case "left":
+    case "top":
+    case "x-start":
+    case "y-start":
+      return { kind: "start", offset: parsedOffset };
+    case "right":
+    case "bottom":
+    case "x-end":
+    case "y-end":
+      return { kind: "end", offset: parsedOffset };
+    default:
+      return { kind: "center", offset: parsedOffset };
+  }
+}
+
+function resolveAxisPosition(position: AxisPosition, freeSpace: number): number {
+  switch (position.kind) {
+    case "fraction":
+      return freeSpace * position.value;
+    case "start":
+      return position.offset;
+    case "end":
+      return freeSpace - position.offset;
+    case "center":
+      return freeSpace / 2 + position.offset;
+  }
+}
+
+function parseClipLength(token: string, reference: number): number {
+  const value = token.trim().toLowerCase();
+  if (!value) return 0;
+  if (value.endsWith("%")) {
+    return (parseFloat(value) / 100) * reference;
+  }
+  const numeric = parseFloat(value);
+  return Number.isNaN(numeric) ? 0 : numeric;
+}
+
+function expandInsetValues(values: string[]): [string, string, string, string] {
+  if (values.length === 1) return [values[0], values[0], values[0], values[0]];
+  if (values.length === 2) return [values[0], values[1], values[0], values[1]];
+  if (values.length === 3) return [values[0], values[1], values[2], values[1]];
+  return [values[0], values[1], values[2], values[3]];
+}
+
+function parseObjectViewBox(value: string, natW: number, natH: number): SourceRect | undefined {
+  const raw = value.trim();
+  if (!raw || raw === "none") return undefined;
+
+  const inset = raw.match(/^inset\((.+)\)$/i);
+  if (inset) {
+    const [rawInsets] = inset[1].split(/\s+round\s+/i, 2);
+    const values = rawInsets.trim().split(/\s+/).filter(Boolean);
+    if (values.length === 0 || values.length > 4) return undefined;
+
+    const [topToken, rightToken, bottomToken, leftToken] = expandInsetValues(values);
+    return normalizeSourceRect({
+      x: parseClipLength(leftToken, natW),
+      y: parseClipLength(topToken, natH),
+      width: natW - parseClipLength(leftToken, natW) - parseClipLength(rightToken, natW),
+      height: natH - parseClipLength(topToken, natH) - parseClipLength(bottomToken, natH),
+    }, natW, natH);
+  }
+
+  const xywh = raw.match(/^xywh\((.+)\)$/i);
+  if (xywh) {
+    const [rawRect] = xywh[1].split(/\s+round\s+/i, 2);
+    const values = rawRect.trim().split(/\s+/).filter(Boolean);
+    if (values.length < 4) return undefined;
+
+    return normalizeSourceRect({
+      x: parseClipLength(values[0], natW),
+      y: parseClipLength(values[1], natH),
+      width: parseClipLength(values[2], natW),
+      height: parseClipLength(values[3], natH),
+    }, natW, natH);
+  }
+
+  const rect = raw.match(/^rect\((.+)\)$/i);
+  if (rect) {
+    const values = rect[1].trim().split(/[\s,]+/).filter(Boolean);
+    if (values.length < 4) return undefined;
+
+    const top = parseClipLength(values[0], natH);
+    const right = parseClipLength(values[1], natW);
+    const bottom = parseClipLength(values[2], natH);
+    const left = parseClipLength(values[3], natW);
+    return normalizeSourceRect({
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top,
+    }, natW, natH);
+  }
+
+  return undefined;
+}
+
+function normalizeSourceRect(rect: SourceRect, natW: number, natH: number): SourceRect | undefined {
+  const x = Math.max(0, Math.min(natW, rect.x));
+  const y = Math.max(0, Math.min(natH, rect.y));
+  const width = Math.max(0, Math.min(rect.width, natW - x));
+  const height = Math.max(0, Math.min(rect.height, natH - y));
+  if (width <= 0 || height <= 0) return undefined;
+  return { x, y, width, height };
+}
+
+function composeSourceRects(baseRect: SourceRect | undefined, cropRect: SourceRect | undefined): SourceRect | undefined {
+  if (!baseRect) return cropRect;
+  if (!cropRect) return baseRect;
+  return {
+    x: baseRect.x + cropRect.x,
+    y: baseRect.y + cropRect.y,
+    width: cropRect.width,
+    height: cropRect.height,
+  };
 }
 
 function fitQuadWithinBox(
@@ -1972,7 +2169,7 @@ function fitQuadWithinBox(
   boxH: number,
   natW: number,
   natH: number,
-  objectPosition: { x: number; y: number }
+  objectPosition: ObjectPosition
 ): Quad {
   const scale = Math.min(boxW / natW, boxH / natH);
   return placeQuadInsideBox(quad, boxW, boxH, natW * scale, natH * scale, objectPosition);
@@ -1984,10 +2181,10 @@ function placeQuadInsideBox(
   boxH: number,
   renderW: number,
   renderH: number,
-  objectPosition: { x: number; y: number }
+  objectPosition: ObjectPosition
 ): Quad {
-  const offsetX = (boxW - renderW) * objectPosition.x;
-  const offsetY = (boxH - renderH) * objectPosition.y;
+  const offsetX = resolveAxisPosition(objectPosition.x, boxW - renderW);
+  const offsetY = resolveAxisPosition(objectPosition.y, boxH - renderH);
   return subQuad(quad, offsetX / boxW, offsetY / boxH, (offsetX + renderW) / boxW, (offsetY + renderH) / boxH);
 }
 

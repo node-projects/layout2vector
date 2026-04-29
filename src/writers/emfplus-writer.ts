@@ -913,6 +913,12 @@ function figuresFromClipShape(shape: ClipPathShape): PathFigure[] {
     return figure ? [figure] : [];
   }
 
+  if (shape.kind === "path") {
+    return shape.subpaths
+      .map((subpath) => figureFromPoints(subpath.points, true))
+      .filter((figure): figure is PathFigure => !!figure);
+  }
+
   if (shape.kind === "ellipse") {
     return [ellipseFigure(shape.cx, shape.cy, shape.rx, shape.ry)];
   }
