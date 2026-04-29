@@ -40,6 +40,7 @@
     "@node-projects/acad-ts": "^2.3.0",
     "@tarikjabiri/dxf": "^2.8.9",
     "esbuild": "^0.28.0",
+    "fonteditor-core": "^2.6.3",
     "svg-path-properties": "^2.0.2"
   },
   "peerDependencies": {

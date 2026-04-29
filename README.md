@@ -94,6 +94,80 @@ const acadDxfBytes = await renderIR(ir, acadDxfWriter);
 
 ```
 
+## Preserving Webfonts
+
+Use `extractIRWithAssets()` when the source DOM relies on downloadable `@font-face` fonts such as icon fonts or brand fonts. It returns the normal IR plus a `fontAssets` bundle that compatible writers can reuse.
+
+```ts
+import {
+  extractIRWithAssets,
+  renderIR,
+  HTMLWriter,
+  SVGWriter,
+  PDFWriter,
+  ImageWriter,
+  DWGWriter,
+  EMFWriter,
+  rasterizeFontTextNodes,
+} from "@node-projects/layout2vector";
+
+const root = document.getElementById("icons")!;
+const bounds = root.getBoundingClientRect();
+
+const { ir, fontAssets } = await extractIRWithAssets(root, {
+  includeImages: true,
+  includeFonts: true,
+});
+
+// HTML and SVG can emit @font-face rules from the collected assets.
+const htmlWriter = new HTMLWriter({
+  width: bounds.width,
+  height: bounds.height,
+  fontAssets,
+  fontMode: { type: "inline" },
+});
+const html = await renderIR(ir, htmlWriter);
+
+const svgWriter = new SVGWriter({
+  width: bounds.width,
+  height: bounds.height,
+  fontAssets,
+  fontMode: { type: "external", basePath: "fonts" },
+});
+const svg = await renderIR(ir, svgWriter);
+// Save svgWriter.fontFiles alongside the SVG when using external mode.
+
+// PDF automatically registers the collected font files.
+const pdfWriter = new PDFWriter({
+  pageWidth: 210,
+  pageHeight: 297,
+  fontAssets,
+});
+const pdfDoc = await renderIR(ir, pdfWriter);
+await pdfDoc.finalize();
+
+// Raster outputs load collected fonts before drawing text.
+const imageWriter = new ImageWriter({
+  width: bounds.width,
+  height: bounds.height,
+  fontAssets,
+});
+const image = await renderIR(ir, imageWriter);
+await image.finalize();
+
+// CAD and EMF-family writers cannot embed browser webfonts directly in Node.
+// Convert the affected text nodes to raster image nodes first.
+const fallbackIr = await rasterizeFontTextNodes(ir, fontAssets);
+
+const dwgBytes = await renderIR(fallbackIr, new DWGWriter({ maxY: bounds.height }));
+const emfBytes = await renderIR(fallbackIr, new EMFWriter({ width: bounds.width, height: bounds.height }));
+```
+
+- `HTMLWriter` and `SVGWriter` only emit downloadable fonts when you pass both `fontAssets` and `fontMode`. The default `fontMode` is `{ type: "none" }`.
+- `PDFWriter` only needs `fontAssets`; it converts WOFF, WOFF2, and OTF sources to embeddable TrueType data automatically.
+- `ImageWriter` and `CanvasWriter` can load collected fonts before drawing text in browser or Playwright contexts.
+- `rasterizeFontTextNodes()` is the fallback path for DXF, DWG, Acad DXF, EMF, and EMF+ when exact browser webfont rendering matters.
+
 ## API Reference
 
 ### Pipeline
@@ -112,6 +186,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `boxType` | `"border" \| "content"` | `"border"` | Which CSS box to use for element quads |
 | `includeText` | `boolean` | `true` | Whether to extract text node geometry |
 | `includeImages` | `boolean` | `false` | Whether to extract `<img>` element content (see [Image Handling](#image-handling)) |
+| `includeFonts` | `boolean` | `false` | When used with `extractIRWithAssets()`, downloads the `@font-face` files actually used by extracted text so compatible writers can preserve webfonts |
 | `includeVideos` | `boolean` | `false` | Whether to extract `<video>` elements as image IR nodes using the first decoded video frame |
 | `includeSourceMetadata` | `boolean` | `false` | Whether to attach source metadata to each IR node for debugging and traceability. HTML and SVG writers surface this as `data-source-*` attributes. |
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
@@ -132,9 +207,25 @@ If `convertFormControls` is `true`, the extractor approximates native control ch
 
 If `walkIframes` is `true`, `extractIR()` descends into same-origin iframe documents and maps their geometry back into the parent page coordinate space. Cross-origin iframes and not-yet-loaded frames are skipped.
 
+#### `async extractIRWithAssets(root: Element \| Element[], options?: Options): Promise<ExtractIRWithAssetsResult>`
+
+Calls `extractIR()` and, when `options.includeFonts === true`, also collects the downloadable `@font-face` assets used by the extracted text.
+
+- `ir`: the same IR array returned by `extractIR()`
+- `fontAssets`: an optional `FontAssetCollection` for `HTMLWriter`, `SVGWriter`, `CanvasWriter`, `ImageWriter`, and `PDFWriter`
+
+When `includeFonts` is false, the result is simply `{ ir }`.
+
 #### `async renderIR<T>(nodes: IRNode[], writer: Writer<T>): Promise<T>`
 
 Passes each IR node through the writer in paint order. Returns a Promise for the writer's `end()` result. You must `await` the result.
+
+#### `async rasterizeFontTextNodes(nodes: IRNode[], fonts: FontAssetCollection | undefined, options?: RasterizeFontTextOptions): Promise<IRNode[]>`
+
+Replaces matching text nodes with PNG-backed `image` nodes after loading the collected webfonts into the current document. Use this as a fallback before DXF, DWG, Acad DXF, EMF, or EMF+ export when those targets cannot reproduce the browser font directly.
+
+- `scale`: device-pixel-ratio multiplier for the rasterized fallback images
+- `onlyFamilies`: optional list of normalized font-family names to rasterize; omitted means all collected downloadable font families
 
 ### Writers
 
@@ -259,6 +350,7 @@ Produces a `Uint8Array` containing an **EMF+** drawing stream wrapped in an EMF 
 type CanvasWriterOptions = {
   width: number;
   height: number;
+  fontAssets?: FontAssetCollection;
   scale?: number;
   zoom?: number;
 };
@@ -266,6 +358,8 @@ new CanvasWriter(options: CanvasWriterOptions)
 ```
 
 Produces an `HTMLCanvasElement` directly via the Canvas 2D API. `CanvasWriter` uses the same drawing backend as `ImageWriter`, but it automatically finalizes queued raster images before returning the canvas.
+
+When `fontAssets` is provided, `CanvasWriter` loads the collected downloadable fonts into the document before drawing text.
 
 - Polygons, polylines, text, gradients, opacity, and embedded images render through the Canvas 2D API
 - Returns a ready-to-use `HTMLCanvasElement` from `await renderIR(ir, new CanvasWriter(...))`
@@ -278,6 +372,7 @@ Produces an `HTMLCanvasElement` directly via the Canvas 2D API. `CanvasWriter` u
 type ImageWriterOptions = {
   width: number;
   height: number;
+  fontAssets?: FontAssetCollection;
   scale?: number;
   zoom?: number;
 };
@@ -285,6 +380,8 @@ new ImageWriter(options: ImageWriterOptions)
 ```
 
 Produces an `ImageResult` via the Canvas 2D API. Width and height are in CSS pixels. The optional `scale` parameter (default 1) acts as a device pixel ratio multiplier for higher resolution output (e.g. `scale: 2` produces a 2× image).
+
+When `fontAssets` is provided, `ImageWriter` loads the collected downloadable fonts into the document before drawing text.
 
 Output format is configurable: call `result.toDataURL(mimeType, quality)` or `result.toBytes(mimeType, quality)` with `"image/png"` (default), `"image/jpeg"`, or `"image/webp"`.
 
@@ -310,12 +407,16 @@ After `await renderIR()`, call `await result.finalize()` to draw any queued rast
 type SVGWriterOptions = {
   width: number;
   height: number;
+  fontAssets?: FontAssetCollection;
+  fontMode?: FontAssetMode;
   zoom?: number;
 };
 new SVGWriter(options: SVGWriterOptions)
 ```
 
 Produces a standalone SVG document string. Width and height define the viewport in CSS pixels.
+
+To preserve downloadable webfonts, pass the `fontAssets` returned by `extractIRWithAssets()` and set `fontMode` to `{ type: "inline" }` or `{ type: "external", basePath }`. The default is `{ type: "none" }`. When using external mode, save `svgWriter.fontFiles` after `end()`.
 
 - Polygons → SVG `<rect>` (axis-aligned with border-radius) or `<path>` elements
 - Polylines → SVG `<path>` elements (open or closed)
@@ -346,6 +447,8 @@ type HTMLImageMode =
 type HTMLWriterOptions = {
   width: number;
   height: number;
+  fontAssets?: FontAssetCollection;
+  fontMode?: FontAssetMode;
   imageMode?: HTMLImageMode;
   zoom?: number;
   customCss?: string;
@@ -355,6 +458,8 @@ new HTMLWriter(options: HTMLWriterOptions)
 ```
 
 Produces a standalone HTML document string. Width and height define the container dimensions in CSS pixels. The `imageMode` parameter controls how images are rendered:
+
+To preserve downloadable webfonts, pass the `fontAssets` returned by `extractIRWithAssets()` and set `fontMode` to `{ type: "inline" }` or `{ type: "external", basePath }`. The default is `{ type: "none" }`. When using external mode, save `htmlWriter.fontFiles` after `end()`.
 
 - `{ type: "inline" }` (default): Images are rendered as `<img src="data:...">` elements (each image in-place)
 - `{ type: "external", basePath }`: Images are rendered as `<img src="[basePath]/imageN.png">` with external file references (see `htmlWriter.imageFiles` after `end()`)
@@ -381,6 +486,7 @@ The output is a self-contained HTML document with all elements absolutely positi
 type PDFWriterOptions = {
   pageWidth?: number;
   pageHeight?: number;
+  fontAssets?: FontAssetCollection;
   customFonts?: Map<string, Uint8Array>;
   defaultFont?: Uint8Array;
   zoom?: number;
@@ -391,6 +497,8 @@ new PDFWriter(options?: PDFWriterOptions)
 Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinates are converted from px to pt (×0.75). Call `await doc.finalize()` then `doc.toBytes()` to get the final PDF as a `Uint8Array`.
 
 The optional `defaultFont` parameter accepts a TTF file as `Uint8Array`. When provided, any text containing characters outside the standard WinAnsiEncoding range (e.g. emoji, CJK, math symbols like ⚖) will automatically use this font with full Unicode support via CID/Type0 embedding.
+
+When `fontAssets` is provided, `PDFWriter` automatically registers the downloaded `@font-face` sources collected by `extractIRWithAssets()`. WOFF, WOFF2, and OTF sources are converted to embeddable TrueType data before the PDF is finalized.
 
 - Polygons → closed paths with fill/stroke operators (`f`, `S`, `B`)
 - Polylines → paths with fill/stroke operators
@@ -406,7 +514,7 @@ The optional `defaultFont` parameter accepts a TTF file as `Uint8Array`. When pr
 
 ##### Embedding Custom Fonts
 
-To use fonts beyond the standard PDF fonts (Helvetica, Times, Courier, Symbol, ZapfDingbats), pass a `Map<string, Uint8Array>` of font family name → TTF file data:
+To use fonts beyond the standard PDF fonts (Helvetica, Times, Courier, Symbol, ZapfDingbats), pass a `Map<string, Uint8Array>` of font family name → TTF file data. Use this path when you already have local TTF files; use `fontAssets` when you want to embed the webfonts captured from the source page:
 
 ```ts
 import { PDFWriter, parseTTF } from "@node-projects/layout2vector";

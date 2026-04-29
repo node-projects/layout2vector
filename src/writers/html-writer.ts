@@ -2,11 +2,13 @@
  * HTML Writer.
  * Maps IR nodes to HTML elements and produces a standalone HTML document string.
  */
+import type { FontAssetCollection, FontAssetMode } from "../font-assets.js";
 import type { ClipQuad, PathSubpath, Point, Quad, SourceMetadata, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, type ClipPathBounds } from "./shared/clip-path.js";
+import { buildEmbeddedFontDataUrl, buildFontFaceCss, choosePreferredWebFontSource, normalizeFontBasePath } from "./shared/font-assets.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
 
 // ── Color helpers ───────────────────────────────────────────────────
@@ -341,6 +343,10 @@ export type HTMLWriterOptions = {
   width: number;
   /** Viewport height in pixels. */
   height: number;
+  /** Downloaded @font-face assets used by extracted text. */
+  fontAssets?: FontAssetCollection;
+  /** How downloadable fonts are emitted in the HTML output. */
+  fontMode?: FontAssetMode;
   /** How images are embedded in the HTML output. */
   imageMode?: HTMLImageMode;
   /** Scale factor applied to width and height. */
@@ -357,6 +363,9 @@ export class HTMLWriter implements Writer<string> {
   private width: number;
   private height: number;
   private elements: HTMLContentEntry[] = [];
+  private fontAssets?: FontAssetCollection;
+  private fontMode: FontAssetMode;
+  private fontCounter = 0;
   private imageMode: HTMLImageMode;
   private imageCounter = 0;
   private imageDedup = new Map<string, string>(); // dataUrl → filename
@@ -372,6 +381,13 @@ export class HTMLWriter implements Writer<string> {
   imageFiles = new Map<string, string>();
 
   /**
+   * Font files referenced by the HTML output.
+   * Maps relative file paths to raw font bytes.
+   * Only populated when `fontMode` is `{ type: "external" }`.
+   */
+  fontFiles = new Map<string, Uint8Array>();
+
+  /**
    * @param optionsOrWidth Options object, or viewport width in pixels (deprecated positional form).
    * @param height Viewport height in pixels (positional form).
    * @param imageMode How images are embedded in the HTML output (positional form).
@@ -383,12 +399,15 @@ export class HTMLWriter implements Writer<string> {
       const z = opts.zoom ?? 1;
       this.width = opts.width * z;
       this.height = opts.height * z;
+      this.fontAssets = opts.fontAssets;
+      this.fontMode = opts.fontMode ?? { type: "none" };
       this.imageMode = opts.imageMode ?? { type: "inline" };
       this.customCss = opts.customCss ?? "";
     } else {
       const z = zoom ?? 1;
       this.width = optionsOrWidth * z;
       this.height = (height ?? 0) * z;
+      this.fontMode = { type: "none" };
       this.imageMode = imageMode ?? { type: "inline" };
       this.customCss = "";
     }
@@ -396,10 +415,40 @@ export class HTMLWriter implements Writer<string> {
 
   async begin(): Promise<void> {
     this.elements = [];
+    this.fontCounter = 0;
     this.imageCounter = 0;
+    this.fontFiles.clear();
     this.imageDedup.clear();
     this.imageFiles.clear();
     this.cssImageClasses.clear();
+  }
+
+  private getFontFilename(source: NonNullable<ReturnType<typeof choosePreferredWebFontSource>>): string {
+    const idx = ++this.fontCounter;
+    const fileName = `font${idx}.${source.format}`;
+    const basePath = this.fontMode.type === "external" ? normalizeFontBasePath(this.fontMode.basePath) : "";
+    const relativePath = basePath ? `${basePath}/${fileName}` : fileName;
+    this.fontFiles.set(relativePath, source.data);
+    return relativePath;
+  }
+
+  private buildFontCss(): string {
+    if (!this.fontAssets || this.fontAssets.faces.length === 0 || this.fontMode.type === "none") {
+      return "";
+    }
+
+    const rules: string[] = [];
+    for (const face of this.fontAssets.faces) {
+      const source = choosePreferredWebFontSource(face);
+      if (!source) continue;
+
+      const sourceUrl = this.fontMode.type === "inline"
+        ? buildEmbeddedFontDataUrl(source)
+        : this.getFontFilename(source);
+      rules.push(buildFontFaceCss(face, sourceUrl, source.format));
+    }
+
+    return rules.join("\n");
   }
 
   /** Get or create a CSS class name for an image data URL, deduplicating identical images. */
@@ -745,6 +794,7 @@ export class HTMLWriter implements Writer<string> {
         ? entry.html
         : `${entry.open}${entry.children.join("")}${entry.close}`
     ).join("\n");
+    const fontCss = this.buildFontCss();
     let cssImageRules = "";
     if (this.imageMode.type === "css" && this.cssImageClasses.size > 0) {
       const rules: string[] = [];
@@ -760,7 +810,7 @@ export class HTMLWriter implements Writer<string> {
 <meta charset="UTF-8">
 <style>
   body { margin: 0; padding: 0; }
-  .ir-container { position: relative; width: ${n(this.width)}px; height: ${n(this.height)}px; overflow: hidden; }${cssImageRules}
+  .ir-container { position: relative; width: ${n(this.width)}px; height: ${n(this.height)}px; overflow: hidden; }${cssImageRules}${fontCss ? "\n" + fontCss : ""}
 ${this.customCss ? "\n" + this.customCss : ""}
 </style>
 </head>

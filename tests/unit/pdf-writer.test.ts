@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
+import * as fs from "node:fs";
 import { deflateSync } from "node:zlib";
+import type { FontAssetCollection } from "../../src/font-assets.js";
 import { renderIR } from "../../src/pipeline.js";
+import { parseTTF } from "../../src/ttf-parser.js";
 import type { IRNode, Quad } from "../../src/types.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
 
@@ -87,6 +90,66 @@ function createOpaqueRedGifDataUrl(): string {
 }
 
 const OPAQUE_RED_GIF = createOpaqueRedGifDataUrl();
+
+function firstExisting(paths: string[]): string | null {
+  for (const filePath of paths) {
+    if (fs.existsSync(filePath)) return filePath;
+  }
+  return null;
+}
+
+function loadSystemFontBytes(): Uint8Array | null {
+  const filePath = firstExisting([
+    "C:\\Windows\\Fonts\\arial.ttf",
+    "C:\\Windows\\Fonts\\segoeui.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+  ]);
+  return filePath ? new Uint8Array(fs.readFileSync(filePath)) : null;
+}
+
+function loadSystemFontPair(): { regular: Uint8Array; bold: Uint8Array } | null {
+  const candidates: Array<[string, string]> = [
+    ["C:\\Windows\\Fonts\\arial.ttf", "C:\\Windows\\Fonts\\arialbd.ttf"],
+    ["C:\\Windows\\Fonts\\segoeui.ttf", "C:\\Windows\\Fonts\\segoeuib.ttf"],
+    ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"],
+    ["/System/Library/Fonts/Supplemental/Arial.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf"],
+  ];
+
+  for (const [regularPath, boldPath] of candidates) {
+    if (!fs.existsSync(regularPath) || !fs.existsSync(boldPath)) continue;
+    return {
+      regular: new Uint8Array(fs.readFileSync(regularPath)),
+      bold: new Uint8Array(fs.readFileSync(boldPath)),
+    };
+  }
+
+  return null;
+}
+
+function createFontAssetCollection(faces: FontAssetCollection["faces"]): FontAssetCollection {
+  return { faces };
+}
+
+function createTextNode(text: string, y: number, family: string, weight?: string): IRNode {
+  return {
+    type: "text",
+    quad: [
+      { x: 4, y },
+      { x: 110, y },
+      { x: 110, y: y + 16 },
+      { x: 4, y: y + 16 },
+    ],
+    text,
+    style: {
+      color: "rgb(36, 41, 46)",
+      fontSize: "16px",
+      fontFamily: family,
+      fontWeight: weight,
+    },
+    zIndex: 0,
+  };
+}
 
 const chipQuad: Quad = [
   { x: 0, y: 0 },
@@ -221,6 +284,76 @@ test.describe("PDF writer regressions", () => {
 
     expect(content).toContain("/BaseFont /Helvetica");
     expect(content).not.toContain("/BaseFont /Symbol");
+  });
+
+  test("embeds WOFF font assets by converting them to TTF for PDF output", async () => {
+    const fontBytes = loadSystemFontBytes();
+    test.skip(!fontBytes, "No usable system TTF font found on this machine.");
+
+    const { createFont } = await import("fonteditor-core");
+    const input = new Uint8Array(fontBytes!.byteLength);
+    input.set(fontBytes!);
+    const font = createFont(input.buffer, { type: "ttf" });
+    const woff = font.write({ type: "woff" });
+    const woffBytes = woff instanceof Uint8Array
+      ? woff
+      : typeof woff === "string"
+        ? new TextEncoder().encode(woff)
+        : new Uint8Array(woff);
+
+    const writer = new PDFWriter({
+      pageWidth: 60,
+      pageHeight: 30,
+      fontAssets: createFontAssetCollection([{
+        family: "HC Pdf Woff",
+        sources: [{ format: "woff", mimeType: "font/woff", data: woffBytes }],
+      }]),
+    });
+
+    const pdf = await renderIR([createTextNode("Woff", 4, "HC Pdf Woff", "400")], writer);
+    await pdf.finalize();
+
+    const content = Buffer.from(pdf.toBytes()).toString("latin1");
+    expect(content).toContain("/FontFile2");
+    expect(content).toContain("/CIDFontType2");
+  });
+
+  test("keeps multiple custom font weights distinct within one family", async () => {
+    const pair = loadSystemFontPair();
+    test.skip(!pair, "No usable regular/bold TTF font pair found on this machine.");
+
+    const regularParsed = parseTTF(pair!.regular);
+    const boldParsed = parseTTF(pair!.bold);
+    test.skip(regularParsed.postScriptName === boldParsed.postScriptName, "Font pair did not expose distinct PostScript names.");
+
+    const writer = new PDFWriter({
+      pageWidth: 80,
+      pageHeight: 40,
+      fontAssets: createFontAssetCollection([
+        {
+          family: "HC Weight Family",
+          weight: "400",
+          style: "normal",
+          sources: [{ format: "ttf", mimeType: "font/ttf", data: pair!.regular }],
+        },
+        {
+          family: "HC Weight Family",
+          weight: "700",
+          style: "normal",
+          sources: [{ format: "ttf", mimeType: "font/ttf", data: pair!.bold }],
+        },
+      ]),
+    });
+
+    const pdf = await renderIR([
+      createTextNode("Regular", 4, "HC Weight Family", "400"),
+      createTextNode("Bold", 24, "HC Weight Family", "700"),
+    ], writer);
+    await pdf.finalize();
+
+    const content = Buffer.from(pdf.toBytes()).toString("latin1");
+    expect(content).toContain(`/${regularParsed.postScriptName}`);
+    expect(content).toContain(`/${boldParsed.postScriptName}`);
   });
 
   test("scales oversized pill radii without collapsing rounded rectangles into ellipses", async () => {

@@ -144,6 +144,12 @@ export type Options = {
   includeText?: boolean;
   includeImages?: boolean;
   /**
+   * When true, `extractIRWithAssets()` also downloads the used @font-face sources
+   * needed to preserve special webfonts in compatible writers.
+   * Defaults to false.
+   */
+  includeFonts?: boolean;
+  /**
    * When true, `<video>` elements are converted into `image` IR nodes by
    * rasterizing their first decoded frame at the element's display size.
    * Uses `imageScale` for rasterization resolution. Defaults to false.

@@ -9,7 +9,8 @@
 export type { Point, Quad, Style, IRNode, Options, Writer, TextMeasurementMode } from "./types.js";
 
 // Pipeline
-export { extractIR, renderIR } from "./pipeline.js";
+export { extractIR, extractIRWithAssets, renderIR } from "./pipeline.js";
+export type { ExtractIRWithAssetsResult } from "./pipeline.js";
 
 // Traversal (advanced usage)
 export {
@@ -48,3 +49,14 @@ export { DWGWriter, type DWGWriterOptions, AcadDXFWriter, type AcadDXFWriterOpti
 
 // Font utilities
 export { parseTTF, type ParsedTTF } from "./ttf-parser.js";
+export type {
+  FontAssetSourceFormat,
+  FontAssetSource,
+  FontAsset,
+  FontAssetCollection,
+  FontAssetMode,
+  CollectFontAssetsOptions,
+} from "./font-assets.js";
+export { collectFontAssets, loadFontAssetsIntoDocument } from "./font-assets.js";
+export type { RasterizeFontTextOptions } from "./font-fallback.js";
+export { rasterizeFontTextNodes } from "./font-fallback.js";

@@ -2,11 +2,13 @@
  * SVG Writer.
  * Maps IR nodes to SVG elements and produces a standalone SVG document string.
  */
+import type { FontAssetCollection, FontAssetMode } from "../font-assets.js";
 import type { ClipQuad, PathSubpath, Point, Quad, SourceMetadata, Style, Writer } from "../types.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds, type ClipPathShape } from "./shared/clip-path.js";
+import { buildEmbeddedFontDataUrl, buildFontFaceCss, choosePreferredWebFontSource, normalizeFontBasePath } from "./shared/font-assets.js";
 import {
   expandRepeatingGradientStops,
   extractAllGradients,
@@ -328,6 +330,10 @@ export type SVGWriterOptions = {
   width: number;
   /** Viewport height in pixels. */
   height: number;
+  /** Downloaded @font-face assets used by extracted text. */
+  fontAssets?: FontAssetCollection;
+  /** How downloadable fonts are emitted in the SVG output. */
+  fontMode?: FontAssetMode;
   /** Scale factor applied to width and height. */
   zoom?: number;
 };
@@ -335,11 +341,21 @@ export type SVGWriterOptions = {
 export class SVGWriter implements Writer<string> {
   private width: number;
   private height: number;
+  private fontAssets?: FontAssetCollection;
+  private fontMode: FontAssetMode;
+  private fontCounter = 0;
   private elements: string[] = [];
   private defs: string[] = [];
   private defIdCounter = 0;
   private clipCache = new Map<string, string>(); // clipKey → clip-path id
   private imageCache = new Map<string, string>(); // dataUrl → symbol def id
+
+  /**
+   * Font files referenced by the SVG output.
+   * Maps relative file paths to raw font bytes.
+   * Only populated when `fontMode` is `{ type: "external" }`.
+   */
+  fontFiles = new Map<string, Uint8Array>();
 
   /**
    * @param optionsOrWidth Options object, or viewport width in pixels (positional form).
@@ -351,19 +367,52 @@ export class SVGWriter implements Writer<string> {
       const z = optionsOrWidth.zoom ?? 1;
       this.width = optionsOrWidth.width * z;
       this.height = optionsOrWidth.height * z;
+      this.fontAssets = optionsOrWidth.fontAssets;
+      this.fontMode = optionsOrWidth.fontMode ?? { type: "none" };
     } else {
       const z = zoom ?? 1;
       this.width = optionsOrWidth * z;
       this.height = (height ?? 0) * z;
+      this.fontMode = { type: "none" };
     }
   }
 
   async begin(): Promise<void> {
     this.elements = [];
     this.defs = [];
+    this.fontCounter = 0;
     this.defIdCounter = 0;
     this.clipCache.clear();
     this.imageCache.clear();
+    this.fontFiles.clear();
+  }
+
+  private getFontFilename(source: NonNullable<ReturnType<typeof choosePreferredWebFontSource>>): string {
+    const idx = ++this.fontCounter;
+    const fileName = `font${idx}.${source.format}`;
+    const basePath = this.fontMode.type === "external" ? normalizeFontBasePath(this.fontMode.basePath) : "";
+    const relativePath = basePath ? `${basePath}/${fileName}` : fileName;
+    this.fontFiles.set(relativePath, source.data);
+    return relativePath;
+  }
+
+  private buildFontCss(): string {
+    if (!this.fontAssets || this.fontAssets.faces.length === 0 || this.fontMode.type === "none") {
+      return "";
+    }
+
+    const rules: string[] = [];
+    for (const face of this.fontAssets.faces) {
+      const source = choosePreferredWebFontSource(face);
+      if (!source) continue;
+
+      const sourceUrl = this.fontMode.type === "inline"
+        ? buildEmbeddedFontDataUrl(source)
+        : this.getFontFilename(source);
+      rules.push(buildFontFaceCss(face, sourceUrl, source.format));
+    }
+
+    return rules.join("\n");
   }
 
   private getCachedClipId(key: string, buildDef: (id: string) => string): string {
@@ -860,8 +909,10 @@ export class SVGWriter implements Writer<string> {
   }
 
   async end(): Promise<string> {
+    const fontCss = this.buildFontCss();
+    const styleBlock = fontCss ? `<style>${escXml(fontCss)}</style>\n` : "";
     const defsBlock = this.defs.length > 0 ? `<defs>\n${this.defs.join("\n")}\n</defs>\n` : "";
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${n(this.width)}" height="${n(this.height)}" viewBox="0 0 ${n(this.width)} ${n(this.height)}">\n${defsBlock}${this.elements.join("\n")}\n</svg>`;
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${n(this.width)}" height="${n(this.height)}" viewBox="0 0 ${n(this.width)} ${n(this.height)}">\n${styleBlock}${defsBlock}${this.elements.join("\n")}\n</svg>`;
   }
 
   // ── Private helpers ─────────────────────────────────────────────

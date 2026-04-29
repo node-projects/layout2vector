@@ -3,6 +3,7 @@
  * Traverses DOM → detects node type → extracts geometry → builds IR → flattens to render order.
  */
 import type { IRNode, Options, Writer } from "./types.js";
+import type { FontAssetCollection } from "./font-assets.js";
 import {
   traverseDOM,
   flattenStackingOrder,
@@ -10,6 +11,7 @@ import {
   isSVGElement,
   type StackingNode,
 } from "./traversal.js";
+import { collectFontAssets } from "./font-assets.js";
 import { extractHTMLGeometry } from "./extractors/html-extractor.js";
 import { extractSVGSubtree } from "./extractors/svg-extractor.js";
 import { isImageElement, isCanvasElement, isVideoElement, extractImageGeometry, extractCanvasGeometry, extractVideoGeometry, hasBackgroundImage, extractBackgroundImage, clearImageCache, preloadImages } from "./extractors/image-extractor.js";
@@ -17,6 +19,11 @@ import { isMathMLRoot, extractMathMLFeatures } from "./extractors/mathml-extract
 import { extractPseudoElements } from "./extractors/pseudo-extractor.js";
 import { clearGeometryCaches, getElementOrigin } from "./geometry.js";
 import { buildSourceMetadata } from "./shared/source-metadata.js";
+
+export type ExtractIRWithAssetsResult = {
+  ir: IRNode[];
+  fontAssets?: FontAssetCollection;
+};
 
 function inheritContainerClipping(nodes: IRNode[], inheritedStyle: IRNode["style"]): void {
   for (const node of nodes) {
@@ -223,6 +230,19 @@ export async function extractIR(root: Element | Element[], options: Options = {}
   }
 
   return irNodes;
+}
+
+export async function extractIRWithAssets(
+  root: Element | Element[],
+  options: Options = {},
+): Promise<ExtractIRWithAssetsResult> {
+  const ir = await extractIR(root, options);
+  if (!options.includeFonts) {
+    return { ir };
+  }
+
+  const fontAssets = await collectFontAssets(root, { ir });
+  return { ir, fontAssets };
 }
 
 function transformIRGeometry(nodes: IRNode[], transform: StackingNode["coordinateTransform"]): void {

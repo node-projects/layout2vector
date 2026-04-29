@@ -19,6 +19,7 @@ import {
   PdfPage,
   PdfPages,
 } from "../pdf-objects.js";
+import type { FontAsset, FontAssetCollection, FontAssetSourceFormat } from "../font-assets.js";
 import { inflateZlibSync } from "../shared/zlib-inflate.js";
 import { parseCssColor as parseColor, parseVisibleCssColor as parseVisibleColor, type ParsedCssColor as ParsedColor } from "./shared/css-color.js";
 import { getPointBounds, getQuadBounds, parseClipPathShape, type ClipPathBounds } from "./shared/clip-path.js";
@@ -100,6 +101,64 @@ function parseFontFamilies(family: string): string[] {
   }
 
   return families;
+}
+
+function normalizeCustomFontWeight(weight: string | undefined): string {
+  const normalized = (weight ?? "").trim().toLowerCase();
+  if (!normalized || normalized === "normal") return "400";
+  if (normalized === "bold" || normalized === "bolder") return "700";
+  const numeric = parseInt(normalized, 10);
+  return Number.isFinite(numeric) ? String(numeric) : normalized;
+}
+
+function normalizeCustomFontStyle(style: string | undefined): string {
+  const normalized = (style ?? "").trim().toLowerCase();
+  if (!normalized || normalized === "normal") return "normal";
+  if (normalized.includes("italic")) return "italic";
+  if (normalized.includes("oblique")) return "oblique";
+  return normalized;
+}
+
+function buildCustomFontKey(family: string, weight: string | undefined, style: string | undefined): string {
+  return `${normalizeFontFamilyName(family)}|${normalizeCustomFontWeight(weight)}|${normalizeCustomFontStyle(style)}`;
+}
+
+function choosePdfFontSource(face: FontAsset): FontAsset["sources"][number] | null {
+  return face.sources.find((source) => source.format === "ttf")
+    ?? face.sources.find((source) => source.format === "otf")
+    ?? face.sources.find((source) => source.format === "woff")
+    ?? face.sources.find((source) => source.format === "woff2")
+    ?? null;
+}
+
+type FontEditorCoreModule = typeof import("fonteditor-core");
+
+let fontEditorCorePromise: Promise<FontEditorCoreModule> | null = null;
+
+async function getFontEditorCore(): Promise<FontEditorCoreModule> {
+  if (!fontEditorCorePromise) {
+    fontEditorCorePromise = import("fonteditor-core").then(async (mod) => {
+      if (mod.woff2 && typeof mod.woff2.init === "function") {
+        await mod.woff2.init();
+      }
+      return mod;
+    });
+  }
+
+  return fontEditorCorePromise;
+}
+
+async function convertFontToTrueType(data: Uint8Array, format: FontAssetSourceFormat): Promise<Uint8Array> {
+  if (format === "ttf") return data;
+
+  const { createFont } = await getFontEditorCore();
+  const input = new Uint8Array(data.byteLength);
+  input.set(data);
+  const font = createFont(input.buffer, { type: format });
+  const converted = font.write({ type: "ttf" });
+  if (converted instanceof Uint8Array) return converted;
+  if (typeof converted === "string") return new TextEncoder().encode(converted);
+  return new Uint8Array(converted);
 }
 
 /** Convert pixel to PDF points (1px ≈ 0.75pt). */
@@ -1043,6 +1102,8 @@ export type PDFWriterOptions = {
   pageWidth?: number;
   /** Page height in mm (default A4 = 297). */
   pageHeight?: number;
+  /** Downloaded @font-face assets used by extracted text. */
+  fontAssets?: FontAssetCollection;
   /** Map of CSS font-family name → TTF file bytes. */
   customFonts?: Map<string, Uint8Array>;
   /** TTF file bytes for a default Unicode-capable font. */
@@ -1065,12 +1126,14 @@ export class PDFWriter implements Writer<PdfDocument> {
   private images: ImageDef[] = [];
   private imageCounter = 0;
 
-  // Custom TrueType fonts: CSS family (lowercase) → parsed TTF data
+  // Custom TrueType fonts: selector/family key → parsed TTF data
   private customFonts = new Map<string, ParsedTTF>();
   // Track which characters (Unicode code points) are used per custom font (PostScript name)
   private customFontUsedChars = new Map<string, Set<number>>();
   // Default font for Unicode text that can't be encoded in WinAnsi
   private defaultFont: ParsedTTF | null = null;
+  private fontAssets?: FontAssetCollection;
+  private fontAssetsRegistered = false;
 
   /**
    * @param optionsOrPageWidth Options object, or page width in mm (positional form).
@@ -1085,6 +1148,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       const z = opts.zoom ?? 1;
       this.pageWidthPt = (opts.pageWidth ?? 210) * z * 2.835;
       this.pageHeightPt = (opts.pageHeight ?? 297) * z * 2.835;
+      this.fontAssets = opts.fontAssets;
       if (opts.customFonts) {
         for (const [family, data] of opts.customFonts) {
           this.registerCustomFont(family, data);
@@ -1099,6 +1163,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       const z = zoom ?? 1;
       this.pageWidthPt = pw * z * 2.835;
       this.pageHeightPt = ph * z * 2.835;
+      this.fontAssets = undefined;
       if (customFonts) {
         for (const [family, data] of customFonts) {
           this.registerCustomFont(family, data);
@@ -1111,6 +1176,8 @@ export class PDFWriter implements Writer<PdfDocument> {
   }
 
   async begin(): Promise<void> {
+    await this.ensureFontAssetsRegistered();
+
     this.ops = [];
     this.fontMap.clear();
     this.fontCounter = 0;
@@ -1132,23 +1199,61 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   // ── Font helpers ────────────────────────────────────────────────
 
-  private registerCustomFont(family: string, data: Uint8Array): void {
+  private async ensureFontAssetsRegistered(): Promise<void> {
+    if (this.fontAssetsRegistered || !this.fontAssets || this.fontAssets.faces.length === 0) return;
+
+    for (const face of this.fontAssets.faces) {
+      const source = choosePdfFontSource(face);
+      if (!source) continue;
+
+      try {
+        const fontData = await convertFontToTrueType(source.data, source.format);
+        this.registerCustomFont(face.family, fontData, {
+          weight: face.weight,
+          style: face.style,
+        });
+      } catch {
+        // Keep best-effort behavior when conversion fails.
+      }
+    }
+
+    this.fontAssetsRegistered = true;
+  }
+
+  private registerCustomFont(
+    family: string,
+    data: Uint8Array,
+    descriptors?: { weight?: string; style?: string },
+  ): void {
     const parsed = parseTTF(data);
+    const directKeys = [family, parsed.familyName, parsed.postScriptName];
+    if (descriptors) {
+      for (const key of directKeys) {
+        if (!key) continue;
+        this.customFonts.set(buildCustomFontKey(key, descriptors.weight, descriptors.style), parsed);
+      }
+    }
+
     for (const key of [family, parsed.familyName, parsed.postScriptName]) {
       const normalized = normalizeFontFamilyName(key);
       if (!normalized) continue;
-      this.customFonts.set(normalized, parsed);
+      if (!this.customFonts.has(normalized)) {
+        this.customFonts.set(normalized, parsed);
+      }
     }
   }
 
-  private getCustomFontForFamily(family: string): ParsedTTF | null {
-    return this.customFonts.get(normalizeFontFamilyName(family)) ?? null;
+  private getCustomFontForFamily(family: string, weight: string | undefined, style: string | undefined): ParsedTTF | null {
+    return this.customFonts.get(buildCustomFontKey(family, weight, style))
+      ?? this.customFonts.get(normalizeFontFamilyName(family))
+      ?? null;
   }
 
   /** Map CSS font family + weight to a standard PDF font name (or custom font ID). */
-  private mapToPdfFont(family: string, weight: "bold" | "normal"): string {
+  private mapToPdfFont(family: string, weight: string | undefined, style: string | undefined): string {
+    const standardWeight = mapFontWeight(weight);
     for (const token of parseFontFamilies(family)) {
-      const customFont = this.getCustomFontForFamily(token);
+      const customFont = this.getCustomFontForFamily(token, weight, style);
       if (customFont) {
         return `custom:${customFont.postScriptName}`;
       }
@@ -1166,10 +1271,10 @@ export class PDFWriter implements Writer<PdfDocument> {
         return "ZapfDingbats";
       }
       if (token.includes("courier") || token.includes("mono") || token === "monospace" || token === "ui-monospace") {
-        return weight === "bold" ? "Courier-Bold" : "Courier";
+        return standardWeight === "bold" ? "Courier-Bold" : "Courier";
       }
       if (token.includes("times") || (token.includes("serif") && !token.includes("sans"))) {
-        return weight === "bold" ? "Times-Bold" : "Times-Roman";
+        return standardWeight === "bold" ? "Times-Bold" : "Times-Roman";
       }
       if (
         token === "sans-serif"
@@ -1184,11 +1289,11 @@ export class PDFWriter implements Writer<PdfDocument> {
         || token.includes("segoe ui")
         || token.includes("tahoma")
       ) {
-        return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
+        return standardWeight === "bold" ? "Helvetica-Bold" : "Helvetica";
       }
     }
 
-    return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
+    return standardWeight === "bold" ? "Helvetica-Bold" : "Helvetica";
   }
 
   /** Check whether a parsed font has glyphs for all characters in the text.
@@ -1209,8 +1314,8 @@ export class PDFWriter implements Writer<PdfDocument> {
    * Falls back through all available custom fonts if the primary choice
    * doesn't have the needed glyphs.
    */
-  private resolveFont(family: string, weight: "bold" | "normal", text: string): string {
-    const mapped = this.mapToPdfFont(family, weight);
+  private resolveFont(family: string, weight: string | undefined, style: string | undefined, text: string): string {
+    const mapped = this.mapToPdfFont(family, weight, style);
     // If it's already a custom font, check it has the glyphs
     if (this.isCustomFont(mapped)) {
       const data = this.getCustomFontData(mapped);
@@ -1224,7 +1329,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       return `custom:${this.defaultFont.postScriptName}`;
     }
     // Search all custom fonts for one that has the needed glyphs
-    for (const [, parsed] of this.customFonts) {
+    for (const parsed of this.getUniqueCustomFonts()) {
       if (this.fontHasAllChars(parsed, text)) {
         return `custom:${parsed.postScriptName}`;
       }
@@ -1242,6 +1347,12 @@ export class PDFWriter implements Writer<PdfDocument> {
   /** Check if a PDF font name refers to a custom TrueType font. */
   private isCustomFont(pdfFontName: string): boolean {
     return pdfFontName.startsWith("custom:");
+  }
+
+  private getUniqueCustomFonts(): ParsedTTF[] {
+    return [...new Map(
+      [...this.customFonts.values()].map((parsed) => [parsed.postScriptName, parsed]),
+    ).values()];
   }
 
   /** Get the ascent ratio (ascent / unitsPerEm) for a PDF font. */
@@ -1309,7 +1420,7 @@ export class PDFWriter implements Writer<PdfDocument> {
   private getCustomFontData(pdfFontName: string): ParsedTTF | null {
     if (!pdfFontName.startsWith("custom:")) return null;
     const psName = pdfFontName.slice(7); // strip "custom:"
-    for (const parsed of this.customFonts.values()) {
+    for (const parsed of this.getUniqueCustomFonts()) {
       if (parsed.postScriptName === psName) return parsed;
     }
     // Check the default font
@@ -1961,9 +2072,10 @@ export class PDFWriter implements Writer<PdfDocument> {
     const styleFontSize = parseFontSize(style.fontSize);
     const quadFontSize = quadHeight > 0 ? pxToPt(quadHeight) : styleFontSize;
     const fontSize = Math.min(styleFontSize, quadFontSize);
-    const fontWeight = mapFontWeight(style.fontWeight);
+    const fontWeight = style.fontWeight;
+    const fontStyle = style.fontStyle;
     const fontFamily = style.fontFamily?.replace(/['"]/g, "") || "Helvetica";
-    const pdfFontName = this.resolveFont(fontFamily, fontWeight, text);
+    const pdfFontName = this.resolveFont(fontFamily, fontWeight, fontStyle, text);
     const fontRes = this.getFontResName(pdfFontName);
 
     const textColor = parseVisibleColor(style.color) ?? parseVisibleColor(style.fill);

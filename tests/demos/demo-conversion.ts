@@ -4,6 +4,7 @@ import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { injectBoxQuadsPolyfill, injectLibrary } from "../helpers.js";
 import { renderIR } from "../../src/pipeline.js";
+import type { FontAssetCollection } from "../../src/font-assets.js";
 import type { IRNode } from "../../src/types.js";
 import { DXFWriter } from "../../src/writers/dxf-writer.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
@@ -46,6 +47,23 @@ export interface ConversionSummary {
     png: string | null;
   };
 }
+
+type SerializableFontAssetCollection = {
+  faces: Array<{
+    family: string;
+    weight?: string;
+    style?: string;
+    stretch?: string;
+    unicodeRange?: string;
+    display?: string;
+    sources: Array<{
+      format: "ttf" | "otf" | "woff" | "woff2";
+      mimeType: string;
+      data: number[];
+      originalUrl?: string;
+    }>;
+  }>;
+};
 
 export function ensureDirectory(dirPath: string): void {
   if (!fs.existsSync(dirPath)) {
@@ -259,6 +277,20 @@ function computeIrBounds(ir: IRNode[]): { width: number; height: number } {
   return {
     width: Math.ceil(maxX) || 1,
     height: Math.ceil(maxY) || 1,
+  };
+}
+
+function deserializeFontAssets(fontAssets: SerializableFontAssetCollection | null | undefined): FontAssetCollection | undefined {
+  if (!fontAssets) return undefined;
+
+  return {
+    faces: fontAssets.faces.map((face) => ({
+      ...face,
+      sources: face.sources.map((source) => ({
+        ...source,
+        data: Uint8Array.from(source.data),
+      })),
+    })),
   };
 }
 
@@ -542,10 +574,15 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   await inlineLocalFileAssets(page);
 
 
-  const ir: IRNode[] = await page.evaluate(({ shouldConvertFormControls, shouldWalkIframes, shouldIncludeSourceMetadata }) => {
+  const extracted: {
+    ir: IRNode[];
+    fontFallbackIr: IRNode[];
+    fontAssets: SerializableFontAssetCollection | null;
+  } = await page.evaluate(async ({ shouldConvertFormControls, shouldWalkIframes, shouldIncludeSourceMetadata }) => {
     const root = document.getElementById("root") ?? document.body;
-    return (window as any).__HC.extractIR(root, {
+    const { ir, fontAssets } = await (window as any).__HC.extractIRWithAssets(root, {
       boxType: "border",
+      includeFonts: true,
       includeText: true,
       includeImages: true,
       includeVideos: true,
@@ -554,11 +591,32 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
       walkIframes: shouldWalkIframes,
       textMeasurement: "auto",
     });
+    const fontFallbackIr = fontAssets
+      ? await (window as any).__HC.rasterizeFontTextNodes(ir, fontAssets)
+      : ir;
+    return {
+      ir,
+      fontFallbackIr,
+      fontAssets: fontAssets
+        ? {
+            faces: fontAssets.faces.map((face: any) => ({
+              ...face,
+              sources: face.sources.map((source: any) => ({
+                ...source,
+                data: Array.from(source.data),
+              })),
+            })),
+          }
+        : null,
+    };
   }, {
     shouldConvertFormControls: convertFormControls,
     shouldWalkIframes: walkIframes,
     shouldIncludeSourceMetadata: dumpIR,
   });
+  const ir = extracted.ir;
+  const fontFallbackIr = extracted.fontFallbackIr;
+  const fontAssets = deserializeFontAssets(extracted.fontAssets);
   expect(ir.length).toBeGreaterThan(0);
 
   await inlineRemoteIrImages(ir, capturedImageDataUrls);
@@ -611,7 +669,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     maxY: viewport.height,
     imageBasePath: `${name}-dxf-assets`,
   });
-  const dxfContent = await renderIR(ir, dxfWriter);
+  const dxfContent = await renderIR(fontFallbackIr, dxfWriter);
   expect(dxfContent).toBeTruthy();
   expect(dxfContent.length).toBeGreaterThan(100);
   const dxfPath = path.join(outputDir, `${name}.dxf`);
@@ -627,12 +685,13 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   }
 
   const { customFonts, defaultFont } = loadPdfFonts(fontDirectory);
-  const pdfWriter = new PDFWriter(
-    viewport.width * 0.2646,
-    viewport.height * 0.2646,
-    customFonts.size > 0 ? customFonts : undefined,
+  const pdfWriter = new PDFWriter({
+    pageWidth: viewport.width * 0.2646,
+    pageHeight: viewport.height * 0.2646,
+    fontAssets,
+    customFonts: customFonts.size > 0 ? customFonts : undefined,
     defaultFont,
-  );
+  });
   const pdfDoc = await renderIR(ir, pdfWriter);
   expect(pdfDoc).toBeTruthy();
   await pdfDoc.finalize();
@@ -665,14 +724,24 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     }
   }
 
-  const svgWriter = new SVGWriter(viewport.width, viewport.height);
+  const svgWriter = new SVGWriter({
+    width: viewport.width,
+    height: viewport.height,
+    fontAssets,
+    fontMode: fontAssets ? { type: "inline" } : { type: "none" },
+  });
   const svgContent = await renderIR(ir, svgWriter);
   expect(svgContent).toBeTruthy();
   expect(svgContent.length).toBeGreaterThan(100);
   const svgPath = path.join(outputDir, `${name}.svg`);
   fs.writeFileSync(svgPath, svgContent, "utf-8");
 
-  const htmlWriter = new HTMLWriter(viewport.width, viewport.height);
+  const htmlWriter = new HTMLWriter({
+    width: viewport.width,
+    height: viewport.height,
+    fontAssets,
+    fontMode: fontAssets ? { type: "inline" } : { type: "none" },
+  });
   const htmlContent = await renderIR(ir, htmlWriter);
   expect(htmlContent).toBeTruthy();
   expect(htmlContent.length).toBeGreaterThan(100);
@@ -680,28 +749,28 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   fs.writeFileSync(htmlPath, htmlContent, "utf-8");
 
   const emfWriter = new EMFWriter({ width: viewport.width, height: viewport.height });
-  const emfBytes = await renderIR(ir, emfWriter);
+  const emfBytes = await renderIR(fontFallbackIr, emfWriter);
   expect(emfBytes).toBeInstanceOf(Uint8Array);
   expect(emfBytes.length).toBeGreaterThan(80);
   const emfPath = path.join(outputDir, `${name}.emf`);
   fs.writeFileSync(emfPath, emfBytes);
 
   const emfPlusWriter = new EMFPlusWriter({ width: viewport.width, height: viewport.height });
-  const emfPlusBytes = await renderIR(ir, emfPlusWriter);
+  const emfPlusBytes = await renderIR(fontFallbackIr, emfPlusWriter);
   expect(emfPlusBytes).toBeInstanceOf(Uint8Array);
   expect(emfPlusBytes.length).toBeGreaterThan(80);
   const emfPlusPath = path.join(outputDir, `${name}-emfplus.emf`);
   fs.writeFileSync(emfPlusPath, emfPlusBytes);
 
   const dwgWriter = new DWGWriter({ maxY: viewport.height });
-  const dwgBytes = await renderIR(ir, dwgWriter);
+  const dwgBytes = await renderIR(fontFallbackIr, dwgWriter);
   expect(dwgBytes).toBeInstanceOf(Uint8Array);
   expect(dwgBytes.length).toBeGreaterThan(100);
   const dwgPath = path.join(outputDir, `${name}.dwg`);
   fs.writeFileSync(dwgPath, dwgBytes);
 
   const acadDxfWriter = new AcadDXFWriter({ maxY: viewport.height });
-  const acadDxfBytes = await renderIR(ir, acadDxfWriter);
+  const acadDxfBytes = await renderIR(fontFallbackIr, acadDxfWriter);
   expect(acadDxfBytes).toBeInstanceOf(Uint8Array);
   expect(acadDxfBytes.length).toBeGreaterThan(100);
   const acadDxfPath = path.join(outputDir, `${name}-acad.dxf`);

@@ -8,7 +8,9 @@
  *
  * Requires a Canvas-capable environment (browser with document.createElement).
  */
+import type { FontAssetCollection } from "../font-assets.js";
 import type { ClipQuad, Point, Quad, Style, Writer } from "../types.js";
+import { loadFontAssetsIntoDocument } from "../font-assets.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString, parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
@@ -437,6 +439,10 @@ export type ImageWriterOptions = {
   width: number;
   /** Canvas height in CSS pixels. */
   height: number;
+  /** Canvas background color. Set to null for a transparent background. */
+  backgroundColor?: string | null;
+  /** Downloaded @font-face assets used by extracted text. */
+  fontAssets?: FontAssetCollection;
   /** Optional existing canvas to render into. */
   canvas?: HTMLCanvasElement;
   /** Device pixel ratio / resolution multiplier. */
@@ -451,6 +457,8 @@ export class ImageWriter implements Writer<ImageResult> {
   private width: number;
   private height: number;
   private scale: number;
+  private backgroundColor: string | null;
+  private fontAssets?: FontAssetCollection;
   private targetCanvas?: HTMLCanvasElement;
 
   /**
@@ -465,16 +473,21 @@ export class ImageWriter implements Writer<ImageResult> {
       this.width = optionsOrWidth.width * z;
       this.height = optionsOrWidth.height * z;
       this.scale = optionsOrWidth.scale ?? 1;
+      this.backgroundColor = optionsOrWidth.backgroundColor ?? "#ffffff";
+      this.fontAssets = optionsOrWidth.fontAssets;
       this.targetCanvas = optionsOrWidth.canvas;
     } else {
       const z = zoom ?? 1;
       this.width = optionsOrWidth * z;
       this.height = (height ?? 0) * z;
       this.scale = scale ?? 1;
+      this.backgroundColor = "#ffffff";
     }
   }
 
   async begin(): Promise<void> {
+    await loadFontAssetsIntoDocument(this.fontAssets);
+
     const w = Math.ceil(this.width * this.scale);
     const h = Math.ceil(this.height * this.scale);
 
@@ -485,9 +498,10 @@ export class ImageWriter implements Writer<ImageResult> {
     this.ctx = this.canvas.getContext("2d")!;
     this.ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
 
-    // White background
-    this.ctx.fillStyle = "#ffffff";
-    this.ctx.fillRect(0, 0, this.width, this.height);
+    if (this.backgroundColor !== null) {
+      this.ctx.fillStyle = this.backgroundColor;
+      this.ctx.fillRect(0, 0, this.width, this.height);
+    }
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {

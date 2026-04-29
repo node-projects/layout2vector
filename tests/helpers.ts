@@ -22,7 +22,7 @@ export async function injectLibrary(page: Page): Promise<void> {
   const bundleResult = buildSync({
     stdin: {
       contents: `
-        import { extractIR, renderIR } from "../src/pipeline.ts";
+        import { extractIR, extractIRWithAssets, renderIR } from "../src/pipeline.ts";
         import {
           traverseDOM,
           flattenStackingOrder,
@@ -43,11 +43,16 @@ export async function injectLibrary(page: Page): Promise<void> {
         } from "../src/extractors/image-extractor.ts";
         import { isMathMLRoot, isMathMLElement, extractMathMLFeatures } from "../src/extractors/mathml-extractor.ts";
         import { extractPseudoElements, parseCSSContentValue } from "../src/extractors/pseudo-extractor.ts";
+        import { collectFontAssets, loadFontAssetsIntoDocument } from "../src/font-assets.ts";
+        import { rasterizeFontTextNodes } from "../src/font-fallback.ts";
         import { CanvasWriter } from "../src/writers/canvas-writer.ts";
+        import { HTMLWriter } from "../src/writers/html-writer.ts";
         import { ImageWriter, ImageResult } from "../src/writers/image-writer.ts";
+        import { SVGWriter } from "../src/writers/svg-writer.ts";
 
         window.__HC = {
           extractIR,
+          extractIRWithAssets,
           renderIR,
           traverseDOM,
           flattenStackingOrder,
@@ -68,11 +73,16 @@ export async function injectLibrary(page: Page): Promise<void> {
           extractMathMLFeatures,
           extractPseudoElements,
           parseCSSContentValue,
+          collectFontAssets,
+          loadFontAssetsIntoDocument,
+          rasterizeFontTextNodes,
           CanvasWriter,
+          HTMLWriter,
           PNGWriter: ImageWriter,
           PNGResult: ImageResult,
           ImageWriter,
           ImageResult,
+          SVGWriter,
         };
       `,
       loader: "ts",
