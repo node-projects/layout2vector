@@ -744,7 +744,7 @@ test.describe("Writer Output", () => {
     expect(emfPlusTypes).toContain(EMFPLUS_DRAW_IMAGE_POINTS);
   });
 
-  test("EMF+ writer zeroes compressed bitmap headers for image objects", async () => {
+  test("EMF+ writer keeps compressed bitmap dimensions for image objects", async () => {
     const ir: IRNode[] = [{
       type: "image",
       quad: [
@@ -772,8 +772,8 @@ test.describe("Writer Output", () => {
     }
 
     const view = new DataView(imageObject.data.buffer, imageObject.data.byteOffset, imageObject.data.byteLength);
-    expect(view.getUint32(8, true)).toBe(0);
-    expect(view.getUint32(12, true)).toBe(0);
+    expect(view.getUint32(8, true)).toBe(1);
+    expect(view.getUint32(12, true)).toBe(1);
     expect(view.getInt32(16, true)).toBe(0);
     expect(view.getUint32(20, true)).toBe(0);
     expect(view.getUint32(24, true)).toBe(1);

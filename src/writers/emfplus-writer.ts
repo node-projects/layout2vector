@@ -1501,7 +1501,7 @@ export class EMFPlusWriter implements Writer<Uint8Array> {
   private buildImageObject(image: ImageSource): Uint8Array {
     const bitmapData = image.compressed
       ? concatBytes(
-          uint32Array(0, 0),
+          uint32Array(image.width, image.height),
           int32Array(0),
           uint32Array(PIXEL_FORMAT_UNDEFINED, BITMAP_DATA_TYPE_COMPRESSED),
           image.data,

@@ -643,8 +643,9 @@ function renderDataUrlWithSampling(
     if (!inspection.hasVisibleContent) return null;
 
     const preserveTransparency = inspection.hasTransparency;
+    const preserveLossless = preserveTransparency || disableSmoothing;
     return {
-      dataUrl: preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
+      dataUrl: preserveLossless ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
       rgbData: inspection.rgbData,
     };
   } catch {
@@ -1135,6 +1136,16 @@ function renderBackgroundImageUncached(
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
+    
+    const imageRendering = getComputedStyle(el).imageRendering || "";
+    const isPixelated = imageRendering === "pixelated"
+      || imageRendering === "crisp-edges"
+      || imageRendering === "-moz-crisp-edges";
+    const isSmallSource = sourceWidth > 0 && sourceHeight > 0 && (sourceWidth <= 16 || sourceHeight <= 16);
+    const disableSmoothing = isPixelated || isSmallSource || w <= 16 || h <= 16;
+    if (disableSmoothing) {
+      ctx.imageSmoothingEnabled = false;
+    }
 
     const scaleX = cssBoxWidth > 0 ? w / cssBoxWidth : 1;
     const scaleY = cssBoxHeight > 0 ? h / cssBoxHeight : 1;
@@ -1182,8 +1193,9 @@ function renderBackgroundImageUncached(
     if (!inspection.hasVisibleContent) return null;
 
     const preserveTransparency = inspection.hasTransparency;
+    const preserveLossless = preserveTransparency || disableSmoothing;
     return {
-      dataUrl: preserveTransparency ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
+      dataUrl: preserveLossless ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
       rgbData: inspection.rgbData,
     };
   } catch {

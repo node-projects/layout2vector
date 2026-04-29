@@ -950,6 +950,87 @@ test.describe("Image Extraction", () => {
     expect(bl.y - tl.y).toBeCloseTo(80, 0);
   });
 
+  test("keeps pixelated CSS background images crisp when scaling them into extracted image nodes", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:20px;height:20px;background-size:cover;background-repeat:no-repeat;image-rendering:pixelated;"></div>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target") as HTMLDivElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 2;
+      canvas.height = 2;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#ff0000";
+      ctx.fillRect(0, 0, 1, 1);
+      ctx.fillStyle = "#00ff00";
+      ctx.fillRect(1, 0, 1, 1);
+      ctx.fillStyle = "#0000ff";
+      ctx.fillRect(0, 1, 1, 1);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(1, 1, 1, 1);
+
+      el.style.backgroundImage = `url('${canvas.toDataURL("image/png")}')`;
+
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((node: any) => node.type === "image");
+      if (!imageNode) return null;
+
+      return new Promise<Record<string, number[]> | null>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const outCanvas = document.createElement("canvas");
+          outCanvas.width = img.naturalWidth;
+          outCanvas.height = img.naturalHeight;
+          const outCtx = outCanvas.getContext("2d")!;
+          outCtx.drawImage(img, 0, 0);
+          resolve({
+            topLeft: Array.from(outCtx.getImageData(4, 4, 1, 1).data),
+            topEdgeLeft: Array.from(outCtx.getImageData(9, 4, 1, 1).data),
+            topEdgeRight: Array.from(outCtx.getImageData(10, 4, 1, 1).data),
+            bottomLeft: Array.from(outCtx.getImageData(4, 15, 1, 1).data),
+            bottomRight: Array.from(outCtx.getImageData(15, 15, 1, 1).data),
+          });
+        };
+        img.onerror = () => reject(new Error("failed to decode extracted pixelated background image"));
+        img.src = imageNode.dataUrl;
+      });
+    });
+
+    expect(extracted).not.toBeNull();
+    expect(extracted?.topLeft?.[0]).toBeGreaterThan(230);
+    expect(extracted?.topLeft?.[1]).toBeLessThan(20);
+    expect(extracted?.topLeft?.[2]).toBeLessThan(20);
+    expect(extracted?.topLeft?.[3]).toBe(255);
+
+    expect(extracted?.topEdgeLeft?.[0]).toBeGreaterThan(230);
+    expect(extracted?.topEdgeLeft?.[1]).toBeLessThan(20);
+    expect(extracted?.topEdgeLeft?.[2]).toBeLessThan(20);
+    expect(extracted?.topEdgeLeft?.[3]).toBe(255);
+
+    expect(extracted?.topEdgeRight?.[0]).toBeLessThan(20);
+    expect(extracted?.topEdgeRight?.[1]).toBeGreaterThan(230);
+    expect(extracted?.topEdgeRight?.[2]).toBeLessThan(20);
+    expect(extracted?.topEdgeRight?.[3]).toBe(255);
+
+    expect(extracted?.bottomLeft?.[0]).toBeLessThan(20);
+    expect(extracted?.bottomLeft?.[1]).toBeLessThan(20);
+    expect(extracted?.bottomLeft?.[2]).toBeGreaterThan(230);
+    expect(extracted?.bottomLeft?.[3]).toBe(255);
+
+    expect(extracted?.bottomRight?.[0]).toBeGreaterThan(240);
+    expect(extracted?.bottomRight?.[1]).toBeGreaterThan(240);
+    expect(extracted?.bottomRight?.[2]).toBeGreaterThan(240);
+    expect(extracted?.bottomRight?.[3]).toBe(255);
+  });
+
   test("extracts repeated CSS background-image tiles instead of stretching a single copy", async ({ page }) => {
     await setupPage(
       page,
