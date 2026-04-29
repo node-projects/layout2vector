@@ -1,5 +1,8 @@
 # AI Guidelines
 
+## Dependencies
+- Do not add new dependencies, only if you directly asked to do so.
+
 ## Documentation Policy
 - **Always update the README and API documentation whenever a public API changes.**
 - Prioritize Firefox for all rendering tests.
