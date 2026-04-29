@@ -1,6 +1,6 @@
 {
   "name": "@node-projects/layout2vector",
-  "version": "5.20.0",
+  "version": "5.21.0",
   "description": "DOM → Geometry → DXF/PDF/PNG library",
   "repository": {
     "type": "git",
@@ -34,17 +34,15 @@
     "test:url": "npx playwright test tests/demos/url.test.ts --project=demos",
     "generate:paint-emf-probes": "npm run build && node scripts/generate-paint-emf-probes.mjs",
     "prepublishOnly": "npm run build && npm run bundle",
-    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --external:@chenglou/pretext --platform=neutral --bundle --outfile=./dist/index-min.js"
+    "bundle": "esbuild ./dist/index.js --format=esm --minify --external:@tarikjabiri/dxf --external:@node-projects/acad-ts --external:@chenglou/pretext --external:fonteditor-core --platform=neutral --bundle --outfile=./dist/index-min.js"
   },
   "dependencies": {
     "@node-projects/acad-ts": "^2.3.0",
-    "@tarikjabiri/dxf": "^2.8.9",
-    "esbuild": "^0.28.0",
-    "fonteditor-core": "^2.6.3",
-    "svg-path-properties": "^2.0.2"
+    "@tarikjabiri/dxf": "^2.8.9"
   },
   "peerDependencies": {
-    "@chenglou/pretext": ">=0.0.6"
+    "@chenglou/pretext": ">=0.0.6",
+    "fonteditor-core": "^2.6.3"
   },
   "peerDependenciesMeta": {
     "@chenglou/pretext": {
@@ -55,6 +53,7 @@
     "@chenglou/pretext": ">=0.0.6",
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
+    "esbuild": "^0.28.0",
     "get-box-quads-polyfill": "^4.36.0",
     "typescript": "^6.0.3"
   }

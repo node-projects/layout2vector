@@ -142,6 +142,7 @@ const pdfWriter = new PDFWriter({
   pageWidth: 210,
   pageHeight: 297,
   fontAssets,
+  useFontEditorCore: true,
 });
 const pdfDoc = await renderIR(ir, pdfWriter);
 await pdfDoc.finalize();
@@ -164,7 +165,7 @@ const emfBytes = await renderIR(fallbackIr, new EMFWriter({ width: bounds.width,
 ```
 
 - `HTMLWriter` and `SVGWriter` only emit downloadable fonts when you pass both `fontAssets` and `fontMode`. The default `fontMode` is `{ type: "none" }`.
-- `PDFWriter` only needs `fontAssets`; it converts WOFF, WOFF2, and OTF sources to embeddable TrueType data automatically.
+- `PDFWriter` embeds collected TTF font assets directly. Set `useFontEditorCore: true` to also convert WOFF, WOFF2, and OTF sources via the optional `fonteditor-core` dependency.
 - `ImageWriter` and `CanvasWriter` can load collected fonts before drawing text in browser or Playwright contexts.
 - `rasterizeFontTextNodes()` is the fallback path for DXF, DWG, Acad DXF, EMF, and EMF+ when exact browser webfont rendering matters.
 
@@ -487,6 +488,7 @@ type PDFWriterOptions = {
   pageWidth?: number;
   pageHeight?: number;
   fontAssets?: FontAssetCollection;
+  useFontEditorCore?: boolean;
   customFonts?: Map<string, Uint8Array>;
   defaultFont?: Uint8Array;
   zoom?: number;
@@ -498,7 +500,7 @@ Produces a `PdfDocument`. Page dimensions default to A4 (210×297 mm). Coordinat
 
 The optional `defaultFont` parameter accepts a TTF file as `Uint8Array`. When provided, any text containing characters outside the standard WinAnsiEncoding range (e.g. emoji, CJK, math symbols like ⚖) will automatically use this font with full Unicode support via CID/Type0 embedding.
 
-When `fontAssets` is provided, `PDFWriter` automatically registers the downloaded `@font-face` sources collected by `extractIRWithAssets()`. WOFF, WOFF2, and OTF sources are converted to embeddable TrueType data before the PDF is finalized.
+When `fontAssets` is provided, `PDFWriter` automatically registers collected TTF `@font-face` sources from `extractIRWithAssets()`. To convert WOFF, WOFF2, or OTF sources to embeddable TrueType data first, set `useFontEditorCore: true` and install the optional `fonteditor-core` dependency.
 
 - Polygons → closed paths with fill/stroke operators (`f`, `S`, `B`)
 - Polylines → paths with fill/stroke operators

@@ -127,6 +127,23 @@ function loadSystemFontPair(): { regular: Uint8Array; bold: Uint8Array } | null 
   return null;
 }
 
+async function createWoffBytes(fontBytes: Uint8Array): Promise<Uint8Array | null> {
+  try {
+    const { createFont } = await import("fonteditor-core");
+    const input = new Uint8Array(fontBytes.byteLength);
+    input.set(fontBytes);
+    const font = createFont(input.buffer, { type: "ttf" });
+    const woff = font.write({ type: "woff" });
+    return woff instanceof Uint8Array
+      ? woff
+      : typeof woff === "string"
+        ? new TextEncoder().encode(woff)
+        : new Uint8Array(woff);
+  } catch {
+    return null;
+  }
+}
+
 function createFontAssetCollection(faces: FontAssetCollection["faces"]): FontAssetCollection {
   return { faces };
 }
@@ -286,20 +303,13 @@ test.describe("PDF writer regressions", () => {
     expect(content).not.toContain("/BaseFont /Symbol");
   });
 
-  test("embeds WOFF font assets by converting them to TTF for PDF output", async () => {
+  test("does not auto-convert WOFF font assets without enabling fonteditor-core", async () => {
     const fontBytes = loadSystemFontBytes();
     test.skip(!fontBytes, "No usable system TTF font found on this machine.");
 
-    const { createFont } = await import("fonteditor-core");
-    const input = new Uint8Array(fontBytes!.byteLength);
-    input.set(fontBytes!);
-    const font = createFont(input.buffer, { type: "ttf" });
-    const woff = font.write({ type: "woff" });
-    const woffBytes = woff instanceof Uint8Array
-      ? woff
-      : typeof woff === "string"
-        ? new TextEncoder().encode(woff)
-        : new Uint8Array(woff);
+    const woffBytes = await createWoffBytes(fontBytes!);
+    test.skip(!woffBytes, "fonteditor-core is not installed.");
+    if (!woffBytes) return;
 
     const writer = new PDFWriter({
       pageWidth: 60,
@@ -308,6 +318,32 @@ test.describe("PDF writer regressions", () => {
         family: "HC Pdf Woff",
         sources: [{ format: "woff", mimeType: "font/woff", data: woffBytes }],
       }]),
+    });
+
+    const pdf = await renderIR([createTextNode("Woff", 4, "HC Pdf Woff", "400")], writer);
+    await pdf.finalize();
+
+    const content = Buffer.from(pdf.toBytes()).toString("latin1");
+    expect(content).toContain("/BaseFont /Helvetica");
+    expect(content).not.toContain("/FontFile2");
+  });
+
+  test("embeds WOFF font assets when fonteditor-core conversion is enabled", async () => {
+    const fontBytes = loadSystemFontBytes();
+    test.skip(!fontBytes, "No usable system TTF font found on this machine.");
+
+    const woffBytes = await createWoffBytes(fontBytes!);
+    test.skip(!woffBytes, "fonteditor-core is not installed.");
+    if (!woffBytes) return;
+
+    const writer = new PDFWriter({
+      pageWidth: 60,
+      pageHeight: 30,
+      fontAssets: createFontAssetCollection([{
+        family: "HC Pdf Woff",
+        sources: [{ format: "woff", mimeType: "font/woff", data: woffBytes }],
+      }]),
+      useFontEditorCore: true,
     });
 
     const pdf = await renderIR([createTextNode("Woff", 4, "HC Pdf Woff", "400")], writer);

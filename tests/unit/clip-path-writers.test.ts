@@ -5,9 +5,12 @@ import { HTMLWriter } from "../../src/writers/html-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
+import { parseClipPathShape } from "../../src/writers/shared/clip-path.js";
 
 const triangleClipPath = "polygon(50% 0%, 100% 100%, 0% 100%)";
 const compoundPathClipPath = 'path(evenodd, "M0 0 H100 V100 H0 Z M25 25 H75 V75 H25 Z")';
+const curvedPathClipPath = 'path("M20 30 C20 8, 66 0, 90 24 C114 0, 160 8, 160 30 L160 144 C160 166, 114 180, 90 154 C66 180, 20 166, 20 144 Z")';
+const compactArcCompoundClipPath = 'path(evenodd, "M0 0 a4 4 0 00.385 7.097 M20 20 H30")';
 
 function createPolygonNodes(clipPath: string): IRNode[] {
   const points: Quad = [
@@ -128,6 +131,35 @@ test.describe("Writer clip-path support", () => {
     expect(svg).toContain('clip-rule="evenodd"');
     expect(svg).toContain('<path d="M0,0 L');
     expect(svg).toContain('M25,25 L');
+  });
+
+  test("clip-path parser samples curved path() clips into points", () => {
+    const shape = parseClipPathShape(curvedPathClipPath, { x: 0, y: 0, w: 180, h: 180 });
+
+    expect(shape).not.toBeNull();
+    expect(shape?.kind).toBe("path");
+    if (!shape || shape.kind !== "path") return;
+
+    expect(shape.subpaths).toHaveLength(1);
+    expect(shape.subpaths[0].closed).toBe(true);
+    expect(shape.subpaths[0].points.length).toBeGreaterThan(24);
+    expect(shape.subpaths[0].points[0].x).toBeCloseTo(20, 3);
+    expect(shape.subpaths[0].points[0].y).toBeCloseTo(30, 3);
+  });
+
+  test("clip-path parser handles compact arc-flag compound path() clips", () => {
+    const shape = parseClipPathShape(compactArcCompoundClipPath, { x: 0, y: 0, w: 40, h: 40 });
+
+    expect(shape).not.toBeNull();
+    expect(shape?.kind).toBe("path");
+    if (!shape || shape.kind !== "path") return;
+
+    expect(shape.fillRule).toBe("evenodd");
+    expect(shape.subpaths).toHaveLength(2);
+    expect(shape.subpaths[0].points.length).toBeGreaterThan(2);
+    expect(shape.subpaths[1].points[0].x).toBeCloseTo(20, 3);
+    expect(shape.subpaths[1].points[1].x).toBeGreaterThan(shape.subpaths[1].points[0].x);
+    expect(shape.subpaths[1].points.at(-1)?.x).toBeCloseTo(30, 3);
   });
 
   test("HTML writer keeps compound path subpaths in one SVG path", async () => {

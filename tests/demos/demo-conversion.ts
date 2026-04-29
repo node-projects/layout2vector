@@ -689,6 +689,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     pageWidth: viewport.width * 0.2646,
     pageHeight: viewport.height * 0.2646,
     fontAssets,
+    useFontEditorCore: true,
     customFonts: customFonts.size > 0 ? customFonts : undefined,
     defaultFont,
   });

@@ -1,5 +1,4 @@
 import type { PathSubpath, Point, Quad } from "../../types.js";
-import { svgPathProperties } from "svg-path-properties";
 
 export type ClipPathBounds = { x: number; y: number; w: number; h: number };
 export type ClipPathFillRule = "nonzero" | "evenodd";
@@ -237,31 +236,55 @@ function decodeCssStringLiteral(value: string): string {
 }
 
 function samplePathSubpath(pathData: string, bounds: ClipPathBounds): PathSubpath | null {
-  try {
-    const properties = new svgPathProperties(pathData);
-    const totalLength = properties.getTotalLength();
-    if (!Number.isFinite(totalLength) || totalLength <= 0) return null;
+  const commands = parsePathDataCommands(pathData);
+  if (!commands) return null;
 
-    const sampleCount = Math.max(PATH_SAMPLE_COUNT, Math.ceil(totalLength / 6));
-    const points: Point[] = [];
-    for (let index = 0; index <= sampleCount; index += 1) {
-      const point = properties.getPointAtLength((totalLength * index) / sampleCount);
-      points.push({ x: bounds.x + point.x, y: bounds.y + point.y });
-    }
-
-    return {
-      points,
-      closed: /[Zz]\s*$/.test(pathData.trim()) || /[Zz]/.test(pathData),
-    };
-  } catch {
+  const sampled = flattenPathCommands(commands);
+  if (!sampled || sampled.points.length < 2) {
     return null;
   }
+
+  return {
+    points: sampled.points.map((point) => ({ x: bounds.x + point.x, y: bounds.y + point.y })),
+    closed: sampled.closed,
+  };
 }
 
 type PathDataSegmentLike = {
   type: string;
   values: number[];
 };
+
+type FlattenedPathSegment =
+  | {
+      kind: "line";
+      start: Point;
+      end: Point;
+    }
+  | {
+      kind: "quadratic";
+      start: Point;
+      control: Point;
+      end: Point;
+    }
+  | {
+      kind: "cubic";
+      start: Point;
+      control1: Point;
+      control2: Point;
+      end: Point;
+    }
+  | {
+      kind: "arc";
+      start: Point;
+      end: Point;
+      center: Point;
+      rx: number;
+      ry: number;
+      rotation: number;
+      startAngle: number;
+      deltaAngle: number;
+    };
 
 const PATH_COMMAND_ARITY: Record<string, number> = {
   A: 7,
@@ -382,6 +405,394 @@ function parsePathDataCommands(pathData: string): PathDataSegmentLike[] | null {
   }
 
   return commands;
+}
+
+function clonePoint(point: Point): Point {
+  return { x: point.x, y: point.y };
+}
+
+function pointsEqual(a: Point, b: Point, epsilon = 1e-6): boolean {
+  return Math.abs(a.x - b.x) <= epsilon && Math.abs(a.y - b.y) <= epsilon;
+}
+
+function distanceBetween(a: Point, b: Point): number {
+  return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+function resolvePoint(currentPoint: Point, relative: boolean, x: number, y: number): Point {
+  return relative
+    ? { x: currentPoint.x + x, y: currentPoint.y + y }
+    : { x, y };
+}
+
+function reflectPoint(control: Point | null, around: Point): Point {
+  if (!control) return clonePoint(around);
+  return {
+    x: around.x * 2 - control.x,
+    y: around.y * 2 - control.y,
+  };
+}
+
+function evaluateLine(start: Point, end: Point, t: number): Point {
+  return {
+    x: start.x + (end.x - start.x) * t,
+    y: start.y + (end.y - start.y) * t,
+  };
+}
+
+function evaluateQuadratic(start: Point, control: Point, end: Point, t: number): Point {
+  const oneMinusT = 1 - t;
+  return {
+    x: oneMinusT * oneMinusT * start.x + 2 * oneMinusT * t * control.x + t * t * end.x,
+    y: oneMinusT * oneMinusT * start.y + 2 * oneMinusT * t * control.y + t * t * end.y,
+  };
+}
+
+function evaluateCubic(start: Point, control1: Point, control2: Point, end: Point, t: number): Point {
+  const oneMinusT = 1 - t;
+  return {
+    x: oneMinusT * oneMinusT * oneMinusT * start.x
+      + 3 * oneMinusT * oneMinusT * t * control1.x
+      + 3 * oneMinusT * t * t * control2.x
+      + t * t * t * end.x,
+    y: oneMinusT * oneMinusT * oneMinusT * start.y
+      + 3 * oneMinusT * oneMinusT * t * control1.y
+      + 3 * oneMinusT * t * t * control2.y
+      + t * t * t * end.y,
+  };
+}
+
+function clampUnit(value: number): number {
+  if (value < -1) return -1;
+  if (value > 1) return 1;
+  return value;
+}
+
+function vectorAngle(u: Point, v: Point): number {
+  const magnitude = Math.hypot(u.x, u.y) * Math.hypot(v.x, v.y);
+  if (magnitude === 0) return 0;
+
+  const cross = u.x * v.y - u.y * v.x;
+  const dot = u.x * v.x + u.y * v.y;
+  return Math.atan2(cross, dot);
+}
+
+function buildArcSegment(
+  start: Point,
+  end: Point,
+  rx: number,
+  ry: number,
+  xAxisRotation: number,
+  largeArcFlag: number,
+  sweepFlag: number,
+): FlattenedPathSegment {
+  let adjustedRx = Math.abs(rx);
+  let adjustedRy = Math.abs(ry);
+  if (adjustedRx === 0 || adjustedRy === 0 || pointsEqual(start, end)) {
+    return {
+      kind: "line",
+      start,
+      end,
+    };
+  }
+
+  const rotation = (xAxisRotation * Math.PI) / 180;
+  const cosRotation = Math.cos(rotation);
+  const sinRotation = Math.sin(rotation);
+  const dx = (start.x - end.x) / 2;
+  const dy = (start.y - end.y) / 2;
+  const x1Prime = cosRotation * dx + sinRotation * dy;
+  const y1Prime = -sinRotation * dx + cosRotation * dy;
+
+  const rxSquared = adjustedRx * adjustedRx;
+  const rySquared = adjustedRy * adjustedRy;
+  const x1PrimeSquared = x1Prime * x1Prime;
+  const y1PrimeSquared = y1Prime * y1Prime;
+
+  const radiiScale = x1PrimeSquared / rxSquared + y1PrimeSquared / rySquared;
+  if (radiiScale > 1) {
+    const scale = Math.sqrt(radiiScale);
+    adjustedRx *= scale;
+    adjustedRy *= scale;
+  }
+
+  const adjustedRxSquared = adjustedRx * adjustedRx;
+  const adjustedRySquared = adjustedRy * adjustedRy;
+  const denominator = adjustedRxSquared * y1PrimeSquared + adjustedRySquared * x1PrimeSquared;
+  if (denominator === 0) {
+    return {
+      kind: "line",
+      start,
+      end,
+    };
+  }
+
+  const numerator = Math.max(
+    0,
+    adjustedRxSquared * adjustedRySquared
+      - adjustedRxSquared * y1PrimeSquared
+      - adjustedRySquared * x1PrimeSquared,
+  );
+  const centerFactorSign = largeArcFlag === sweepFlag ? -1 : 1;
+  const centerFactor = centerFactorSign * Math.sqrt(numerator / denominator);
+  const cxPrime = centerFactor * ((adjustedRx * y1Prime) / adjustedRy);
+  const cyPrime = centerFactor * (-(adjustedRy * x1Prime) / adjustedRx);
+
+  const center = {
+    x: cosRotation * cxPrime - sinRotation * cyPrime + (start.x + end.x) / 2,
+    y: sinRotation * cxPrime + cosRotation * cyPrime + (start.y + end.y) / 2,
+  };
+
+  const startVector = {
+    x: (x1Prime - cxPrime) / adjustedRx,
+    y: (y1Prime - cyPrime) / adjustedRy,
+  };
+  const endVector = {
+    x: (-x1Prime - cxPrime) / adjustedRx,
+    y: (-y1Prime - cyPrime) / adjustedRy,
+  };
+
+  let deltaAngle = vectorAngle(startVector, endVector);
+  if (!sweepFlag && deltaAngle > 0) deltaAngle -= Math.PI * 2;
+  if (sweepFlag && deltaAngle < 0) deltaAngle += Math.PI * 2;
+
+  return {
+    kind: "arc",
+    start,
+    end,
+    center,
+    rx: adjustedRx,
+    ry: adjustedRy,
+    rotation,
+    startAngle: Math.atan2(startVector.y, startVector.x),
+    deltaAngle,
+  };
+}
+
+function evaluateArc(segment: Extract<FlattenedPathSegment, { kind: "arc" }>, t: number): Point {
+  const angle = segment.startAngle + segment.deltaAngle * t;
+  const cosRotation = Math.cos(segment.rotation);
+  const sinRotation = Math.sin(segment.rotation);
+  const cosAngle = Math.cos(angle);
+  const sinAngle = Math.sin(angle);
+
+  return {
+    x: segment.center.x + cosRotation * segment.rx * cosAngle - sinRotation * segment.ry * sinAngle,
+    y: segment.center.y + sinRotation * segment.rx * cosAngle + cosRotation * segment.ry * sinAngle,
+  };
+}
+
+function estimateSegmentLength(segment: FlattenedPathSegment): number {
+  switch (segment.kind) {
+    case "line":
+      return distanceBetween(segment.start, segment.end);
+    case "quadratic": {
+      let length = 0;
+      let previous = segment.start;
+      for (let index = 1; index <= 10; index += 1) {
+        const point = evaluateQuadratic(segment.start, segment.control, segment.end, index / 10);
+        length += distanceBetween(previous, point);
+        previous = point;
+      }
+      return length;
+    }
+    case "cubic": {
+      let length = 0;
+      let previous = segment.start;
+      for (let index = 1; index <= 12; index += 1) {
+        const point = evaluateCubic(segment.start, segment.control1, segment.control2, segment.end, index / 12);
+        length += distanceBetween(previous, point);
+        previous = point;
+      }
+      return length;
+    }
+    case "arc": {
+      let length = 0;
+      let previous = segment.start;
+      const samples = Math.max(12, Math.ceil(Math.abs(segment.deltaAngle) / (Math.PI / 8)));
+      for (let index = 1; index <= samples; index += 1) {
+        const point = evaluateArc(segment, index / samples);
+        length += distanceBetween(previous, point);
+        previous = point;
+      }
+      return length;
+    }
+  }
+}
+
+function evaluateSegment(segment: FlattenedPathSegment, t: number): Point {
+  switch (segment.kind) {
+    case "line":
+      return evaluateLine(segment.start, segment.end, t);
+    case "quadratic":
+      return evaluateQuadratic(segment.start, segment.control, segment.end, t);
+    case "cubic":
+      return evaluateCubic(segment.start, segment.control1, segment.control2, segment.end, t);
+    case "arc":
+      return evaluateArc(segment, t);
+  }
+}
+
+function appendSampledSegmentPoints(
+  points: Point[],
+  segment: FlattenedPathSegment,
+  sampleCount: number,
+): void {
+  const segmentSamples = Math.max(1, sampleCount);
+  for (let index = 1; index <= segmentSamples; index += 1) {
+    const point = evaluateSegment(segment, index / segmentSamples);
+    const previous = points[points.length - 1];
+    if (!previous || !pointsEqual(previous, point)) {
+      points.push(point);
+    }
+  }
+}
+
+function flattenPathCommands(commands: PathDataSegmentLike[]): PathSubpath | null {
+  const segments: FlattenedPathSegment[] = [];
+  let currentPoint: Point = { x: 0, y: 0 };
+  let subpathStart: Point = { x: 0, y: 0 };
+  let previousCubicControl: Point | null = null;
+  let previousQuadraticControl: Point | null = null;
+  let previousCommand = "";
+  let closed = false;
+
+  for (const command of commands) {
+    const type = command.type.toUpperCase();
+    const relative = command.type === command.type.toLowerCase();
+    const values = command.values;
+
+    switch (type) {
+      case "M": {
+        const nextPoint = resolvePoint(currentPoint, relative, values[0], values[1]);
+        currentPoint = nextPoint;
+        subpathStart = nextPoint;
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "L": {
+        const end = resolvePoint(currentPoint, relative, values[0], values[1]);
+        segments.push({ kind: "line", start: currentPoint, end });
+        currentPoint = end;
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "H": {
+        const end = relative
+          ? { x: currentPoint.x + values[0], y: currentPoint.y }
+          : { x: values[0], y: currentPoint.y };
+        segments.push({ kind: "line", start: currentPoint, end });
+        currentPoint = end;
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "V": {
+        const end = relative
+          ? { x: currentPoint.x, y: currentPoint.y + values[0] }
+          : { x: currentPoint.x, y: values[0] };
+        segments.push({ kind: "line", start: currentPoint, end });
+        currentPoint = end;
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "C": {
+        const control1 = resolvePoint(currentPoint, relative, values[0], values[1]);
+        const control2 = resolvePoint(currentPoint, relative, values[2], values[3]);
+        const end = resolvePoint(currentPoint, relative, values[4], values[5]);
+        segments.push({ kind: "cubic", start: currentPoint, control1, control2, end });
+        currentPoint = end;
+        previousCubicControl = control2;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "S": {
+        const control1 = previousCommand === "C" || previousCommand === "S"
+          ? reflectPoint(previousCubicControl, currentPoint)
+          : clonePoint(currentPoint);
+        const control2 = resolvePoint(currentPoint, relative, values[0], values[1]);
+        const end = resolvePoint(currentPoint, relative, values[2], values[3]);
+        segments.push({ kind: "cubic", start: currentPoint, control1, control2, end });
+        currentPoint = end;
+        previousCubicControl = control2;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "Q": {
+        const control = resolvePoint(currentPoint, relative, values[0], values[1]);
+        const end = resolvePoint(currentPoint, relative, values[2], values[3]);
+        segments.push({ kind: "quadratic", start: currentPoint, control, end });
+        currentPoint = end;
+        previousQuadraticControl = control;
+        previousCubicControl = null;
+        break;
+      }
+      case "T": {
+        const control: Point = previousCommand === "Q" || previousCommand === "T"
+          ? reflectPoint(previousQuadraticControl, currentPoint)
+          : clonePoint(currentPoint);
+        const end = resolvePoint(currentPoint, relative, values[0], values[1]);
+        segments.push({ kind: "quadratic", start: currentPoint, control, end });
+        currentPoint = end;
+        previousQuadraticControl = control;
+        previousCubicControl = null;
+        break;
+      }
+      case "A": {
+        const end = resolvePoint(currentPoint, relative, values[5], values[6]);
+        const segment = buildArcSegment(
+          currentPoint,
+          end,
+          values[0],
+          values[1],
+          values[2],
+          values[3],
+          values[4],
+        );
+        segments.push(segment);
+        currentPoint = end;
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      case "Z": {
+        closed = true;
+        if (!pointsEqual(currentPoint, subpathStart)) {
+          segments.push({ kind: "line", start: currentPoint, end: subpathStart });
+        }
+        currentPoint = clonePoint(subpathStart);
+        previousCubicControl = null;
+        previousQuadraticControl = null;
+        break;
+      }
+      default:
+        return null;
+    }
+
+    previousCommand = type;
+  }
+
+  if (segments.length === 0) return null;
+
+  const segmentLengths = segments.map(estimateSegmentLength);
+  const totalLength = segmentLengths.reduce((sum, length) => sum + length, 0);
+  if (!Number.isFinite(totalLength) || totalLength <= 0) return null;
+
+  const totalSampleCount = Math.max(PATH_SAMPLE_COUNT, Math.ceil(totalLength / 6));
+  const points: Point[] = [clonePoint(segments[0].start)];
+  for (let index = 0; index < segments.length; index += 1) {
+    const segmentLength = segmentLengths[index];
+    const segmentSampleCount = Math.max(1, Math.ceil((segmentLength / totalLength) * totalSampleCount));
+    appendSampledSegmentPoints(points, segments[index], segmentSampleCount);
+  }
+
+  return {
+    points,
+    closed,
+  };
 }
 
 function advancePathCurrentPoint(

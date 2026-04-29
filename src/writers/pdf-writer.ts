@@ -1104,6 +1104,12 @@ export type PDFWriterOptions = {
   pageHeight?: number;
   /** Downloaded @font-face assets used by extracted text. */
   fontAssets?: FontAssetCollection;
+  /**
+   * When true, OTF/WOFF/WOFF2 font assets are converted to TrueType via the
+   * optional `fonteditor-core` dependency before PDF embedding.
+   * Defaults to false.
+   */
+  useFontEditorCore?: boolean;
   /** Map of CSS font-family name → TTF file bytes. */
   customFonts?: Map<string, Uint8Array>;
   /** TTF file bytes for a default Unicode-capable font. */
@@ -1134,6 +1140,7 @@ export class PDFWriter implements Writer<PdfDocument> {
   private defaultFont: ParsedTTF | null = null;
   private fontAssets?: FontAssetCollection;
   private fontAssetsRegistered = false;
+  private useFontEditorCore = false;
 
   /**
    * @param optionsOrPageWidth Options object, or page width in mm (positional form).
@@ -1149,6 +1156,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.pageWidthPt = (opts.pageWidth ?? 210) * z * 2.835;
       this.pageHeightPt = (opts.pageHeight ?? 297) * z * 2.835;
       this.fontAssets = opts.fontAssets;
+      this.useFontEditorCore = opts.useFontEditorCore ?? false;
       if (opts.customFonts) {
         for (const [family, data] of opts.customFonts) {
           this.registerCustomFont(family, data);
@@ -1205,9 +1213,12 @@ export class PDFWriter implements Writer<PdfDocument> {
     for (const face of this.fontAssets.faces) {
       const source = choosePdfFontSource(face);
       if (!source) continue;
+      if (source.format !== "ttf" && !this.useFontEditorCore) continue;
 
       try {
-        const fontData = await convertFontToTrueType(source.data, source.format);
+        const fontData = source.format === "ttf"
+          ? source.data
+          : await convertFontToTrueType(source.data, source.format);
         this.registerCustomFont(face.family, fontData, {
           weight: face.weight,
           style: face.style,
