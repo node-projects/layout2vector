@@ -4,6 +4,7 @@
 - **Always update the README and API documentation whenever a public API changes.**
 - Prioritize Firefox for all rendering tests.
 - Perform comprehensive regression checks after each change.
+- Check also FEATURES.md if it needs an update after each change.
 
 ## Testing
 
