@@ -197,6 +197,32 @@ test.describe("PDF writer regressions", () => {
     expect(content).toMatch(/\bTz\b/);
   });
 
+  test("does not map Segoe UI Symbol fallback stacks to the Symbol font", async () => {
+    const writer = new PDFWriter({ pageWidth: 60, pageHeight: 30 });
+    const pdf = await renderIR([{
+      type: "text",
+      quad: [
+        { x: 4, y: 4 },
+        { x: 110, y: 4 },
+        { x: 110, y: 20 },
+        { x: 4, y: 20 },
+      ],
+      text: "Forum 123",
+      style: {
+        color: "rgb(36, 41, 46)",
+        fontSize: "16px",
+        fontFamily: 'Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+      },
+      zIndex: 0,
+    } satisfies IRNode], writer);
+
+    await pdf.finalize();
+    const content = Buffer.from(pdf.toBytes()).toString("latin1");
+
+    expect(content).toContain("/BaseFont /Helvetica");
+    expect(content).not.toContain("/BaseFont /Symbol");
+  });
+
   test("scales oversized pill radii without collapsing rounded rectangles into ellipses", async () => {
     const writer = new PDFWriter({ pageWidth: 60, pageHeight: 60 });
     const pdf = await renderIR(createOversizedPillNodes(), writer);

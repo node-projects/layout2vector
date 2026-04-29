@@ -84,6 +84,24 @@ function mapFontWeight(weight: string | undefined): "bold" | "normal" {
   return "normal";
 }
 
+function normalizeFontFamilyName(family: string): string {
+  return family.replace(/["']/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function parseFontFamilies(family: string): string[] {
+  const seen = new Set<string>();
+  const families: string[] = [];
+
+  for (const token of family.split(",")) {
+    const normalized = normalizeFontFamilyName(token);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    families.push(normalized);
+  }
+
+  return families;
+}
+
 /** Convert pixel to PDF points (1px ≈ 0.75pt). */
 function pxToPt(px: number): number { return px * 0.75; }
 
@@ -1069,7 +1087,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.pageHeightPt = (opts.pageHeight ?? 297) * z * 2.835;
       if (opts.customFonts) {
         for (const [family, data] of opts.customFonts) {
-          this.customFonts.set(family.toLowerCase(), parseTTF(data));
+          this.registerCustomFont(family, data);
         }
       }
       if (opts.defaultFont) {
@@ -1083,7 +1101,7 @@ export class PDFWriter implements Writer<PdfDocument> {
       this.pageHeightPt = ph * z * 2.835;
       if (customFonts) {
         for (const [family, data] of customFonts) {
-          this.customFonts.set(family.toLowerCase(), parseTTF(data));
+          this.registerCustomFont(family, data);
         }
       }
       if (defaultFont) {
@@ -1114,29 +1132,62 @@ export class PDFWriter implements Writer<PdfDocument> {
 
   // ── Font helpers ────────────────────────────────────────────────
 
+  private registerCustomFont(family: string, data: Uint8Array): void {
+    const parsed = parseTTF(data);
+    for (const key of [family, parsed.familyName, parsed.postScriptName]) {
+      const normalized = normalizeFontFamilyName(key);
+      if (!normalized) continue;
+      this.customFonts.set(normalized, parsed);
+    }
+  }
+
+  private getCustomFontForFamily(family: string): ParsedTTF | null {
+    return this.customFonts.get(normalizeFontFamilyName(family)) ?? null;
+  }
+
   /** Map CSS font family + weight to a standard PDF font name (or custom font ID). */
   private mapToPdfFont(family: string, weight: "bold" | "normal"): string {
-    const fam = family.toLowerCase();
+    for (const token of parseFontFamilies(family)) {
+      const customFont = this.getCustomFontForFamily(token);
+      if (customFont) {
+        return `custom:${customFont.postScriptName}`;
+      }
 
-    // Check custom fonts first
-    for (const [cssFamily, parsed] of this.customFonts) {
-      if (fam.includes(cssFamily)) {
-        return `custom:${parsed.postScriptName}`;
+      if (token === "symbol") {
+        return "Symbol";
+      }
+      if (
+        token === "wingdings"
+        || token === "wingding"
+        || token === "zapfdingbats"
+        || token === "zapf dingbats"
+        || token.includes("dingbats")
+      ) {
+        return "ZapfDingbats";
+      }
+      if (token.includes("courier") || token.includes("mono") || token === "monospace" || token === "ui-monospace") {
+        return weight === "bold" ? "Courier-Bold" : "Courier";
+      }
+      if (token.includes("times") || (token.includes("serif") && !token.includes("sans"))) {
+        return weight === "bold" ? "Times-Bold" : "Times-Roman";
+      }
+      if (
+        token === "sans-serif"
+        || token === "ui-sans-serif"
+        || token === "system-ui"
+        || token === "-apple-system"
+        || token.includes("sans")
+        || token.includes("arial")
+        || token.includes("helvetica")
+        || token.includes("roboto")
+        || token.includes("inter")
+        || token.includes("segoe ui")
+        || token.includes("tahoma")
+      ) {
+        return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
       }
     }
 
-    if (fam.includes("wingdings") || fam.includes("zapfdingbats") || fam.includes("dingbats")) {
-      return "ZapfDingbats";
-    }
-    if (fam.includes("symbol")) {
-      return "Symbol";
-    }
-    if (fam.includes("times") || (fam.includes("serif") && !fam.includes("sans"))) {
-      return weight === "bold" ? "Times-Bold" : "Times-Roman";
-    }
-    if (fam.includes("courier") || fam.includes("mono")) {
-      return weight === "bold" ? "Courier-Bold" : "Courier";
-    }
     return weight === "bold" ? "Helvetica-Bold" : "Helvetica";
   }
 
