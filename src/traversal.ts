@@ -586,13 +586,19 @@ function getBoundsFromPoints(points: Array<{ x: number; y: number }>): { x: numb
  * Flatten the stacking context tree into paint order.
  * Within each stacking context:
  *   1. Negative z-index children
- *   2. Non-positioned / z-index:auto / z-index:0 (in DOM order)
- *   3. Positive z-index children
+ *   2. In-flow non-positioned children (in DOM order)
+ *   3. Positioned / z-index:auto / z-index:0 / stacking-context children
+ *      in the auto/zero layer (in DOM order)
+ *   4. Positive z-index children
  */
 export function flattenStackingOrder(root: StackingNode): StackingNode[] {
   const result: StackingNode[] = [];
   collectInOrder(root, result);
   return result;
+}
+
+function paintsInAutoOrZeroLayer(node: StackingNode): boolean {
+  return node.createsStackingContext || node.style.position !== "static";
 }
 
 function collectInOrder(node: StackingNode, result: StackingNode[]): void {
@@ -602,18 +608,20 @@ function collectInOrder(node: StackingNode, result: StackingNode[]): void {
     return;
   }
 
-  // Check if any children create stacking contexts with non-zero z-index
+  // Check if any children need stacking-layer grouping
   let hasNegZ = false;
+  let hasAutoOrZeroLayer = false;
   let hasPosZ = false;
   for (const child of node.children) {
     if (child.createsStackingContext) {
       if (child.zIndex < 0) hasNegZ = true;
       else if (child.zIndex > 0) hasPosZ = true;
     }
+    if (paintsInAutoOrZeroLayer(child)) hasAutoOrZeroLayer = true;
   }
 
-  // Fast path: no stacking contexts with non-zero z — all children are zero/auto
-  if (!hasNegZ && !hasPosZ) {
+  // Fast path: no children require special paint-phase grouping.
+  if (!hasNegZ && !hasAutoOrZeroLayer && !hasPosZ) {
     result.push(node);
     for (const child of node.children) {
       collectInOrder(child, result);
@@ -621,9 +629,10 @@ function collectInOrder(node: StackingNode, result: StackingNode[]): void {
     return;
   }
 
-  // Full path: need to separate and sort z-index groups
+  // Full path: separate by paint phase and z-index group.
   const negativeZ: StackingNode[] = [];
-  const zeroZ: StackingNode[] = [];
+  const inFlow: StackingNode[] = [];
+  const autoOrZeroLayer: StackingNode[] = [];
   const positiveZ: StackingNode[] = [];
 
   for (const child of node.children) {
@@ -633,10 +642,12 @@ function collectInOrder(node: StackingNode, result: StackingNode[]): void {
       } else if (child.zIndex > 0) {
         positiveZ.push(child);
       } else {
-        zeroZ.push(child);
+        autoOrZeroLayer.push(child);
       }
+    } else if (paintsInAutoOrZeroLayer(child)) {
+      autoOrZeroLayer.push(child);
     } else {
-      zeroZ.push(child);
+      inFlow.push(child);
     }
   }
 
@@ -649,7 +660,11 @@ function collectInOrder(node: StackingNode, result: StackingNode[]): void {
 
   result.push(node);
 
-  for (const child of zeroZ) {
+  for (const child of inFlow) {
+    collectInOrder(child, result);
+  }
+
+  for (const child of autoOrZeroLayer) {
     collectInOrder(child, result);
   }
 

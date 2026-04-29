@@ -160,4 +160,30 @@ test.describe("Stacking Context", () => {
     const ctx2Idx = result.indexOf("ctx2");
     expect(ctx1Idx).toBeLessThan(ctx2Idx);
   });
+
+  test("paints transformed stacking contexts after normal-flow sibling text", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="root" style="display:flex;flex-direction:column;align-items:flex-start;">
+          <div id="box" style="width:120px;height:80px;background:red;transform:rotate(30deg);"></div>
+          <span id="label">Label</span>
+        </div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(() => {
+      const HC = (window as any).__HC;
+      const root = document.getElementById("root")!;
+      const tree = HC.traverseDOM(root, false);
+      const ordered = HC.flattenStackingOrder(tree);
+      return ordered.map((n: any) => n.element.id).filter((id: string) => id);
+    });
+
+    const labelIdx = result.indexOf("label");
+    const boxIdx = result.indexOf("box");
+
+    expect(labelIdx).toBeGreaterThanOrEqual(0);
+    expect(boxIdx).toBeGreaterThan(labelIdx);
+  });
 });
