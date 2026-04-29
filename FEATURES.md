@@ -45,7 +45,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Built-in output formats | DXF, DWG, EMF, EMF+, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | SVG, PNG, JPG, WEBP, Canvas, Blob | SnapDOM's PDF story is plugin-based, not a built-in core writer. |
 | Structured IR / custom backends | Yes | No | No | Partial | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. SnapDOM can add custom exports through beta plugins, but it does not expose a typed scene graph. |
 | Plugin / hook system around capture | No | No | No | Yes | SnapDOM documents `beforeSnap`, `beforeClone`, `afterClone`, `beforeRender`, `afterRender`, `beforeExport`, `afterExport`, and `defineExports`. |
-| Keeps text as text/vector objects | Yes | No | No | No | html2canvas, html2canvas-pro, and SnapDOM are screenshot-oriented. `layout2vector` preserves text nodes for text-capable writers, including extracted font-family stacks in the HTML, SVG, and Canvas/Image outputs. |
+| Keeps text as text/vector objects | Yes | No | No | No | html2canvas, html2canvas-pro, and SnapDOM are screenshot-oriented. `layout2vector` preserves text nodes for text-capable writers, including extracted font-family stacks plus optional collected `@font-face` assets in HTML, SVG, and PDF output. |
 | Open Shadow DOM | Yes | Not documented | Yes | Yes | `layout2vector` traverses open Shadow DOM. html2canvas-pro documents automatic Shadow DOM handling and `iframeContainer`. SnapDOM documents Shadow DOM support in its clone flow. |
 | Same-origin iframe traversal | Yes | Not documented | Not documented | Yes | `layout2vector` can opt into live same-origin iframe walking with `walkIframes`. SnapDOM explicitly documents same-origin iframe support. Cross-origin or unavailable iframe documents are still skipped by browser constraints. |
 | Generated content (`::before` / `::after`, `counter()`, `counters()`) | Yes | Not documented | Not documented | Yes | `layout2vector` extracts `::before`/`::after` pseudo-elements with `counter()`, `counters()`, `attr()`, and `open-quote`/`close-quote` resolution. SnapDOM explicitly documents pseudo-element inlining and counter resolution. |
@@ -66,7 +66,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | Form controls as value-aware export | Yes | No | No | Partial | `layout2vector` can synthesize native controls into IR that preserves visible values and states across writers. SnapDOM can capture rendered controls in screenshots, but it does not expose a structured form-control export model. |
 | MathML-specific handling | Yes | Not documented | Not documented | Not documented | `layout2vector` has a MathML extractor for browser-rendered MathML features. |
 | SVG markers (`marker-start`, `marker-mid`, `marker-end`) | Yes | Not documented | Not documented | Not documented | `layout2vector` has explicit SVG marker extraction and tests. |
-| Font embedding / icon-font controls | No | No | No | Yes | I did not find a public font-embedding control surface in `layout2vector`, html2canvas, or html2canvas-pro. SnapDOM documents `embedFonts`, `localFonts`, `iconFonts`, and `excludeFonts`. |
+| Font embedding / icon-font controls | Partial | No | No | Yes | `layout2vector` can collect the used downloadable `@font-face` sources with `extractIRWithAssets()`, emit them in HTML/SVG, auto-embed them in PDF, load them before Canvas/Image rendering, and rasterize affected text nodes for DXF/DWG/EMF fallbacks. It does not expose a SnapDOM-style global font policy surface such as `embedFonts` / `excludeFonts`. |
 | Cache control / pre-cache API | No | No | No | Yes | `layout2vector` has internal caches but no public cache mode API. SnapDOM documents `cache` modes and `preCache()`. |
 | Cross-origin image control knobs | Partial | Yes | Yes+ | Yes | html2canvas documents `allowTaint`, `useCORS`, and `proxy`. html2canvas-pro keeps those and adds `customIsSameOrigin`. SnapDOM documents `useProxy` plus fallback image handling. `layout2vector` preloads images, but browser security still applies. |
 | CAD / print / vector-document workflows | Yes | No | No | No | This is the clearest product split: `layout2vector` targets DXF, DWG, EMF, EMF+, PDF, SVG, and HTML export, not just screenshots. |
@@ -94,6 +94,8 @@ Internal project sources used for this comparison:
 
 - [README.md](./README.md)
 - [src/index.ts](./src/index.ts)
+- [src/font-assets.ts](./src/font-assets.ts)
+- [src/font-fallback.ts](./src/font-fallback.ts)
 - [src/pipeline.ts](./src/pipeline.ts)
 - [src/traversal.ts](./src/traversal.ts)
 - [src/extractors/html-extractor.ts](./src/extractors/html-extractor.ts)
@@ -106,6 +108,7 @@ Internal project sources used for this comparison:
 - [src/writers/emf-writer.ts](./src/writers/emf-writer.ts)
 - [src/writers/pdf-writer.ts](./src/writers/pdf-writer.ts)
 - [src/writers/svg-writer.ts](./src/writers/svg-writer.ts)
+- [src/writers/shared/font-assets.ts](./src/writers/shared/font-assets.ts)
 - [src/writers/shared/clip-path.ts](./src/writers/shared/clip-path.ts)
 - [src/writers/shared/css-color.ts](./src/writers/shared/css-color.ts)
 - [tests/ui/rendering.test.ts](./tests/ui/rendering.test.ts)
@@ -113,6 +116,7 @@ Internal project sources used for this comparison:
 - [tests/unit/canvas-writer.test.ts](./tests/unit/canvas-writer.test.ts)
 - [tests/unit/clip-path-writers.test.ts](./tests/unit/clip-path-writers.test.ts)
 - [tests/unit/css-color.test.ts](./tests/unit/css-color.test.ts)
+- [tests/unit/font-assets.test.ts](./tests/unit/font-assets.test.ts)
 - [tests/unit/form-controls.test.ts](./tests/unit/form-controls.test.ts)
 - [tests/unit/image-extractor.test.ts](./tests/unit/image-extractor.test.ts)
 - [tests/unit/png-writer.test.ts](./tests/unit/png-writer.test.ts)

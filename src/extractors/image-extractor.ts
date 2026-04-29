@@ -1715,6 +1715,7 @@ type SourceRect = { x: number; y: number; width: number; height: number };
 
 type AxisPosition =
   | { kind: "fraction"; value: number }
+  | { kind: "fractionOffset"; value: number; offset: number }
   | { kind: "start"; offset: number }
   | { kind: "center"; offset: number }
   | { kind: "end"; offset: number };
@@ -1735,7 +1736,17 @@ function getObjectFitPlan(
   const objectFit = computedStyle.objectFit;
   if (!natW || !natH) return { quad };
 
-  const baseSourceRect = parseObjectViewBox(computedStyle.getPropertyValue("object-view-box"), natW, natH);
+  const computedObjectViewBox = computedStyle.getPropertyValue("object-view-box").trim();
+  const inlineObjectViewBox = el instanceof HTMLElement ? el.style.getPropertyValue("object-view-box").trim() : "";
+  const styleAttr = el.getAttribute("style") ?? "";
+  const styleAttrObjectViewBox = styleAttr.match(/(?:^|;)\s*object-view-box\s*:\s*([^;]+)/i)?.[1]?.trim() ?? "";
+  const baseSourceRect = parseObjectViewBox(
+    computedObjectViewBox && computedObjectViewBox !== "none"
+      ? computedObjectViewBox
+      : (inlineObjectViewBox || styleAttrObjectViewBox),
+    natW,
+    natH,
+  );
   const sourceNatW = baseSourceRect?.width ?? natW;
   const sourceNatH = baseSourceRect?.height ?? natH;
   const plan = getObjectFitPlanFromDimensions(quad, sourceNatW, sourceNatH, objectFit, computedStyle.objectPosition);
@@ -2026,18 +2037,19 @@ function isVerticalPositionKeyword(token: string): boolean {
 }
 
 function isObjectPositionLength(token: string): boolean {
-  return /^[-+]?\d*\.?\d+(?:[a-z%]+)?$/i.test(token);
+  return /^[-+]?\d*\.?\d+(?:[a-z%]+)?$/i.test(token) || isCssCalcExpression(token);
 }
 
 function parseObjectPositionLength(token: string): AxisPosition {
-  const value = token.toLowerCase();
-  if (value.endsWith("%")) {
-    const percent = parseFloat(value);
-    return { kind: "fraction", value: Number.isNaN(percent) ? 0.5 : percent / 100 };
+  const parsed = parseCssLengthExpression(token);
+  if (!parsed) return { kind: "start", offset: 0 };
+  if (parsed.fraction !== 0 && parsed.offset !== 0) {
+    return { kind: "fractionOffset", value: parsed.fraction, offset: parsed.offset };
   }
-
-  const numeric = parseFloat(value);
-  return { kind: "start", offset: Number.isNaN(numeric) ? 0 : numeric };
+  if (parsed.fraction !== 0) {
+    return { kind: "fraction", value: parsed.fraction };
+  }
+  return { kind: "start", offset: parsed.offset };
 }
 
 function createKeywordAxisPosition(keyword: string, offsetToken?: string): AxisPosition {
@@ -2064,6 +2076,8 @@ function resolveAxisPosition(position: AxisPosition, freeSpace: number): number 
   switch (position.kind) {
     case "fraction":
       return freeSpace * position.value;
+    case "fractionOffset":
+      return freeSpace * position.value + position.offset;
     case "start":
       return position.offset;
     case "end":
@@ -2074,13 +2088,63 @@ function resolveAxisPosition(position: AxisPosition, freeSpace: number): number 
 }
 
 function parseClipLength(token: string, reference: number): number {
+  const parsed = parseCssLengthExpression(token);
+  if (!parsed) return 0;
+  return parsed.offset + parsed.fraction * reference;
+}
+
+function isCssCalcExpression(token: string): boolean {
   const value = token.trim().toLowerCase();
-  if (!value) return 0;
-  if (value.endsWith("%")) {
-    return (parseFloat(value) / 100) * reference;
+  return value.startsWith("calc(") && value.endsWith(")");
+}
+
+function parseCssLengthExpression(token: string): { fraction: number; offset: number } | null {
+  const value = token.trim().toLowerCase();
+  if (!value) return null;
+
+  if (isCssCalcExpression(value)) {
+    const expression = value.slice(5, -1).replace(/\s+/g, "");
+    const terms = expression.match(/[+-]?[^+-]+/g);
+    if (!terms || terms.length === 0) return null;
+
+    let fraction = 0;
+    let offset = 0;
+    for (const rawTerm of terms) {
+      if (!rawTerm) continue;
+      let sign = 1;
+      let term = rawTerm;
+      if (term.startsWith("+")) {
+        term = term.slice(1);
+      } else if (term.startsWith("-")) {
+        sign = -1;
+        term = term.slice(1);
+      }
+      if (!term) return null;
+
+      if (term.endsWith("%")) {
+        const percent = parseFloat(term);
+        if (Number.isNaN(percent)) return null;
+        fraction += sign * (percent / 100);
+        continue;
+      }
+
+      const numeric = parseFloat(term);
+      if (Number.isNaN(numeric)) return null;
+      offset += sign * numeric;
+    }
+
+    return { fraction, offset };
   }
+
+  if (value.endsWith("%")) {
+    const percent = parseFloat(value);
+    if (Number.isNaN(percent)) return null;
+    return { fraction: percent / 100, offset: 0 };
+  }
+
   const numeric = parseFloat(value);
-  return Number.isNaN(numeric) ? 0 : numeric;
+  if (Number.isNaN(numeric)) return null;
+  return { fraction: 0, offset: numeric };
 }
 
 function expandInsetValues(values: string[]): [string, string, string, string] {
