@@ -13,7 +13,7 @@ endobj
 <</Font <</F1 1 0 R /F2 2 0 R /F3 3 0 R>>>>
 endobj
 5 0 obj
-<</Length 5072>>
+<</Length 5078>>
 stream
 q
 BT
@@ -316,31 +316,7 @@ BT
 0 0 0 rg
 /F2 11.25 Tf
 0 220.0571 Td
-(This has) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 11.25 Tf
-119.475 220.0571 Td
-(and) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 11.25 Tf
-191.4125 220.0571 Td
-(and) Tj
-ET
-Q
-q
-BT
-0 0 0 rg
-/F2 11.25 Tf
-284.4375 220.0571 Td
-(mixed together in a single paragraph.) Tj
+(This has ) Tj
 ET
 Q
 q
@@ -353,10 +329,26 @@ ET
 Q
 q
 BT
+0 0 0 rg
+/F2 11.25 Tf
+119.475 220.0571 Td
+( and ) Tj
+ET
+Q
+q
+BT
 0.0824 0.3961 0.7529 rg
 /F1 11.25 Tf
 144.5125 220.0571 Td
 (bold text) Tj
+ET
+Q
+q
+BT
+0 0 0 rg
+/F2 11.25 Tf
+191.4125 220.0571 Td
+( and ) Tj
 ET
 Q
 q
@@ -382,6 +374,14 @@ BT
 91.6667 Tz
 220.95 220.6354 Td
 (inline code) Tj
+ET
+Q
+q
+BT
+0 0 0 rg
+/F2 11.25 Tf
+284.4375 220.0571 Td
+( mixed together in a single paragraph.) Tj
 ET
 Q
 q
@@ -478,11 +478,11 @@ xref
 0000000210 00000 n 
 0000000303 00000 n 
 0000000362 00000 n 
-0000005484 00000 n 
-0000005599 00000 n 
-0000005654 00000 n 
+0000005490 00000 n 
+0000005605 00000 n 
+0000005660 00000 n 
 trailer
 <</Root 8 0 R /Size 9>>
 startxref
-5701
+5707
 %%EOF

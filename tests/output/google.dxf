@@ -47413,7 +47413,7 @@ AcDbText
 40
 14
 1
-Doppeltippen, um mit
+Doppeltippen, um mit 
 7
 Arial
 100
@@ -47422,62 +47422,6 @@ AcDbText
 TEXT
 5
 53
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-266.921875
-20
-2232.5
-30
-0
-40
-14
-1
-zu suchen. MELDEN. ABBRECHEN. Ok. LÖSCHEN. Trends bei
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-54
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-82.5
-20
-2210.5
-30
-0
-40
-14
-1
-Suchanfragen. Feedback geben. Einstellungen. Menü schließen.
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-55
 330
 C
 100
@@ -47498,6 +47442,62 @@ AcDbText
 14
 1
 Google
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+54
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+266.921875
+20
+2232.5
+30
+0
+40
+14
+1
+ zu suchen. MELDEN. ABBRECHEN. Ok. LÖSCHEN. Trends bei
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+55
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+82.5
+20
+2210.5
+30
+0
+40
+14
+1
+Suchanfragen. Feedback geben. Einstellungen. Menü schließen.
 7
 Arial
 100
@@ -52901,7 +52901,7 @@ AcDbText
 40
 14
 1
-Find local businesses, view maps and get driving directions in
+Find local businesses, view maps and get driving directions in 
 7
 Arial
 100
@@ -52910,34 +52910,6 @@ AcDbText
 TEXT
 5
 88
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-556.390625
-20
-1635.15625
-30
-0
-40
-14
-1
-.
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-89
 330
 C
 100
@@ -52958,6 +52930,34 @@ AcDbText
 14
 1
 Google Maps
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+89
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+556.390625
+20
+1635.15625
+30
+0
+40
+14
+1
+.
 7
 Arial
 100
@@ -55061,7 +55061,7 @@ AcDbEntity
 100
 AcDbText
 10
-130.734375
+82.5
 20
 1511.15625
 30
@@ -55069,7 +55069,7 @@ AcDbText
 40
 14
 1
-ist eine Websuchmaschine des US-amerikanischen Unternehmens Google LLC. Google. Logo
+Google
 7
 Arial
 100
@@ -55089,15 +55089,15 @@ AcDbEntity
 100
 AcDbText
 10
-82.5
+130.734375
 20
-1489.15625
+1511.15625
 30
 0
 40
 14
 1
-von Google. Ein großes blaues „G“ am Anfang, ein kleines rotes.
+ ist eine Websuchmaschine des US-amerikanischen Unternehmens Google LLC. Google. Logo
 7
 Arial
 100
@@ -55119,13 +55119,13 @@ AcDbText
 10
 82.5
 20
-1511.15625
+1489.15625
 30
 0
 40
 14
 1
-Google
+von Google. Ein großes blaues „G“ am Anfang, ein kleines rotes.
 7
 Arial
 100
@@ -57209,7 +57209,7 @@ AcDbText
 40
 14
 1
-Search the world's information, including webpages, images, videos and more.
+Search the world's information, including webpages, images, videos and more. 
 7
 Arial
 100
@@ -57218,62 +57218,6 @@ AcDbText
 TEXT
 5
 A7
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-621.34375
-20
-1365.15625
-30
-0
-40
-14
-1
-has many special
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-A8
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-82.5
-20
-1343.15625
-30
-0
-40
-14
-1
-features to help you find exactly what you're looking ...
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-A9
 330
 C
 100
@@ -57294,6 +57238,62 @@ AcDbText
 14
 1
 Google
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+A8
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+621.34375
+20
+1365.15625
+30
+0
+40
+14
+1
+ has many special
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+A9
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+82.5
+20
+1343.15625
+30
+0
+40
+14
+1
+features to help you find exactly what you're looking ...
 7
 Arial
 100
@@ -61991,7 +61991,7 @@ AcDbEntity
 100
 AcDbText
 10
-314.078125
+305.515625
 20
 1206.15625
 30
@@ -61999,7 +61999,7 @@ AcDbText
 40
 14
 1
-Digitale Profis
+·
 7
 Arial
 100
@@ -62019,7 +62019,7 @@ AcDbEntity
 100
 AcDbText
 10
-305.515625
+314.078125
 20
 1206.15625
 30
@@ -62027,7 +62027,7 @@ AcDbText
 40
 14
 1
-·
+ Digitale Profis
 7
 Arial
 100
@@ -66725,7 +66725,7 @@ AcDbEntity
 100
 AcDbText
 10
-314.078125
+305.515625
 20
 1098.15625
 30
@@ -66733,7 +66733,7 @@ AcDbText
 40
 14
 1
-tagesschau
+·
 7
 Arial
 100
@@ -66753,7 +66753,7 @@ AcDbEntity
 100
 AcDbText
 10
-305.515625
+314.078125
 20
 1098.15625
 30
@@ -66761,7 +66761,7 @@ AcDbText
 40
 14
 1
-·
+ tagesschau
 7
 Arial
 100
@@ -71459,7 +71459,7 @@ AcDbEntity
 100
 AcDbText
 10
-314.078125
+305.515625
 20
 990.15625
 30
@@ -71467,7 +71467,7 @@ AcDbText
 40
 14
 1
-TURN ON
+·
 7
 Arial
 100
@@ -71487,7 +71487,7 @@ AcDbEntity
 100
 AcDbText
 10
-305.515625
+314.078125
 20
 990.15625
 30
@@ -71495,7 +71495,7 @@ AcDbText
 40
 14
 1
-·
+ TURN ON
 7
 Arial
 100
@@ -76843,7 +76843,7 @@ AcDbText
 40
 14
 1
-Alles rund um
+Alles rund um 
 7
 Arial
 100
@@ -76852,6 +76852,34 @@ AcDbText
 TEXT
 5
 10D
+330
+C
+100
+AcDbEntity
+420
+12566463
+8
+0
+100
+AcDbText
+10
+171.984375
+20
+738.15625
+30
+0
+40
+14
+1
+Google
+7
+Arial
+100
+AcDbText
+0
+TEXT
+5
+10E
 330
 C
 100
@@ -76879,7 +76907,7 @@ AcDbText
 0
 TEXT
 5
-10E
+10F
 330
 C
 100
@@ -76900,34 +76928,6 @@ AcDbText
 14
 1
 Menschen auf der ganzen Welt helfen.
-7
-Arial
-100
-AcDbText
-0
-TEXT
-5
-10F
-330
-C
-100
-AcDbEntity
-420
-12566463
-8
-0
-100
-AcDbText
-10
-171.984375
-20
-738.15625
-30
-0
-40
-14
-1
-Google
 7
 Arial
 100
@@ -79059,7 +79059,7 @@ AcDbEntity
 100
 AcDbText
 10
-164.953125
+82.5
 20
 592.15625
 30
@@ -79067,7 +79067,7 @@ AcDbText
 40
 14
 1
-... Sign in ... How can we help you ... Google Chrome ... Google Account ... YouTube ...
+Google Help
 7
 Arial
 100
@@ -79087,15 +79087,15 @@ AcDbEntity
 100
 AcDbText
 10
-82.5
+164.953125
 20
-570.15625
+592.15625
 30
 0
 40
 14
 1
-Gmail ... Google Play ... Google Search ... Google AdSense ... Gemini Apps ...
+ ... Sign in ... How can we help you ... Google Chrome ... Google Account ... YouTube ...
 7
 Arial
 100
@@ -79117,13 +79117,13 @@ AcDbText
 10
 82.5
 20
-592.15625
+570.15625
 30
 0
 40
 14
 1
-Google Help
+Gmail ... Google Play ... Google Search ... Google AdSense ... Gemini Apps ...
 7
 Arial
 100
@@ -79343,7 +79343,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -80749,7 +80749,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -82147,7 +82147,7 @@ AcDbEntity
 100
 AcDbText
 10
-138.5
+98.5
 20
 345.15625
 30
@@ -82155,7 +82155,7 @@ AcDbText
 40
 16
 1
-Google
+Www
 7
 Google Sans
 100
@@ -82175,7 +82175,7 @@ AcDbEntity
 100
 AcDbText
 10
-98.5
+138.5
 20
 345.15625
 30
@@ -82183,7 +82183,7 @@ AcDbText
 40
 16
 1
-Www
+ Google 
 7
 Google Sans
 100
@@ -83589,7 +83589,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -84995,7 +84995,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -86401,7 +86401,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -87807,7 +87807,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100
@@ -89213,7 +89213,7 @@ AcDbText
 40
 16
 1
-Google
+Google 
 7
 Google Sans
 100

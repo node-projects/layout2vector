@@ -285,7 +285,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 7,
     "source": {
       "id": "b",
       "xpath": "/html/body/div/ui-text-block",
@@ -359,7 +359,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 10,
     "source": {
       "id": "b",
       "xpath": "/html/body/div/ui-text-block",
@@ -433,7 +433,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 13,
     "source": {
       "id": "b",
       "xpath": "/html/body/div/ui-text-block",
@@ -507,7 +507,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 16,
     "source": {
       "id": "b",
       "xpath": "/html/body/div/ui-text-block",

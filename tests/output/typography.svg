@@ -36,14 +36,14 @@
 <text x="210" y="723.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif">pariatur. Excepteur sint occaecat</text>
 <text x="210" y="741.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif">cupidatat non proident.</text>
 <text x="0" y="801.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial, sans-serif">Inline Formatting</text>
-<text x="0" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">This has</text>
-<text x="159.23" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">and</text>
-<text x="255.11" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">and</text>
-<text x="379.11" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">mixed together in a single paragraph.</text>
+<text x="0" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif" xml:space="preserve">This has </text>
 <text x="60.86" y="837.56" fill="rgb(211, 47, 47)" dominant-baseline="text-before-edge" font-style="italic" font-size="15px" font-family="Arial, sans-serif">italic emphasis</text>
+<text x="159.23" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif" xml:space="preserve"> and </text>
 <text x="192.61" y="837.56" fill="rgb(21, 101, 192)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">bold text</text>
+<text x="255.11" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif" xml:space="preserve"> and </text>
 <rect x="288" y="837" width="91" height="19" rx="3" ry="3" fill="rgb(38, 50, 56)"/>
 <text x="294.48" y="839.56" fill="rgb(128, 203, 196)" dominant-baseline="text-before-edge" font-size="13px" font-family="monospace">inline code</text>
+<text x="379.11" y="837.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif" xml:space="preserve"> mixed together in a single paragraph.</text>
 <text x="0" y="874.56" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial, sans-serif">Multi-column Text 2</text>
 <g><path d="M3.29,1061.3 L349.71,861.3 L396.71,942.7 L50.29,1142.7 Z" fill="rgb(245, 245, 245)"/><path d="M3.29,1061.3 L349.71,861.3 L396.71,942.7 L50.29,1142.7 Z" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
 <text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif" transform="matrix(0.87,-0.5,0.5,0.87,19.32,1067.06)">Lorem ipsum dolor sit amet,</text>

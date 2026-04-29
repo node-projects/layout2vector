@@ -212,7 +212,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 2,
+    "zIndex": 3,
     "source": {
       "xpath": "/html/body/main/p[1]",
       "originalType": "p"
@@ -285,7 +285,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 3,
+    "zIndex": 5,
     "source": {
       "xpath": "/html/body/main/h1",
       "originalType": "h1"
@@ -356,7 +356,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 7,
     "source": {
       "xpath": "/html/body/main/p[2]",
       "originalType": "p"
@@ -427,7 +427,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 4,
+    "zIndex": 7,
     "source": {
       "xpath": "/html/body/main/p[2]",
       "originalType": "p"
@@ -500,7 +500,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 6,
+    "zIndex": 9,
     "source": {
       "xpath": "/html/body/main/div",
       "originalType": "div"
@@ -573,7 +573,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 7,
+    "zIndex": 10,
     "source": {
       "id": "demo-video",
       "xpath": "/html/body/main/div/video",
@@ -173452,7 +173452,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 8,
+    "zIndex": 11,
     "source": {
       "id": "demo-video",
       "xpath": "/html/body/main/div/video",
@@ -173526,7 +173526,7 @@
       "textOverflow": "clip",
       "imageRendering": "auto"
     },
-    "zIndex": 9,
+    "zIndex": 13,
     "source": {
       "id": "status",
       "xpath": "/html/body/main/div/div",

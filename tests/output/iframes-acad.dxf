@@ -3079,7 +3079,7 @@ AcDbText
  40
 21.0
   1
-iframe rendered from srcdoc content. Enable
+iframe rendered from srcdoc content. Enable 
  50
 0.0
  41
@@ -3135,7 +3135,7 @@ AcDbText
  39
 0.0
  10
-632.6875
+496.390625
  20
 723.25
  30
@@ -3143,7 +3143,7 @@ AcDbText
  40
 21.0
   1
-to traverse those
+walkIframes
  50
 0.0
  41
@@ -3199,15 +3199,15 @@ AcDbText
  39
 0.0
  10
-75.0
+632.6875
  20
-691.75
+723.25
  30
 0.0
  40
 21.0
   1
-nested documents and keep them in the same paint-order pipeline.
+ to traverse those
  50
 0.0
  41
@@ -3263,15 +3263,15 @@ AcDbText
  39
 0.0
  10
-496.390625
+75.0
  20
-723.25
+691.75
  30
 0.0
  40
 21.0
   1
-walkIframes
+nested documents and keep them in the same paint-order pipeline.
  50
 0.0
  41
@@ -4071,7 +4071,7 @@ AcDbText
  40
 17.0
   1
-The left frame points at
+The left frame points at 
  50
 0.0
  41
@@ -4104,6 +4104,70 @@ AcDbText
 TEXT
   5
 37
+330
+1D
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+420
+1450302
+ 48
+1.0
+ 60
+0
+ 67
+0
+370
+-1
+100
+AcDbText
+ 39
+0.0
+ 10
+246.421875
+ 20
+538.25
+ 30
+0.0
+ 40
+17.0
+  1
+text.html
+ 50
+0.0
+ 41
+1.0
+ 51
+0.0
+  7
+Standard
+ 71
+0
+ 72
+0
+ 11
+0.0
+ 21
+0.0
+ 31
+0.0
+210
+0.0
+220
+0.0
+230
+1.0
+100
+AcDbText
+ 73
+0
+  0
+TEXT
+  5
+38
 330
 1D
 100
@@ -4167,7 +4231,7 @@ AcDbText
   0
 TEXT
   5
-38
+39
 330
 1D
 100
@@ -4200,70 +4264,6 @@ AcDbText
 17.0
   1
 walking across a nested file load instead of only inline markup.
- 50
-0.0
- 41
-1.0
- 51
-0.0
-  7
-Standard
- 71
-0
- 72
-0
- 11
-0.0
- 21
-0.0
- 31
-0.0
-210
-0.0
-220
-0.0
-230
-1.0
-100
-AcDbText
- 73
-0
-  0
-TEXT
-  5
-39
-330
-1D
-100
-AcDbEntity
-  8
-0
-  6
-ByLayer
-420
-1450302
- 48
-1.0
- 60
-0
- 67
-0
-370
--1
-100
-AcDbText
- 39
-0.0
- 10
-246.421875
- 20
-538.25
- 30
-0.0
- 40
-17.0
-  1
-text.html
  50
 0.0
  41
