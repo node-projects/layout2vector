@@ -376,6 +376,9 @@ async function inlineLocalFileAssets(page: Page): Promise<void> {
     }));
   });
 
+  // Headless Chromium can render file:// iframe content while still exposing
+  // a null contentDocument. Rewriting local iframe HTML to srcdoc keeps the
+  // demo content accessible to the iframe traversal path.
   for (const iframeSource of iframeSources) {
     const src = iframeSource.src;
     if (!src || iframeSource.srcdocLength > 0 || src.startsWith("data:")) {
@@ -425,7 +428,8 @@ async function inlineLocalFileAssets(page: Page): Promise<void> {
   if (inlinedIframeCount > 0) {
     await page.waitForFunction(
       () => Array.from(document.querySelectorAll("iframe[data-hc-inline-srcdoc='true']")).every((iframe) => {
-        return !!iframe.contentDocument && iframe.contentDocument.readyState === "complete";
+        const frame = iframe as HTMLIFrameElement;
+        return !!frame.contentDocument && frame.contentDocument.readyState === "complete";
       }),
       undefined,
       { timeout: 10_000 },
@@ -537,32 +541,6 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   const walkIframes = walkIframesOverride ?? await page.evaluate(() => document.querySelector("iframe") !== null);
   await inlineLocalFileAssets(page);
 
-  if (name === "iframes") {
-    const iframeDebug = await page.evaluate(async () => {
-      const iframeState = Array.from(document.querySelectorAll("iframe")).map((iframe) => ({
-        src: iframe.src,
-        srcdocLength: iframe.srcdoc.length,
-        hasContentDocument: !!iframe.contentDocument,
-        readyState: iframe.contentDocument?.readyState ?? null,
-        bodyText: iframe.contentDocument?.body?.innerText ?? "",
-      }));
-      const root = document.getElementById("root") ?? document.body;
-      const ir = await (window as any).__HC.extractIR(root, {
-        boxType: "border",
-        includeText: true,
-        includeImages: true,
-        includeVideos: true,
-        walkIframes: true,
-        textMeasurement: "auto",
-      });
-      return {
-        iframeState,
-        hasExternalText: ir.some((node: any) => node.type === "text" && typeof node.text === "string" && node.text.includes("Alte Not-Halt")),
-        textCount: ir.filter((node: any) => node.type === "text").length,
-      };
-    });
-    console.log(`IFRAME DEBUG ${JSON.stringify(iframeDebug)}`);
-  }
 
   const ir: IRNode[] = await page.evaluate(({ shouldConvertFormControls, shouldWalkIframes, shouldIncludeSourceMetadata }) => {
     const root = document.getElementById("root") ?? document.body;
