@@ -421,7 +421,7 @@ Segoe UI.ttf
 0
 STYLE
 5
-53
+4C
 330
 4
 100
@@ -4527,55 +4527,23 @@ C
 100
 AcDbEntity
 420
-2508371
+4014171
 8
 0
 100
 AcDbText
 10
-849.8581750156666
+1011.296875
 20
-498.30111515333647
+304.84375
 30
 0
 40
-22
+18
 1
-WrapThisAbsurdlyLongToken
-50
--1.9999998429261654
+white-space: pre-wrap
 7
-Segoe UI
-100
-AcDbText
-0
-TEXT
-5
-4C
-330
-C
-100
-AcDbEntity
-420
-2508371
-8
-0
-100
-AcDbText
-10
-848.7451978764827
-20
-466.4299298296353
-30
-0
-40
-22
-1
-WithoutAnyMercyBecauseWo
-50
--1.9999998429261419
-7
-Segoe UI
+Courier New
 100
 AcDbText
 0
@@ -4587,25 +4555,23 @@ C
 100
 AcDbEntity
 420
-2508371
+4014171
 8
 0
 100
 AcDbText
 10
-847.6322204096622
+1011.296875
 20
-434.55875388822506
+276.953125
 30
 0
 40
-22
+18
 1
-rdBreakAndOverflowWrapSh
-50
--1.9999998429261454
+keeps   deliberate gaps
 7
-Segoe UI
+Courier New
 100
 AcDbText
 0
@@ -4617,31 +4583,57 @@ C
 100
 AcDbEntity
 420
-2508371
+4014171
 8
 0
 100
 AcDbText
 10
-846.5192439057239
+1011.296875
 20
-402.68755037346955
+249.0625
 30
 0
 40
-22
+18
 1
-ouldStillPreserveTheLayout.
-50
--1.9999998429261472
+and carries line breaks 
 7
-Segoe UI
+Courier New
+100
+AcDbText
+0
+TEXT
+5
+4F
+330
+C
+100
+AcDbEntity
+420
+4014171
+8
+0
+100
+AcDbText
+10
+1259.75
+20
+249.0625
+30
+0
+40
+18
+1
+forward.
+7
+Courier New
 100
 AcDbText
 0
 HATCH
 5
-4F
+50
 330
 C
 100
@@ -4773,7 +4765,7 @@ SOLID
 0
 LWPOLYLINE
 5
-50
+51
 330
 C
 100
@@ -4881,7 +4873,7 @@ AcDbPolyline
 0
 TEXT
 5
-51
+52
 330
 C
 100
@@ -4911,29 +4903,31 @@ AcDbText
 0
 TEXT
 5
-52
+53
 330
 C
 100
 AcDbEntity
 420
-4014171
+2508371
 8
 0
 100
 AcDbText
 10
-1011.296875
+849.8581750156666
 20
-304.84375
+498.30111515333647
 30
 0
 40
-18
+22
 1
-white-space: pre-wrap
+WrapThisAbsurdlyLongToken
+50
+-1.9999998429261654
 7
-Courier New
+Segoe UI
 100
 AcDbText
 0
@@ -4945,23 +4939,25 @@ C
 100
 AcDbEntity
 420
-4014171
+2508371
 8
 0
 100
 AcDbText
 10
-1011.296875
+848.7451978764827
 20
-276.953125
+466.4299298296353
 30
 0
 40
-18
+22
 1
-keeps   deliberate gaps
+WithoutAnyMercyBecauseWo
+50
+-1.9999998429261419
 7
-Courier New
+Segoe UI
 100
 AcDbText
 0
@@ -4973,23 +4969,25 @@ C
 100
 AcDbEntity
 420
-4014171
+2508371
 8
 0
 100
 AcDbText
 10
-1011.296875
+847.6322204096622
 20
-249.0625
+434.55875388822506
 30
 0
 40
-18
+22
 1
-and carries line breaks 
+rdBreakAndOverflowWrapSh
+50
+-1.9999998429261454
 7
-Courier New
+Segoe UI
 100
 AcDbText
 0
@@ -5001,23 +4999,25 @@ C
 100
 AcDbEntity
 420
-4014171
+2508371
 8
 0
 100
 AcDbText
 10
-1259.75
+846.5192439057239
 20
-249.0625
+402.68755037346955
 30
 0
 40
-18
+22
 1
-forward.
+ouldStillPreserveTheLayout.
+50
+-1.9999998429261472
 7
-Courier New
+Segoe UI
 100
 AcDbText
 0

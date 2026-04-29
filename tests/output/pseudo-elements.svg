@@ -49,14 +49,7 @@
 <text x="20" y="841.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">This shows an attribute value</text>
 <text x="227" y="841.5" fill="rgb(127, 140, 141)" dominant-baseline="text-before-edge" font-style="italic" font-size="16px" font-family="Arial, sans-serif">[important]</text>
 <text x="20" y="902.14" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Decorative Pseudo-Elements</text>
-<g><rect x="20" y="933" width="1240" height="62" rx="0" ry="0" fill="rgb(249, 249, 249)"/><rect x="20" y="933" width="1240" height="62" rx="0" ry="0" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
-<text x="41" y="956.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">A card with a decorative top bar and bottom line</text>
-<rect x="41" y="944" width="40" height="4" rx="0" ry="0" fill="rgb(231, 76, 60)"/>
-<rect x="41" y="982" width="1198" height="2" rx="0" ry="0" fill="rgb(52, 152, 219)"/>
 <text x="20" y="1020.14" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Transformed Element</text>
-<g><path d="M41.27,1063.4 L255.98,1074.65 L253.73,1117.59 L39.02,1106.34 Z" fill="rgb(255, 243, 205)"/><path d="M41.27,1063.4 L255.98,1074.65 L253.73,1117.59 L39.02,1106.34 Z" fill="none" stroke="rgb(255, 193, 7)" stroke-width="1"/></g>
-<text x="0" y="0.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,76.59,1080.21)">Warning: tilted element</text>
-<text x="0" y="0.5" fill="rgb(133, 100, 4)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,57.57,1078.22)">&#x26A0;</text>
 <text x="20" y="1175.14" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18.72px" font-family="Arial, sans-serif">Chapter Numbering</text>
 <text x="98.36" y="1205" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="15px" font-family="Arial, sans-serif">Getting Started</text>
 <text x="20" y="1205" fill="rgb(26, 82, 118)" dominant-baseline="text-before-edge" font-weight="700" font-size="15px" font-family="Arial, sans-serif">Chapter 1:</text>
@@ -73,4 +66,11 @@
 <text x="50.34" y="1382.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Another surrounded item</text>
 <text x="33" y="1382.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25B6;</text>
 <text x="226" y="1382.5" fill="rgb(41, 128, 185)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">&#x25C0;</text>
+<g><rect x="20" y="933" width="1240" height="62" rx="0" ry="0" fill="rgb(249, 249, 249)"/><rect x="20" y="933" width="1240" height="62" rx="0" ry="0" fill="none" stroke="rgb(221, 221, 221)" stroke-width="1"/></g>
+<text x="41" y="956.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">A card with a decorative top bar and bottom line</text>
+<rect x="41" y="944" width="40" height="4" rx="0" ry="0" fill="rgb(231, 76, 60)"/>
+<rect x="41" y="982" width="1198" height="2" rx="0" ry="0" fill="rgb(52, 152, 219)"/>
+<g><path d="M41.27,1063.4 L255.98,1074.65 L253.73,1117.59 L39.02,1106.34 Z" fill="rgb(255, 243, 205)"/><path d="M41.27,1063.4 L255.98,1074.65 L253.73,1117.59 L39.02,1106.34 Z" fill="none" stroke="rgb(255, 193, 7)" stroke-width="1"/></g>
+<text x="0" y="0.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,76.59,1080.21)">Warning: tilted element</text>
+<text x="0" y="0.5" fill="rgb(133, 100, 4)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" transform="matrix(1,0.05,-0.05,1,57.57,1078.22)">&#x26A0;</text>
 </svg>
