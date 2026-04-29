@@ -38,6 +38,7 @@ const ir = await extractIR(root, {
   includeImages: true,     // enable image extraction (recommended)
   convertFormControls: true, // synthesize native form controls into value/state-aware IR
   walkIframes: true,       // walk same-origin iframe documents too
+  rootScrollBehavior: "expand", // optional: export the full content of a scrollable root
 });
 
 // 2. Render to DXF
@@ -116,6 +117,7 @@ Main entry point. Traverses the DOM tree under `root`, builds a stacking context
 | `includeInvisible` | `boolean` | `false` | Include `display:none` / `visibility:hidden` elements |
 | `textMeasurement` | `"line" \| "pretext" \| "auto"` | `"line"` | Text extraction granularity. `pretext` uses `@chenglou/pretext` for accurate text measurement and layout, supporting all writing modes (vertical-rl, vertical-lr, sideways-rl, sideways-lr). `auto` keeps the fast line mode for normal text and switches to pretext only when non-default `writing-mode` or `direction` is present. Requires `@chenglou/pretext` to be installed when using `pretext` or `auto` with non-standard writing modes. |
 | `walkIframes` | `boolean` | `false` | Traverse same-origin iframe documents and merge their content into the same IR paint order |
+| `rootScrollBehavior` | `"clip" \| "expand"` | `"clip"` | Controls scrollable overflow on the extraction root only. Use `"expand"` to export the full content of a root with `overflow: scroll|auto|overlay` while keeping nested scroll containers clipped normally. Root `overflow: hidden|clip` still clips normally. |
 | `zoom` | `number` | `1` | Scale factor applied to all extracted coordinates. Useful when the source DOM is rendered at a different zoom level |
 | `imageScale` | `number` | `1` | Scale factor for rasterizing embedded images. Higher values (e.g. `2`) produce sharper images when zooming in on the exported file. Max pixel dimension is capped at 4096 |
 | `svgToVector` | `boolean` | `false` | When true, embedded SVG images (in `<img>` tags and CSS `background-image`) are always converted to vector IR nodes (polygon, polyline, text) instead of being rasterized to bitmap image nodes. This produces resolution-independent output but may not accurately render SVGs that use fill-rule:evenodd with complex multi-subpath paths. |

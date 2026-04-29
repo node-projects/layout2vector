@@ -82,7 +82,8 @@ export async function extractIR(root: Element | Element[], options: Options = {}
     const stackingTree = traverseDOM(
       rootEl,
       options.includeInvisible ?? false,
-      options.walkIframes ?? false
+      options.walkIframes ?? false,
+      { rootScrollBehavior: options.rootScrollBehavior }
     );
 
     // 2. Flatten to paint order
@@ -166,7 +167,7 @@ export async function extractIR(root: Element | Element[], options: Options = {}
       if (options.includePseudoElements !== false) {
         const pseudoNodes = await extractPseudoElements(el, getPseudoInheritedStyle(node), globalIndex, options);
         attachSourceMetadata(pseudoNodes, el, options, `${el.tagName.toLowerCase()}::pseudo`);
-        transformIRGeometry(pseudoNodes, node.coordinateTransform);
+        transformIRGeometry(pseudoNodes, node.childCoordinateTransform);
         irNodes.push(...pseudoNodes);
         globalIndex += pseudoNodes.length;
       }

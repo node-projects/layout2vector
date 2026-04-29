@@ -1,19 +1,23 @@
 /**
  * DOM traversal with stacking context awareness.
  */
-import type { ClipQuad, Quad, Style } from "./types.js";
+import type { ClipQuad, Quad, RootScrollBehavior, Style } from "./types.js";
 import { getElementQuad } from "./geometry.js";
 
 type CoordinateTransform = { a: number; b: number; c: number; d: number; e: number; f: number };
 
 const IDENTITY_TRANSFORM: CoordinateTransform = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
 
-function createsOverflowClip(overflow: string | undefined): boolean {
-  return overflow === "hidden"
-    || overflow === "clip"
-    || overflow === "scroll"
+function isScrollableOverflow(overflow: string | undefined): boolean {
+  return overflow === "scroll"
     || overflow === "auto"
     || overflow === "overlay";
+}
+
+function createsOverflowClip(overflow: string | undefined, ignoreScrollableOverflow = false): boolean {
+  return overflow === "hidden"
+    || overflow === "clip"
+    || (!ignoreScrollableOverflow && isScrollableOverflow(overflow));
 }
 
 /** Represents a node in the stacking context tree. */
@@ -28,6 +32,8 @@ export interface StackingNode {
   zIndex: number;
   /** Accumulated outer-page transform for nested browsing contexts. */
   coordinateTransform: CoordinateTransform;
+  /** Transform applied to descendants and pseudo-elements inside this element. */
+  childCoordinateTransform: CoordinateTransform;
   /** Clip quads inherited from iframe viewports. */
   clipQuads?: ClipQuad[];
   /** Clip boundary from an ancestor with overflow:hidden + border-radius. */
@@ -244,9 +250,21 @@ export function isSVGRoot(el: Element): boolean {
 export function traverseDOM(
   root: Element,
   includeInvisible = false,
-  walkIframes = false
+  walkIframes = false,
+  options: { rootScrollBehavior?: RootScrollBehavior } = {}
 ): StackingNode {
-  return buildStackingNode(root, includeInvisible, 1, undefined, undefined, IDENTITY_TRANSFORM, walkIframes, undefined);
+  return buildStackingNode(
+    root,
+    includeInvisible,
+    1,
+    undefined,
+    undefined,
+    IDENTITY_TRANSFORM,
+    walkIframes,
+    undefined,
+    root,
+    options.rootScrollBehavior ?? "clip",
+  );
 }
 
 function buildStackingNode(
@@ -257,7 +275,9 @@ function buildStackingNode(
   parentClipPath: string | undefined,
   coordinateTransform: CoordinateTransform,
   walkIframes: boolean,
-  parentClipQuads: ClipQuad[] | undefined
+  parentClipQuads: ClipQuad[] | undefined,
+  traversalRoot: Element,
+  rootScrollBehavior: RootScrollBehavior,
 ): StackingNode {
   const cs = getComputedStyle(element);
   const extractedStyleVal = extractStyle(cs);
@@ -273,6 +293,17 @@ function buildStackingNode(
 
   const zVal =
     cs.zIndex && cs.zIndex !== "auto" ? parseInt(cs.zIndex, 10) : 0;
+  const overflowX = cs.overflowX || cs.overflow;
+  const overflowY = cs.overflowY || cs.overflow;
+  const shouldExpandRootScrollContent =
+    element === traversalRoot
+    && rootScrollBehavior === "expand"
+    && (isScrollableOverflow(overflowX) || isScrollableOverflow(overflowY))
+    && !createsOverflowClip(overflowX, true)
+    && !createsOverflowClip(overflowY, true);
+  const childCoordinateTransform = shouldExpandRootScrollContent
+    ? getScrollExpandedChildTransform(element, coordinateTransform)
+    : coordinateTransform;
 
   const node: StackingNode = {
     element,
@@ -283,6 +314,7 @@ function buildStackingNode(
     textNodes: [],
     zIndex: zVal,
     coordinateTransform,
+    childCoordinateTransform,
     clipQuads: parentClipQuads,
     clipBounds: parentClipBounds,
   };
@@ -290,9 +322,10 @@ function buildStackingNode(
   // Determine clip bounds for children: if this element has clipped or scrollable
   // overflow, children should be clipped to the visible scrollport boundary.
   let childClipBounds = parentClipBounds;
-  const overflowX = cs.overflowX || cs.overflow;
-  const overflowY = cs.overflowY || cs.overflow;
-  if (createsOverflowClip(overflowX) || createsOverflowClip(overflowY)) {
+  if (
+    createsOverflowClip(overflowX, shouldExpandRootScrollContent)
+    || createsOverflowClip(overflowY, shouldExpandRootScrollContent)
+  ) {
     let rect = element.getBoundingClientRect();
     // Firefox returns height:0 for iframe body with overflow:hidden and only
     // absolutely-positioned children. Use the viewport dimensions instead.
@@ -332,7 +365,7 @@ function buildStackingNode(
     if (child.nodeType === Node.TEXT_NODE) {
       const text = child as Text;
       if (text.textContent && shouldCreateTextNodeEntry(text, element)) {
-        node.children.push(buildTextStackingNode(element, cs, extractedStyleVal, text, zVal, coordinateTransform, parentClipQuads, parentClipBounds, childClipBounds));
+        node.children.push(buildTextStackingNode(element, cs, extractedStyleVal, text, zVal, childCoordinateTransform, parentClipQuads, parentClipBounds, childClipBounds));
       }
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const childEl = child as Element;
@@ -346,7 +379,7 @@ function buildStackingNode(
         continue;
       }
 
-      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds, childClipPath, coordinateTransform, walkIframes, parentClipQuads));
+      node.children.push(buildStackingNode(childEl, includeInvisible, effectiveOpacity, childClipBounds, childClipPath, childCoordinateTransform, walkIframes, parentClipQuads, traversalRoot, rootScrollBehavior));
     }
   }
 
@@ -369,6 +402,8 @@ function buildStackingNode(
             iframeViewport.transform,
             walkIframes,
             iframeClipQuads,
+            traversalRoot,
+            rootScrollBehavior,
           )
         );
       }
@@ -399,9 +434,83 @@ function buildTextStackingNode(
     textOnly: true,
     zIndex,
     coordinateTransform,
+    childCoordinateTransform: coordinateTransform,
     clipQuads,
     clipBounds,
     childClipBounds,
+  };
+}
+
+function getScrollExpandedChildTransform(
+  element: Element,
+  coordinateTransform: CoordinateTransform,
+): CoordinateTransform {
+  const scrollLeft = typeof (element as Element & { scrollLeft?: number }).scrollLeft === "number"
+    ? (element as Element & { scrollLeft?: number }).scrollLeft ?? 0
+    : 0;
+  const scrollTop = typeof (element as Element & { scrollTop?: number }).scrollTop === "number"
+    ? (element as Element & { scrollTop?: number }).scrollTop ?? 0
+    : 0;
+
+  if (scrollLeft === 0 && scrollTop === 0) {
+    return coordinateTransform;
+  }
+
+  const translation = getElementScrollTranslation(element, scrollLeft, scrollTop);
+  if (translation.x === 0 && translation.y === 0) {
+    return coordinateTransform;
+  }
+
+  return composeCoordinateTransforms(coordinateTransform, {
+    a: 1,
+    b: 0,
+    c: 0,
+    d: 1,
+    e: translation.x,
+    f: translation.y,
+  });
+}
+
+function getElementScrollTranslation(
+  element: Element,
+  scrollLeft: number,
+  scrollTop: number,
+): { x: number; y: number } {
+  const quad = getElementQuad(element);
+  const htmlEl = element as Element & {
+    offsetWidth?: number;
+    offsetHeight?: number;
+    clientWidth?: number;
+    clientHeight?: number;
+  };
+
+  const width = typeof htmlEl.offsetWidth === "number" && htmlEl.offsetWidth > 0
+    ? htmlEl.offsetWidth
+    : typeof htmlEl.clientWidth === "number" && htmlEl.clientWidth > 0
+      ? htmlEl.clientWidth
+      : 0;
+  const height = typeof htmlEl.offsetHeight === "number" && htmlEl.offsetHeight > 0
+    ? htmlEl.offsetHeight
+    : typeof htmlEl.clientHeight === "number" && htmlEl.clientHeight > 0
+      ? htmlEl.clientHeight
+      : 0;
+
+  if (!quad || width <= 0 || height <= 0) {
+    return { x: scrollLeft, y: scrollTop };
+  }
+
+  const xAxis = {
+    x: (quad[1].x - quad[0].x) / width,
+    y: (quad[1].y - quad[0].y) / width,
+  };
+  const yAxis = {
+    x: (quad[3].x - quad[0].x) / height,
+    y: (quad[3].y - quad[0].y) / height,
+  };
+
+  return {
+    x: xAxis.x * scrollLeft + yAxis.x * scrollTop,
+    y: xAxis.y * scrollLeft + yAxis.y * scrollTop,
   };
 }
 

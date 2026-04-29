@@ -92,6 +92,8 @@ export type Style = {
 /** Controls how text is split into IR text nodes during extraction. */
 export type TextMeasurementMode = "line" | "pretext" | "auto";
 
+export type RootScrollBehavior = "clip" | "expand";
+
 export type SourceMetadata = {
   id?: string;
   xpath: string;
@@ -169,6 +171,15 @@ export type Options = {
    * Defaults to false.
    */
   walkIframes?: boolean;
+  /**
+   * Controls scrollable overflow on the extraction root itself.
+   * - `clip`: keep the visible scrollport only (default)
+   * - `expand`: export the root's full scrollable content while keeping
+   *   nested scroll containers clipped normally
+   *
+   * `overflow: hidden|clip` on the root still clips normally.
+   */
+  rootScrollBehavior?: RootScrollBehavior;
   /**
    * When extracting from multiple elements (passing an array to extractIR),
    * specifies which element's top-left corner to use as the coordinate origin.

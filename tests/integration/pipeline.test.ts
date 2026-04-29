@@ -174,6 +174,66 @@ test.describe("Full Pipeline: DOM → IR → Writer", () => {
     expect(calls).toEqual([]);
   });
 
+  test("end-to-end: root scroll overflow can expand without affecting nested scroll clips", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div id="root" style="position:relative;width:80px;height:60px;overflow:scroll;background:#fff;">
+          <div style="width:160px;height:200px;opacity:0;"></div>
+          <div style="position:absolute;left:0;top:0;width:20px;height:20px;background:rgb(255, 0, 0);"></div>
+          <div style="position:absolute;left:0;top:100px;width:20px;height:20px;background:rgb(0, 0, 255);"></div>
+          <div style="position:absolute;left:40px;top:60px;width:30px;height:20px;overflow:scroll;">
+            <div style="position:absolute;left:0;top:40px;width:10px;height:10px;background:rgb(0, 128, 0);"></div>
+          </div>
+        </div>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(async () => {
+      const el = document.getElementById("root") as HTMLElement;
+      el.scrollLeft = 15;
+      el.scrollTop = 40;
+      return (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: false,
+        rootScrollBehavior: "expand",
+      });
+    });
+
+    const topChild = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.fill === "rgb(255, 0, 0)"
+    );
+    const bottomChild = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.fill === "rgb(0, 0, 255)"
+    );
+    const nestedChild = ir.find((node: any) =>
+      node.type === "polygon" &&
+      node.style.fill === "rgb(0, 128, 0)"
+    );
+
+    expect(topChild).toBeDefined();
+    expect(topChild.points[0].x).toBeCloseTo(0, 0);
+    expect(topChild.points[0].y).toBeCloseTo(0, 0);
+    expect(topChild.style.clipBounds).toBeUndefined();
+
+    expect(bottomChild).toBeDefined();
+    expect(bottomChild.points[0].x).toBeCloseTo(0, 0);
+    expect(bottomChild.points[0].y).toBeCloseTo(100, 0);
+    expect(bottomChild.style.clipBounds).toBeUndefined();
+
+    expect(nestedChild).toBeDefined();
+    expect(nestedChild.points[0].x).toBeCloseTo(40, 0);
+    expect(nestedChild.points[0].y).toBeCloseTo(100, 0);
+    expect(nestedChild.style.clipBounds).toMatchObject({
+      x: 40,
+      y: 60,
+      w: 30,
+      h: 20,
+    });
+  });
+
   test("renderIR skips nodes that are fully outside their clip bounds", async () => {
     const calls: string[] = [];
     const writer: Writer<string> = {
