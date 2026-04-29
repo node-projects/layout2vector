@@ -107,6 +107,15 @@ export async function extractIR(root: Element | Element[], options: Options = {}
         node.extractedStyle.clipQuads = node.clipQuads;
       }
 
+      if (node.textOnly) {
+        const htmlNodes = await extractHTMLGeometry(node, globalIndex, options);
+        attachSourceMetadata(htmlNodes, el, options);
+        transformIRGeometry(htmlNodes, node.coordinateTransform);
+        irNodes.push(...htmlNodes);
+        globalIndex += htmlNodes.length || 1;
+        continue;
+      }
+
       // SVG root elements: extract HTML box first (background, borders),
       // then the SVG subtree on top. The HTML box must come first so
       // the SVG content paints over it (correct paint order).

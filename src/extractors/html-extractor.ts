@@ -37,7 +37,8 @@ function shouldExtractMaskedLeafImage(node: StackingNode, options: Options): boo
   if (!(node.element instanceof HTMLElement)) return false;
   if (!node.extractedStyle.mask || node.extractedStyle.mask === "none") return false;
   if (node.element.children.length > 0) return false;
-  return !node.textNodes.some((textNode) => (textNode.textContent ?? "").trim().length > 0);
+  if (node.textNodes.some((textNode) => (textNode.textContent ?? "").trim().length > 0)) return false;
+  return !node.children.some((child) => child.textOnly && child.textNodes.some((textNode) => (textNode.textContent ?? "").trim().length > 0));
 }
 
 function isVisiblePaint(value: string | undefined): boolean {
@@ -94,10 +95,12 @@ export async function extractHTMLGeometry(
 ): Promise<IRNode[]> {
   const el = node.element;
   const results: IRNode[] = [];
+  const isTextOnly = node.textOnly === true;
   const isRootSvg = isSVGElement(el) && el.tagName.toLowerCase() === "svg";
 
   if (shouldSkipFormControlDescendant(el, options)) return results;
 
+  if (!isTextOnly) {
   const formControlNodes = extractFormControlGeometry(node, globalIndex, options);
   if (formControlNodes !== null) return formControlNodes;
 
@@ -123,6 +126,7 @@ export async function extractHTMLGeometry(
         zIndex: globalIndex,
       });
     }
+  }
   }
 
   // Extract text node geometry
@@ -159,9 +163,10 @@ function extractTextNode(
 ): IRNode[] | Promise<IRNode[]> {
   const results: IRNode[] = [];
   const fullText = textNode.textContent ?? "";
+  const boundaryWhitespace = getCollapsedBoundaryWhitespace(textNode, parentStyle);
   if (preservesWhitespace(parentStyle)) {
     if (fullText.length === 0) return results;
-  } else if (!fullText.trim()) {
+  } else if (!fullText.trim() && !boundaryWhitespace.leading && !boundaryWhitespace.trailing) {
     return results;
   }
 
@@ -193,7 +198,13 @@ function extractTextNode(
 
   if (effectiveLineCount === 1) {
     // Single line: use the first quad directly
-    let text = normalizeWhitespaceAwareText(lineTexts[0], parentStyle);
+    const normalized = normalizeCollapsedTextFragment(
+      lineTexts[0],
+      parentStyle,
+      boundaryWhitespace.leading,
+      boundaryWhitespace.trailing,
+    );
+    let text = normalized.text;
     if (text.length === 0) return results;
 
     text = applyTextTransform(text, parentStyle.textTransform);
@@ -211,7 +222,7 @@ function extractTextNode(
       type: "text",
       quad: finalQuad,
       text,
-      style: measuredTextStyle,
+      style: normalized.style ?? measuredTextStyle,
       zIndex: globalIndex,
     });
   } else {
@@ -220,19 +231,28 @@ function extractTextNode(
     const hasHiddenClampedLines = isMultilineClamp && Math.max(allQuads.length, lineTexts.length) > visibleLineCount;
 
     for (let i = 0; i < visibleLineCount; i++) {
-      let text = normalizeWhitespaceAwareText(i < lineTexts.length ? lineTexts[i] : "", parentStyle)
-        .replace(/[\r\n]+$/g, "");
+      const normalized = normalizeCollapsedTextFragment(
+        i < lineTexts.length ? lineTexts[i] : "",
+        parentStyle,
+        i === 0 && boundaryWhitespace.leading,
+        i === visibleLineCount - 1 && boundaryWhitespace.trailing,
+      );
+      let text = normalized.text.replace(/[\r\n]+$/g, "");
       if (text.length === 0) continue;
 
       text = applyTextTransform(text, parentStyle.textTransform);
 
       let quad = allQuads[i];
       const lineStyle: Style = {
-        ...parentStyle,
+        ...(normalized.style ?? parentStyle),
         textAlign: getMultilineTextAlign(parentStyle.textAlign, i, visibleLineCount),
         textIndent: undefined,
         whiteSpace: preservesWhitespace(parentStyle) ? "pre" : "nowrap",
       };
+
+      if (normalized.style?.whiteSpace === "pre") {
+        lineStyle.whiteSpace = "pre";
+      }
 
       if (hasHiddenClampedLines && i === visibleLineCount - 1) {
         const clipped = clipTextToWidth(text, parentEl, quad, lineStyle, getQuadWidth(quad), "force");
@@ -320,6 +340,155 @@ function hasQuadArea(quad: Quad): boolean {
   return Math.abs(x1 * y2 - y1 * x2) > 0.01;
 }
 
+function getCollapsedBoundaryWhitespace(
+  textNode: Text,
+  style: Style,
+): { leading: boolean; trailing: boolean } {
+  if (preservesWhitespace(style)) {
+    return { leading: false, trailing: false };
+  }
+
+  const text = textNode.textContent ?? "";
+  const hasLeadingBoundary = /^\s/.test(text) && hasInlineBoundarySibling(textNode.previousSibling, "previous");
+  const hasTrailingBoundary = /\s$/.test(text) && hasInlineBoundarySibling(textNode.nextSibling, "next");
+  const renderedBoundaryWhitespace = getRenderedCollapsedBoundaryWhitespace(
+    textNode,
+    hasLeadingBoundary,
+    hasTrailingBoundary,
+  );
+
+  return {
+    leading: hasLeadingBoundary && renderedBoundaryWhitespace.leading,
+    trailing: hasTrailingBoundary && renderedBoundaryWhitespace.trailing,
+  };
+}
+
+function getRenderedCollapsedBoundaryWhitespace(
+  textNode: Text,
+  checkLeading: boolean,
+  checkTrailing: boolean,
+): { leading: boolean; trailing: boolean } {
+  const text = textNode.textContent ?? "";
+  if (!text || (!checkLeading && !checkTrailing)) {
+    return { leading: false, trailing: false };
+  }
+
+  const range = document.createRange();
+  let leading = false;
+  let trailing = false;
+
+  if (checkLeading) {
+    for (let i = 0; i < text.length && /\s/.test(text[i]); i++) {
+      if (hasRenderableCharacterRect(range, textNode, i)) {
+        leading = true;
+        break;
+      }
+    }
+  }
+
+  if (checkTrailing) {
+    for (let i = text.length - 1; i >= 0 && /\s/.test(text[i]); i--) {
+      if (hasRenderableCharacterRect(range, textNode, i)) {
+        trailing = true;
+        break;
+      }
+    }
+  }
+
+  return { leading, trailing };
+}
+
+function hasRenderableCharacterRect(range: Range, textNode: Text, index: number): boolean {
+  try {
+    range.setStart(textNode, index);
+    range.setEnd(textNode, index + 1);
+  } catch {
+    return false;
+  }
+
+  const rects = range.getClientRects();
+  for (let i = 0; i < rects.length; i++) {
+    const rect = rects[i];
+    if (rect.width * rect.height > 0.01) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function hasInlineBoundarySibling(node: Node | null, direction: "previous" | "next"): boolean {
+  let current: Node | null = node;
+  while (current) {
+    if (current.nodeType === Node.COMMENT_NODE) {
+      current = direction === "previous" ? current.previousSibling : current.nextSibling;
+      continue;
+    }
+
+    if (current.nodeType === Node.TEXT_NODE) {
+      if ((current.textContent ?? "").trim().length === 0) {
+        current = direction === "previous" ? current.previousSibling : current.nextSibling;
+        continue;
+      }
+      return true;
+    }
+
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const element = current as Element;
+      if (element.tagName === "BR") return false;
+
+      const display = getComputedStyle(element).display;
+      if (display === "none") {
+        current = direction === "previous" ? current.previousSibling : current.nextSibling;
+        continue;
+      }
+
+      return isInlineLevelDisplay(display);
+    }
+
+    current = direction === "previous" ? current.previousSibling : current.nextSibling;
+  }
+
+  return false;
+}
+
+function isInlineLevelDisplay(display: string): boolean {
+  return display === "inline"
+    || display === "inline-block"
+    || display === "inline-flex"
+    || display === "inline-grid"
+    || display === "inline-table"
+    || display === "contents"
+    || display === "ruby"
+    || display === "ruby-base"
+    || display === "ruby-text";
+}
+
+function normalizeCollapsedTextFragment(
+  text: string,
+  style: Style,
+  preserveLeadingSpace: boolean,
+  preserveTrailingSpace: boolean,
+): { text: string; style?: Style } {
+  if (preservesWhitespace(style)) {
+    return { text: normalizeWhitespaceAwareText(text, style) };
+  }
+
+  let normalized = text.replace(/\s+/g, " ");
+  if (!preserveLeadingSpace) normalized = normalized.replace(/^ /, "");
+  if (!preserveTrailingSpace) normalized = normalized.replace(/ $/, "");
+  if (!normalized) return { text: "" };
+
+  if (normalized.startsWith(" ") || normalized.endsWith(" ")) {
+    return {
+      text: normalized,
+      style: { ...style, whiteSpace: "pre" },
+    };
+  }
+
+  return { text: normalized };
+}
+
 // --- Pretext-based text measurement ---
 
 let _pretextModule: { prepareWithSegments: any; layoutWithLines: any } | null = null;
@@ -356,7 +525,14 @@ async function extractTextNodeWithPretext(
   globalIndex: number,
 ): Promise<IRNode[]> {
   const fullText = textNode.textContent ?? "";
-  const normalizedText = normalizeWhitespaceAwareText(fullText, parentStyle);
+  const boundaryWhitespace = getCollapsedBoundaryWhitespace(textNode, parentStyle);
+  const normalized = normalizeCollapsedTextFragment(
+    fullText,
+    parentStyle,
+    boundaryWhitespace.leading,
+    boundaryWhitespace.trailing,
+  );
+  const normalizedText = normalized.text;
   if (!normalizedText) return [];
 
   const text = applyTextTransform(normalizedText, parentStyle.textTransform);
@@ -381,7 +557,9 @@ async function extractTextNodeWithPretext(
   const cw = contentTransform ? contentTransform.contentWidth : fallbackRect.width - padL - padR;
   const ch = contentTransform ? contentTransform.contentHeight : fallbackRect.height - padT - padB;
 
-  const outputStyle = getPrelaidTextStyle(parentStyle);
+  const outputStyle = normalized.style
+    ? { ...getPrelaidTextStyle(parentStyle), whiteSpace: normalized.style.whiteSpace }
+    : getPrelaidTextStyle(parentStyle);
 
   const { prepareWithSegments, layoutWithLines } = await loadPretextModule();
   const whiteSpaceOpt = preservesWhitespace(parentStyle) ? { whiteSpace: 'pre-wrap' as const } : undefined;

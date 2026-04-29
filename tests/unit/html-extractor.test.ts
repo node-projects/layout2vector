@@ -45,6 +45,68 @@ test.describe("HTML Geometry Extraction", () => {
     expect(textNode.text).toContain("Hello World");
   });
 
+  test("preserves collapsed spaces around inline elements", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;">
+        <p id="target" style="margin:0;font-size:20px;line-height:1.4;font-family:Arial, sans-serif;"><b>Hello</b> world <a href="#">again</a> now.</p>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+
+      return ir
+        .filter((node: any) => node.type === "text")
+        .map((node: any) => ({
+          text: node.text,
+          whiteSpace: node.style.whiteSpace ?? null,
+          fontWeight: node.style.fontWeight ?? null,
+          color: node.style.color ?? null,
+        }));
+    });
+
+    expect(summary).toEqual([
+      { text: "Hello", whiteSpace: "normal", fontWeight: "700", color: "rgb(0, 0, 0)" },
+      { text: " world ", whiteSpace: "pre", fontWeight: "400", color: "rgb(0, 0, 0)" },
+      { text: "again", whiteSpace: "normal", fontWeight: "400", color: "rgb(0, 0, 238)" },
+      { text: " now.", whiteSpace: "pre", fontWeight: "400", color: "rgb(0, 0, 0)" },
+    ]);
+  });
+
+  test("drops collapsed inline boundary spaces when wrapping to a new line", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;">
+        <p id="target" style="margin:0;width:80px;font-size:20px;line-height:1.2;font-family:monospace;"><a href="#">abcde</a> fghij</p>
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const el = document.getElementById("target")!;
+      const ir = await (window as any).__HC.extractIR(el, {
+        boxType: "border",
+        includeText: true,
+      });
+
+      return ir
+        .filter((node: any) => node.type === "text")
+        .map((node: any) => ({
+          text: node.text,
+          top: node.quad[0].y,
+        }));
+    });
+
+    expect(summary).toHaveLength(2);
+    expect(summary[0].text).toBe("abcde");
+    expect(summary[1].text).toBe("fghij");
+    expect(summary[1].top).toBeGreaterThan(summary[0].top);
+  });
+
   test("skips display:none elements", async ({ page }) => {
     await setupPage(
       page,

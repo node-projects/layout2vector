@@ -24,6 +24,7 @@ export interface StackingNode {
   createsStackingContext: boolean;
   children: StackingNode[];
   textNodes: Text[];
+  textOnly?: boolean;
   zIndex: number;
   /** Accumulated outer-page transform for nested browsing contexts. */
   coordinateTransform: CoordinateTransform;
@@ -330,8 +331,8 @@ function buildStackingNode(
   for (const child of childNodes) {
     if (child.nodeType === Node.TEXT_NODE) {
       const text = child as Text;
-      if (text.textContent && text.textContent.trim().length > 0) {
-        node.textNodes.push(text);
+      if (text.textContent && shouldCreateTextNodeEntry(text, element)) {
+        node.children.push(buildTextStackingNode(element, cs, extractedStyleVal, text, zVal, coordinateTransform, parentClipQuads, parentClipBounds, childClipBounds));
       }
     } else if (child.nodeType === Node.ELEMENT_NODE) {
       const childEl = child as Element;
@@ -375,6 +376,88 @@ function buildStackingNode(
   }
 
   return node;
+}
+
+function buildTextStackingNode(
+  element: Element,
+  style: CSSStyleDeclaration,
+  extractedStyle: Style,
+  textNode: Text,
+  zIndex: number,
+  coordinateTransform: CoordinateTransform,
+  clipQuads: ClipQuad[] | undefined,
+  clipBounds: StackingNode["clipBounds"],
+  childClipBounds: StackingNode["childClipBounds"],
+): StackingNode {
+  return {
+    element,
+    style,
+    extractedStyle: { ...extractedStyle },
+    createsStackingContext: false,
+    children: [],
+    textNodes: [textNode],
+    textOnly: true,
+    zIndex,
+    coordinateTransform,
+    clipQuads,
+    clipBounds,
+    childClipBounds,
+  };
+}
+
+function shouldCreateTextNodeEntry(textNode: Text, parent: Element): boolean {
+  const text = textNode.textContent ?? "";
+  if (!text) return false;
+  if (text.trim().length > 0) return !isSVGElement(parent);
+  if (isSVGElement(parent)) return false;
+  return hasRenderableCollapsedWhitespace(textNode);
+}
+
+function hasRenderableCollapsedWhitespace(textNode: Text): boolean {
+  const text = textNode.textContent ?? "";
+  if (!text || !/^\s+$/.test(text)) return false;
+  return hasInlineLikeSibling(textNode.previousSibling, "previous") && hasInlineLikeSibling(textNode.nextSibling, "next");
+}
+
+function hasInlineLikeSibling(node: Node | null, direction: "previous" | "next"): boolean {
+  let current = node;
+  while (current) {
+    if (current.nodeType === Node.COMMENT_NODE) {
+      current = direction === "previous" ? current.previousSibling : current.nextSibling;
+      continue;
+    }
+
+    if (current.nodeType === Node.TEXT_NODE) {
+      if ((current.textContent ?? "").trim().length === 0) {
+        current = direction === "previous" ? current.previousSibling : current.nextSibling;
+        continue;
+      }
+      return true;
+    }
+
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const element = current as Element;
+      if (element.tagName === "BR") return false;
+      const display = getComputedStyle(element).display;
+      if (display === "none") {
+        current = direction === "previous" ? current.previousSibling : current.nextSibling;
+        continue;
+      }
+      return display === "inline"
+        || display === "inline-block"
+        || display === "inline-flex"
+        || display === "inline-grid"
+        || display === "inline-table"
+        || display === "contents"
+        || display === "ruby"
+        || display === "ruby-base"
+        || display === "ruby-text";
+    }
+
+    current = direction === "previous" ? current.previousSibling : current.nextSibling;
+  }
+
+  return false;
 }
 
 function parseBorderRadius(cs: CSSStyleDeclaration): number {
@@ -598,6 +681,7 @@ export function flattenStackingOrder(root: StackingNode): StackingNode[] {
 }
 
 function paintsInAutoOrZeroLayer(node: StackingNode): boolean {
+  if (node.textOnly) return false;
   return node.createsStackingContext || node.style.position !== "static";
 }
 
