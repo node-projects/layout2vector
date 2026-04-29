@@ -13,7 +13,7 @@ $LASTSAVEDBY
 9
 $HANDSEED
 5
-42
+47
 9
 $INSUNITS
 70
@@ -305,7 +305,7 @@ STYLE
 100
 AcDbSymbolTable
 70
-2
+3
 0
 STYLE
 5
@@ -360,6 +360,34 @@ Georgia
 1
 3
 Georgia.ttf
+4
+
+0
+STYLE
+5
+2D
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+2
+Times New Roman
+70
+0
+40
+0
+41
+1
+50
+0
+71
+0
+42
+1
+3
+Times New Roman.ttf
 4
 
 0
@@ -1719,9 +1747,121 @@ AcDbPolyline
 20
 487
 0
-LWPOLYLINE
+TEXT
 5
 2C
+330
+C
+100
+AcDbEntity
+420
+0
+8
+0
+100
+AcDbText
+10
+85
+20
+456.5
+30
+0
+40
+16
+1
+Alte Not-Halt Mobile Panel Steckplatz
+7
+Times New Roman
+100
+AcDbText
+0
+TEXT
+5
+2E
+330
+C
+100
+AcDbEntity
+420
+0
+8
+0
+100
+AcDbText
+10
+85
+20
+420.5
+30
+0
+40
+16
+1
+und Fördererstich AE11/AE12.
+7
+Times New Roman
+100
+AcDbText
+0
+TEXT
+5
+2F
+330
+C
+100
+AcDbEntity
+420
+0
+8
+0
+100
+AcDbText
+10
+85
+20
+384.5
+30
+0
+40
+16
+1
+Am Pnoz gebrückt. Im Programm nur noch für
+7
+Times New Roman
+100
+AcDbText
+0
+TEXT
+5
+30
+330
+C
+100
+AcDbEntity
+420
+0
+8
+0
+100
+AcDbText
+10
+85
+20
+348.5
+30
+0
+40
+16
+1
+Diagnose, falls sie mal ausgelöst werden!
+7
+Times New Roman
+100
+AcDbText
+0
+LWPOLYLINE
+5
+31
 330
 C
 100
@@ -1913,7 +2053,7 @@ AcDbPolyline
 0
 TEXT
 5
-2D
+32
 330
 C
 100
@@ -1941,7 +2081,7 @@ AcDbText
 0
 TEXT
 5
-2E
+33
 330
 C
 100
@@ -1969,7 +2109,7 @@ AcDbText
 0
 TEXT
 5
-2F
+34
 330
 C
 100
@@ -1997,7 +2137,7 @@ AcDbText
 0
 TEXT
 5
-30
+35
 330
 C
 100
@@ -2025,7 +2165,7 @@ AcDbText
 0
 LWPOLYLINE
 5
-31
+36
 330
 C
 100
@@ -2217,7 +2357,7 @@ AcDbPolyline
 0
 HATCH
 5
-32
+37
 330
 C
 100
@@ -2349,7 +2489,7 @@ SOLID
 0
 LWPOLYLINE
 5
-33
+38
 330
 C
 100
@@ -2457,7 +2597,7 @@ AcDbPolyline
 0
 LWPOLYLINE
 5
-34
+39
 330
 C
 100
@@ -2501,7 +2641,7 @@ AcDbPolyline
 0
 HATCH
 5
-35
+3A
 330
 C
 100
@@ -2633,7 +2773,7 @@ SOLID
 0
 LWPOLYLINE
 5
-36
+3B
 330
 C
 100
@@ -2741,7 +2881,7 @@ AcDbPolyline
 0
 TEXT
 5
-37
+3C
 330
 C
 100
@@ -2771,7 +2911,7 @@ AcDbText
 0
 TEXT
 5
-38
+3D
 330
 C
 100
@@ -2801,7 +2941,7 @@ AcDbText
 0
 TEXT
 5
-39
+3E
 330
 C
 100
@@ -2831,7 +2971,7 @@ AcDbText
 0
 TEXT
 5
-3A
+3F
 330
 C
 100
@@ -2861,7 +3001,7 @@ AcDbText
 0
 TEXT
 5
-3B
+40
 330
 C
 100
@@ -2891,7 +3031,7 @@ AcDbText
 0
 HATCH
 5
-3C
+41
 330
 C
 100
@@ -3023,7 +3163,7 @@ SOLID
 0
 LWPOLYLINE
 5
-3D
+42
 330
 C
 100
@@ -3131,7 +3271,7 @@ AcDbPolyline
 0
 TEXT
 5
-3E
+43
 330
 C
 100
@@ -3161,7 +3301,7 @@ AcDbText
 0
 HATCH
 5
-3F
+44
 330
 C
 100
@@ -3293,7 +3433,7 @@ SOLID
 0
 LWPOLYLINE
 5
-40
+45
 330
 C
 100
@@ -3401,7 +3541,7 @@ AcDbPolyline
 0
 TEXT
 5
-41
+46
 330
 C
 100

@@ -115,6 +115,11 @@ for (const demoFile of demoFiles) {
       fontDirectory: demosDir,
     });
 
+    if (name === "iframes") {
+      const irHtml = fs.readFileSync(path.join(projectOutputDir, `${name}-ir.html`), "utf-8");
+      expect(irHtml).toContain("Alte Not-Halt Mobile Panel Steckplatz");
+    }
+
     console.log(
       `  \u2713 ${name}: ${summary.irCount} IR nodes \u2192 DXF (${summary.fileSizes.dxf} bytes), PDF (${summary.fileSizes.pdf} bytes), PNG (${summary.fileSizes.png !== null ? summary.fileSizes.png + " bytes" : "skipped"}), SVG (${summary.fileSizes.svg} bytes), HTML (${summary.fileSizes.html} bytes), EMF (${summary.fileSizes.emf} bytes), EMF+ (${summary.fileSizes.emfPlus} bytes), DWG (${summary.fileSizes.dwg} bytes), AcadDXF (${summary.fileSizes.acadDxf} bytes)`
     );

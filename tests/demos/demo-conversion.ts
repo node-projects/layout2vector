@@ -1,7 +1,7 @@
 import { expect, type Page, type Response as PlaywrightResponse } from "@playwright/test";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { injectBoxQuadsPolyfill, injectLibrary } from "../helpers.js";
 import { renderIR } from "../../src/pipeline.js";
 import type { IRNode } from "../../src/types.js";
@@ -368,6 +368,70 @@ async function inlineLocalFileAssets(page: Page): Promise<void> {
     }
   }
 
+  let inlinedIframeCount = 0;
+  const iframeSources = await page.evaluate(() => {
+    return Array.from(document.querySelectorAll("iframe")).map((iframe) => ({
+      src: iframe.src,
+      srcdocLength: iframe.srcdoc.length,
+    }));
+  });
+
+  for (const iframeSource of iframeSources) {
+    const src = iframeSource.src;
+    if (!src || iframeSource.srcdocLength > 0 || src.startsWith("data:")) {
+      continue;
+    }
+
+    const filePath = src.startsWith("file:///") ? fileURLToPath(src) : src;
+    if (!fs.existsSync(filePath)) {
+      continue;
+    }
+    const extension = path.extname(filePath).toLowerCase();
+    if (extension !== ".html" && extension !== ".htm") {
+      continue;
+    }
+
+    const html = fs.readFileSync(filePath, "utf-8");
+    const baseHref = pathToFileURL(path.dirname(filePath) + path.sep).href;
+    const baseTag = `<base href="${escapeHtmlAttribute(baseHref)}">`;
+    const iframeSrcdoc = /<head\b/i.test(html)
+      ? html.replace(/<head\b([^>]*)>/i, `<head$1>${baseTag}`)
+      : /<html\b/i.test(html)
+        ? html.replace(/<html\b([^>]*)>/i, `<html$1><head>${baseTag}</head>`)
+        : `<!doctype html><html><head><meta charset="UTF-8">${baseTag}</head><body>${html}</body></html>`;
+
+    const didInline = await page.evaluate(({ frameSrc, nextSrcdoc }) => {
+      const iframe = Array.from(document.querySelectorAll("iframe")).find((candidate) => {
+        return candidate.src === frameSrc && candidate.srcdoc.length === 0;
+      });
+      if (!iframe) {
+        return false;
+      }
+
+      iframe.setAttribute("data-hc-inline-srcdoc", "true");
+      iframe.srcdoc = nextSrcdoc;
+      iframe.removeAttribute("src");
+      return true;
+    }, {
+      frameSrc: src,
+      nextSrcdoc: iframeSrcdoc,
+    });
+
+    if (didInline) {
+      inlinedIframeCount += 1;
+    }
+  }
+
+  if (inlinedIframeCount > 0) {
+    await page.waitForFunction(
+      () => Array.from(document.querySelectorAll("iframe[data-hc-inline-srcdoc='true']")).every((iframe) => {
+        return !!iframe.contentDocument && iframe.contentDocument.readyState === "complete";
+      }),
+      undefined,
+      { timeout: 10_000 },
+    ).catch(() => {});
+  }
+
   if (Object.keys(dataUrlMap).length === 0) {
     return;
   }
@@ -393,11 +457,30 @@ async function inlineLocalFileAssets(page: Page): Promise<void> {
         if (element.shadowRoot) {
           walk(element.shadowRoot);
         }
+
+        if (element.tagName === "IFRAME") {
+          try {
+            const doc = (element as HTMLIFrameElement).contentDocument;
+            if (doc) {
+              walk(doc);
+            }
+          } catch {
+            // Ignore cross-origin iframes.
+          }
+        }
       }
     }
 
     walk(document);
   }, dataUrlMap);
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 export async function convertPageToAllWriters(options: ConvertPageToAllWritersOptions): Promise<ConversionSummary> {
@@ -453,6 +536,33 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
 
   const walkIframes = walkIframesOverride ?? await page.evaluate(() => document.querySelector("iframe") !== null);
   await inlineLocalFileAssets(page);
+
+  if (name === "iframes") {
+    const iframeDebug = await page.evaluate(async () => {
+      const iframeState = Array.from(document.querySelectorAll("iframe")).map((iframe) => ({
+        src: iframe.src,
+        srcdocLength: iframe.srcdoc.length,
+        hasContentDocument: !!iframe.contentDocument,
+        readyState: iframe.contentDocument?.readyState ?? null,
+        bodyText: iframe.contentDocument?.body?.innerText ?? "",
+      }));
+      const root = document.getElementById("root") ?? document.body;
+      const ir = await (window as any).__HC.extractIR(root, {
+        boxType: "border",
+        includeText: true,
+        includeImages: true,
+        includeVideos: true,
+        walkIframes: true,
+        textMeasurement: "auto",
+      });
+      return {
+        iframeState,
+        hasExternalText: ir.some((node: any) => node.type === "text" && typeof node.text === "string" && node.text.includes("Alte Not-Halt")),
+        textCount: ir.filter((node: any) => node.type === "text").length,
+      };
+    });
+    console.log(`IFRAME DEBUG ${JSON.stringify(iframeDebug)}`);
+  }
 
   const ir: IRNode[] = await page.evaluate(({ shouldConvertFormControls, shouldWalkIframes, shouldIncludeSourceMetadata }) => {
     const root = document.getElementById("root") ?? document.body;
