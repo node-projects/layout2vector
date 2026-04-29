@@ -1094,6 +1094,44 @@ test.describe("Image Extraction", () => {
     expect(extracted?.repeatedBand[3]).toBe(255);
   });
 
+  test("keeps repeated raster CSS background patterns as PNG for downstream writers", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:0;">
+        <div id="target" style="width:512px;height:512px;"></div>
+      </body></html>`
+    );
+
+    const extracted = await page.evaluate(async () => {
+      const el = document.getElementById("target") as HTMLDivElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 20;
+      canvas.height = 20;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, 20, 20);
+      ctx.fillStyle = "#1a237e";
+      ctx.fillRect(0, 0, 10, 10);
+      ctx.fillStyle = "#3949ab";
+      ctx.fillRect(10, 10, 10, 10);
+
+      el.style.backgroundImage = `url('${canvas.toDataURL("image/png")}')`;
+      el.style.backgroundRepeat = "repeat";
+      el.style.backgroundPosition = "0px 0px";
+      el.style.backgroundSize = "auto";
+
+      const ir = await (window as any).__HC.extractIR(el, {
+        includeImages: true,
+        includeText: false,
+      });
+
+      const imageNode = ir.find((node: any) => node.type === "image");
+      return imageNode?.dataUrl?.slice(0, 22) ?? null;
+    });
+
+    expect(extracted).toBe("data:image/png;base64,");
+  });
+
   test("extracts CSS background-image SVG data URL as vector geometry", async ({ page }) => {
     const SVG_BG = "data:image/svg+xml," +
       encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="blue"/></svg>');

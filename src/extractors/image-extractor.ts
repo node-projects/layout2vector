@@ -1193,7 +1193,10 @@ function renderBackgroundImageUncached(
     if (!inspection.hasVisibleContent) return null;
 
     const preserveTransparency = inspection.hasTransparency;
-    const preserveLossless = preserveTransparency || disableSmoothing;
+    const preserveRepeatedPattern = (repeat.repeatX || repeat.repeatY)
+      && backgroundSize.width <= 64
+      && backgroundSize.height <= 64;
+    const preserveLossless = preserveTransparency || disableSmoothing || preserveRepeatedPattern;
     return {
       dataUrl: preserveLossless ? canvas.toDataURL("image/png") : canvas.toDataURL("image/jpeg", 0.92),
       rgbData: inspection.rgbData,
