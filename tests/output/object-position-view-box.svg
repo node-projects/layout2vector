@@ -55,7 +55,7 @@
 <text x="45" y="436.98" fill="rgb(97, 121, 145)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif">Stretches the source to the frame.</text>
 <g filter="url(#ds6)"><g><rect x="339" y="199" width="293" height="271" rx="20" ry="20" fill="rgba(255, 255, 255, 0.9)"/><rect x="339" y="199" width="293" height="271" rx="20" ry="20" fill="none" stroke="rgba(18, 32, 51, 0.08)" stroke-width="1"/></g></g>
 <g><rect x="356" y="216" width="259" height="170" rx="16" ry="16" fill="rgba(14, 116, 144, 0.14)"/><rect x="356" y="216" width="259" height="170" rx="16" ry="16" fill="url(#lg8)"/><rect x="356" y="216" width="259" height="170" rx="16" ry="16" fill="url(#lg7)"/><rect x="356" y="216" width="259" height="170" rx="16" ry="16" fill="none" stroke="rgba(18, 32, 51, 0.12)" stroke-width="2"/></g>
-<g clip-path="url(#clip10)"><use href="#imgSym9" x="335.5" y="125.5" width="300" height="351"/></g>
+<g clip-path="url(#clip10)"><use href="#imgSym9" x="295" y="21" width="300" height="351"/></g>
 <text x="355.5" y="398.59" fill="rgb(18, 32, 51)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial, sans-serif">None + Four-Value Offset</text>
 <text x="355.5" y="419.59" fill="rgb(15, 61, 98)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">object-fit: none</text>
 <text x="355.5" y="436.98" fill="rgb(15, 61, 98)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">object-position: right 18px bottom 12px</text>
@@ -73,7 +73,7 @@
 <text x="976.5" y="436.98" fill="rgb(15, 61, 98)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">object-position: 18% 78%</text>
 <g filter="url(#ds21)"><g><rect x="28" y="487" width="293" height="271" rx="20" ry="20" fill="rgba(255, 255, 255, 0.9)"/><rect x="28" y="487" width="293" height="271" rx="20" ry="20" fill="none" stroke="rgba(18, 32, 51, 0.08)" stroke-width="1"/></g></g>
 <g><rect x="45" y="504" width="259" height="170" rx="16" ry="16" fill="rgba(14, 116, 144, 0.14)"/><rect x="45" y="504" width="259" height="170" rx="16" ry="16" fill="url(#lg23)"/><rect x="45" y="504" width="259" height="170" rx="16" ry="16" fill="url(#lg22)"/><rect x="45" y="504" width="259" height="170" rx="16" ry="16" fill="none" stroke="rgba(18, 32, 51, 0.12)" stroke-width="2"/></g>
-<g clip-path="url(#clip25)"><use href="#imgSym24" x="110.5" y="525" width="128" height="128"/></g>
+<g clip-path="url(#clip25)"><use href="#imgSym24" x="162" y="534" width="128" height="128"/></g>
 <text x="45" y="687.38" fill="rgb(18, 32, 51)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial, sans-serif">Scale-Down + Offset</text>
 <text x="45" y="708.38" fill="rgb(15, 61, 98)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">object-fit: scale-down</text>
 <text x="45" y="725.77" fill="rgb(15, 61, 98)" dominant-baseline="text-before-edge" font-size="12px" font-family="Consolas, monospace">object-position: right 12px bottom 10px</text>
