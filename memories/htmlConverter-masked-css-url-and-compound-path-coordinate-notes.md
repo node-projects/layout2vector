@@ -1,0 +1,3 @@
+- CSS `mask-image` / `background-image` values from computed styles can contain CSS-escaped quotes inside SVG data URLs (for example `\"` in `data:image/svg+xml;utf8,...`). Normalize `extractCssUrlValue()` output with `decodeCssEscapes()` before loading the asset, or masked icons fall back to solid boxes.
+- Compound SVG paths stored in `style.pathSubpaths` must stay in sync with `node.points` through remap, stacking transforms, root offsets, and zoom. If only the flattened polyline points are updated, writers that prefer `pathSubpaths` render the shape at the wrong origin.
+- Regressions: `tests/unit/image-extractor.test.ts` covers escaped-quote masked SVG URLs and `<img>` SVG compound-path subpath remapping.

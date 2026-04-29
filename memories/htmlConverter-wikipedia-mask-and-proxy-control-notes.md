@@ -1,0 +1,5 @@
+- Transparent native form controls used as interaction proxies (for example, Wikipedia's menu checkbox at `opacity:0`) should be skipped by form-control synthesis or they render as bogus native boxes.
+- Leaf HTML or pseudo elements that paint via CSS `mask-image` need to be rasterized to image IR for non-HTML writers; preserving only `style.mask` leaves SVG/PNG with solid colored rectangles.
+- `preloadImages()` should include element and pseudo `mask-image`/`background-image` URLs, or remote Wikipedia-style icon assets are unavailable during extraction.
+- The offline `tests/demos/wikipedia.html` fixture needs absolute logo image URLs for the wordmark/tagline because root-relative `/static/...` assets resolve to broken `file:///C:/...` paths.
+- Pseudo-element mask extraction depends on the temporary `hc-pseudo` replacement carrying the pseudo's mask longhands/shorthand; if rasterizing that masked pseudo still fails, skip the fallback polygon entirely or SVG/PNG emit solid 12x12 rectangles instead of dropdown chevrons.

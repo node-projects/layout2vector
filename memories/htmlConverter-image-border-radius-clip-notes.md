@@ -1,0 +1,2 @@
+- Image nodes can carry `style.borderRadius` without any `clipBounds` or `clipPath`; PDF and canvas/image writers must apply a rounded clip in `drawImage`/deferred image paint paths.
+- A focused regression pair exists in `tests/unit/pdf-writer.test.ts` and `tests/unit/png-writer.test.ts` for circular image clipping.

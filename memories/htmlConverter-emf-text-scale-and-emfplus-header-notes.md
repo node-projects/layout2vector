@@ -1,0 +1,2 @@
+- Non-Windows EMF consumers can reject text-heavy output when EMR_EXTTEXTOUTW writes exScale/eyScale as 0. Match Windows GDI by using the page's 0.01mm-per-pixel scale derived from the EMF header frame metrics.
+- EMF+ outer EMF containers need the same capped rclFrame and page-matched szlDevice/szlMillimeters/szlMicrometers metadata as the plain EMF writer; fixed 1920x1080 device metrics break tall files like the GitHub URL export.

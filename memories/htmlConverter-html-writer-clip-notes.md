@@ -1,0 +1,2 @@
+- HTMLWriter clip wrappers must give their inner relative container the full page width/height. Without that, absolutely positioned text inside clipped regions uses shrink-to-fit width against the clip box and can wrap links vertically (`dotnet/efcore#...` style regressions in github.html).
+- Demo output viewport sizing is more stable when derived from the root element box (`getBoxQuads`/`getBoundingClientRect`) instead of raw max IR extents, because clipped code-block backgrounds can extend far past the visible page width.

@@ -1,0 +1,3 @@
+- For generated file:// HTML preview screenshots, do not wait on Playwright networkidle. It can hang on local image-heavy pages; wait for document.fonts.ready and document.images[].complete instead.
+- Preview generation in `tests/demos/screenshot.test.ts` should target generated `*-ir.html` exports only; copied source demos like `github.html` can pull live remote assets and make preview PNGs flaky or nondeterministic.
+- Firefox can hang resolving `page.goto(file://..., { waitUntil: "domcontentloaded" })` for generated local previews even when the DOM is visible; prefer `waitUntil: "commit"` plus explicit body/font/image readiness checks.

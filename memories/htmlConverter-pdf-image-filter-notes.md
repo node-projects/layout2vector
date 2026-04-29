@@ -1,0 +1,2 @@
+- PDFWriter ignores CSS filter strings on image nodes unless it transforms the embedded pixels itself. Supported color filters now run against PNG/rgbData bytes before embedding: invert, brightness, contrast, saturate, grayscale, sepia, hue-rotate.
+- This fixes filtered SVG <img> cases because extraction already rasterizes effect-bearing SVG images into image IR nodes. Unsupported filter functions (for example blur/drop-shadow) still fall back to unfiltered PDF image output when no browser-side raster effect is available.

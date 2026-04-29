@@ -1,0 +1,4 @@
+- htmlConverter assigns solid fill color to acad-ts Hatch.color in src/writers/acad-writer.ts; the shared acad-ts DXF path writes the expected green hatch color for test3-acad.dxf.
+- The DWG issue appears hatch-specific: true-color solid hatch fills can show as white in viewers even though the shared color mapping is correct.
+- Local workaround in htmlConverter: in DWGWriter.end(), convert Hatch true colors to the nearest indexed AutoCAD color before DWG serialization; keep true colors for other entity types.
+- Focused validation: npx playwright test tests/demos/demos.test.ts --grep "convert demo: test3" passed in Chromium and Firefox after the workaround.

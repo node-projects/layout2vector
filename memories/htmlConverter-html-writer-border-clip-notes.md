@@ -1,0 +1,2 @@
+- HTMLWriter cannot rely on `style.stroke`/`strokeWidth` for CSS boxes with asymmetric borders; extracted DOM boxes may only carry visible `borderTop/Right/Bottom/Left*` props (for example 1px separators and table row rules), so emit per-side CSS borders directly from those fields.
+- Traversal must propagate `clipBounds` even when an `overflow:hidden|clip` element has zero width or height. Skipping zero-size bounds leaks fully clipped skip-links and similar offscreen/accessibility affordances into exported HTML.

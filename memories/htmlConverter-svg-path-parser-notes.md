@@ -1,0 +1,2 @@
+- `splitPathSubpathsFromString()` must parse SVG arc commands command-aware: packed arc-flag syntax like `a4 4 0 00.385 7.097` means `0 0 .385`, and a generic number tokenizer will swallow `00.385` as one value and lose later subpath `M` splits.
+- Repro/demo anchor: `tests/demos/aaa.html` inline SVG icons. Coverage lives in `tests/unit/svg-extractor.test.ts` (`compact arc-flag multi-subpath`).
