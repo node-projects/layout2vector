@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1264" height="1324" viewBox="0 0 1264 1324">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="1660" viewBox="0 0 1600 1660">
 <defs>
 <clipPath id="clip1" clipPathUnits="userSpaceOnUse"><rect x="72" y="136" width="88" height="130"/></clipPath>
 <clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="255" y="136" width="88" height="130"/></clipPath>
 </defs>
 <text x="0" y="1" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="16px" font-family="serif">headerABC</text>
-<text x="-15.8" y="108.43" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="126.4px" font-family="serif">0,5</text>
+<text x="-20" y="121.75" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="160px" font-family="serif">0,5</text>
 <g><rect x="71" y="135" width="90" height="132" rx="0" ry="0" fill="rgb(255, 255, 255)"/><rect x="71" y="135" width="90" height="132" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>
 <g clip-path="url(#clip1)"><text x="154.03" y="170.98" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="10.13px" font-family="serif">0</text></g>
 <g><rect x="254" y="135" width="90" height="132" rx="0" ry="0" fill="rgb(255, 255, 255)"/><rect x="254" y="135" width="90" height="132" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>

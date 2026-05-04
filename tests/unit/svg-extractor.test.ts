@@ -142,6 +142,59 @@ test.describe("SVG Geometry Extraction", () => {
     expect(texts[0].text).toContain("SVG Text");
   });
 
+  test("respects root viewBox and preserveAspectRatio when extracting SVG text", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <div style="width:200px;height:400px;">
+          <svg id="target" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
+               style="display:block;width:100%;height:100%;">
+            <text x="5" y="5" text-anchor="middle" dominant-baseline="middle" font-size="10" transform="translate(0,5)">0,5</text>
+          </svg>
+        </div>
+      </body></html>`
+    );
+
+    const result = await page.evaluate(async () => {
+      const el = document.getElementById("target") as SVGSVGElement;
+      const textEl = el.querySelector("text") as SVGTextElement;
+      const rect = textEl.getBoundingClientRect();
+      const ctm = textEl.getScreenCTM();
+      return {
+        sourceRect: {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        },
+        ctm: ctm ? { a: ctm.a, d: ctm.d, e: ctm.e, f: ctm.f } : null,
+        ir: await (window as any).__HC.extractIR(el, { includeText: true }),
+      };
+    });
+
+    const textNode = result.ir.find((node: any) => node.type === "text");
+    expect(textNode).toBeDefined();
+    expect(result.ctm).not.toBeNull();
+    expect(result.ctm!.a).toBeCloseTo(2, 2);
+    expect(result.ctm!.d).toBeCloseTo(2, 2);
+    expect(parseFloat(textNode.style.fontSize)).toBeCloseTo(20, 1);
+
+    const xs = textNode.quad.map((point: any) => point.x);
+    const ys = textNode.quad.map((point: any) => point.y);
+    const extractedRect = {
+      left: Math.min(...xs),
+      top: Math.min(...ys),
+      width: Math.max(...xs) - Math.min(...xs),
+      height: Math.max(...ys) - Math.min(...ys),
+    };
+
+    expect(extractedRect.left).toBeCloseTo(result.sourceRect.left, 1);
+    expect(extractedRect.top).toBeCloseTo(result.sourceRect.top, 1);
+    expect(extractedRect.width).toBeCloseTo(result.sourceRect.width, 1);
+    expect(extractedRect.height).toBeCloseTo(result.sourceRect.height, 1);
+  });
+
   test("extracts SVG polygon", async ({ page }) => {
     await setupPage(
       page,
