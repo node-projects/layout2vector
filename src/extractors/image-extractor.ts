@@ -1235,10 +1235,12 @@ async function renderMaskedElement(
     const cssBoxWidth = htmlEl.offsetWidth || w;
     const cssBoxHeight = htmlEl.offsetHeight || h;
 
-    const preloaded = preloadedImageElems.get(resolvedSource);
-    const img = preloaded ?? new Image();
-    if (!preloaded) img.src = resolvedSource;
-    if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) return null;
+    let img = preloadedImageElems.get(resolvedSource) ?? null;
+    if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
+      img = await createDecodedImage(resolvedSource);
+      if (!img) return null;
+      preloadedImageElems.set(resolvedSource, img);
+    }
 
     let sourceWidth = img.naturalWidth;
     let sourceHeight = img.naturalHeight;

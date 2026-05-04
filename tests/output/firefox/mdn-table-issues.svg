@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="559" viewBox="0 0 1232 559">
+<defs>
+<filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="rgba(32, 33, 36, 0.08)" result="s0"/></filter>
+<filter id="ds2" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="rgba(32, 33, 36, 0.08)" result="s0"/></filter>
+<symbol id="imgSym3" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA7klEQVQ4T2NkoBAwUqifgb4GyBQ+FnrSL/sO2dVEu0C66EX/f0bGEGYmBofH3eJ3YYYQZQBEM0MBUNM7pn8MDk/6JS7jNECq6KXVMz6xEwwNjP9AiqSKX7QDqQog/sTA9M/xWbfUOZxekCl57vDvP+NOhv8Mi5/1SaQgaf4C1GyPrhlkEIoXJEuf2TL+Y9oJFOdk+M94mIHxvy2Q/Z2RkdH5aY/4cWxRjhEGUsWvbBgY/u0GKuYAuuQbAyOT+7NesSO40gvWQJQueeH0/z/DegYGJm98mjG8gGyLUvk7/nudQh8JpVSiohGfIcPAAAAMCUoRo+bXZQAAAABJRU5ErkJggg==" width="1" height="1" preserveAspectRatio="none"/></symbol>
+<symbol id="imgSym4" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAANUlEQVQ4T2NkoBAwUqifYdQABiqGwdd53P9JiRHupK/gCIDHAsUGkGI7strRdEDNdEBuLAAAkmgIEZYzevAAAAAASUVORK5CYII=" width="1" height="1" preserveAspectRatio="none"/></symbol>
+</defs>
+<rect x="0" y="0" width="1232" height="558.7" rx="0" ry="0" fill="rgb(246, 247, 249)"/>
+<g filter="url(#ds1)"><g><rect x="0" y="0" width="1232" height="238.87" rx="12" ry="12" fill="rgb(255, 255, 255)"/><rect x="0" y="0" width="1232" height="238.87" rx="12" ry="12" fill="none" stroke="rgb(215, 217, 221)" stroke-width="1"/></g></g>
+<text x="17" y="43.93" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="32px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Details / Summary</text>
+<g><rect x="17" y="102.87" width="1198" height="35" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="17" y="102.87" width="1198" height="35" rx="8" ry="8" fill="none" stroke="rgb(200, 204, 209)" stroke-width="1"/></g>
+<text x="28.91" y="112.37" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="600" font-size="16px" font-family="-moz-bullet-font" xml:space="preserve">&#x25B8;</text>
+<text x="42.08" y="112.37" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="600" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Closed summary (content must stay hidden)</text>
+<g><rect x="17" y="147.87" width="1198" height="64" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="17" y="147.87" width="1198" height="64" rx="8" ry="8" fill="none" stroke="rgb(200, 204, 209)" stroke-width="1"/></g>
+<text x="28.91" y="157.37" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="600" font-size="16px" font-family="-moz-bullet-font" xml:space="preserve">&#x25BE;</text>
+<text x="42.08" y="157.37" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="600" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Open summary (content should be exported)</text>
+<text x="28" y="186.37" fill="rgb(68, 73, 80)" dominant-baseline="text-before-edge" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">This text should be exported because details is open.</text>
+<g filter="url(#ds2)"><g><rect x="0" y="254.87" width="1232" height="303.83" rx="12" ry="12" fill="rgb(255, 255, 255)"/><rect x="0" y="254.87" width="1232" height="303.83" rx="12" ry="12" fill="none" stroke="rgb(215, 217, 221)" stroke-width="1"/></g></g>
+<text x="17" y="295.78" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="24px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Compat Table Mimic</text>
+<rect x="17" y="343.7" width="1198" height="198" rx="0" ry="0" fill="rgb(255, 255, 255)"/>
+<rect x="17.5" y="344.2" width="299.25" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="138.9" y="355.2" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Feature</text>
+<rect x="316.75" y="344.2" width="598.5" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="552.55" y="355.2" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Browser Support</text>
+<rect x="17.5" y="382.2" width="299.25" height="121" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="0" y="2.51" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif" letter-spacing="0.2px" transform="matrix(0,-1,1,0,156.62,470.8)" xml:space="preserve">Chrome</text>
+<rect x="316.75" y="382.2" width="299.25" height="121" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="0" y="2.51" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif" letter-spacing="0.2px" transform="matrix(0,-1,1,0,455.87,467.52)" xml:space="preserve">Firefox</text>
+<rect x="616" y="382.2" width="299.25" height="121" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="0" y="2.51" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif" letter-spacing="0.2px" transform="matrix(0,-1,1,0,755.12,462.95)" xml:space="preserve">Safari</text>
+<rect x="17.5" y="503.2" width="299.25" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<text x="120.03" y="514.2" fill="rgb(32, 33, 36)" dominant-baseline="text-before-edge" font-size="16px" font-family="&quot;Segoe UI&quot;, Tahoma, sans-serif">Simple tables</text>
+<rect x="316.75" y="503.2" width="299.25" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<use href="#imgSym3" x="458.37" y="512.7" width="16" height="16"/>
+<rect x="616" y="503.2" width="299.25" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<use href="#imgSym3" x="757.62" y="512.7" width="16" height="16"/>
+<rect x="915.25" y="503.2" width="299.25" height="38" rx="0" ry="0" fill="none" stroke="rgb(213, 215, 220)" stroke-width="1"/>
+<use href="#imgSym4" x="1056.87" y="512.7" width="16" height="16"/>
+</svg>

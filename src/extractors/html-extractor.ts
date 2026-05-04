@@ -171,7 +171,13 @@ function extractTextNode(
   }
 
   const measurementMode = resolveTextMeasurementMode(parentStyle, options);
-  const nativeTextQuads = measurementMode === "pretext" ? getNativeTextNodeQuads(textNode, parentStyle) : [];
+  const requiresNativeWritingModeQuads = !!parentStyle.writingMode && parentStyle.writingMode !== "horizontal-tb";
+  const nativeTextQuads = (measurementMode === "pretext" || requiresNativeWritingModeQuads)
+    ? getNativeTextNodeQuads(textNode, parentStyle)
+    : [];
+  const renderedTextProgression = shouldOrientQuadFromRenderedText(parentStyle)
+    ? getRenderedTextProgression(textNode)
+    : null;
   const measuredTextStyle = measurementMode === "pretext" ? getPrelaidTextStyle(parentStyle) : parentStyle;
   if (measurementMode === "pretext" && nativeTextQuads.length !== 1) {
     return extractTextNodeWithPretext(textNode, parentEl, parentStyle, globalIndex);
@@ -228,7 +234,7 @@ function extractTextNode(
 
     results.push({
       type: "text",
-      quad: finalQuad,
+      quad: orientQuadToRenderedTextProgression(finalQuad, renderedTextProgression),
       text,
       style: normalized.style ?? measuredTextStyle,
       zIndex: globalIndex,
@@ -332,13 +338,39 @@ function getNativeTextNodeQuads(textNode: Text, style: Style): Quad[] {
 }
 
 function orientNativeTextQuad(quad: Quad, writingMode: string | undefined): Quad {
+  if (writingMode === "sideways-lr") {
+    // sideways-lr glyphs are counter-clockwise relative to horizontal text;
+    // keep point order aligned with inline flow to avoid 180deg flips.
+    return [quad[1], quad[2], quad[3], quad[0]];
+  }
+
   switch (writingMode) {
     case "vertical-rl":
     case "vertical-lr":
     case "sideways-rl":
-      return [quad[1], quad[2], quad[3], quad[0]];
-    case "sideways-lr":
-      return [quad[3], quad[0], quad[1], quad[2]];
+    {
+      const candidates: Quad[] = [
+        quad,
+        [quad[1], quad[2], quad[3], quad[0]],
+        [quad[3], quad[0], quad[1], quad[2]],
+      ];
+
+      let best = candidates[0];
+      let bestScore = -Infinity;
+
+      for (const candidate of candidates) {
+        const dx = candidate[1].x - candidate[0].x;
+        const dy = candidate[1].y - candidate[0].y;
+        const verticality = Math.abs(dy) - Math.abs(dx);
+        const score = verticality;
+        if (score > bestScore) {
+          bestScore = score;
+          best = candidate;
+        }
+      }
+
+      return best;
+    }
     default:
       return quad;
   }
@@ -350,6 +382,89 @@ function hasQuadArea(quad: Quad): boolean {
   const x2 = quad[3].x - quad[0].x;
   const y2 = quad[3].y - quad[0].y;
   return Math.abs(x1 * y2 - y1 * x2) > 0.01;
+}
+
+function shouldOrientQuadFromRenderedText(style: Style): boolean {
+  const writingMode = style.writingMode?.trim().toLowerCase();
+  return !!writingMode && writingMode !== "horizontal-tb";
+}
+
+function getRenderableCharacterCenters(textNode: Text): Point[] {
+  const text = textNode.textContent ?? "";
+  if (!text) return [];
+
+  const centers: Point[] = [];
+  const range = document.createRange();
+
+  for (let index = 0; index < text.length; index++) {
+    try {
+      range.setStart(textNode, index);
+      range.setEnd(textNode, index + 1);
+    } catch {
+      continue;
+    }
+
+    const rects = range.getClientRects();
+    for (let rectIndex = 0; rectIndex < rects.length; rectIndex++) {
+      const rect = rects[rectIndex];
+      if (rect.width * rect.height <= 0.01) continue;
+      centers.push({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      });
+      break;
+    }
+  }
+
+  return centers;
+}
+
+function getRenderedTextProgression(textNode: Text): { dx: number; dy: number } | null {
+  const centers = getRenderableCharacterCenters(textNode);
+  if (centers.length < 2) return null;
+
+  const first = centers[0];
+  const last = centers[centers.length - 1];
+  const dx = last.x - first.x;
+  const dy = last.y - first.y;
+  if (Math.abs(dx) <= 0.01 && Math.abs(dy) <= 0.01) return null;
+
+  return { dx, dy };
+}
+
+function orientQuadToRenderedTextProgression(
+  quad: Quad,
+  progression: { dx: number; dy: number } | null,
+): Quad {
+  if (!progression) return quad;
+
+  const progressionLength = Math.hypot(progression.dx, progression.dy);
+  if (progressionLength <= 0.01) return quad;
+
+  const candidates: Quad[] = [
+    quad,
+    [quad[1], quad[2], quad[3], quad[0]],
+    [quad[2], quad[3], quad[0], quad[1]],
+    [quad[3], quad[0], quad[1], quad[2]],
+  ];
+
+  let best = candidates[0];
+  let bestScore = -Infinity;
+
+  for (const candidate of candidates) {
+    const dx = candidate[1].x - candidate[0].x;
+    const dy = candidate[1].y - candidate[0].y;
+    const edgeLength = Math.hypot(dx, dy);
+    if (edgeLength <= 0.01) continue;
+
+    const score = (dx * progression.dx + dy * progression.dy) / (edgeLength * progressionLength);
+    if (score > bestScore) {
+      bestScore = score;
+      best = candidate;
+    }
+  }
+
+  return best;
 }
 
 function getCollapsedBoundaryWhitespace(
@@ -576,6 +691,7 @@ async function extractTextNodeWithPretext(
   const { prepareWithSegments, layoutWithLines } = await loadPretextModule();
   const whiteSpaceOpt = preservesWhitespace(parentStyle) ? { whiteSpace: 'pre-wrap' as const } : undefined;
   const results: IRNode[] = [];
+  const shouldOrientFromRenderedText = shouldOrientQuadFromRenderedText(parentStyle);
 
   if (writingMode === 'horizontal-tb') {
     const prepared = prepareWithSegments(text, font, whiteSpaceOpt);
@@ -615,6 +731,9 @@ async function extractTextNodeWithPretext(
   // and swap axes when positioning.
   const prepared = prepareWithSegments(text, font, whiteSpaceOpt);
   const { lines } = layoutWithLines(prepared, ch, lineHeight);
+  const renderedTextProgression = shouldOrientFromRenderedText && lines.length === 1
+    ? getRenderedTextProgression(textNode)
+    : null;
 
   for (let i = 0; i < lines.length; i++) {
     const lineText = lines[i].text;
@@ -638,7 +757,13 @@ async function extractTextNodeWithPretext(
         { x: colX, y: colY + lw },
         { x: colX, y: colY },
       ];
-      results.push({ type: "text", quad: mapPretextQuad(quad, contentTransform), text: lineText, style: outputStyle, zIndex: globalIndex });
+      results.push({
+        type: "text",
+        quad: orientQuadToRenderedTextProgression(mapPretextQuad(quad, contentTransform), renderedTextProgression),
+        text: lineText,
+        style: outputStyle,
+        zIndex: globalIndex,
+      });
 
     } else if (writingMode === 'sideways-lr') {
       // CCW rotation (-90°): characters rotated 90° counter-clockwise, inline flows bottom→top
@@ -663,7 +788,13 @@ async function extractTextNodeWithPretext(
           { x: colX + lineHeight, y: cy + ch },
         ];
       }
-      results.push({ type: "text", quad: mapPretextQuad(quad, contentTransform), text: lineText, style: outputStyle, zIndex: globalIndex });
+      results.push({
+        type: "text",
+        quad: orientQuadToRenderedTextProgression(mapPretextQuad(quad, contentTransform), renderedTextProgression),
+        text: lineText,
+        style: outputStyle,
+        zIndex: globalIndex,
+      });
     }
   }
 

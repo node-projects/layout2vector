@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MDN Table Issue Repro</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    body {
+      margin: 24px;
+      background: #f6f7f9;
+      color: #202124;
+    }
+
+    .panel {
+      background: #ffffff;
+      border: 1px solid #d7d9dd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 3px 10px rgba(32, 33, 36, 0.08);
+    }
+
+    details {
+      border: 1px solid #c8ccd1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .details-body {
+      padding-top: 8px;
+      color: #444950;
+    }
+
+    .compat-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #fff;
+    }
+
+    .compat-table th,
+    .compat-table td {
+      border: 1px solid #d5d7dc;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .compat-table thead tr:nth-child(2) th {
+      height: 120px;
+      width: 44px;
+      padding: 0;
+    }
+
+    .vertical-header {
+      display: inline-block;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      line-height: 1;
+    }
+
+    .compat-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-color: rgb(95, 99, 104);
+      mask-position: center;
+      mask-repeat: no-repeat;
+      mask-size: 16px;
+      -webkit-mask-position: center;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: 16px;
+    }
+
+    .compat-icon.supported {
+      background-color: rgb(26, 115, 232);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M6.5 11.2 3.3 8l1.4-1.4 1.8 1.8 4.7-4.7L12.6 5z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M6.5 11.2 3.3 8l1.4-1.4 1.8 1.8 4.7-4.7L12.6 5z'/%3E%3C/svg%3E");
+    }
+
+    .compat-icon.partial {
+      background-color: rgb(245, 158, 11);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M2 7h12v2H2z'/%3E%3C/svg%3E");
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M2 7h12v2H2z'/%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body>
+  <section class="panel">
+    <h1>Details / Summary</h1>
+    <details>
+      <summary>Closed summary (content must stay hidden)</summary>
+      <div class="details-body">This text should not be exported while details is closed.</div>
+    </details>
+
+    <details open>
+      <summary>Open summary (content should be exported)</summary>
+      <div class="details-body">This text should be exported because details is open.</div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>Compat Table Mimic</h2>
+    <table class="compat-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th colspan="2">Browser Support</th>
+        </tr>
+        <tr>
+          <th><div id="chrome-header" class="vertical-header">Chrome</div></th>
+          <th><div id="firefox-header" class="vertical-header">Firefox</div></th>
+          <th><div id="safari-header" class="vertical-header">Safari</div></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Simple tables</td>
+          <td><abbr class="compat-icon supported" title="Supported"></abbr></td>
+          <td><abbr class="compat-icon supported" title="Supported"></abbr></td>
+          <td><abbr class="compat-icon partial" title="Partial support"></abbr></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</body>
+</html>

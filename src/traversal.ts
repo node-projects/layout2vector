@@ -65,11 +65,7 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
     : undefined;
   const bgImage = cs.backgroundImage;
   const bgImageVal = bgImage || undefined;
-  const maskVal = cs.getPropertyValue("mask")
-    || cs.getPropertyValue("-webkit-mask")
-    || cs.getPropertyValue("mask-image")
-    || cs.getPropertyValue("-webkit-mask-image")
-    || undefined;
+  const maskVal = pickComputedMaskValue(cs);
 
   // If backgroundColor is transparent but there's a gradient, extract its first color
   if ((!fill || fill === "rgba(0, 0, 0, 0)" || fill === "transparent") && bgImageVal && bgImageVal !== "none") {
@@ -193,6 +189,37 @@ export function isVisible(cs: CSSStyleDeclaration): boolean {
   if (cs.visibility === "hidden") return false;
   if (cs.opacity === "0") return false;
   return true;
+}
+
+function pickComputedMaskValue(cs: CSSStyleDeclaration): string | undefined {
+  const candidates = [
+    cs.getPropertyValue("mask"),
+    cs.getPropertyValue("-webkit-mask"),
+    cs.getPropertyValue("mask-image"),
+    cs.getPropertyValue("-webkit-mask-image"),
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = candidate?.trim();
+    if (!normalized || normalized === "none") continue;
+    return normalized;
+  }
+
+  return undefined;
+}
+
+function isWithinClosedDetailsContent(element: Element): boolean {
+  const details = element.closest("details:not([open])");
+  if (!(details instanceof HTMLDetailsElement)) return false;
+  if (element === details) return false;
+
+  const summary = Array.from(details.children).find(
+    (child): child is HTMLElement => child.tagName.toLowerCase() === "summary"
+  );
+  if (!summary) return true;
+  if (element === summary) return false;
+
+  return !summary.contains(element);
 }
 
 /** Determine if an element creates a new stacking context. */
@@ -365,6 +392,10 @@ function buildStackingNode(
   for (const child of childNodes) {
     if (child.nodeType === Node.TEXT_NODE) {
       const text = child as Text;
+      if (!includeInvisible && isWithinClosedDetailsContent(element)) {
+        continue;
+      }
+
       if (text.textContent && shouldCreateTextNodeEntry(text, element)) {
         node.children.push(buildTextStackingNode(element, cs, extractedStyleVal, text, zVal, childCoordinateTransform, parentClipQuads, parentClipBounds, childClipBounds));
       }
@@ -376,7 +407,7 @@ function buildStackingNode(
       // opacity:0 makes the compositing layer fully transparent — skip subtree.
       // visibility:hidden hides the element but children can override with
       // visibility:visible, so the subtree must still be walked.
-      if (!includeInvisible && (childCs.display === "none" || childCs.opacity === "0")) {
+      if (!includeInvisible && (childCs.display === "none" || childCs.opacity === "0" || isWithinClosedDetailsContent(childEl))) {
         continue;
       }
 
