@@ -88,6 +88,38 @@ test.describe("CanvasWriter", () => {
     expect(result.capturedFont).toContain('"Mona Sans", "Segoe UI", sans-serif');
   });
 
+  test("renders gradient strokes on polylines", async ({ page }) => {
+    await setupPage(page, `<html><body style="margin:0;padding:0;"></body></html>`);
+
+    const result = await page.evaluate(async () => {
+      const writer = new (window as any).__HC.CanvasWriter({ width: 120, height: 30 });
+      await writer.begin();
+      await writer.drawPolyline(
+        [
+          { x: 10, y: 15 },
+          { x: 110, y: 15 },
+        ],
+        false,
+        {
+          stroke: "rgb(255, 0, 0)",
+          strokeImage: "linear-gradient(90deg, rgb(255, 0, 0) 0%, rgb(0, 0, 255) 100%)",
+          strokeWidth: "8px",
+        },
+      );
+      const canvas = await writer.end();
+      const ctx = canvas.getContext("2d")!;
+      return {
+        left: Array.from(ctx.getImageData(15, 15, 1, 1).data),
+        right: Array.from(ctx.getImageData(95, 15, 1, 1).data),
+      };
+    });
+
+    expect(result.left[0]).toBeGreaterThan(result.left[2]);
+    expect(result.right[2]).toBeGreaterThan(result.right[0]);
+    expect(result.left[3]).toBeGreaterThan(200);
+    expect(result.right[3]).toBeGreaterThan(200);
+  });
+
   const clipCases = [
     {
       name: "inset()",

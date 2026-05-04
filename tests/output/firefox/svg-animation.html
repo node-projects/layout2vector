@@ -1,0 +1,48 @@
+<style>
+    @keyframes strokeFullFBH {
+        0% {
+            stroke-dashoffset: 100;
+        }
+
+        100% {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .fbh {
+        animation: calc((102 - var(--speed)) * 0.1s) linear 0s infinite normal none running strokeFullFBH;
+        animation-play-state: var(--status);
+    }
+
+    .rev {
+        animation-direction: reverse;
+    }
+</style>
+<svg width="300" height="200" id="Animation Boiler" bind-cssvar:speed="0_userdata.0.speed"
+    bind-cssvar:status='{"signal":"0_userdata.0.testbool","converter":{"true":"running","false":"paused"}}'
+    style="position:absolute;left:93px;top:87px;pointer-events:auto;--speed:87;--status:play;">
+    <defs style="pointer-events:auto;">
+        <linearGradient id="MyGradientFullBOI" x1="0%" y1="0%" x2="0%" y2="100%" style="pointer-events:auto;">
+            <stop offset="0%" stop-color="red" style="pointer-events:auto;"></stop>
+            <stop offset="50%" stop-color="lightblue" style="pointer-events:auto;"></stop>
+            <stop offset="100%" stop-color="#0101DF" style="pointer-events:auto;"></stop>
+        </linearGradient>
+    </defs>
+    <g style="pointer-events:auto;">
+        <path class="fbh" d="M 10 10 
+            L 210 10
+            l 50 0 
+            A 10 10 0 1 1 267 35
+            l -50 0 
+            A 10 10 0 0 0 216 55
+            l 50 0 
+            A 10 10 0 1 1 268 75
+            l -50 0 
+            A 10 10 0 0 0 214 96
+            l 50 0 
+            A 10 10 0 1 1 264 118
+            l -200 0 " fill="none" stroke-width="8" stroke-dasharray="15 5" stroke="url(#MyGradientFullBOI)"
+            animation-play-state="0_userdata.0.Wärmepumpe.Boiler.Status_Variabeln.Heizkreis_Boiler_Läuft"
+            style="pointer-events:auto;"></path>
+    </g>
+</svg>

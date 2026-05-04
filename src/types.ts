@@ -25,6 +25,7 @@ export type Style = {
   fill?: string;
   fillRule?: "nonzero" | "evenodd";
   stroke?: string;
+  strokeImage?: string;
   strokeWidth?: string;
   strokeDasharray?: string;
   pathSubpaths?: PathSubpath[];

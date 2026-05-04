@@ -596,7 +596,8 @@ export class ImageWriter implements Writer<ImageResult> {
       ctx.fill(style.fillRule === "evenodd" ? "evenodd" : "nonzero");
     }
     if (stroke) {
-      ctx.strokeStyle = stroke.color;
+      const strokeGradient = this.createGradientFromBBox(ctx, this.computeBoundingBox(points), style.strokeImage);
+      ctx.strokeStyle = strokeGradient ?? stroke.color;
       ctx.lineWidth = stroke.width;
       this.applyDashArray(ctx, style, stroke.width);
       ctx.stroke();
@@ -811,7 +812,8 @@ export class ImageWriter implements Writer<ImageResult> {
     if (points && this.hasMixedBorders(style)) {
       this.drawPerSideBorders(ctx, points, style);
     } else if (stroke) {
-      ctx.strokeStyle = stroke.color;
+      const strokeGradient = points ? this.createGradient(ctx, points, style.strokeImage) : null;
+      ctx.strokeStyle = strokeGradient ?? stroke.color;
       ctx.lineWidth = stroke.width;
       this.applyDashArray(ctx, style, stroke.width);
       ctx.stroke();
@@ -927,8 +929,6 @@ export class ImageWriter implements Writer<ImageResult> {
         cx + cos * halfDiag,
         cy + sin * halfDiag,
       );
-
-      // Handle repeating gradients with px-based stops
       if (gradient.repeating && totalLength > 0) {
         stops = this.resolveRepeatingStops(stops, totalLength);
       } else {

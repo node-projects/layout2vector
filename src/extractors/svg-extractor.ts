@@ -149,7 +149,8 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
   // SVG uses fill/stroke attributes directly
   let fill = cs.fill || el.getAttribute("fill") || undefined;
   const fillRule = cs.fillRule || el.getAttribute("fill-rule") || undefined;
-  const stroke = cs.stroke || el.getAttribute("stroke") || undefined;
+  let stroke = cs.stroke || el.getAttribute("stroke") || undefined;
+  let strokeImage: string | undefined;
   let strokeWidth = cs.strokeWidth || el.getAttribute("stroke-width") || undefined;
 
   // Scale stroke width by the CTM's average scale factor.
@@ -192,6 +193,18 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     }
   }
 
+  // Preserve gradient strokes for capable writers and keep a concrete
+  // fallback color for formats that only accept simple stroke colors.
+  if (stroke && stroke.startsWith("url(")) {
+    const resolved = resolveGradient(stroke, el);
+    if (resolved) {
+      strokeImage = resolved.cssGradient;
+      stroke = resolved.fallbackColor;
+    } else {
+      stroke = resolveGradientColor(stroke, el) ?? stroke;
+    }
+  }
+
   // Scale fontSize by the CTM so it matches the screen-coordinate quad.
   // Same principle as strokeWidth: CSS fontSize is in local SVG coordinates,
   // but extracted text quads are in screen coordinates after CTM transformation.
@@ -214,6 +227,7 @@ function extractSVGStyle(cs: CSSStyleDeclaration, el: SVGGraphicsElement, ctm: D
     fill: fill !== "none" ? fill : undefined,
     fillRule: fillRule === "evenodd" ? "evenodd" : fillRule === "nonzero" ? "nonzero" : undefined,
     stroke: stroke !== "none" ? stroke : undefined,
+    strokeImage,
     strokeWidth,
     strokeDasharray,
     fontSize,
@@ -235,8 +249,11 @@ function resolveGradientColor(urlRef: string, el: SVGGraphicsElement): string | 
   const stops = gradEl.querySelectorAll("stop");
   if (stops.length === 0) return undefined;
   // Use the first stop's color as a representative solid color
-  const stopColor = (stops[0] as SVGStopElement).getAttribute("stop-color")
-    ?? getComputedStyle(stops[0]).stopColor;
+  const stopStyle = getComputedStyle(stops[0]);
+  const stopColor = stopStyle.getPropertyValue("stop-color")
+    || stopStyle.stopColor
+    || (stops[0] as SVGStopElement).getAttribute("stop-color")
+    || undefined;
   return stopColor || undefined;
 }
 
@@ -258,9 +275,11 @@ function resolveGradient(urlRef: string, el: SVGGraphicsElement): { cssGradient:
   let fallbackColor = "";
   for (let i = 0; i < stops.length; i++) {
     const stop = stops[i] as SVGStopElement;
-    const color = stop.getAttribute("stop-color")
-      ?? getComputedStyle(stop).getPropertyValue("stop-color")
-      ?? getComputedStyle(stop).stopColor;
+    const stopStyle = getComputedStyle(stop);
+    const color = stopStyle.getPropertyValue("stop-color")
+      || stopStyle.stopColor
+      || stop.getAttribute("stop-color")
+      || "";
     let offset = stop.getAttribute("offset") ?? "0%";
     // Normalize SVG fraction offset (0..1) to CSS percentage
     if (!offset.endsWith("%")) {

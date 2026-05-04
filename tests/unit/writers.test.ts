@@ -381,6 +381,31 @@ test.describe("Writer Output", () => {
     expect(svg).not.toContain('fill="none" clip-path="url(#ic');
   });
 
+  test("SVG and HTML writers preserve gradient strokes on polylines", async () => {
+    const ir: IRNode[] = [{
+      type: "polyline",
+      points: [
+        { x: 10, y: 50 },
+        { x: 120, y: 50 },
+      ],
+      closed: false,
+      style: {
+        stroke: "rgb(255, 0, 0)",
+        strokeImage: "linear-gradient(90deg, red 0%, blue 100%)",
+        strokeWidth: "8px",
+      },
+      zIndex: 0,
+    }];
+
+    const html = await renderIR(ir, new HTMLWriter({ width: 140, height: 100 }));
+    const svg = await renderIR(ir, new SVGWriter({ width: 140, height: 100 }));
+
+    expect(svg).toContain("<linearGradient");
+    expect(svg).toContain('stroke="url(#');
+    expect(html).toContain("<defs><linearGradient");
+    expect(html).toContain('stroke="url(#ir-stroke-gradient)"');
+  });
+
   test("EMF writer renders inset box shadows as filled paths", async () => {
     const emfBytes = await renderIR([{
       type: "polygon",

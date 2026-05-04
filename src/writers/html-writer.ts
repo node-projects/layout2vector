@@ -7,6 +7,7 @@ import type { ClipQuad, PathSubpath, Point, Quad, SourceMetadata, Style, Writer 
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText, preservesWhitespace } from "../shared/text-whitespace.js";
 import { getVisibleCssColorString } from "./shared/css-color.js";
+import { parseGradientAst } from "./shared/gradient-utils.js";
 import { getPointBounds, getQuadBounds, type ClipPathBounds } from "./shared/clip-path.js";
 import { buildEmbeddedFontDataUrl, buildFontFaceCss, choosePreferredWebFontSource, normalizeFontBasePath } from "./shared/font-assets.js";
 import { formatWriterNumber as n, getVisibleStroke, isAxisAlignedRect, parseMinDimensionBorderRadius } from "./shared/writer-utils.js";
@@ -150,6 +151,83 @@ type QuadTransform = {
   height: number;
   matrix: string;
 };
+
+function normalizeGradientStops(stops: Array<{ color: string; offset: number }>): Array<{ color: string; offset: number }> {
+  if (stops.length === 0) return stops;
+
+  const resolved = stops.map((stop) => ({ ...stop }));
+  if (resolved[0].offset < 0) resolved[0].offset = 0;
+  if (resolved[resolved.length - 1].offset < 0) resolved[resolved.length - 1].offset = 1;
+
+  let lastKnown = 0;
+  for (let index = 1; index < resolved.length; index += 1) {
+    if (resolved[index].offset >= 0) {
+      const gap = index - lastKnown;
+      if (gap > 1) {
+        const start = resolved[lastKnown].offset;
+        const end = resolved[index].offset;
+        for (let fillIndex = lastKnown + 1; fillIndex < index; fillIndex += 1) {
+          resolved[fillIndex].offset = start + (end - start) * ((fillIndex - lastKnown) / gap);
+        }
+      }
+      lastKnown = index;
+    }
+  }
+
+  return resolved;
+}
+
+function buildInlineStrokeGradientDef(
+  strokeImage: string | undefined,
+  id: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): string | null {
+  const gradient = parseGradientAst(strokeImage);
+  if (!gradient) return null;
+
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  if (gradient.type === "linear") {
+    const angleRad = ((gradient.angleDeg - 90) * Math.PI) / 180;
+    const cos = Math.cos(angleRad);
+    const sin = Math.sin(angleRad);
+    const halfDiag = Math.abs(w * cos) / 2 + Math.abs(h * sin) / 2;
+    const stops = normalizeGradientStops(gradient.stops.map((stop) => ({
+      color: stop.color,
+      offset: stop.unit === "px"
+        ? (halfDiag > 0 ? stop.offset / (halfDiag * 2) : stop.offset)
+        : stop.unit === "auto"
+          ? -1
+          : stop.offset,
+    })));
+    const stopsStr = stops.map((stop) =>
+      `<stop offset="${n(Math.max(0, Math.min(1, stop.offset)) * 100)}%" stop-color="${escHtml(stop.color)}"/>`
+    ).join("");
+    return `<linearGradient id="${id}" x1="${n(cx - cos * halfDiag)}" y1="${n(cy - sin * halfDiag)}" x2="${n(cx + cos * halfDiag)}" y2="${n(cy + sin * halfDiag)}" gradientUnits="userSpaceOnUse">${stopsStr}</linearGradient>`;
+  }
+
+  if (gradient.type === "radial") {
+    const radius = Math.max(w, h) / 2;
+    const stops = normalizeGradientStops(gradient.stops.map((stop) => ({
+      color: stop.color,
+      offset: stop.unit === "px"
+        ? (radius > 0 ? stop.offset / radius : stop.offset)
+        : stop.unit === "auto"
+          ? -1
+          : stop.offset,
+    })));
+    const stopsStr = stops.map((stop) =>
+      `<stop offset="${n(Math.max(0, Math.min(1, stop.offset)) * 100)}%" stop-color="${escHtml(stop.color)}"/>`
+    ).join("");
+    return `<radialGradient id="${id}" cx="${n(cx)}" cy="${n(cy)}" r="${n(radius)}" gradientUnits="userSpaceOnUse">${stopsStr}</radialGradient>`;
+  }
+
+  return null;
+}
 
 function pushCss(css: string[], name: string, value: string | undefined): void {
   if (!value) return;
@@ -634,15 +712,34 @@ export class HTMLWriter implements Writer<string> {
     const opacity = style.opacity;
     const d = style.pathSubpaths?.length ? subpathsToSvgPath(style.pathSubpaths) : pointsToSvgPath(points, closed);
     const canFillPath = closed || !!style.pathSubpaths?.length;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const point of points) {
+      if (point.x < minX) minX = point.x;
+      if (point.y < minY) minY = point.y;
+      if (point.x > maxX) maxX = point.x;
+      if (point.y > maxY) maxY = point.y;
+    }
+
+    const strokeGradientId = "ir-stroke-gradient";
+    const strokeGradientDef = stroke
+      ? buildInlineStrokeGradientDef(style.strokeImage, strokeGradientId, minX, minY, maxX - minX || 1, maxY - minY || 1)
+      : null;
     const svgAttrs: string[] = [];
     if (fill && canFillPath) svgAttrs.push(`fill="${escHtml(fill)}"`);
     else svgAttrs.push(`fill="none"`);
     if (style.fillRule === "evenodd") svgAttrs.push('fill-rule="evenodd"');
-    if (stroke) svgAttrs.push(`stroke="${escHtml(stroke.color)}" stroke-width="${n(stroke.width)}"`);
+    if (stroke) {
+      const strokePaint = strokeGradientDef ? `url(#${strokeGradientId})` : stroke.color;
+      svgAttrs.push(`stroke="${escHtml(strokePaint)}" stroke-width="${n(stroke.width)}"`);
+    }
     if (style.strokeDasharray && style.strokeDasharray !== "none") svgAttrs.push(`stroke-dasharray="${escHtml(style.strokeDasharray)}"`);
     if (opacity !== undefined && opacity < 1) svgAttrs.push(`opacity="${n(opacity)}"`);
 
-    this.pushElement(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible"><path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points), source);
+    const defs = strokeGradientDef ? `<defs>${strokeGradientDef}</defs>` : "";
+    this.pushElement(`<svg style="position:absolute;left:0;top:0;width:${n(this.width)}px;height:${n(this.height)}px;pointer-events:none;overflow:visible">${defs}<path d="${d}" ${svgAttrs.join(" ")}/></svg>`, style, getPointBounds(points), source);
   }
 
   async drawText(quad: Quad, text: string, style: Style, source?: SourceMetadata): Promise<void> {

@@ -95,6 +95,33 @@ test.describe("SVG Geometry Extraction", () => {
     expect(polylines[0].points.length).toBeGreaterThan(2);
   });
 
+  test("resolves gradient stroke url() to a visible fallback color", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;">
+        <svg id="target" width="300" height="120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="red" />
+              <stop offset="100%" stop-color="blue" />
+            </linearGradient>
+          </defs>
+          <path d="M 10 60 L 290 60" stroke="url(#g)" stroke-width="8" fill="none" />
+        </svg>
+      </body></html>`
+    );
+
+    const ir = await page.evaluate(() => {
+      const el = document.getElementById("target")!;
+      return (window as any).__HC.extractIR(el);
+    });
+
+    const linePath = ir.find((node: any) => node.type === "polyline" && node.points.length > 2);
+    expect(linePath).toBeDefined();
+    expect(linePath.style.stroke).toBe("rgb(255, 0, 0)");
+    expect(linePath.style.strokeImage).toContain("linear-gradient(");
+  });
+
   test("extracts SVG text", async ({ page }) => {
     await setupPage(
       page,

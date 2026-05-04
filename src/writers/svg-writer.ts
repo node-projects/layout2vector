@@ -662,12 +662,14 @@ export class SVGWriter implements Writer<string> {
       const r = radius > 0 ? Math.min(radius, w / 2, h / 2) : 0;
 
       const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w, h);
+      const strokeGradientId = this.addGradientDef(style.strokeImage, x, y, w, h);
       const baseElement = this.buildLayeredShape(
         (attrs) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(r)}" ry="${n(r)}"${attrs}/>` ,
         fill,
         mixedBorders ? null : stroke,
         style,
         gradientIds,
+        strokeGradientId,
         undefined,
         undefined,
       );
@@ -706,12 +708,14 @@ export class SVGWriter implements Writer<string> {
     }
 
     const gradientIds = this.addGradientDefs(style.backgroundImage, x, y, w || 1, h || 1);
+    const strokeGradientId = this.addGradientDef(style.strokeImage, x, y, w || 1, h || 1);
     const baseElement = this.buildLayeredShape(
       (attrs) => `<path d="${pathD}"${attrs}/>` ,
       fill,
       mixedBorders ? null : stroke,
       style,
       gradientIds,
+      strokeGradientId,
       undefined,
       undefined,
     );
@@ -751,6 +755,7 @@ export class SVGWriter implements Writer<string> {
     }
     const d = style.pathSubpaths?.length ? subpathsToPath(style.pathSubpaths) : pointsToPath(points, closed);
     const gradientIds = this.addGradientDefs(style.backgroundImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
+    const strokeGradientId = this.addGradientDef(style.strokeImage, minX, minY, maxX - minX || 1, maxY - minY || 1);
     const canFillPath = closed || !!style.pathSubpaths?.length;
     const element = this.buildLayeredShape(
       (attrs) => `<path d="${d}"${style.fillRule === "evenodd" ? ' fill-rule="evenodd"' : ""}${attrs}/>` ,
@@ -758,6 +763,7 @@ export class SVGWriter implements Writer<string> {
       stroke,
       style,
       gradientIds,
+      strokeGradientId,
       undefined,
       opacity,
     );
@@ -1009,6 +1015,7 @@ export class SVGWriter implements Writer<string> {
     stroke: { color: string; width: number } | null,
     style: Style,
     gradientIds: string[],
+    strokeGradientId: string | undefined,
     filterId: string | undefined,
     opacity: number | undefined,
   ): string {
@@ -1021,7 +1028,8 @@ export class SVGWriter implements Writer<string> {
       layers.push(createShape(` fill="url(#${gradientIds[index]})"`));
     }
     if (stroke) {
-      const strokeParts = [` fill="none"`, ` stroke="${escXml(stroke.color)}"`, ` stroke-width="${n(stroke.width)}"`];
+      const strokePaint = strokeGradientId ? `url(#${strokeGradientId})` : escXml(stroke.color);
+      const strokeParts = [` fill="none"`, ` stroke="${strokePaint}"`, ` stroke-width="${n(stroke.width)}"`];
       if (style.strokeDasharray && style.strokeDasharray !== "none") {
         strokeParts.push(` stroke-dasharray="${escXml(style.strokeDasharray)}"`);
       }
