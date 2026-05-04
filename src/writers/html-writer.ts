@@ -481,14 +481,15 @@ export class HTMLWriter implements Writer<string> {
 
     if (bounds && style.clipPath && style.clipPath !== "none" && bounds.w > 0 && bounds.h > 0) {
       wrapped = offsetRootElementPosition(wrapped, -bounds.x, -bounds.y);
+      const escapedClipPath = escHtml(style.clipPath);
       const css = [
         "position:absolute",
         `left:${n(bounds.x)}px`,
         `top:${n(bounds.y)}px`,
         `width:${n(bounds.w)}px`,
         `height:${n(bounds.h)}px`,
-        `clip-path:${style.clipPath}`,
-        `-webkit-clip-path:${style.clipPath}`,
+        `clip-path:${escapedClipPath}`,
+        `-webkit-clip-path:${escapedClipPath}`,
       ];
       wrapped = `<div style="${css.join(";")}">${wrapped}</div>`;
     }
