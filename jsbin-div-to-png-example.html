@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>layout2vector JSBin Demo</title>
+    <style>
+      :root {
+        --bg: #f3f6fb;
+        --card: #ffffff;
+        --ink: #1b2333;
+        --accent: #0f7cda;
+        --muted: #6a7487;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at top right, #d9ebff 0%, var(--bg) 55%);
+      }
+
+      .page {
+        max-width: 920px;
+        margin: 24px auto;
+        padding: 0 16px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        background: var(--card);
+        border: 1px solid #dbe2ef;
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 8px 28px rgba(20, 34, 66, 0.08);
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 22px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      #capture {
+        margin-top: 16px;
+        width: min(620px, 100%);
+        min-height: 180px;
+        border-radius: 20px;
+        padding: 18px;
+        color: #0a1b2e;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(221, 236, 255, 0.95)),
+          repeating-linear-gradient(-45deg, rgba(15, 124, 218, 0.08), rgba(15, 124, 218, 0.08) 12px, rgba(15, 124, 218, 0.02) 12px, rgba(15, 124, 218, 0.02) 24px);
+        border: 2px solid rgba(15, 124, 218, 0.22);
+      }
+
+      #capture h2 {
+        margin: 0;
+        font-size: 26px;
+      }
+
+      #capture .badge {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #0f7cda;
+        color: white;
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      #capture .note {
+        margin-top: 10px;
+        font-size: 15px;
+      }
+
+      .controls {
+        margin-top: 14px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:hover {
+        filter: brightness(1.08);
+      }
+
+      #status {
+        margin-top: 10px;
+        min-height: 1.3em;
+        font-size: 14px;
+        color: #274060;
+      }
+
+      #result {
+        margin-top: 16px;
+        max-width: 100%;
+        border-radius: 12px;
+        border: 1px solid #cfd9ea;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="panel">
+        <h1>Div to PNG using @node-projects/layout2vector</h1>
+        <p>
+          This demo initializes getBoxQuads polyfill first (for Chromium), then extracts
+          the target div and renders it to a PNG data URL.
+        </p>
+
+        <div id="capture">
+          <h2>Hello JSBin</h2>
+          <span class="badge">layout2vector</span>
+          <p class="note">Export this card as PNG with gradients, text, and rounded corners.</p>
+        </div>
+
+        <div class="controls">
+          <button id="convertBtn" type="button">Convert #capture to PNG</button>
+        </div>
+        <div id="status"></div>
+        <img id="result" alt="Generated PNG preview" />
+      </div>
+    </div>
+
+    <script type="module">
+      import { addPolyfill } from "https://esm.sh/get-box-quads-polyfill@4";
+      import { extractIR, renderIR, ImageWriter } from "https://esm.sh/@node-projects/layout2vector@5";
+
+      // Required in Chromium where getBoxQuads is missing.
+      addPolyfill(window);
+
+      const convertBtn = document.getElementById("convertBtn");
+      const capture = document.getElementById("capture");
+      const status = document.getElementById("status");
+      const result = document.getElementById("result");
+
+      convertBtn.addEventListener("click", async () => {
+        status.textContent = "Converting...";
+
+        try {
+          const bounds = capture.getBoundingClientRect();
+          const ir = await extractIR(capture, {
+            includeText: true,
+            includeImages: true,
+          });
+
+          const writer = new ImageWriter({
+            width: Math.max(1, Math.ceil(bounds.width)),
+            height: Math.max(1, Math.ceil(bounds.height)),
+            scale: Math.min(window.devicePixelRatio || 1, 2),
+          });
+
+          const pngResult = await renderIR(ir, writer);
+          await pngResult.finalize();
+
+          const dataUrl = pngResult.toDataURL("image/png");
+          result.src = dataUrl;
+          status.textContent = "Done. PNG generated below.";
+        } catch (error) {
+          console.error(error);
+          status.textContent = `Conversion failed: ${error?.message || error}`;
+        }
+      });
+    </script>
+  </body>
+</html>
