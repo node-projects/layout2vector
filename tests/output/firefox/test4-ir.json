@@ -684,6 +684,7 @@
     ],
     "style": {
       "fill": "rgb(111, 216, 146)",
+      "backgroundColor": "rgb(111, 216, 146)",
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",

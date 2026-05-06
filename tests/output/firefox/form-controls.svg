@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="682" viewBox="0 0 1232 682">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="1055" viewBox="0 0 1232 1055">
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
 <clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="31" y="134" width="369" height="20"/></clipPath>
@@ -9,14 +9,17 @@
 <clipPath id="clip6" clipPathUnits="userSpaceOnUse"><rect x="31" y="334" width="323" height="20"/></clipPath>
 <filter id="ds7" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
 <clipPath id="clip8" clipPathUnits="userSpaceOnUse"><rect x="469" y="230" width="391" height="16"/></clipPath>
-<filter id="ds9" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip10" clipPathUnits="userSpaceOnUse"><rect x="31" y="483" width="369" height="20"/></clipPath>
-<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="31" y="558" width="369" height="20"/></clipPath>
-<clipPath id="clip12" clipPathUnits="userSpaceOnUse"><rect x="31" y="633" width="369" height="20"/></clipPath>
-<filter id="ds13" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip14" clipPathUnits="userSpaceOnUse"><rect x="480" y="483" width="369" height="20"/></clipPath>
-<clipPath id="clip15" clipPathUnits="userSpaceOnUse"><rect x="480" y="558" width="369" height="20"/></clipPath>
-<clipPath id="clip16" clipPathUnits="userSpaceOnUse"><rect x="480" y="633" width="369" height="20"/></clipPath>
+<linearGradient id="lg9" x1="664.5" y1="282" x2="664.5" y2="302" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(230, 230, 230)"/><stop offset="10%" stop-color="rgb(230, 230, 230)"/><stop offset="20%" stop-color="rgb(238, 238, 238)"/><stop offset="45%" stop-color="rgb(204, 204, 204)"/><stop offset="55%" stop-color="rgb(204, 204, 204)"/></linearGradient>
+<filter id="ds10" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="31" y="483" width="369" height="20"/></clipPath>
+<clipPath id="clip12" clipPathUnits="userSpaceOnUse"><rect x="31" y="558" width="369" height="20"/></clipPath>
+<clipPath id="clip13" clipPathUnits="userSpaceOnUse"><rect x="31" y="633" width="369" height="20"/></clipPath>
+<filter id="ds14" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
+<clipPath id="clip15" clipPathUnits="userSpaceOnUse"><rect x="480" y="483" width="369" height="20"/></clipPath>
+<clipPath id="clip16" clipPathUnits="userSpaceOnUse"><rect x="480" y="558" width="369" height="20"/></clipPath>
+<clipPath id="clip17" clipPathUnits="userSpaceOnUse"><rect x="480" y="633" width="369" height="20"/></clipPath>
+<clipPath id="clip18" clipPathUnits="userSpaceOnUse"><rect x="469" y="990" width="132.94" height="45"/></clipPath>
+<clipPath id="clip19" clipPathUnits="userSpaceOnUse"><rect x="613.94" y="990" width="246.06" height="45"/></clipPath>
 </defs>
 <text x="0" y="2" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Arial, sans-serif">Native Form Controls</text>
 <g filter="url(#ds1)"><g><rect x="0" y="52" width="431" height="331" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="52" width="431" height="331" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
@@ -35,39 +38,58 @@
 <path d="M399,342.24 L403,345.76 L407,342.24" fill="none" stroke="rgb(80, 80, 80)" stroke-width="1.6"/>
 <g filter="url(#ds7)"><g><rect x="449" y="52" width="431" height="331" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="52" width="431" height="331" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="468" y="72" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">State Fields</text>
-<g><rect x="472" y="106" width="18" height="18" rx="8" ry="8" fill="rgb(15, 98, 254)"/><rect x="472" y="106" width="18" height="18" rx="8" ry="8" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1"/></g>
+<g><rect x="472" y="106" width="18" height="18" rx="2" ry="2" fill="rgb(15, 98, 254)"/><rect x="472" y="106" width="18" height="18" rx="2" ry="2" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1.5"/></g>
 <path d="M475.96,115.72 L479.56,119.32 L486.04,111.4" fill="none" stroke="rgb(255, 255, 255)" stroke-width="2.52"/>
 <text x="503" y="109" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">CHECKED CHECKBOX</text>
-<g><rect x="472" y="142" width="18" height="18" rx="8" ry="8" fill="rgb(15, 98, 254)"/><rect x="472" y="142" width="18" height="18" rx="8" ry="8" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1"/></g>
+<g><rect x="472" y="142" width="18" height="18" rx="2" ry="2" fill="rgb(15, 98, 254)"/><rect x="472" y="142" width="18" height="18" rx="2" ry="2" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1.5"/></g>
 <rect x="475.6" y="149.74" width="10.8" height="2.52" rx="0" ry="0" fill="rgb(255, 255, 255)"/>
 <text x="503" y="145" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">INDETERMINATE CHECKBOX</text>
-<g><path d="M491,187 L490.77,189 L490.11,190.9 L489.04,192.61 L487.61,194.04 L485.9,195.11 L484,195.77 L482,196 L480,195.77 L478.1,195.11 L476.39,194.04 L474.96,192.61 L473.89,190.9 L473.23,189 L473,187 L473.23,185 L473.89,183.1 L474.96,181.39 L476.39,179.96 L478.1,178.89 L480,178.23 L482,178 L484,178.23 L485.9,178.89 L487.61,179.96 L489.04,181.39 L490.11,183.1 L490.77,185 Z" fill="rgb(255, 255, 255)"/><path d="M491,187 L490.77,189 L490.11,190.9 L489.04,192.61 L487.61,194.04 L485.9,195.11 L484,195.77 L482,196 L480,195.77 L478.1,195.11 L476.39,194.04 L474.96,192.61 L473.89,190.9 L473.23,189 L473,187 L473.23,185 L473.89,183.1 L474.96,181.39 L476.39,179.96 L478.1,178.89 L480,178.23 L482,178 L484,178.23 L485.9,178.89 L487.61,179.96 L489.04,181.39 L490.11,183.1 L490.77,185 Z" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1"/></g>
+<g><path d="M491,187 L490.77,189 L490.11,190.9 L489.04,192.61 L487.61,194.04 L485.9,195.11 L484,195.77 L482,196 L480,195.77 L478.1,195.11 L476.39,194.04 L474.96,192.61 L473.89,190.9 L473.23,189 L473,187 L473.23,185 L473.89,183.1 L474.96,181.39 L476.39,179.96 L478.1,178.89 L480,178.23 L482,178 L484,178.23 L485.9,178.89 L487.61,179.96 L489.04,181.39 L490.11,183.1 L490.77,185 Z" fill="rgb(255, 255, 255)"/><path d="M491,187 L490.77,189 L490.11,190.9 L489.04,192.61 L487.61,194.04 L485.9,195.11 L484,195.77 L482,196 L480,195.77 L478.1,195.11 L476.39,194.04 L474.96,192.61 L473.89,190.9 L473.23,189 L473,187 L473.23,185 L473.89,183.1 L474.96,181.39 L476.39,179.96 L478.1,178.89 L480,178.23 L482,178 L484,178.23 L485.9,178.89 L487.61,179.96 L489.04,181.39 L490.11,183.1 L490.77,185 Z" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1.5"/></g>
 <g><path d="M485.78,187 L485.65,187.98 L485.27,188.89 L484.67,189.67 L483.89,190.27 L482.98,190.65 L482,190.78 L481.02,190.65 L480.11,190.27 L479.33,189.67 L478.73,188.89 L478.35,187.98 L478.22,187 L478.35,186.02 L478.73,185.11 L479.33,184.33 L480.11,183.73 L481.02,183.35 L482,183.22 L482.98,183.35 L483.89,183.73 L484.67,184.33 L485.27,185.11 L485.65,186.02 Z" fill="rgb(15, 98, 254)"/><path d="M485.78,187 L485.65,187.98 L485.27,188.89 L484.67,189.67 L483.89,190.27 L482.98,190.65 L482,190.78 L481.02,190.65 L480.11,190.27 L479.33,189.67 L478.73,188.89 L478.35,187.98 L478.22,187 L478.35,186.02 L478.73,185.11 L479.33,184.33 L480.11,183.73 L481.02,183.35 L482,183.22 L482.98,183.35 L483.89,183.73 L484.67,184.33 L485.27,185.11 L485.65,186.02 Z" fill="none" stroke="rgb(15, 98, 254)" stroke-width="1"/></g>
 <text x="504" y="179.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">SELECTED RADIO BUTTON</text>
 <text x="468" y="209.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">PROGRESS</text>
 <g><rect x="468" y="229" width="393" height="18" rx="9" ry="9" fill="rgb(230, 230, 230)"/><rect x="468" y="229" width="393" height="18" rx="9" ry="9" fill="none" stroke="rgb(143, 143, 157)" stroke-width="1"/></g>
 <rect x="469" y="230" width="281.52" height="16" rx="8" ry="8" fill="rgb(15, 98, 254)"/>
 <g clip-path="url(#clip8)"><text x="648.48" y="230" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">72%</text></g>
-<g filter="url(#ds9)"><g><rect x="0" y="401" width="431" height="281" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="401" width="431" height="281" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
+<text x="468" y="262.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">METER</text>
+<g><rect x="468" y="282" width="393" height="20" rx="10" ry="10" fill="rgb(230, 230, 230)"/><rect x="468" y="282" width="393" height="20" rx="10" ry="10" fill="url(#lg9)"/><rect x="468" y="282" width="393" height="20" rx="10" ry="10" fill="none" stroke="rgb(29, 39, 54)" stroke-width="1"/></g>
+<rect x="469" y="283" width="242.42" height="18" rx="9" ry="9" fill="rgb(56, 142, 60)"/>
+<g filter="url(#ds10)"><g><rect x="0" y="401" width="431" height="654" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="401" width="431" height="654" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="19" y="421" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Date &amp; Time</text>
 <text x="19" y="453.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATE</text>
 <g><rect x="19" y="473" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="473" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip10)"><text x="31" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13</text></g>
+<g clip-path="url(#clip11)"><text x="31" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13</text></g>
 <text x="19" y="528.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">TIME</text>
 <g><rect x="19" y="548" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="548" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip11)"><text x="31" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">14:35</text></g>
+<g clip-path="url(#clip12)"><text x="31" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">14:35</text></g>
 <text x="19" y="603.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATETIME</text>
 <g><rect x="19" y="623" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="623" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip12)"><text x="31" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13 14:35</text></g>
-<g filter="url(#ds13)"><g><rect x="449" y="401" width="431" height="281" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="401" width="431" height="281" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
+<g clip-path="url(#clip13)"><text x="31" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13 14:35</text></g>
+<g filter="url(#ds14)"><g><rect x="449" y="401" width="431" height="654" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="401" width="431" height="654" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="468" y="421" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Additional Inputs</text>
 <text x="468" y="453.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">MONTH</text>
 <g><rect x="468" y="473" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="473" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip14)"><text x="480" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04</text></g>
+<g clip-path="url(#clip15)"><text x="480" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04</text></g>
 <text x="468" y="528.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">WEEK</text>
 <g><rect x="468" y="548" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="548" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip15)"><text x="480" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-W16</text></g>
+<g clip-path="url(#clip16)"><text x="480" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-W16</text></g>
 <text x="468" y="603.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">NUMBER</text>
 <g><rect x="468" y="623" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="623" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip16)"><text x="480" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">42</text></g>
+<g clip-path="url(#clip17)"><text x="480" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">42</text></g>
+<text x="468" y="678.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">COLOR</text>
+<g><rect x="468" y="698" width="393" height="38" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="698" width="393" height="38" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g><rect x="471.8" y="701.8" width="385.4" height="30.4" rx="8" ry="8" fill="#0f62fe"/><rect x="471.8" y="701.8" width="385.4" height="30.4" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<text x="468" y="751.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">RANGE</text>
+<rect x="477" y="780.6" width="379" height="4.8" rx="2.4" ry="2.4" fill="rgb(232, 232, 232)"/>
+<rect x="477" y="780.6" width="257.72" height="4.8" rx="2.4" ry="2.4" fill="rgb(15, 98, 254)"/>
+<g><path d="M741.72,783 L741.48,784.81 L740.78,786.5 L739.67,787.95 L738.22,789.06 L736.53,789.76 L734.72,790 L732.91,789.76 L731.22,789.06 L729.77,787.95 L728.66,786.5 L727.96,784.81 L727.72,783 L727.96,781.19 L728.66,779.5 L729.77,778.05 L731.22,776.94 L732.91,776.24 L734.72,776 L736.53,776.24 L738.22,776.94 L739.67,778.05 L740.78,779.5 L741.48,781.19 Z" fill="rgb(15, 98, 254)"/><path d="M741.72,783 L741.48,784.81 L740.78,786.5 L739.67,787.95 L738.22,789.06 L736.53,789.76 L734.72,790 L732.91,789.76 L731.22,789.06 L729.77,787.95 L728.66,786.5 L727.96,784.81 L727.72,783 L727.96,781.19 L728.66,779.5 L729.77,778.05 L731.22,776.94 L732.91,776.24 L734.72,776 L736.53,776.24 L738.22,776.94 L739.67,778.05 L740.78,779.5 L741.48,781.19 Z" fill="none" stroke="rgb(255, 255, 255)" stroke-width="1"/></g>
+<text x="468" y="810.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">VERTICAL RANGE</text>
+<rect x="661.5" y="842" width="10" height="100" rx="5" ry="5" fill="rgb(232, 232, 232)"/>
+<rect x="661.5" y="842" width="10" height="70" rx="5" ry="5" fill="rgb(15, 98, 254)"/>
+<g><path d="M676.5,912 L676.16,914.59 L675.16,917 L673.57,919.07 L671.5,920.66 L669.09,921.66 L666.5,922 L663.91,921.66 L661.5,920.66 L659.43,919.07 L657.84,917 L656.84,914.59 L656.5,912 L656.84,909.41 L657.84,907 L659.43,904.93 L661.5,903.34 L663.91,902.34 L666.5,902 L669.09,902.34 L671.5,903.34 L673.57,904.93 L675.16,907 L676.16,909.41 Z" fill="rgb(15, 98, 254)"/><path d="M676.5,912 L676.16,914.59 L675.16,917 L673.57,919.07 L671.5,920.66 L669.09,921.66 L666.5,922 L663.91,921.66 L661.5,920.66 L659.43,919.07 L657.84,917 L656.84,914.59 L656.5,912 L656.84,909.41 L657.84,907 L659.43,904.93 L661.5,903.34 L663.91,902.34 L666.5,902 L669.09,902.34 L671.5,903.34 L673.57,904.93 L675.16,907 L676.16,909.41 Z" fill="none" stroke="rgb(255, 255, 255)" stroke-width="1"/></g>
+<text x="468" y="969.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">FILE</text>
+<g><rect x="468" y="989" width="393" height="47" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="989" width="393" height="47" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g><rect x="469" y="990" width="132.94" height="45" rx="0" ry="0" fill="rgb(239, 239, 239)"/><rect x="469" y="990" width="132.94" height="45" rx="0" ry="0" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g clip-path="url(#clip18)"><text x="492.79" y="1004.5" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">Choose File</text></g>
+<g clip-path="url(#clip19)"><text x="613.94" y="1004.5" fill="rgb(98, 105, 120)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">No file selected</text></g>
 </svg>

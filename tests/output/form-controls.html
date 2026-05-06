@@ -50,14 +50,14 @@
       letter-spacing: 0.03em;
       text-transform: uppercase;
     }
-    input,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
     textarea,
     select,
     progress {
       width: 100%;
       font: inherit;
     }
-    input,
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
     textarea,
     select {
       padding: 10px 12px;
@@ -91,6 +91,18 @@
     progress {
       height: 18px;
       accent-color: #0f62fe;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #0f62fe;
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 38px;
+      padding: 3px;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      background: #ffffff;
     }
   </style>
 </head>
@@ -138,6 +150,10 @@ Third line</textarea>
           <label for="completion">Progress</label>
           <progress id="completion" value="72" max="100"></progress>
         </div>
+        <div class="field">
+          <label for="signal">Meter</label>
+          <meter id="signal" min="0" max="1" low="0.3" high="0.8" optimum="0.7" value="0.62" style="width: 100%; height: 20px;"></meter>
+        </div>
       </section>
 
       <section class="card">
@@ -169,6 +185,22 @@ Third line</textarea>
         <div class="field">
           <label for="amount">Number</label>
           <input id="amount" type="number" value="42">
+        </div>
+        <div class="field">
+          <label for="brand">Color</label>
+          <input id="brand" type="color" value="#0f62fe">
+        </div>
+        <div class="field">
+          <label for="velocity">Range</label>
+          <input id="velocity" type="range" min="0" max="100" value="68">
+        </div>
+        <div class="field">
+          <label for="zoom">Vertical Range</label>
+          <input id="zoom" type="range" min="0" max="10" value="7" style="height: 120px; writing-mode: vertical-lr;">
+        </div>
+        <div class="field">
+          <label for="attachment">File</label>
+          <input id="attachment" type="file">
         </div>
       </section>
     </div>

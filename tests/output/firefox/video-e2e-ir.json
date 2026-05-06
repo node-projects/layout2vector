@@ -94,6 +94,7 @@
     ],
     "style": {
       "fill": "rgba(255, 255, 255, 0.88)",
+      "backgroundColor": "rgba(255, 255, 255, 0.88)",
       "stroke": "rgb(16, 33, 58)",
       "strokeWidth": "0px",
       "fontSize": "16px",
@@ -528,6 +529,7 @@
     ],
     "style": {
       "fill": "rgb(9, 16, 28)",
+      "backgroundColor": "rgb(9, 16, 28)",
       "stroke": "rgb(16, 33, 58)",
       "strokeWidth": "0px",
       "fontSize": "16px",
@@ -173407,6 +173409,7 @@
     ],
     "style": {
       "fill": "rgb(9, 16, 28)",
+      "backgroundColor": "rgb(9, 16, 28)",
       "stroke": "rgb(16, 33, 58)",
       "strokeWidth": "0px",
       "fontSize": "16px",

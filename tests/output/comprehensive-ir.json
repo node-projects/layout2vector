@@ -21,6 +21,7 @@
     ],
     "style": {
       "fill": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(255, 255, 255)",
       "stroke": "rgb(224, 224, 224)",
       "strokeWidth": "1px",
       "fontSize": "16px",
@@ -489,6 +490,7 @@
     ],
     "style": {
       "fill": "rgb(245, 245, 245)",
+      "backgroundColor": "rgb(245, 245, 245)",
       "stroke": "rgb(224, 224, 224) rgb(0, 0, 0) rgb(0, 0, 0)",
       "strokeWidth": "1px 0px 0px",
       "fontSize": "16px",
@@ -569,6 +571,7 @@
     ],
     "style": {
       "fill": "rgb(30, 136, 229)",
+      "backgroundColor": "rgb(30, 136, 229)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "13px",
@@ -650,6 +653,7 @@
     "text": "Accept",
     "style": {
       "fill": "rgb(30, 136, 229)",
+      "backgroundColor": "rgb(30, 136, 229)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "13px",
@@ -889,6 +893,7 @@
     ],
     "style": {
       "fill": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(255, 255, 255)",
       "stroke": "rgb(224, 224, 224)",
       "strokeWidth": "1px",
       "fontSize": "16px",
@@ -1108,6 +1113,7 @@
     ],
     "style": {
       "fill": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(255, 255, 255)",
       "stroke": "rgb(224, 224, 224)",
       "strokeWidth": "1px",
       "fontSize": "16px",
@@ -1327,6 +1333,7 @@
     ],
     "style": {
       "fill": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(255, 255, 255)",
       "stroke": "rgb(224, 224, 224)",
       "strokeWidth": "1px",
       "fontSize": "16px",
@@ -1546,6 +1553,7 @@
     ],
     "style": {
       "fill": "rgb(255, 255, 255)",
+      "backgroundColor": "rgb(255, 255, 255)",
       "stroke": "rgb(224, 224, 224)",
       "strokeWidth": "1px",
       "fontSize": "16px",
@@ -2362,6 +2370,7 @@
     ],
     "style": {
       "fill": "rgb(67, 160, 71)",
+      "backgroundColor": "rgb(67, 160, 71)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2436,6 +2445,7 @@
     "text": "Active",
     "style": {
       "fill": "rgb(67, 160, 71)",
+      "backgroundColor": "rgb(67, 160, 71)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2509,6 +2519,7 @@
     ],
     "style": {
       "fill": "rgb(251, 140, 0)",
+      "backgroundColor": "rgb(251, 140, 0)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2583,6 +2594,7 @@
     "text": "Pending",
     "style": {
       "fill": "rgb(251, 140, 0)",
+      "backgroundColor": "rgb(251, 140, 0)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2656,6 +2668,7 @@
     ],
     "style": {
       "fill": "rgb(229, 57, 53)",
+      "backgroundColor": "rgb(229, 57, 53)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2730,6 +2743,7 @@
     "text": "Critical",
     "style": {
       "fill": "rgb(229, 57, 53)",
+      "backgroundColor": "rgb(229, 57, 53)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2803,6 +2817,7 @@
     ],
     "style": {
       "fill": "rgb(30, 136, 229)",
+      "backgroundColor": "rgb(30, 136, 229)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -2877,6 +2892,7 @@
     "text": "Info",
     "style": {
       "fill": "rgb(30, 136, 229)",
+      "backgroundColor": "rgb(30, 136, 229)",
       "stroke": "rgb(255, 255, 255)",
       "strokeWidth": "0px",
       "fontSize": "12px",
@@ -3169,6 +3185,7 @@
     ],
     "style": {
       "fill": "rgb(244, 67, 54)",
+      "backgroundColor": "rgb(244, 67, 54)",
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
@@ -3243,6 +3260,7 @@
     ],
     "style": {
       "fill": "rgb(76, 175, 80)",
+      "backgroundColor": "rgb(76, 175, 80)",
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
@@ -3317,6 +3335,7 @@
     ],
     "style": {
       "fill": "rgb(33, 150, 243)",
+      "backgroundColor": "rgb(33, 150, 243)",
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",

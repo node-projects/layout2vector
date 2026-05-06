@@ -7,6 +7,7 @@ const DEFAULT_BORDER_COLOR = "rgb(118, 118, 118)";
 const DEFAULT_SURFACE_COLOR = "rgb(255, 255, 255)";
 const DEFAULT_BUTTON_COLOR = "rgb(239, 239, 239)";
 const DEFAULT_PROGRESS_TRACK = "rgb(232, 232, 232)";
+const DEFAULT_METER_VALUE_COLOR = "rgb(56, 142, 60)";
 const DEFAULT_ICON_COLOR = "rgb(80, 80, 80)";
 const DEFAULT_FORM_RADIUS_PX = 2;
 
@@ -67,6 +68,9 @@ export function extractFormControlGeometry(
   if (el instanceof HTMLProgressElement) {
     return extractProgressGeometry(el, node, globalIndex);
   }
+  if (el instanceof HTMLMeterElement) {
+    return extractMeterGeometry(el, node, globalIndex);
+  }
   if (el instanceof HTMLInputElement) {
     return extractInputGeometry(el, node, globalIndex);
   }
@@ -91,6 +95,15 @@ function extractInputGeometry(
   }
   if (type === "radio") {
     return extractRadioGeometry(input, node, globalIndex);
+  }
+  if (type === "range") {
+    return extractRangeGeometry(input, node, globalIndex);
+  }
+  if (type === "color") {
+    return extractColorInputGeometry(input, node, globalIndex);
+  }
+  if (type === "file") {
+    return extractFileInputGeometry(input, node, globalIndex);
   }
   if (BUTTON_INPUT_TYPES.has(type)) {
     return extractButtonInputGeometry(input, node, globalIndex, defaultButtonLabel(type));
@@ -233,6 +246,48 @@ function extractButtonInputGeometry(
 ): IRNode[] {
   const value: ControlDisplayText = { text: input.value || fallbackLabel, isPlaceholder: false };
   return extractSingleLineControlGeometry(input, node, globalIndex, value, "center", DEFAULT_BUTTON_COLOR);
+}
+
+function extractColorInputGeometry(
+  input: HTMLInputElement,
+  node: StackingNode,
+  globalIndex: number
+): IRNode[] {
+  const geometry = getControlGeometry(input);
+  if (!geometry) return [];
+
+  const { quad, localWidth, localHeight } = geometry;
+  const cs = getComputedStyle(input);
+  const outerStyle = getControlBoxStyle(
+    shouldUseFallbackControlFill(cs) ? { ...node.extractedStyle, fill: undefined } : node.extractedStyle,
+    DEFAULT_SURFACE_COLOR,
+    DEFAULT_BORDER_COLOR,
+    DEFAULT_FORM_RADIUS_PX
+  );
+
+  const nodes: IRNode[] = [{
+    type: "polygon",
+    points: quad,
+    style: outerStyle,
+    zIndex: globalIndex,
+  }];
+
+  const inset = clamp(Math.min(localWidth, localHeight) * 0.1, 2, 6);
+  const swatchRect = insetRect(localWidth, localHeight, inset, inset, inset, inset);
+  nodes.push({
+    type: "polygon",
+    points: localRectToQuad(quad, swatchRect.left, swatchRect.top, swatchRect.width, swatchRect.height, localWidth, localHeight),
+    style: {
+      fill: input.value || "#000000",
+      stroke: outerStyle.stroke,
+      strokeWidth: normalizeStrokeWidth(outerStyle.strokeWidth, 1),
+      borderRadius: outerStyle.borderRadius,
+      opacity: node.extractedStyle.opacity,
+    },
+    zIndex: globalIndex + 1,
+  });
+
+  return nodes;
 }
 
 function extractSingleLineControlGeometry(
@@ -460,6 +515,295 @@ function extractProgressGeometry(
   return nodes;
 }
 
+function extractMeterGeometry(
+  meter: HTMLMeterElement,
+  node: StackingNode,
+  globalIndex: number
+): IRNode[] {
+  const geometry = getControlGeometry(meter);
+  if (!geometry) return [];
+
+  const { quad, localWidth, localHeight } = geometry;
+  const cs = getComputedStyle(meter);
+  const min = Number.isFinite(meter.min) ? meter.min : 0;
+  const max = Number.isFinite(meter.max) && meter.max > min ? meter.max : min + 1;
+  const ratio = clamp((meter.value - min) / (max - min), 0, 1);
+  const trackStyle = getControlBoxStyle(node.extractedStyle, DEFAULT_PROGRESS_TRACK, DEFAULT_BORDER_COLOR, Math.max(3, localHeight / 2));
+
+  const nodes: IRNode[] = [{
+    type: "polygon",
+    points: quad,
+    style: trackStyle,
+    zIndex: globalIndex,
+  }];
+
+  const track = insetRect(localWidth, localHeight, 1, 1, 1, 1);
+  if (ratio <= 0) return nodes;
+
+  const accentColor = getMeterValueColor(cs);
+  nodes.push({
+    type: "polygon",
+    points: localRectToQuad(quad, track.left, track.top, Math.max(1, track.width * ratio), track.height, localWidth, localHeight),
+    style: {
+      fill: accentColor,
+      borderRadius: trackStyle.borderRadius,
+      opacity: node.extractedStyle.opacity,
+    },
+    zIndex: globalIndex + 1,
+  });
+
+  return nodes;
+}
+
+function extractFileInputGeometry(
+  input: HTMLInputElement,
+  node: StackingNode,
+  globalIndex: number
+): IRNode[] {
+  const geometry = getControlGeometry(input);
+  if (!geometry) return [];
+
+  const { quad, localWidth, localHeight } = geometry;
+  const cs = getComputedStyle(input);
+  const nodes: IRNode[] = [];
+
+  const outerStyle = getControlBoxStyle(
+    shouldUseFallbackControlFill(cs) ? { ...node.extractedStyle, fill: undefined } : node.extractedStyle,
+    DEFAULT_SURFACE_COLOR,
+    DEFAULT_BORDER_COLOR,
+    DEFAULT_FORM_RADIUS_PX
+  );
+  nodes.push({
+    type: "polygon",
+    points: quad,
+    style: outerStyle,
+    zIndex: globalIndex,
+  });
+
+  const inset = insetRect(localWidth, localHeight, 1, 1, 1, 1);
+  const buttonWidth = clamp(inset.width * 0.34, 72, Math.max(72, inset.width * 0.65));
+  const buttonBox: LocalRect = {
+    left: inset.left,
+    top: inset.top,
+    width: Math.min(buttonWidth, inset.width),
+    height: inset.height,
+  };
+
+  nodes.push({
+    type: "polygon",
+    points: localRectToQuad(quad, buttonBox.left, buttonBox.top, buttonBox.width, buttonBox.height, localWidth, localHeight),
+    style: {
+      fill: DEFAULT_BUTTON_COLOR,
+      stroke: outerStyle.stroke,
+      strokeWidth: normalizeStrokeWidth(outerStyle.strokeWidth, 1),
+      opacity: node.extractedStyle.opacity,
+    },
+    zIndex: globalIndex + 1,
+  });
+
+  const fontSize = getFontSize(node.extractedStyle, cs);
+  const lineHeight = Math.min(getLineHeight(node.extractedStyle, cs, fontSize), Math.max(1, localHeight - 4));
+  const buttonLabel = input.multiple ? "Choose Files" : "Choose File";
+  const buttonLabelNode = createSingleLineTextNode(
+    buttonLabel,
+    quad,
+    localWidth,
+    localHeight,
+    buttonBox,
+    node.extractedStyle,
+    cs,
+    globalIndex + 2,
+    "center",
+    lineHeight
+  );
+  if (buttonLabelNode) nodes.push(buttonLabelNode);
+
+  const fileName = getFileInputDisplayText(input);
+  if (fileName.text.trim()) {
+    const textPadding = Math.max(6, parsePx(cs.paddingLeft));
+    const fileTextBox: LocalRect = {
+      left: Math.min(localWidth - 1, buttonBox.left + buttonBox.width + textPadding),
+      top: inset.top,
+      width: Math.max(1, localWidth - (buttonBox.left + buttonBox.width + textPadding) - inset.left),
+      height: inset.height,
+    };
+    const fileTextStyle = fileName.isPlaceholder
+      ? { ...node.extractedStyle, color: "rgb(98, 105, 120)" }
+      : node.extractedStyle;
+    const fileTextNode = createSingleLineTextNode(
+      fileName.text,
+      quad,
+      localWidth,
+      localHeight,
+      fileTextBox,
+      fileTextStyle,
+      cs,
+      globalIndex + 2,
+      "left",
+      lineHeight
+    );
+    if (fileTextNode) nodes.push(fileTextNode);
+  }
+
+  return nodes;
+}
+
+function extractRangeGeometry(
+  input: HTMLInputElement,
+  node: StackingNode,
+  globalIndex: number
+): IRNode[] {
+  const geometry = getControlGeometry(input);
+  if (!geometry) return [];
+
+  const { quad, localWidth, localHeight } = geometry;
+  const cs = getComputedStyle(input);
+  const accentColor = getAccentColor(cs, node.extractedStyle.color);
+  const trackColor = (shouldUseFallbackControlFill(cs) || shouldUseFallbackFill(node.extractedStyle))
+    ? DEFAULT_PROGRESS_TRACK
+    : (node.extractedStyle.fill ?? DEFAULT_PROGRESS_TRACK);
+  const { ratio } = resolveRangeValueMetrics(input);
+
+  const isVertical = isVerticalRangeControl(input, cs, localWidth, localHeight);
+  const verticalStartAtTop = isVertical && isVerticalRangeStartAtTop(input, cs);
+  const horizontalStartAtLeft = cs.direction !== "rtl";
+  const thumbDiameter = clamp((isVertical ? localWidth : localHeight) * 0.7, 10, 20);
+  const thumbRadius = thumbDiameter / 2;
+  const trackThickness = clamp(Math.min(localWidth, localHeight) * 0.24, 4, 10);
+
+  const nodes: IRNode[] = [];
+
+  if (isVertical) {
+    const trackTop = thumbRadius;
+    const trackHeight = Math.max(1, localHeight - thumbDiameter);
+    const trackLeft = Math.max(0, (localWidth - trackThickness) / 2);
+
+    nodes.push({
+      type: "polygon",
+      points: localRectToQuad(quad, trackLeft, trackTop, trackThickness, trackHeight, localWidth, localHeight),
+      style: {
+        fill: trackColor,
+        borderRadius: `${Math.max(2, trackThickness / 2)}px`,
+        opacity: node.extractedStyle.opacity,
+      },
+      zIndex: globalIndex,
+    });
+
+    if (ratio > 0) {
+      const filledHeight = Math.max(1, trackHeight * ratio);
+      const filledTop = verticalStartAtTop
+        ? trackTop
+        : trackTop + (trackHeight - filledHeight);
+      nodes.push({
+        type: "polygon",
+        points: localRectToQuad(
+          quad,
+          trackLeft,
+          filledTop,
+          trackThickness,
+          filledHeight,
+          localWidth,
+          localHeight
+        ),
+        style: {
+          fill: accentColor,
+          borderRadius: `${Math.max(2, trackThickness / 2)}px`,
+          opacity: node.extractedStyle.opacity,
+        },
+        zIndex: globalIndex + 1,
+      });
+    }
+
+    const thumbCenterX = localWidth / 2;
+    const thumbCenterY = verticalStartAtTop
+      ? trackTop + trackHeight * ratio
+      : trackTop + trackHeight - trackHeight * ratio;
+    nodes.push({
+      type: "polyline",
+      points: approximateEllipsePoints(
+        quad,
+        thumbCenterX,
+        thumbCenterY,
+        thumbRadius,
+        thumbRadius,
+        localWidth,
+        localHeight,
+        24
+      ),
+      closed: true,
+      style: {
+        fill: accentColor,
+        stroke: "rgb(255, 255, 255)",
+        strokeWidth: normalizeStrokeWidth(node.extractedStyle.strokeWidth, 1),
+        opacity: node.extractedStyle.opacity,
+      },
+      zIndex: globalIndex + 2,
+    });
+
+    return nodes;
+  }
+
+  const trackLeft = thumbRadius;
+  const trackWidth = Math.max(1, localWidth - thumbDiameter);
+  const trackTop = Math.max(0, (localHeight - trackThickness) / 2);
+
+  nodes.push({
+    type: "polygon",
+    points: localRectToQuad(quad, trackLeft, trackTop, trackWidth, trackThickness, localWidth, localHeight),
+    style: {
+      fill: trackColor,
+      borderRadius: `${Math.max(2, trackThickness / 2)}px`,
+      opacity: node.extractedStyle.opacity,
+    },
+    zIndex: globalIndex,
+  });
+
+  if (ratio > 0) {
+    const filledWidth = Math.max(1, trackWidth * ratio);
+    const filledLeft = horizontalStartAtLeft
+      ? trackLeft
+      : trackLeft + (trackWidth - filledWidth);
+    nodes.push({
+      type: "polygon",
+      points: localRectToQuad(quad, filledLeft, trackTop, filledWidth, trackThickness, localWidth, localHeight),
+      style: {
+        fill: accentColor,
+        borderRadius: `${Math.max(2, trackThickness / 2)}px`,
+        opacity: node.extractedStyle.opacity,
+      },
+      zIndex: globalIndex + 1,
+    });
+  }
+
+  const thumbCenterX = horizontalStartAtLeft
+    ? trackLeft + trackWidth * ratio
+    : trackLeft + trackWidth - trackWidth * ratio;
+  const thumbCenterY = localHeight / 2;
+  nodes.push({
+    type: "polyline",
+    points: approximateEllipsePoints(
+      quad,
+      thumbCenterX,
+      thumbCenterY,
+      thumbRadius,
+      thumbRadius,
+      localWidth,
+      localHeight,
+      24
+    ),
+    closed: true,
+    style: {
+      fill: accentColor,
+      stroke: "rgb(255, 255, 255)",
+      strokeWidth: normalizeStrokeWidth(node.extractedStyle.strokeWidth, 1),
+      opacity: node.extractedStyle.opacity,
+    },
+    zIndex: globalIndex + 2,
+  });
+
+  return nodes;
+}
+
 function getControlGeometry(el: HTMLElement): { quad: Quad; localWidth: number; localHeight: number } | null {
   const quad = getElementQuad(el, "border");
   if (!quad) return null;
@@ -494,6 +838,88 @@ function getAccentColor(cs: CSSStyleDeclaration, colorFallback?: string): string
   if (isVisibleColor(colorFallback)) return colorFallback!;
   if (isVisibleColor(cs.color)) return cs.color;
   return DEFAULT_ACCENT_COLOR;
+}
+
+function getMeterValueColor(cs: CSSStyleDeclaration): string {
+  const accent = (cs.getPropertyValue("accent-color") || "").trim();
+  if (accent && accent !== "auto") return accent;
+  if (shouldUseFallbackControlFill(cs)) return DEFAULT_METER_VALUE_COLOR;
+  if (isVisibleColor(cs.color)) return cs.color;
+  return DEFAULT_METER_VALUE_COLOR;
+}
+
+function isVerticalRangeControl(
+  input: HTMLInputElement,
+  cs: CSSStyleDeclaration,
+  localWidth: number,
+  localHeight: number
+): boolean {
+  if (localHeight > localWidth * 1.25) return true;
+
+  const writingMode = (cs.writingMode || cs.getPropertyValue("writing-mode") || "").trim().toLowerCase();
+  if (writingMode.startsWith("vertical") || writingMode.startsWith("sideways")) return true;
+
+  const appearance = (
+    cs.getPropertyValue("appearance") ||
+    cs.getPropertyValue("-webkit-appearance") ||
+    cs.getPropertyValue("-moz-appearance") ||
+    ""
+  ).trim().toLowerCase();
+  if (appearance.includes("slider-vertical")) return true;
+
+  const orient = (input.getAttribute("orient") || "").trim().toLowerCase();
+  if (orient === "vertical") return true;
+
+  const ariaOrientation = (input.getAttribute("aria-orientation") || "").trim().toLowerCase();
+  return ariaOrientation === "vertical";
+}
+
+function isVerticalRangeStartAtTop(
+  input: HTMLInputElement,
+  cs: CSSStyleDeclaration
+): boolean {
+  const writingMode = (cs.writingMode || cs.getPropertyValue("writing-mode") || "").trim().toLowerCase();
+  if (writingMode.startsWith("vertical") || writingMode.startsWith("sideways")) return true;
+
+  const appearance = (
+    cs.getPropertyValue("appearance") ||
+    cs.getPropertyValue("-webkit-appearance") ||
+    cs.getPropertyValue("-moz-appearance") ||
+    ""
+  ).trim().toLowerCase();
+  if (appearance.includes("slider-vertical")) return false;
+
+  const orient = (input.getAttribute("orient") || "").trim().toLowerCase();
+  if (orient === "vertical") return false;
+
+  return false;
+}
+
+function resolveRangeValueMetrics(input: HTMLInputElement): {
+  min: number;
+  max: number;
+  value: number;
+  ratio: number;
+} {
+  const parsedMin = Number.parseFloat(input.min);
+  const min = Number.isFinite(parsedMin) ? parsedMin : 0;
+
+  const parsedMax = Number.parseFloat(input.max);
+  const fallbackMax = min + 100;
+  const max = Number.isFinite(parsedMax) ? Math.max(parsedMax, min) : fallbackMax;
+
+  const defaultValue = max > min ? min + (max - min) / 2 : min;
+  const liveValue = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : Number.NaN;
+  const parsedValue = Number.parseFloat(input.value);
+  const unclampedValue = Number.isFinite(liveValue)
+    ? liveValue
+    : Number.isFinite(parsedValue)
+      ? parsedValue
+      : defaultValue;
+  const value = clamp(unclampedValue, min, max);
+  const ratio = max > min ? (value - min) / (max - min) : 0;
+
+  return { min, max, value, ratio };
 }
 
 function shouldUseFallbackControlFill(cs: CSSStyleDeclaration): boolean {
@@ -849,4 +1275,28 @@ function isVisibleColor(color: string | undefined): boolean {
   if (rgbaMatch?.[1] !== undefined && parseFloat(rgbaMatch[1]) <= 0) return false;
   if (color.startsWith("#") && color.length === 9 && parseInt(color.slice(7, 9), 16) === 0) return false;
   return true;
+}
+
+function getFileInputDisplayText(input: HTMLInputElement): ControlDisplayText {
+  const files = input.files;
+  if (files && files.length > 0) {
+    const names = Array.from(files).map((file) => file.name).filter(Boolean);
+    if (names.length > 0) {
+      return {
+        text: input.multiple && names.length > 1 ? `${names.length} files selected` : names.join(", "),
+        isPlaceholder: false,
+      };
+    }
+  }
+
+  const rawValue = (input.value ?? "").trim();
+  if (rawValue) {
+    const basename = rawValue.split(/[\\/]/).pop() ?? rawValue;
+    return { text: basename || rawValue, isPlaceholder: false };
+  }
+
+  return {
+    text: "No file selected",
+    isPlaceholder: true,
+  };
 }

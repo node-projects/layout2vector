@@ -1517,6 +1517,16 @@ export async function extractImageGeometry(
     }
   }
 
+  // Keep fallback output consistent with the primary canvas path by applying
+  // object-view-box crops and display-size sampling when needed.
+  if (objectFitPlan.sourceRect || renderW !== natW || renderH !== natH) {
+    const rendered = renderDataUrlWithSampling(dataUrl, renderW, renderH, disableSmoothing, objectFitPlan.sourceRect);
+    if (rendered) {
+      dataUrl = rendered.dataUrl;
+      rgbData = rendered.rgbData;
+    }
+  }
+
   // For inline SVG data URLs, keep the original payload so writers that can render
   // SVG natively preserve fidelity. For remote SVG sources, keep the resolved data URL
   // or raster fallback; reverting to the original URL re-taints downstream canvases.
@@ -1742,13 +1752,15 @@ function getObjectFitPlan(
   const inlineObjectViewBox = el instanceof HTMLElement ? el.style.getPropertyValue("object-view-box").trim() : "";
   const styleAttr = el.getAttribute("style") ?? "";
   const styleAttrObjectViewBox = styleAttr.match(/(?:^|;)\s*object-view-box\s*:\s*([^;]+)/i)?.[1]?.trim() ?? "";
-  const baseSourceRect = parseObjectViewBox(
-    computedObjectViewBox && computedObjectViewBox !== "none"
-      ? computedObjectViewBox
-      : (inlineObjectViewBox || styleAttrObjectViewBox),
-    natW,
-    natH,
-  );
+  const objectViewBoxCandidates = [computedObjectViewBox, inlineObjectViewBox, styleAttrObjectViewBox]
+    .map((value) => value.trim())
+    .filter((value) => !!value && value !== "none");
+
+  let baseSourceRect: SourceRect | undefined;
+  for (const candidate of objectViewBoxCandidates) {
+    baseSourceRect = parseObjectViewBox(candidate, natW, natH);
+    if (baseSourceRect) break;
+  }
   const sourceNatW = baseSourceRect?.width ?? natW;
   const sourceNatH = baseSourceRect?.height ?? natH;
   const plan = getObjectFitPlanFromDimensions(quad, sourceNatW, sourceNatH, objectFit, computedStyle.objectPosition);

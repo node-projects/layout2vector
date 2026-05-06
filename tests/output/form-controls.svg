@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="684" viewBox="0 0 1232 684">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1232" height="1043" viewBox="0 0 1232 1043">
 <defs>
 <filter id="ds1" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
 <clipPath id="clip2" clipPathUnits="userSpaceOnUse"><rect x="31" y="133" width="369" height="20"/></clipPath>
@@ -17,6 +17,8 @@
 <clipPath id="clip14" clipPathUnits="userSpaceOnUse"><rect x="480" y="478" width="369" height="22"/></clipPath>
 <clipPath id="clip15" clipPathUnits="userSpaceOnUse"><rect x="480" y="554" width="369" height="22"/></clipPath>
 <clipPath id="clip16" clipPathUnits="userSpaceOnUse"><rect x="480" y="630" width="369" height="20"/></clipPath>
+<clipPath id="clip17" clipPathUnits="userSpaceOnUse"><rect x="469" y="979" width="132.94" height="44"/></clipPath>
+<clipPath id="clip18" clipPathUnits="userSpaceOnUse"><rect x="613.94" y="979" width="246.06" height="44"/></clipPath>
 </defs>
 <text x="0" y="1.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="28px" font-family="Arial, sans-serif">Native Form Controls</text>
 <g filter="url(#ds1)"><g><rect x="0" y="52" width="431" height="327" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="52" width="431" height="327" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
@@ -48,7 +50,10 @@
 <g><rect x="468" y="228" width="393" height="18" rx="9" ry="9" fill="rgb(232, 232, 232)"/><rect x="468" y="228" width="393" height="18" rx="9" ry="9" fill="none" stroke="rgb(29, 39, 54)" stroke-width="1"/></g>
 <rect x="469" y="229" width="281.52" height="16" rx="8" ry="8" fill="rgb(15, 98, 254)"/>
 <g clip-path="url(#clip8)"><text x="648.49" y="229" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">72%</text></g>
-<g filter="url(#ds9)"><g><rect x="0" y="397" width="431" height="287" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="397" width="431" height="287" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
+<text x="468" y="261" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">METER</text>
+<g><rect x="468" y="280" width="393" height="20" rx="10" ry="10" fill="rgb(232, 232, 232)"/><rect x="468" y="280" width="393" height="20" rx="10" ry="10" fill="none" stroke="rgb(29, 39, 54)" stroke-width="1"/></g>
+<rect x="469" y="281" width="242.42" height="18" rx="9" ry="9" fill="rgb(56, 142, 60)"/>
+<g filter="url(#ds9)"><g><rect x="0" y="397" width="431" height="646" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="0" y="397" width="431" height="646" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="19" y="416.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Date &amp; Time</text>
 <text x="19" y="449" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATE</text>
 <g><rect x="19" y="468" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="468" width="393" height="42" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
@@ -59,7 +64,7 @@
 <text x="19" y="603.8" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATETIME</text>
 <g><rect x="19" y="623" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="623" width="393" height="42" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
 <g clip-path="url(#clip12)"><text x="31" y="636" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13 14:35</text></g>
-<g filter="url(#ds13)"><g><rect x="449" y="397" width="431" height="287" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="397" width="431" height="287" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
+<g filter="url(#ds13)"><g><rect x="449" y="397" width="431" height="646" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="397" width="431" height="646" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="468" y="416.5" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Additional Inputs</text>
 <text x="468" y="449" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">MONTH</text>
 <g><rect x="468" y="468" width="393" height="42" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="468" width="393" height="42" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
@@ -70,4 +75,20 @@
 <text x="468" y="601" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">NUMBER</text>
 <g><rect x="468" y="620" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="620" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
 <g clip-path="url(#clip16)"><text x="480" y="632" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">42</text></g>
+<text x="468" y="675" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">COLOR</text>
+<g><rect x="468" y="694" width="393" height="38" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="694" width="393" height="38" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g><rect x="471.8" y="697.8" width="385.4" height="30.4" rx="8" ry="8" fill="#0f62fe"/><rect x="471.8" y="697.8" width="385.4" height="30.4" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<text x="468" y="747" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">RANGE</text>
+<rect x="475.6" y="774" width="381.8" height="4" rx="2" ry="2" fill="rgb(232, 232, 232)"/>
+<rect x="475.6" y="774" width="259.62" height="4" rx="2" ry="2" fill="rgb(15, 98, 254)"/>
+<g><path d="M740.82,776 L740.63,777.45 L740.07,778.8 L739.18,779.96 L738.02,780.85 L736.67,781.41 L735.22,781.6 L733.77,781.41 L732.42,780.85 L731.26,779.96 L730.37,778.8 L729.81,777.45 L729.62,776 L729.81,774.55 L730.37,773.2 L731.26,772.04 L732.42,771.15 L733.77,770.59 L735.22,770.4 L736.67,770.59 L738.02,771.15 L739.18,772.04 L740.07,773.2 L740.63,774.55 Z" fill="rgb(15, 98, 254)"/><path d="M740.82,776 L740.63,777.45 L740.07,778.8 L739.18,779.96 L738.02,780.85 L736.67,781.41 L735.22,781.6 L733.77,781.41 L732.42,780.85 L731.26,779.96 L730.37,778.8 L729.81,777.45 L729.62,776 L729.81,774.55 L730.37,773.2 L731.26,772.04 L732.42,771.15 L733.77,770.59 L735.22,770.4 L736.67,770.59 L738.02,771.15 L739.18,772.04 L740.07,773.2 L740.63,774.55 Z" fill="none" stroke="rgb(255, 255, 255)" stroke-width="1"/></g>
+<text x="468" y="801" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">VERTICAL RANGE</text>
+<rect x="661.5" y="832" width="10" height="100" rx="5" ry="5" fill="rgb(232, 232, 232)"/>
+<rect x="661.5" y="832" width="10" height="70" rx="5" ry="5" fill="rgb(15, 98, 254)"/>
+<g><path d="M676.5,902 L676.16,904.59 L675.16,907 L673.57,909.07 L671.5,910.66 L669.09,911.66 L666.5,912 L663.91,911.66 L661.5,910.66 L659.43,909.07 L657.84,907 L656.84,904.59 L656.5,902 L656.84,899.41 L657.84,897 L659.43,894.93 L661.5,893.34 L663.91,892.34 L666.5,892 L669.09,892.34 L671.5,893.34 L673.57,894.93 L675.16,897 L676.16,899.41 Z" fill="rgb(15, 98, 254)"/><path d="M676.5,902 L676.16,904.59 L675.16,907 L673.57,909.07 L671.5,910.66 L669.09,911.66 L666.5,912 L663.91,911.66 L661.5,910.66 L659.43,909.07 L657.84,907 L656.84,904.59 L656.5,902 L656.84,899.41 L657.84,897 L659.43,894.93 L661.5,893.34 L663.91,892.34 L666.5,892 L669.09,892.34 L671.5,893.34 L673.57,894.93 L675.16,897 L676.16,899.41 Z" fill="none" stroke="rgb(255, 255, 255)" stroke-width="1"/></g>
+<text x="468" y="959" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">FILE</text>
+<g><rect x="468" y="978" width="393" height="46" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="468" y="978" width="393" height="46" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g><rect x="469" y="979" width="132.94" height="44" rx="0" ry="0" fill="rgb(239, 239, 239)"/><rect x="469" y="979" width="132.94" height="44" rx="0" ry="0" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
+<g clip-path="url(#clip17)"><text x="492.78" y="993" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" xml:space="preserve">Choose File</text></g>
+<g clip-path="url(#clip18)"><text x="613.94" y="993" fill="rgb(98, 105, 120)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif" xml:space="preserve">No file selected</text></g>
 </svg>

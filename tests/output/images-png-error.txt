@@ -1,0 +1,1 @@
+Error: page.evaluate: Target page, context or browser has been closed

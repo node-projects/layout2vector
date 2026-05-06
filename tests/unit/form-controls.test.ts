@@ -18,6 +18,11 @@ test.describe("Form control conversion", () => {
           <option selected>Option B</option>
         </select>
         <progress id="progress" value="65" max="100"></progress>
+        <meter id="meter" min="0" max="1" value="0.62"></meter>
+        <input id="range" type="range" min="20" max="120" value="80">
+        <input id="vertical-range" type="range" min="0" max="10" value="7" style="width: 220px; height: 120px; writing-mode: vertical-lr;">
+        <input id="color" type="color" value="#0f62fe">
+        <input id="file" type="file">
         <input id="date" type="date" value="2026-04-13">
         <input id="time" type="time" value="14:35">
         <input id="datetime" type="datetime-local" value="2026-04-13T14:35">
@@ -29,6 +34,10 @@ test.describe("Form control conversion", () => {
     const summary = await page.evaluate(async () => {
       const HC = (window as any).__HC;
       (document.getElementById("checkbox-mixed") as HTMLInputElement).indeterminate = true;
+      const fileInput = document.getElementById("file") as HTMLInputElement;
+      const dt = new DataTransfer();
+      dt.items.add(new File(["hello"], "notes.txt", { type: "text/plain" }));
+      Object.defineProperty(fileInput, "files", { configurable: true, value: dt.files });
 
       async function summarize(id: string, convertFormControls = true) {
         const el = document.getElementById(id)!;
@@ -39,6 +48,7 @@ test.describe("Form control conversion", () => {
 
         return {
           texts: ir.filter((node: any) => node.type === "text").map((node: any) => node.text),
+          polygons: ir.filter((node: any) => node.type === "polygon"),
           polygonCount: ir.filter((node: any) => node.type === "polygon").length,
           closedPolylines: ir.filter((node: any) => node.type === "polyline" && node.closed).length,
           openPolylinePointCounts: ir
@@ -58,6 +68,11 @@ test.describe("Form control conversion", () => {
         radio: await summarize("radio"),
         select: await summarize("select"),
         progress: await summarize("progress"),
+        meter: await summarize("meter"),
+        range: await summarize("range"),
+        verticalRange: await summarize("vertical-range"),
+        color: await summarize("color"),
+        file: await summarize("file"),
         date: await summarize("date"),
         time: await summarize("time"),
         datetime: await summarize("datetime"),
@@ -83,6 +98,36 @@ test.describe("Form control conversion", () => {
 
     expect(summary.progress.polygonCount).toBeGreaterThanOrEqual(2);
     expect(summary.progress.texts).toContain("65%");
+
+    expect(summary.meter.polygonCount).toBeGreaterThanOrEqual(2);
+    expect(summary.meter.polygons[1]?.style?.fill).toBe("rgb(56, 142, 60)");
+
+    expect(summary.range.polygonCount).toBeGreaterThanOrEqual(2);
+    expect(summary.range.closedPolylines).toBeGreaterThanOrEqual(1);
+    const rangeTrackXs = summary.range.polygons[0].points.map((point: any) => point.x);
+    const rangeFillXs = summary.range.polygons[1].points.map((point: any) => point.x);
+    const rangeTrackWidth = Math.max(...rangeTrackXs) - Math.min(...rangeTrackXs);
+    const rangeFillWidth = Math.max(...rangeFillXs) - Math.min(...rangeFillXs);
+    // Value is 80 in a 20..120 range => ratio 0.6, so filled track should be around 60%.
+    expect(rangeFillWidth / Math.max(1, rangeTrackWidth)).toBeCloseTo(0.6, 1);
+
+    expect(summary.verticalRange.polygonCount).toBeGreaterThanOrEqual(2);
+    expect(summary.verticalRange.closedPolylines).toBeGreaterThanOrEqual(1);
+    const verticalTrackXs = summary.verticalRange.polygons[0].points.map((point: any) => point.x);
+    const verticalTrackYs = summary.verticalRange.polygons[0].points.map((point: any) => point.y);
+    const verticalTrackWidth = Math.max(...verticalTrackXs) - Math.min(...verticalTrackXs);
+    const verticalTrackHeight = Math.max(...verticalTrackYs) - Math.min(...verticalTrackYs);
+    expect(verticalTrackHeight).toBeGreaterThan(verticalTrackWidth);
+    const verticalFillYs = summary.verticalRange.polygons[1].points.map((point: any) => point.y);
+    // writing-mode vertical slider in this fixture should fill from top downward.
+    expect(Math.min(...verticalFillYs)).toBeCloseTo(Math.min(...verticalTrackYs), 1);
+
+    expect(summary.color.polygonCount).toBeGreaterThanOrEqual(2);
+    expect(summary.color.polygons[1]?.style?.fill).toBe("#0f62fe");
+
+    expect(summary.file.polygonCount).toBeGreaterThanOrEqual(2);
+    expect(summary.file.texts).toContain("Choose File");
+    expect(summary.file.texts.join(" ")).toContain("notes.txt");
 
     expect(summary.date.texts).toContain("2026-04-13");
     expect(summary.time.texts).toContain("14:35");
@@ -200,5 +245,50 @@ test.describe("Form control conversion", () => {
 
     expect(summary.count).toBe(0);
     expect(summary.types).toEqual([]);
+  });
+
+  test("maps range thumb positions from min max and live value", async ({ page }) => {
+    await setupPage(
+      page,
+      `<html><body style="margin:0;padding:24px;font-family:Arial,sans-serif;">
+        <input id="range-min" type="range" min="20" max="120" value="20" style="width: 200px;">
+        <input id="range-mid" type="range" min="20" max="120" value="70" style="width: 200px;">
+        <input id="range-max" type="range" min="20" max="120" value="120" style="width: 200px;">
+      </body></html>`
+    );
+
+    const summary = await page.evaluate(async () => {
+      const HC = (window as any).__HC;
+
+      async function summarize(id: string) {
+        const el = document.getElementById(id)!;
+        const ir = await HC.extractIR(el, {
+          includeText: false,
+          convertFormControls: true,
+        });
+
+        const track = ir.find((node: any) => node.type === "polygon");
+        const thumb = ir.find((node: any) => node.type === "polyline" && node.closed);
+        const trackXs = track.points.map((point: any) => point.x);
+        const thumbXs = thumb.points.map((point: any) => point.x);
+        return {
+          trackMinX: Math.min(...trackXs),
+          trackMaxX: Math.max(...trackXs),
+          thumbCenterX: (Math.min(...thumbXs) + Math.max(...thumbXs)) / 2,
+        };
+      }
+
+      return {
+        min: await summarize("range-min"),
+        mid: await summarize("range-mid"),
+        max: await summarize("range-max"),
+      };
+    });
+
+    expect(summary.min.thumbCenterX).toBeCloseTo(summary.min.trackMinX, 1);
+    expect(summary.max.thumbCenterX).toBeCloseTo(summary.max.trackMaxX, 1);
+    expect(summary.mid.thumbCenterX).toBeGreaterThan(summary.mid.trackMinX);
+    expect(summary.mid.thumbCenterX).toBeLessThan(summary.mid.trackMaxX);
+    expect(summary.mid.thumbCenterX).toBeCloseTo((summary.mid.trackMinX + summary.mid.trackMaxX) / 2, 1);
   });
 });

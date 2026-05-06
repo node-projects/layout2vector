@@ -220,8 +220,9 @@ export type Options = {
   /**
    * When true, native form controls are converted to synthetic IR nodes that
    * preserve their visible state or value (for example checkbox/radio state,
-   * input values, select labels, and progress values) instead of relying on the
-   * browser exposing those visuals as regular DOM text and boxes.
+    * input values (including file names), select labels, and progress/meter
+    * values) instead of relying on the browser exposing those visuals as
+    * regular DOM text and boxes.
    * Defaults to false.
    */
   convertFormControls?: boolean;
