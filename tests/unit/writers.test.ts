@@ -7,6 +7,7 @@ import { DWGWriter } from "../../src/writers/acad-writer.js";
 import { AcadDXFWriter } from "../../src/writers/acad-writer.js";
 import { renderIR } from "../../src/pipeline.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import type { IRNode } from "../../src/types.js";
 import { CadUtils, DwgReader, Hatch } from "@node-projects/acad-ts";
@@ -264,6 +265,81 @@ test.describe("Writer Output", () => {
     expect(texts.length).toBeGreaterThan(0);
     expect(texts[0].text).toContain("Hello PDF");
     expect(texts[0].style).toBeDefined();
+  });
+
+  test("PDF writer selects the subset font that actually covers ASCII text", async () => {
+    const writer = new PDFWriter({ pageWidth: 40, pageHeight: 20 });
+    const writerAny = writer as any;
+    const subsetA = {
+      id: "CF1",
+      pdfName: "IBMPlexMono-Regular-1",
+      parsed: {
+        familyName: "IBM Plex Mono",
+        postScriptName: "IBMPlexMono-Regular",
+        unitsPerEm: 1000,
+        bbox: [0, 0, 1000, 1000],
+        ascent: 800,
+        descent: -200,
+        italicAngle: 0,
+        flags: 4,
+        isSymbolFont: false,
+        cmap: new Map([[97, 1]]),
+        glyphWidths: new Map([[1, 600]]),
+        rawData: new Uint8Array([0]),
+      },
+    };
+    const subsetB = {
+      id: "CF2",
+      pdfName: "IBMPlexMono-Regular-2",
+      parsed: {
+        familyName: "IBM Plex Mono",
+        postScriptName: "IBMPlexMono-Regular",
+        unitsPerEm: 1000,
+        bbox: [0, 0, 1000, 1000],
+        ascent: 800,
+        descent: -200,
+        italicAngle: 0,
+        flags: 4,
+        isSymbolFont: false,
+        cmap: new Map(Array.from("getBoxQuads()", (ch, index) => [ch.codePointAt(0)!, index + 1])),
+        glyphWidths: new Map(Array.from({ length: 13 }, (_, index) => [index + 1, 600])),
+        rawData: new Uint8Array([1]),
+      },
+    };
+
+    writerAny.customFonts.set('ibm plex mono|400|normal', [subsetA, subsetB]);
+    writerAny.customFonts.set('ibm plex mono', [subsetA, subsetB]);
+    writerAny.customFontIndex.set(subsetA.id, subsetA);
+    writerAny.customFontIndex.set(subsetB.id, subsetB);
+
+    const resolved = writerAny.resolveFont('"IBM Plex Mono", monospace', '400', 'normal', 'getBoxQuads()');
+
+    expect(resolved).toBe('custom:CF2');
+  });
+
+  test("PDF writer keeps semi-transparent gradients translucent without fallback overpaint", async () => {
+    const writer = new PDFWriter({ pageWidth: 120, pageHeight: 80 });
+    const writerAny = writer as any;
+
+    await writer.begin();
+    await writer.drawPolygon([
+      { x: 10, y: 10 },
+      { x: 90, y: 10 },
+      { x: 90, y: 50 },
+      { x: 10, y: 50 },
+    ], {
+      fill: 'rgba(18, 53, 91, 0.92)',
+      backgroundColor: undefined,
+      backgroundImage: 'linear-gradient(135deg, rgba(18, 53, 91, 0.92), rgba(15, 118, 110, 0.92))',
+      borderRadius: '22px',
+      opacity: 1,
+    });
+
+    expect(writerAny.gstates).toEqual([
+      expect.objectContaining({ ca: 0.92, CA: 0.92 }),
+    ]);
+    expect(writerAny.ops).toContain('/SH1 sh');
+    expect(writerAny.ops).not.toContain('f');
   });
 
   test("source metadata is attached to IR and surfaced in HTML and SVG output", async ({ page }) => {

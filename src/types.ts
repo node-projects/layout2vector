@@ -23,6 +23,7 @@ export type ClipQuad = {
 /** Extracted computed style subset. */
 export type Style = {
   fill?: string;
+  backgroundColor?: string;
   fillRule?: "nonzero" | "evenodd";
   stroke?: string;
   strokeImage?: string;

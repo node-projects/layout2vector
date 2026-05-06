@@ -83,6 +83,9 @@ export function extractStyle(cs: CSSStyleDeclaration): Style {
 
   const result: Style = {
     fill,
+    backgroundColor: bgColor && bgColor !== "rgba(0, 0, 0, 0)" && bgColor !== "transparent"
+      ? bgColor
+      : undefined,
     stroke: cs.borderColor || undefined,
     strokeWidth: cs.borderWidth || undefined,
 

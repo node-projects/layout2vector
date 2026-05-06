@@ -132,6 +132,11 @@ function choosePdfFontSource(face: FontAsset): FontAsset["sources"][number] | nu
 }
 
 type FontEditorCoreModule = typeof import("fonteditor-core");
+type RegisteredCustomFont = {
+  id: string;
+  pdfName: string;
+  parsed: ParsedTTF;
+};
 
 let fontEditorCorePromise: Promise<FontEditorCoreModule> | null = null;
 
@@ -1132,8 +1137,10 @@ export class PDFWriter implements Writer<PdfDocument> {
   private images: ImageDef[] = [];
   private imageCounter = 0;
 
-  // Custom TrueType fonts: selector/family key → parsed TTF data
-  private customFonts = new Map<string, ParsedTTF>();
+  // Custom TrueType fonts: selector/family key → one or more parsed TTF subsets
+  private customFonts = new Map<string, RegisteredCustomFont[]>();
+  private customFontIndex = new Map<string, RegisteredCustomFont>();
+  private customFontIdCounter = 0;
   // Track which characters (Unicode code points) are used per custom font (PostScript name)
   private customFontUsedChars = new Map<string, Set<number>>();
   // Default font for Unicode text that can't be encoded in WinAnsi
@@ -1237,27 +1244,57 @@ export class PDFWriter implements Writer<PdfDocument> {
     descriptors?: { weight?: string; style?: string },
   ): void {
     const parsed = parseTTF(data);
+    const record: RegisteredCustomFont = {
+      id: `CF${++this.customFontIdCounter}`,
+      pdfName: `${parsed.postScriptName}-${this.customFontIdCounter}`,
+      parsed,
+    };
+    this.customFontIndex.set(record.id, record);
     const directKeys = [family, parsed.familyName, parsed.postScriptName];
     if (descriptors) {
       for (const key of directKeys) {
         if (!key) continue;
-        this.customFonts.set(buildCustomFontKey(key, descriptors.weight, descriptors.style), parsed);
+        this.addCustomFontCandidate(buildCustomFontKey(key, descriptors.weight, descriptors.style), record);
       }
     }
 
     for (const key of [family, parsed.familyName, parsed.postScriptName]) {
       const normalized = normalizeFontFamilyName(key);
       if (!normalized) continue;
-      if (!this.customFonts.has(normalized)) {
-        this.customFonts.set(normalized, parsed);
-      }
+      this.addCustomFontCandidate(normalized, record);
     }
   }
 
-  private getCustomFontForFamily(family: string, weight: string | undefined, style: string | undefined): ParsedTTF | null {
-    return this.customFonts.get(buildCustomFontKey(family, weight, style))
-      ?? this.customFonts.get(normalizeFontFamilyName(family))
-      ?? null;
+  private addCustomFontCandidate(key: string, record: RegisteredCustomFont): void {
+    const existing = this.customFonts.get(key);
+    if (existing) {
+      if (!existing.some((candidate) => candidate.id === record.id)) {
+        existing.push(record);
+      }
+      return;
+    }
+
+    this.customFonts.set(key, [record]);
+  }
+
+  private getCustomFontForFamily(family: string, weight: string | undefined, style: string | undefined): RegisteredCustomFont | null {
+    const exactMatches = this.customFonts.get(buildCustomFontKey(family, weight, style)) ?? [];
+    const familyMatches = this.customFonts.get(normalizeFontFamilyName(family)) ?? [];
+    return exactMatches[0] ?? familyMatches[0] ?? null;
+  }
+
+  private getCustomFontCandidates(family: string, weight: string | undefined, style: string | undefined): RegisteredCustomFont[] {
+    const seen = new Set<string>();
+    const candidates: RegisteredCustomFont[] = [];
+    for (const record of [
+      ...(this.customFonts.get(buildCustomFontKey(family, weight, style)) ?? []),
+      ...(this.customFonts.get(normalizeFontFamilyName(family)) ?? []),
+    ]) {
+      if (seen.has(record.id)) continue;
+      seen.add(record.id);
+      candidates.push(record);
+    }
+    return candidates;
   }
 
   /** Map CSS font family + weight to a standard PDF font name (or custom font ID). */
@@ -1266,7 +1303,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     for (const token of parseFontFamilies(family)) {
       const customFont = this.getCustomFontForFamily(token, weight, style);
       if (customFont) {
-        return `custom:${customFont.postScriptName}`;
+        return `custom:${customFont.id}`;
       }
 
       if (token === "symbol") {
@@ -1312,7 +1349,6 @@ export class PDFWriter implements Writer<PdfDocument> {
   private fontHasAllChars(parsed: ParsedTTF, text: string): boolean {
     for (const ch of text) {
       const code = ch.codePointAt(0)!;
-      if (code < 0x80) continue; // ASCII always available
       const gid = parsed.cmap.get(code);
       if (gid === undefined || gid === 0) return false;
     }
@@ -1326,6 +1362,15 @@ export class PDFWriter implements Writer<PdfDocument> {
    * doesn't have the needed glyphs.
    */
   private resolveFont(family: string, weight: string | undefined, style: string | undefined, text: string): string {
+    const families = parseFontFamilies(family);
+    for (const token of families) {
+      for (const record of this.getCustomFontCandidates(token, weight, style)) {
+        if (this.fontHasAllChars(record.parsed, text)) {
+          return `custom:${record.id}`;
+        }
+      }
+    }
+
     const mapped = this.mapToPdfFont(family, weight, style);
     // If it's already a custom font, check it has the glyphs
     if (this.isCustomFont(mapped)) {
@@ -1340,9 +1385,9 @@ export class PDFWriter implements Writer<PdfDocument> {
       return `custom:${this.defaultFont.postScriptName}`;
     }
     // Search all custom fonts for one that has the needed glyphs
-    for (const parsed of this.getUniqueCustomFonts()) {
-      if (this.fontHasAllChars(parsed, text)) {
-        return `custom:${parsed.postScriptName}`;
+    for (const record of this.getUniqueCustomFonts()) {
+      if (this.fontHasAllChars(record.parsed, text)) {
+        return `custom:${record.id}`;
       }
     }
     // Last resort: use default font even if incomplete, or mapped standard font
@@ -1360,10 +1405,8 @@ export class PDFWriter implements Writer<PdfDocument> {
     return pdfFontName.startsWith("custom:");
   }
 
-  private getUniqueCustomFonts(): ParsedTTF[] {
-    return [...new Map(
-      [...this.customFonts.values()].map((parsed) => [parsed.postScriptName, parsed]),
-    ).values()];
+  private getUniqueCustomFonts(): RegisteredCustomFont[] {
+    return [...this.customFontIndex.values()];
   }
 
   /** Get the ascent ratio (ascent / unitsPerEm) for a PDF font. */
@@ -1427,17 +1470,31 @@ export class PDFWriter implements Writer<PdfDocument> {
     return Math.max(50, Math.min(200, scale));
   }
 
-  /** Get the parsed TTF data for a custom font name. */
-  private getCustomFontData(pdfFontName: string): ParsedTTF | null {
+  private getCustomFontRecord(pdfFontName: string): RegisteredCustomFont | null {
     if (!pdfFontName.startsWith("custom:")) return null;
-    const psName = pdfFontName.slice(7); // strip "custom:"
-    for (const parsed of this.getUniqueCustomFonts()) {
-      if (parsed.postScriptName === psName) return parsed;
-    }
+    return this.customFontIndex.get(pdfFontName.slice(7)) ?? null;
+  }
+
+  private getCustomFontData(pdfFontName: string): ParsedTTF | null {
+    const record = this.getCustomFontRecord(pdfFontName);
+    if (record) return record.parsed;
+
+    const psName = pdfFontName.startsWith("custom:") ? pdfFontName.slice(7) : "";
     // Check the default font
     if (this.defaultFont && this.defaultFont.postScriptName === psName) {
       return this.defaultFont;
     }
+    return null;
+  }
+
+  private getCustomFontPdfName(pdfFontName: string): string | null {
+    const record = this.getCustomFontRecord(pdfFontName);
+    if (record) return record.pdfName;
+
+    if (pdfFontName.startsWith("custom:") && this.defaultFont && this.defaultFont.postScriptName === pdfFontName.slice(7)) {
+      return this.defaultFont.postScriptName;
+    }
+
     return null;
   }
 
@@ -1460,12 +1517,13 @@ export class PDFWriter implements Writer<PdfDocument> {
   private encodeCustomText(text: string, pdfFontName: string): string {
     const parsed = this.getCustomFontData(pdfFontName);
     if (!parsed) return "";
+    const fontKey = pdfFontName.slice(7);
 
     // Track used characters
-    let usedChars = this.customFontUsedChars.get(parsed.postScriptName);
+    let usedChars = this.customFontUsedChars.get(fontKey);
     if (!usedChars) {
       usedChars = new Set<number>();
-      this.customFontUsedChars.set(parsed.postScriptName, usedChars);
+      this.customFontUsedChars.set(fontKey, usedChars);
     }
 
     if (parsed.isSymbolFont) {
@@ -2316,15 +2374,15 @@ export class PDFWriter implements Writer<PdfDocument> {
         // TrueType font embedding
         const parsed = this.getCustomFontData(pdfFontName);
         if (!parsed) continue;
-
-        const usedChars = this.customFontUsedChars.get(parsed.postScriptName) ?? new Set<number>();
+        const pdfBaseName = this.getCustomFontPdfName(pdfFontName);
+        const usedChars = this.customFontUsedChars.get(pdfFontName.slice(7)) ?? new Set<number>();
         if (parsed.isSymbolFont) {
           // Simple TrueType embedding for symbol fonts (better compatibility)
-          const fontRef = this.createSimpleTrueTypeFont(doc, parsed, usedChars);
+          const fontRef = this.createSimpleTrueTypeFont(doc, parsed, usedChars, pdfBaseName ?? parsed.postScriptName);
           fontDict.set(resName, fontRef);
         } else {
           // CID font embedding for Unicode fonts
-          const fontRef = this.createCIDFont(doc, parsed, usedChars);
+          const fontRef = this.createCIDFont(doc, parsed, usedChars, pdfBaseName ?? parsed.postScriptName);
           fontDict.set(resName, fontRef);
         }
       } else {
@@ -2453,8 +2511,9 @@ export class PDFWriter implements Writer<PdfDocument> {
     doc: PdfDocument,
     parsed: ParsedTTF,
     usedChars: Set<number>,
+    pdfName: string,
   ): PdfReference {
-    const psName = parsed.postScriptName;
+    const psName = pdfName;
     const scale = 1000 / parsed.unitsPerEm;
 
     // 1. Embedded font stream (FontFile2)
@@ -2525,8 +2584,9 @@ export class PDFWriter implements Writer<PdfDocument> {
     doc: PdfDocument,
     parsed: ParsedTTF,
     usedChars: Set<number>,
+    pdfName: string,
   ): PdfReference {
-    const psName = parsed.postScriptName;
+    const psName = pdfName;
     const scale = 1000 / parsed.unitsPerEm;
 
     // 1. Embedded font stream (FontFile2) — full TTF data
@@ -2704,7 +2764,7 @@ export class PDFWriter implements Writer<PdfDocument> {
   private drawSolidBackgroundPolygon(points: Quad, style: Style, fillColor: ParsedColor): void {
     this.ops.push("q");
 
-    const opacity = style.opacity ?? 1;
+    const opacity = (style.opacity ?? 1) * fillColor.a;
     if (opacity < 1) {
       const gsName = this.getGStateResName(opacity, opacity);
       this.ops.push(`/${gsName} gs`);
@@ -2723,6 +2783,11 @@ export class PDFWriter implements Writer<PdfDocument> {
     if (!strokeColor || strokeWidth <= 0) return;
 
     this.ops.push("q");
+    const strokeOpacity = (style.opacity ?? 1) * strokeColor.a;
+    if (strokeOpacity < 1) {
+      const gsName = this.getGStateResName(1, strokeOpacity);
+      this.ops.push(`/${gsName} gs`);
+    }
     this.emitClip(style, getQuadBounds(points));
     this.setStroke(strokeColor);
     this.setLineWidth(pxToPt(strokeWidth));
@@ -2732,7 +2797,7 @@ export class PDFWriter implements Writer<PdfDocument> {
   }
 
   private drawGradientPolygon(points: Quad, gradients: ParsedGradient[], style: Style): void {
-    const fillColor = parseVisibleColor(style.fill);
+    const fillColor = parseVisibleColor(style.backgroundColor);
     if (fillColor) {
       this.drawSolidBackgroundPolygon(points, style, fillColor);
     }
@@ -2772,6 +2837,7 @@ export class PDFWriter implements Writer<PdfDocument> {
         color: interpolateConicColor(1, [...sortedStops], true),
       }))
       : gradient.stops;
+    const gradientOpacity = this.getUniformGradientOpacity(resolvedStops);
     const stops = resolvedStops.map(s => ({
       offset: s.offset,
       r: s.color.r,
@@ -2800,7 +2866,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     // Save state, set opacity, clip, shade, restore
     this.ops.push("q");
 
-    const opacity = style.opacity ?? 1;
+    const opacity = (style.opacity ?? 1) * gradientOpacity;
     if (opacity < 1) {
       const gsName = this.getGStateResName(opacity, opacity);
       this.ops.push(`/${gsName} gs`);
@@ -2815,6 +2881,17 @@ export class PDFWriter implements Writer<PdfDocument> {
     // Paint shading
     this.ops.push(`/${shName} sh`);
     this.ops.push("Q");
+  }
+
+  private getUniformGradientOpacity(stops: GradientStop[]): number {
+    if (stops.length === 0) return 1;
+    const firstAlpha = stops[0].color.a;
+    for (let index = 1; index < stops.length; index += 1) {
+      if (Math.abs(stops[index].color.a - firstAlpha) > 0.001) {
+        return 1;
+      }
+    }
+    return firstAlpha;
   }
 
   /** Build a PDF color function dictionary for gradient stops. */
