@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>layout2vector - DOM to DXF, DWG, EMF, PDF, SVG, PNG</title>
+  <meta name="description" content="layout2vector converts live DOM layout into CAD, vector, and image formats using a typed intermediate representation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f7f5ef;
+      --bg-alt: #e6dfd0;
+      --panel: #fffef9;
+      --ink: #16211a;
+      --ink-muted: #455348;
+      --line: #d6ceb7;
+      --accent: #bd4e24;
+      --accent-2: #2f6b53;
+      --shadow: 0 12px 30px rgba(22, 33, 26, 0.12);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, #f0d6b9 0, transparent 40%),
+        radial-gradient(circle at 90% 0, #cedecf 0, transparent 35%),
+        linear-gradient(180deg, var(--bg) 0%, #f2eddf 60%, var(--bg-alt) 100%);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .wrap {
+      width: min(1120px, 92vw);
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 68px 0 36px;
+      animation: rise 700ms ease-out;
+    }
+
+    h1 {
+      font-size: clamp(2.1rem, 5vw, 4.4rem);
+      line-height: 1.02;
+      margin: 0;
+      letter-spacing: -0.03em;
+      max-width: 11ch;
+    }
+
+    .lede {
+      color: var(--ink-muted);
+      max-width: 62ch;
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      margin-top: 18px;
+    }
+
+    .cta {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+      border-color: #b7ab8e;
+    }
+
+    section {
+      margin: 28px auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      animation: rise 700ms ease-out;
+      animation-fill-mode: both;
+    }
+
+    section:nth-of-type(2) {
+      animation-delay: 100ms;
+    }
+
+    section:nth-of-type(3) {
+      animation-delay: 180ms;
+    }
+
+    section:nth-of-type(4) {
+      animation-delay: 260ms;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+      letter-spacing: -0.02em;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #c8b99e;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.85rem;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      background: #fffaf0;
+    }
+
+    .code {
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      font-size: 0.92rem;
+      background: #141a17;
+      color: #ecf2ee;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      border: 1px solid #222f29;
+      white-space: pre;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f5f1e5;
+      font-weight: 700;
+    }
+
+    .yes {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    .no {
+      color: #8c3a24;
+      font-weight: 700;
+    }
+
+    .gallery {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .gallery figure {
+      margin: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #f7f4ea;
+    }
+
+    .gallery img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+    }
+
+    .gallery figcaption {
+      padding: 8px 10px;
+      font-size: 0.87rem;
+      color: var(--ink-muted);
+    }
+
+    footer {
+      padding: 10px 0 40px;
+      color: var(--ink-muted);
+      text-align: center;
+      font-size: 0.92rem;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .grid,
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 18px;
+      }
+
+      table {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="pill">DOM -> IR -> Writers</span>
+      <span class="pill">TypeScript ESM</span>
+      <span class="pill">CAD + Vector + Raster</span>
+      <h1>layout2vector turns rendered web layouts into production-ready files.</h1>
+      <p class="lede">Extract live DOM geometry (HTML, SVG, transforms, form controls, optional same-origin iframes) and write it as DXF, DWG, EMF/EMF+, PDF, SVG, PNG/JPEG/WEBP, Canvas, or standalone HTML.</p>
+      <div class="cta">
+        <a class="button primary" href="https://www.npmjs.com/package/@node-projects/layout2vector">Install on npm</a>
+        <a class="button" href="https://github.com/node-projects/layout2vector">View on GitHub</a>
+      </div>
+    </header>
+
+    <section>
+      <h2>Why teams pick it</h2>
+      <div class="grid">
+        <article class="card">
+          <strong>One extraction, many targets</strong>
+          One intermediate representation feeds CAD, print, vector, and raster outputs so your export logic stays consistent.
+        </article>
+        <article class="card">
+          <strong>Text and geometry stay structured</strong>
+          Unlike screenshot-only pipelines, text-capable writers keep editable text where possible.
+        </article>
+        <article class="card">
+          <strong>Built for technical workflows</strong>
+          DXF, DWG, EMF, and EMF+ support is first-class, not an afterthought via raster conversion.
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Quick code sample</h2>
+      <div class="code">import { extractIR, renderIR, DXFWriter, PDFWriter } from "@node-projects/layout2vector";
+
+const root = document.getElementById("layout")!;
+const ir = await extractIR(root, {
+  includeImages: true,
+  includeText: true,
+  convertFormControls: true,
+  walkIframes: true
+});
+
+const dxf = await renderIR(ir, new DXFWriter({ maxY: document.documentElement.scrollHeight }));
+const pdfDoc = await renderIR(ir, new PDFWriter());
+await pdfDoc.finalize();
+const pdfBytes = pdfDoc.toBytes();</div>
+    </section>
+
+    <section>
+      <h2>Advantages over screenshot-focused libraries</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>layout2vector</th>
+            <th>Typical screenshot libs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Native DXF / DWG / EMF / EMF+</td>
+            <td class="yes">Yes</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>Structured IR for custom exporters</td>
+            <td class="yes">Yes</td>
+            <td class="no">Usually no</td>
+          </tr>
+          <tr>
+            <td>Keeps text as text in vector/document outputs</td>
+            <td class="yes">Yes</td>
+            <td class="no">Mostly rasterized</td>
+          </tr>
+          <tr>
+            <td>Standalone HTML and native SVG writers</td>
+            <td class="yes">Yes</td>
+            <td class="no">Rare / partial</td>
+          </tr>
+          <tr>
+            <td>Screenshot outputs (PNG/JPEG/WEBP/Canvas)</td>
+            <td class="yes">Yes</td>
+            <td class="yes">Yes</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-bottom: 0; color: var(--ink-muted);">For a detailed matrix with html2canvas, html2canvas-pro, and SnapDOM, see <a href="https://github.com/node-projects/layout2vector/blob/main/FEATURES.md">FEATURES.md</a>.</p>
+    </section>
+
+    <section>
+      <h2>Example outputs</h2>
+      <div class="gallery">
+        <figure>
+          <img src="assets/comprehensive.png" alt="Comprehensive HTML to vector conversion preview" loading="lazy" />
+          <figcaption>Complex DOM extraction with mixed CSS effects.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/github-glow.png" alt="GitHub-like page converted output" loading="lazy" />
+          <figcaption>Real-world webpage rendering converted from live layout.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/gradients-pdf-preview.png" alt="Gradient and PDF preview" loading="lazy" />
+          <figcaption>Gradient-heavy content exported for PDF workflows.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <footer>
+      MIT Licensed · Built by node-projects · Production use in CAD/vector/document export pipelines
+    </footer>
+  </div>
+</body>
+</html>
