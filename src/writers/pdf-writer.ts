@@ -2817,9 +2817,10 @@ export class PDFWriter implements Writer<PdfDocument> {
       return;
     }
 
-    // Compute bounding box in PDF coords
-    const xs = points.map(p => this.ptX(p.x));
-    const ys = points.map(p => this.ptY(p.y));
+    // Compute polygon geometry in PDF coords
+    const pdfPoints = points.map((point) => ({ x: this.ptX(point.x), y: this.ptY(point.y) }));
+    const xs = pdfPoints.map((point) => point.x);
+    const ys = pdfPoints.map((point) => point.y);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
     const minY = Math.min(...ys);
@@ -2837,8 +2838,18 @@ export class PDFWriter implements Writer<PdfDocument> {
         color: interpolateConicColor(1, [...sortedStops], true),
       }))
       : gradient.stops;
-    const gradientOpacity = this.getUniformGradientOpacity(resolvedStops);
-    const stops = resolvedStops.map(s => ({
+    const { stops: alphaSafeStops, opacity: gradientOpacity } = this.prepareGradientStopsForPdf(resolvedStops);
+    if (!alphaSafeStops || alphaSafeStops.length < 2) {
+      return;
+    }
+
+    const uniqueOffsets = new Set(alphaSafeStops.map((stop) => Math.round(stop.offset * 10000)));
+    if (uniqueOffsets.size < 2) {
+      // Degenerate stops (e.g. both at 100%) cannot produce a stable shading.
+      return;
+    }
+
+    const stops = alphaSafeStops.map(s => ({
       offset: s.offset,
       r: s.color.r,
       g: s.color.g,
@@ -2849,11 +2860,7 @@ export class PDFWriter implements Writer<PdfDocument> {
     let shadingType: 2 | 3;
 
     if (gradient.type === "linear") {
-      const A = gradient.angleDeg * Math.PI / 180;
-      const halfDiag = Math.sqrt(w * w + h * h) / 2;
-      const dx = Math.sin(A) * halfDiag;
-      const dy = Math.cos(A) * halfDiag;
-      coords = [cx - dx, cy - dy, cx + dx, cy + dy];
+      coords = this.computeLinearGradientCoords(pdfPoints, gradient.angleDeg, cx, cy);
       shadingType = 2;
     } else {
       const r = Math.max(w, h) / 2;
@@ -2883,6 +2890,59 @@ export class PDFWriter implements Writer<PdfDocument> {
     this.ops.push("Q");
   }
 
+  /**
+   * Resolve CSS linear-gradient endpoints in transformed element space.
+   * This keeps gradient direction attached to the element's local box even when transformed.
+   */
+  private computeLinearGradientCoords(
+    pdfPoints: Array<{ x: number; y: number }>,
+    angleDeg: number,
+    cx: number,
+    cy: number,
+  ): number[] {
+    const uxX = pdfPoints[1].x - pdfPoints[0].x;
+    const uxY = pdfPoints[1].y - pdfPoints[0].y;
+    const uyX = pdfPoints[3].x - pdfPoints[0].x;
+    const uyY = pdfPoints[3].y - pdfPoints[0].y;
+
+    const uxLen = Math.hypot(uxX, uxY);
+    const uyLen = Math.hypot(uyX, uyY);
+    if (uxLen <= 0 || uyLen <= 0) {
+      const a = angleDeg * Math.PI / 180;
+      const halfDiag = Math.hypot(
+        Math.max(...pdfPoints.map((point) => point.x)) - Math.min(...pdfPoints.map((point) => point.x)),
+        Math.max(...pdfPoints.map((point) => point.y)) - Math.min(...pdfPoints.map((point) => point.y)),
+      ) / 2;
+      const dx = Math.sin(a) * halfDiag;
+      const dy = Math.cos(a) * halfDiag;
+      return [cx - dx, cy - dy, cx + dx, cy + dy];
+    }
+
+    const uxNX = uxX / uxLen;
+    const uxNY = uxY / uxLen;
+    const uyNX = uyX / uyLen;
+    const uyNY = uyY / uyLen;
+
+    const a = angleDeg * Math.PI / 180;
+    // CSS angle: 0deg points up, 90deg points right.
+    const dirX = Math.sin(a) * uxNX - Math.cos(a) * uyNX;
+    const dirY = Math.sin(a) * uxNY - Math.cos(a) * uyNY;
+    const dirLen = Math.hypot(dirX, dirY);
+    if (dirLen <= 0) {
+      return [cx, cy, cx, cy];
+    }
+
+    const dx = dirX / dirLen;
+    const dy = dirY / dirLen;
+    let halfSpan = 0;
+    for (const point of pdfPoints) {
+      const projection = Math.abs((point.x - cx) * dx + (point.y - cy) * dy);
+      if (projection > halfSpan) halfSpan = projection;
+    }
+
+    return [cx - dx * halfSpan, cy - dy * halfSpan, cx + dx * halfSpan, cy + dy * halfSpan];
+  }
+
   private getUniformGradientOpacity(stops: GradientStop[]): number {
     if (stops.length === 0) return 1;
     const firstAlpha = stops[0].color.a;
@@ -2892,6 +2952,28 @@ export class PDFWriter implements Writer<PdfDocument> {
       }
     }
     return firstAlpha;
+  }
+
+  private prepareGradientStopsForPdf(stops: GradientStop[]): { stops: GradientStop[] | null; opacity: number } {
+    if (stops.length < 2) return { stops: null, opacity: 1 };
+
+    const visibleStops = stops.filter((stop) => stop.color.a > 0.001);
+    if (visibleStops.length < 2) {
+      return { stops: null, opacity: 1 };
+    }
+
+    const opacity = this.getUniformGradientOpacity(visibleStops);
+    if (opacity >= 1) {
+      return { stops: visibleStops, opacity: 1 };
+    }
+
+    // PDF shadings do not support per-stop alpha. Use uniform alpha only.
+    const hasVaryingAlpha = visibleStops.some((stop) => Math.abs(stop.color.a - opacity) > 0.001);
+    if (hasVaryingAlpha) {
+      return { stops: null, opacity: 1 };
+    }
+
+    return { stops: visibleStops, opacity };
   }
 
   /** Build a PDF color function dictionary for gradient stops. */

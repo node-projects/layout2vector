@@ -342,6 +342,59 @@ test.describe("Writer Output", () => {
     expect(writerAny.ops).not.toContain('f');
   });
 
+  test("PDF writer aligns linear gradient with transformed polygon axes", async () => {
+    const writer = new PDFWriter({ pageWidth: 120, pageHeight: 80 });
+    const writerAny = writer as any;
+
+    const quad = [
+      { x: 20, y: 20 },
+      { x: 120, y: 70 },
+      { x: 80, y: 150 },
+      { x: -20, y: 100 },
+    ] as const;
+
+    await writer.begin();
+    await writer.drawPolygon([...quad] as any, {
+      backgroundImage: 'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))',
+      borderRadius: '0px',
+      opacity: 1,
+    });
+
+    const shading = writerAny.shadings[0];
+    expect(shading).toBeDefined();
+    const [x0, y0, x1, y1] = shading.coords as number[];
+    const gradDx = x1 - x0;
+    const gradDy = y1 - y0;
+
+    // The top edge direction of the transformed quad in PDF coordinates.
+    const uxDx = (quad[1].x - quad[0].x) * 0.75;
+    const uxDy = -(quad[1].y - quad[0].y) * 0.75;
+
+    const cross = Math.abs(gradDx * uxDy - gradDy * uxDx);
+    const gradLen = Math.hypot(gradDx, gradDy);
+    const uxLen = Math.hypot(uxDx, uxDy);
+    expect(cross / (gradLen * uxLen)).toBeLessThan(0.02);
+  });
+
+  test("PDF writer skips unsupported transparent-stop gradients instead of overpainting", async () => {
+    const writer = new PDFWriter({ pageWidth: 120, pageHeight: 80 });
+    const writerAny = writer as any;
+
+    await writer.begin();
+    await writer.drawPolygon([
+      { x: 10, y: 10 },
+      { x: 90, y: 10 },
+      { x: 90, y: 50 },
+      { x: 10, y: 50 },
+    ], {
+      backgroundImage: 'linear-gradient(rgba(18, 53, 91, 0.08) 1px, rgba(0, 0, 0, 0) 1px)',
+      opacity: 1,
+    });
+
+    expect(writerAny.shadings.length).toBe(0);
+    expect(writerAny.ops).not.toContain('/SH1 sh');
+  });
+
   test("source metadata is attached to IR and surfaced in HTML and SVG output", async ({ page }) => {
     await setupPage(
       page,
