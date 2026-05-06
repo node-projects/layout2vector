@@ -57,6 +57,104 @@ test.describe("Form control conversion", () => {
         };
       }
 
+      function parseDateValue(value: string): Date | null {
+        const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return null;
+        return new Date(Number.parseInt(match[1], 10), Number.parseInt(match[2], 10) - 1, Number.parseInt(match[3], 10), 12, 0, 0, 0);
+      }
+
+      function parseTimeValue(value: string): { hour: number; minute: number; second: number; hasSecond: boolean } | null {
+        const match = value.match(/^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
+        if (!match) return null;
+        return {
+          hour: Number.parseInt(match[1], 10),
+          minute: Number.parseInt(match[2], 10),
+          second: match[3] ? Number.parseInt(match[3], 10) : 0,
+          hasSecond: !!match[3],
+        };
+      }
+
+      function parseDateTimeLocalValue(value: string): Date | null {
+        const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
+        if (!match) return null;
+        return new Date(
+          Number.parseInt(match[1], 10),
+          Number.parseInt(match[2], 10) - 1,
+          Number.parseInt(match[3], 10),
+          Number.parseInt(match[4], 10),
+          Number.parseInt(match[5], 10),
+          match[6] ? Number.parseInt(match[6], 10) : 0,
+          match[7] ? Number.parseInt(match[7].padEnd(3, "0"), 10) : 0
+        );
+      }
+
+      function parseMonthValue(value: string): Date | null {
+        const match = value.match(/^(\d{4})-(\d{2})$/);
+        if (!match) return null;
+        return new Date(Number.parseInt(match[1], 10), Number.parseInt(match[2], 10) - 1, 1, 12, 0, 0, 0);
+      }
+
+      function parseWeekValue(value: string): { start: Date; end: Date } | null {
+        const match = value.match(/^(\d{4})-W(\d{2})$/);
+        if (!match) return null;
+        const isoYear = Number.parseInt(match[1], 10);
+        const isoWeek = Number.parseInt(match[2], 10);
+        const jan4 = new Date(isoYear, 0, 4, 12, 0, 0, 0);
+        const day = jan4.getDay();
+        const mondayOffset = day === 0 ? -6 : 1 - day;
+        const firstWeekMonday = new Date(isoYear, 0, 4 + mondayOffset, 12, 0, 0, 0);
+        const start = new Date(firstWeekMonday);
+        start.setDate(firstWeekMonday.getDate() + (isoWeek - 1) * 7);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return { start, end };
+      }
+
+      function temporalDisplay(type: string, value: string): string {
+        if (!value) return "";
+        switch (type) {
+          case "date": {
+            const date = parseDateValue(value);
+            if (!date) return value;
+            return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+          }
+          case "time": {
+            const parts = parseTimeValue(value);
+            if (!parts) return value;
+            const date = new Date(2000, 0, 1, parts.hour, parts.minute, parts.second, 0);
+            return new Intl.DateTimeFormat(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+              second: parts.hasSecond ? "2-digit" : undefined,
+            }).format(date);
+          }
+          case "datetime-local": {
+            const date = parseDateTimeLocalValue(value);
+            if (!date) return value.replace("T", " ");
+            return new Intl.DateTimeFormat(undefined, { dateStyle: "short", timeStyle: "short" }).format(date);
+          }
+          case "month": {
+            const date = parseMonthValue(value);
+            if (!date) return value;
+            return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long" }).format(date);
+          }
+          case "week": {
+            const parsed = parseWeekValue(value);
+            if (!parsed) return value;
+            const startLabel = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(parsed.start);
+            const endLabel = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(parsed.end);
+            const yearLabel = new Intl.DateTimeFormat(undefined, { year: "numeric" }).format(parsed.start);
+            return `${startLabel} - ${endLabel}, ${yearLabel}`;
+          }
+          default:
+            return value;
+        }
+      }
+
+      function controlValue(id: string): string {
+        return (document.getElementById(id) as HTMLInputElement).value;
+      }
+
       return {
         gated: await summarize("text-input", false),
         textInput: await summarize("text-input"),
@@ -78,6 +176,13 @@ test.describe("Form control conversion", () => {
         datetime: await summarize("datetime"),
         month: await summarize("month"),
         week: await summarize("week"),
+        expectedTemporal: {
+          date: temporalDisplay("date", controlValue("date")),
+          time: temporalDisplay("time", controlValue("time")),
+          datetime: temporalDisplay("datetime-local", controlValue("datetime")),
+          month: temporalDisplay("month", controlValue("month")),
+          week: temporalDisplay("week", controlValue("week")),
+        },
       };
     });
 
@@ -129,11 +234,11 @@ test.describe("Form control conversion", () => {
     expect(summary.file.texts).toContain("Choose File");
     expect(summary.file.texts.join(" ")).toContain("notes.txt");
 
-    expect(summary.date.texts).toContain("2026-04-13");
-    expect(summary.time.texts).toContain("14:35");
-    expect(summary.datetime.texts).toContain("2026-04-13 14:35");
-    expect(summary.month.texts).toContain("2026-04");
-    expect(summary.week.texts).toContain("2026-W16");
+    expect(summary.date.texts).toContain(summary.expectedTemporal.date);
+    expect(summary.time.texts).toContain(summary.expectedTemporal.time);
+    expect(summary.datetime.texts).toContain(summary.expectedTemporal.datetime);
+    expect(summary.month.texts).toContain(summary.expectedTemporal.month);
+    expect(summary.week.texts).toContain(summary.expectedTemporal.week);
   });
 
   test("uses placeholder pseudo styles and avoids inventing boxes for transparent proxy textareas", async ({ page }) => {

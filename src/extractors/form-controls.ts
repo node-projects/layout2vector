@@ -1084,11 +1084,181 @@ function getInputDisplayValue(input: HTMLInputElement): ControlDisplayText {
   switch (type) {
     case "password":
       return { text: "*".repeat(value.length), isPlaceholder: false };
+    case "date":
+    case "time":
     case "datetime-local":
-      return { text: value.replace("T", " "), isPlaceholder: false };
+    case "month":
+    case "week": {
+      const localized = formatTemporalInputDisplayValue(input, type, value);
+      if (localized) {
+        return { text: localized, isPlaceholder: false };
+      }
+      break;
+    }
     default:
       return { text: value, isPlaceholder: false };
   }
+
+  return { text: type === "datetime-local" ? value.replace("T", " ") : value, isPlaceholder: false };
+}
+
+function formatTemporalInputDisplayValue(
+  input: HTMLInputElement,
+  type: string,
+  value: string
+): string | null {
+  try {
+    switch (type) {
+      case "date": {
+        const date = parseDateValue(value);
+        if (!date) return null;
+        return new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(date);
+      }
+      case "time": {
+        const parts = parseTimeValue(value);
+        if (!parts) return null;
+        const date = new Date(2000, 0, 1, parts.hour, parts.minute, parts.second, parts.millisecond);
+        return new Intl.DateTimeFormat(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+          second: parts.hasSecond ? "2-digit" : undefined,
+        }).format(date);
+      }
+      case "datetime-local": {
+        const date = parseDateTimeLocalValue(value);
+        if (!date) return null;
+        return new Intl.DateTimeFormat(undefined, {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(date);
+      }
+      case "month": {
+        const date = parseMonthValue(value);
+        if (!date) return null;
+        return new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+          month: "long",
+        }).format(date);
+      }
+      case "week": {
+        const parsed = parseWeekValue(value);
+        if (!parsed) return null;
+        const rangeFormatter = new Intl.DateTimeFormat(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+        const startLabel = rangeFormatter.format(parsed.start);
+        const endLabel = rangeFormatter.format(parsed.end);
+        const yearLabel = new Intl.DateTimeFormat(undefined, {
+          year: "numeric",
+        }).format(parsed.start);
+        return `${startLabel} - ${endLabel}, ${yearLabel}`;
+      }
+      default:
+        return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+function parseDateValue(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
+function parseTimeValue(value: string): {
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
+  hasSecond: boolean;
+} | null {
+  const match = value.match(/^(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
+  if (!match) return null;
+
+  const hour = Number.parseInt(match[1], 10);
+  const minute = Number.parseInt(match[2], 10);
+  const second = match[3] ? Number.parseInt(match[3], 10) : 0;
+  const millisecond = match[4] ? Number.parseInt(match[4].padEnd(3, "0"), 10) : 0;
+  if (!Number.isFinite(hour) || !Number.isFinite(minute) || !Number.isFinite(second) || !Number.isFinite(millisecond)) {
+    return null;
+  }
+
+  return {
+    hour,
+    minute,
+    second,
+    millisecond,
+    hasSecond: !!match[3],
+  };
+}
+
+function parseDateTimeLocalValue(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/);
+  if (!match) return null;
+
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  const hour = Number.parseInt(match[4], 10);
+  const minute = Number.parseInt(match[5], 10);
+  const second = match[6] ? Number.parseInt(match[6], 10) : 0;
+  const millisecond = match[7] ? Number.parseInt(match[7].padEnd(3, "0"), 10) : 0;
+  if (!Number.isFinite(year)
+    || !Number.isFinite(month)
+    || !Number.isFinite(day)
+    || !Number.isFinite(hour)
+    || !Number.isFinite(minute)
+    || !Number.isFinite(second)
+    || !Number.isFinite(millisecond)) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day, hour, minute, second, millisecond);
+}
+
+function parseMonthValue(value: string): Date | null {
+  const match = value.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  if (!Number.isFinite(year) || !Number.isFinite(month)) return null;
+
+  return new Date(year, month - 1, 1, 12, 0, 0, 0);
+}
+
+function parseWeekValue(value: string): { start: Date; end: Date } | null {
+  const match = value.match(/^(\d{4})-W(\d{2})$/);
+  if (!match) return null;
+
+  const isoYear = Number.parseInt(match[1], 10);
+  const isoWeek = Number.parseInt(match[2], 10);
+  if (!Number.isFinite(isoYear) || !Number.isFinite(isoWeek)) return null;
+
+  // ISO week 1 is the week containing Jan 4. Monday is day 1.
+  const jan4 = new Date(isoYear, 0, 4, 12, 0, 0, 0);
+  const day = jan4.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const firstWeekMonday = new Date(isoYear, 0, 4 + mondayOffset, 12, 0, 0, 0);
+  const start = new Date(firstWeekMonday);
+  start.setDate(firstWeekMonday.getDate() + (isoWeek - 1) * 7);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  return { start, end };
 }
 
 function defaultButtonLabel(type: string): string {
