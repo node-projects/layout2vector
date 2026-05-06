@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example: Webfont Fallback for CAD Writers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #f3f0e6; --panel: #fffefb; --ink: #17211b; --muted: #4a564e; --line: #d9d0bf; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; color: var(--ink); background: linear-gradient(180deg, #f8f5ed 0, var(--bg) 100%); }
+    .wrap { width: min(980px, 92vw); margin: 0 auto; padding: 34px 0 42px; }
+    .crumb { color: var(--muted); text-decoration: none; }
+    h1 { margin: 10px 0 8px; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
+    p { color: var(--muted); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-top: 16px; }
+    .code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 0.9rem; white-space: pre; overflow-x: auto; background: #111916; color: #e6efea; border-radius: 10px; padding: 14px; border: 1px solid #21312a; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="crumb" href="../index.html">Back to homepage</a>
+    <h1>Font Fidelity for CAD and EMF Writers</h1>
+    <p>CAD and EMF-family formats cannot embed browser webfonts directly. Use rasterizeFontTextNodes() to preserve exact text appearance for those targets.</p>
+
+    <section class="panel">
+      <h2>Code</h2>
+      <div class="code">import {
+  extractIRWithAssets,
+  rasterizeFontTextNodes,
+  renderIR,
+  DWGWriter,
+  EMFWriter
+} from "@node-projects/layout2vector";
+
+async function exportCadWithFontFidelity(root) {
+  const bounds = root.getBoundingClientRect();
+
+  const { ir, fontAssets } = await extractIRWithAssets(root, {
+    includeFonts: true,
+    includeText: true,
+    includeImages: true
+  });
+
+  const fallbackIr = await rasterizeFontTextNodes(ir, fontAssets, {
+    scale: 2
+  });
+
+  const dwgBytes = await renderIR(fallbackIr, new DWGWriter({
+    maxY: Math.ceil(bounds.height)
+  }));
+
+  const emfBytes = await renderIR(fallbackIr, new EMFWriter({
+    width: bounds.width,
+    height: bounds.height
+  }));
+
+  return { dwgBytes, emfBytes };
+}</div>
+    </section>
+  </div>
+</body>
+</html>

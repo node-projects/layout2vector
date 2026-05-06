@@ -307,6 +307,28 @@ const pdfBytes = pdfDoc.toBytes();</div>
     </section>
 
     <section>
+      <h2>Advanced example pages</h2>
+      <div class="grid">
+        <article class="card">
+          <strong>Complex PDF with embedded WOFF/WOFF2 fonts</strong>
+          Uses <code>extractIRWithAssets()</code> and <code>PDFWriter({ useFontEditorCore: true })</code> so non-TTF webfonts are converted and embedded in the exported PDF.
+          <p><a class="button" href="examples/pdf-embedded-fonts.html">Open example</a></p>
+        </article>
+        <article class="card">
+          <strong>One extraction to multiple writers</strong>
+          Produces DXF, SVG, HTML, and PNG outputs from one IR extraction pass to keep all artifacts in sync.
+          <p><a class="button" href="examples/multi-writer-export.html">Open example</a></p>
+        </article>
+        <article class="card">
+          <strong>CAD + EMF export bundle</strong>
+          Generates DWG, Acad DXF, EMF, and EMF+ together for mixed CAD and Windows vector workflows.
+          <p><a class="button" href="examples/cad-emf-export.html">Open example</a></p>
+        </article>
+      </div>
+      <p style="margin-top: 14px; color: var(--ink-muted);">Need browser-webfont fidelity for CAD/EMF? See <a href="examples/font-fallback-cad.html">the font fallback example</a>.</p>
+    </section>
+
+    <section>
       <h2>Advantages over screenshot-focused libraries</h2>
       <table>
         <thead>

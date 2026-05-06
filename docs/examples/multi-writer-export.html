@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example: One IR, Multiple Writers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #f4efe3; --panel: #fffef9; --ink: #1a2218; --muted: #4f594f; --line: #dad0b9; --accent: #2f6b53; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; color: var(--ink); background: linear-gradient(180deg, var(--bg), #ece5d3); }
+    .wrap { width: min(980px, 92vw); margin: 0 auto; padding: 34px 0 42px; }
+    .crumb { color: var(--muted); text-decoration: none; }
+    h1 { margin: 10px 0 8px; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
+    p { color: var(--muted); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-top: 16px; }
+    .code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 0.9rem; white-space: pre; overflow-x: auto; background: #111815; color: #e5eeea; border-radius: 10px; padding: 14px; border: 1px solid #203129; }
+    .tag { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; margin-right: 8px; margin-bottom: 8px; font-size: 0.86rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="crumb" href="../index.html">Back to homepage</a>
+    <h1>One Extraction, Multiple Output Writers</h1>
+    <p>Extract once, then fan out to several output formats. This keeps geometry and paint-order consistent across artifacts generated in a single run.</p>
+
+    <section class="panel">
+      <span class="tag">DXF</span>
+      <span class="tag">SVG</span>
+      <span class="tag">HTML</span>
+      <span class="tag">PNG</span>
+      <h2>Code</h2>
+      <div class="code">import {
+  extractIR,
+  renderIR,
+  DXFWriter,
+  SVGWriter,
+  HTMLWriter,
+  ImageWriter
+} from "@node-projects/layout2vector";
+
+async function exportAll(root) {
+  const bounds = root.getBoundingClientRect();
+
+  const ir = await extractIR(root, {
+    includeText: true,
+    includeImages: true,
+    convertFormControls: true,
+    includePseudoElements: true
+  });
+
+  const dxf = await renderIR(ir, new DXFWriter({ maxY: Math.ceil(bounds.height) }));
+  const svg = await renderIR(ir, new SVGWriter({ width: bounds.width, height: bounds.height }));
+  const html = await renderIR(ir, new HTMLWriter({ width: bounds.width, height: bounds.height }));
+
+  const image = await renderIR(ir, new ImageWriter({
+    width: bounds.width,
+    height: bounds.height,
+    scale: 2
+  }));
+  await image.finalize();
+  const pngBytes = image.toBytes();
+
+  return { dxf, svg, html, pngBytes };
+}</div>
+    </section>
+
+    <section class="panel">
+      <h2>When this helps</h2>
+      <p>Use this for workflows where engineering receives CAD output, product receives PDF/SVG previews, and support receives PNG snapshots from the same source DOM.</p>
+    </section>
+  </div>
+</body>
+</html>

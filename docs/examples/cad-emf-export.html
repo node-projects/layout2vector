@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example: CAD + EMF Export Bundle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg: #f5f1e8; --panel: #fffefb; --ink: #1a201c; --muted: #4a5550; --line: #d7cfbf; --accent: #8f462d; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Space Grotesk", "Segoe UI", sans-serif; color: var(--ink); background: radial-gradient(circle at 10% 0, #e7dcc2 0, transparent 28%), var(--bg); }
+    .wrap { width: min(980px, 92vw); margin: 0 auto; padding: 34px 0 42px; }
+    .crumb { color: var(--muted); text-decoration: none; }
+    h1 { margin: 10px 0 8px; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
+    p { color: var(--muted); }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-top: 16px; }
+    .code { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 0.9rem; white-space: pre; overflow-x: auto; background: #131915; color: #eaf2ee; border-radius: 10px; padding: 14px; border: 1px solid #25352d; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="crumb" href="../index.html">Back to homepage</a>
+    <h1>CAD + EMF Export in One Pipeline</h1>
+    <p>Generate DWG/DXF for CAD consumers and EMF/EMF+ for Windows-native vector interchange from a single IR extraction.</p>
+
+    <section class="panel">
+      <h2>Code</h2>
+      <div class="code">import {
+  extractIR,
+  renderIR,
+  DWGWriter,
+  AcadDXFWriter,
+  EMFWriter,
+  EMFPlusWriter
+} from "@node-projects/layout2vector";
+
+async function exportCadAndMetafile(root) {
+  const bounds = root.getBoundingClientRect();
+  const maxY = Math.ceil(bounds.height);
+
+  const ir = await extractIR(root, {
+    includeText: true,
+    includeImages: true,
+    includePseudoElements: true,
+    svgToVector: true
+  });
+
+  const dwgBytes = await renderIR(ir, new DWGWriter({ maxY }));
+  const dxfBytes = await renderIR(ir, new AcadDXFWriter({ maxY }));
+  const emfBytes = await renderIR(ir, new EMFWriter({
+    width: bounds.width,
+    height: bounds.height
+  }));
+  const emfPlusBytes = await renderIR(ir, new EMFPlusWriter({
+    width: bounds.width,
+    height: bounds.height
+  }));
+
+  return { dwgBytes, dxfBytes, emfBytes, emfPlusBytes };
+}</div>
+    </section>
+
+    <section class="panel">
+      <h2>Notes</h2>
+      <p>If exact browser webfont appearance is required for CAD/EMF-family outputs, pre-process IR text nodes with rasterizeFontTextNodes() and use the rasterized IR for those writers.</p>
+    </section>
+  </div>
+</body>
+</html>

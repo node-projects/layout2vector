@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example: Complex PDF with Embedded WOFF/WOFF2 Fonts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f2e8;
+      --panel: #fffef9;
+      --ink: #132218;
+      --muted: #4b5a4f;
+      --line: #d8cfba;
+      --accent: #9f3f1f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at 90% -10%, #d9e8de 0, transparent 40%), var(--bg);
+      line-height: 1.6;
+    }
+    .wrap { width: min(980px, 92vw); margin: 0 auto; padding: 34px 0 42px; }
+    .crumb { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 10px 0 8px; letter-spacing: -0.02em; }
+    p { color: var(--muted); }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 18px;
+    }
+    .code {
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      font-size: 0.9rem;
+      white-space: pre;
+      overflow-x: auto;
+      background: #121916;
+      color: #e8efea;
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid #25342d;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+      margin-top: 14px;
+      color: var(--ink);
+    }
+    ul { margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="crumb" href="../index.html">Back to homepage</a>
+    <h1>Complex PDF Export with Embedded WOFF/WOFF2 Fonts</h1>
+    <p>This pattern matches the browser addon flow: collect used webfont assets from the live DOM, convert non-TTF font files through fonteditor-core, and embed the result directly into the PDF.</p>
+
+    <section class="panel">
+      <h2>Install</h2>
+      <div class="code">npm install @node-projects/layout2vector fonteditor-core</div>
+    </section>
+
+    <section class="panel">
+      <h2>Code</h2>
+      <div class="code">import {
+  extractIRWithAssets,
+  renderIR,
+  PDFWriter
+} from "@node-projects/layout2vector";
+
+async function exportInvoicePdf(root) {
+  // includeFonts gathers the @font-face files used by extracted text.
+  const { ir, fontAssets } = await extractIRWithAssets(root, {
+    includeText: true,
+    includeImages: true,
+    includeFonts: true,
+    convertFormControls: true,
+    walkIframes: true
+  });
+
+  const writer = new PDFWriter({
+    pageWidth: 210,
+    pageHeight: 297,
+    fontAssets,
+    // Enables WOFF/WOFF2/OTF -> TTF conversion for embedding.
+    useFontEditorCore: true
+  });
+
+  const pdfDoc = await renderIR(ir, writer);
+  await pdfDoc.finalize();
+  const pdfBytes = pdfDoc.toBytes();
+
+  return pdfBytes;
+}
+
+function downloadPdf(bytes, filename = "layout-export.pdf") {
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}</div>
+      <p class="note">Important: without <strong>useFontEditorCore: true</strong>, the PDF writer only embeds TTF sources and ignores WOFF/WOFF2/OTF sources.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Production notes</h2>
+      <ul>
+        <li>Keep includeFonts enabled only when you need webfont fidelity to reduce network work.</li>
+        <li>If the source app uses dynamic @font-face rules, wait for document fonts to load before calling extractIRWithAssets().</li>
+        <li>This same approach works in browser extensions where fonts are loaded from page styles.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
