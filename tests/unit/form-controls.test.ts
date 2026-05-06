@@ -141,6 +141,13 @@ test.describe("Form control conversion", () => {
           case "week": {
             const parsed = parseWeekValue(value);
             if (!parsed) return value;
+            const locale = new Intl.DateTimeFormat(undefined).resolvedOptions().locale;
+            if (/^de(?:-|$)/i.test(locale)) {
+              const match = value.match(/^(\d{4})-W(\d{2})$/);
+              if (match) {
+                return `Woche ${Number.parseInt(match[2], 10)}, ${Number.parseInt(match[1], 10)}`;
+              }
+            }
             const startLabel = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(parsed.start);
             const endLabel = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(parsed.end);
             const yearLabel = new Intl.DateTimeFormat(undefined, { year: "numeric" }).format(parsed.start);
@@ -239,6 +246,11 @@ test.describe("Form control conversion", () => {
     expect(summary.datetime.texts).toContain(summary.expectedTemporal.datetime);
     expect(summary.month.texts).toContain(summary.expectedTemporal.month);
     expect(summary.week.texts).toContain(summary.expectedTemporal.week);
+    expect(summary.date.openPolylinePointCounts.length).toBeGreaterThan(0);
+    expect(summary.time.openPolylinePointCounts.length).toBeGreaterThan(0);
+    expect(summary.datetime.openPolylinePointCounts.length).toBeGreaterThan(0);
+    expect(summary.month.openPolylinePointCounts.length).toBeGreaterThan(0);
+    expect(summary.week.openPolylinePointCounts.length).toBeGreaterThan(0);
   });
 
   test("uses placeholder pseudo styles and avoids inventing boxes for transparent proxy textareas", async ({ page }) => {

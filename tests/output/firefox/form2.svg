@@ -13,6 +13,10 @@
 <g><rect x="118" y="425" width="59" height="59" rx="2" ry="2" fill="rgb(0, 120, 212)"/><rect x="118" y="425" width="59" height="59" rx="2" ry="2" fill="none" stroke="rgb(0, 120, 212)" stroke-width="1.5"/></g>
 <path d="M130.98,456.86 L142.78,468.66 L164.02,442.7" fill="none" stroke="rgb(255, 255, 255)" stroke-width="8.26"/>
 <g><rect x="62" y="381" width="211" height="21" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="62" y="381" width="211" height="21" rx="2" ry="2" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
+<path d="M254,387 L263,387 L263,396 L254,396 L254,387" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<path d="M254,389.7 L263,389.7" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<path d="M255.98,386.55 L255.98,388.26" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
+<path d="M261.02,386.55 L261.02,388.26" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/>
 <g><rect x="404" y="46" width="164.67" height="22" rx="2" ry="2" fill="rgb(255, 255, 255)"/><rect x="404" y="46" width="164.67" height="22" rx="2" ry="2" fill="none" stroke="rgb(143, 143, 157)" stroke-width="2"/></g>
 <g clip-path="url(#clip2)"><text x="409.99" y="50.33" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-size="13.33px" font-family="MS Shell Dlg \32">mnnmnmnm</text></g>
 <g><rect x="404" y="82" width="329" height="229" rx="0" ry="0" fill="rgba(194, 31, 31, 0.52)"/><rect x="404" y="82" width="329" height="229" rx="0" ry="0" fill="none" stroke="rgb(0, 0, 0)" stroke-width="1"/></g>

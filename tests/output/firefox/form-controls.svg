@@ -11,9 +11,9 @@
 <clipPath id="clip8" clipPathUnits="userSpaceOnUse"><rect x="469" y="230" width="391" height="16"/></clipPath>
 <linearGradient id="lg9" x1="664.5" y1="282" x2="664.5" y2="302" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgb(230, 230, 230)"/><stop offset="10%" stop-color="rgb(230, 230, 230)"/><stop offset="20%" stop-color="rgb(238, 238, 238)"/><stop offset="45%" stop-color="rgb(204, 204, 204)"/><stop offset="55%" stop-color="rgb(204, 204, 204)"/></linearGradient>
 <filter id="ds10" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
-<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="31" y="483" width="369" height="20"/></clipPath>
-<clipPath id="clip12" clipPathUnits="userSpaceOnUse"><rect x="31" y="558" width="369" height="20"/></clipPath>
-<clipPath id="clip13" clipPathUnits="userSpaceOnUse"><rect x="31" y="633" width="369" height="20"/></clipPath>
+<clipPath id="clip11" clipPathUnits="userSpaceOnUse"><rect x="31" y="483" width="343" height="20"/></clipPath>
+<clipPath id="clip12" clipPathUnits="userSpaceOnUse"><rect x="31" y="558" width="343" height="20"/></clipPath>
+<clipPath id="clip13" clipPathUnits="userSpaceOnUse"><rect x="31" y="633" width="343" height="20"/></clipPath>
 <filter id="ds14" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="rgba(14, 23, 38, 0.06)" result="s0"/></filter>
 <clipPath id="clip15" clipPathUnits="userSpaceOnUse"><rect x="480" y="483" width="369" height="20"/></clipPath>
 <clipPath id="clip16" clipPathUnits="userSpaceOnUse"><rect x="480" y="558" width="369" height="20"/></clipPath>
@@ -58,13 +58,24 @@
 <text x="19" y="421" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Date &amp; Time</text>
 <text x="19" y="453.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATE</text>
 <g><rect x="19" y="473" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="473" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip11)"><text x="31" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13</text></g>
+<path d="M385.2,486 L399.2,486 L399.2,500 L385.2,500 L385.2,486" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M385.2,490.2 L399.2,490.2" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M388.28,485.3 L388.28,487.96" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M396.12,485.3 L396.12,487.96" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<g clip-path="url(#clip11)"><text x="31" y="485" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">04/13/2026</text></g>
 <text x="19" y="528.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">TIME</text>
 <g><rect x="19" y="548" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="548" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip12)"><text x="31" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">14:35</text></g>
+<path d="M398.64,568 L398.32,569.99 L397.41,571.79 L395.99,573.21 L394.19,574.12 L392.2,574.44 L390.21,574.12 L388.41,573.21 L386.99,571.79 L386.08,569.99 L385.76,568 L386.08,566.01 L386.99,564.21 L388.41,562.79 L390.21,561.88 L392.2,561.56 L394.19,561.88 L395.99,562.79 L397.41,564.21 L398.32,566.01 Z" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M392.2,568 L392.2,564.65" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M392.2,568 L394.78,568" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<g clip-path="url(#clip12)"><text x="31" y="560" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2:35 PM</text></g>
 <text x="19" y="603.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">DATETIME</text>
 <g><rect x="19" y="623" width="393" height="40" rx="8" ry="8" fill="rgb(255, 255, 255)"/><rect x="19" y="623" width="393" height="40" rx="8" ry="8" fill="none" stroke="rgb(148, 163, 184)" stroke-width="1"/></g>
-<g clip-path="url(#clip13)"><text x="31" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">2026-04-13 14:35</text></g>
+<path d="M385.2,636 L399.2,636 L399.2,650 L385.2,650 L385.2,636" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M385.2,640.2 L399.2,640.2" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M388.28,635.3 L388.28,637.96" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<path d="M396.12,635.3 L396.12,637.96" fill="none" stroke="rgb(17, 24, 39)" stroke-width="1.12"/>
+<g clip-path="url(#clip13)"><text x="31" y="635" fill="rgb(17, 24, 39)" dominant-baseline="text-before-edge" font-size="16px" font-family="Arial, sans-serif">4/13/26, 2:35 PM</text></g>
 <g filter="url(#ds14)"><g><rect x="449" y="401" width="431" height="654" rx="14" ry="14" fill="rgb(255, 255, 255)"/><rect x="449" y="401" width="431" height="654" rx="14" ry="14" fill="none" stroke="rgb(215, 222, 234)" stroke-width="1"/></g></g>
 <text x="468" y="421" fill="rgb(29, 39, 54)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Additional Inputs</text>
 <text x="468" y="453.5" fill="rgb(75, 90, 112)" dominant-baseline="text-before-edge" font-weight="700" font-size="12px" font-family="Arial, sans-serif" letter-spacing="0.36px">MONTH</text>

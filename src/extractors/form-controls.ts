@@ -305,9 +305,19 @@ function extractSingleLineControlGeometry(
   const cs = getComputedStyle(el);
   const fontSize = getFontSize(node.extractedStyle, cs);
   const lineHeight = Math.min(getLineHeight(node.extractedStyle, cs, fontSize), localHeight);
+  const temporalIconKind = getTemporalInputIconKind(el.type);
+  const iconSlotWidth = temporalIconKind ? clamp(localHeight * 0.62, 14, 22) : 0;
+  const iconGap = temporalIconKind ? clamp(localHeight * 0.12, 2, 4) : 0;
   const paddingX = Math.max(parsePx(cs.paddingLeft), align === "center" ? 8 : 6);
   const paddingY = Math.max(parsePx(cs.paddingTop), 4);
-  const contentBox = insetRect(localWidth, localHeight, paddingX, paddingY, Math.max(parsePx(cs.paddingRight), paddingX), Math.max(parsePx(cs.paddingBottom), paddingY));
+  const contentBox = insetRect(
+    localWidth,
+    localHeight,
+    paddingX,
+    paddingY,
+    Math.max(parsePx(cs.paddingRight), paddingX) + iconSlotWidth + iconGap,
+    Math.max(parsePx(cs.paddingBottom), paddingY)
+  );
 
   const nodes: IRNode[] = [];
   if (shouldRenderSyntheticControlBox(node.extractedStyle, cs)) {
@@ -320,6 +330,22 @@ function extractSingleLineControlGeometry(
     });
   }
 
+  const iconStyleColor = isVisibleColor(node.extractedStyle.color)
+    ? (node.extractedStyle.color as string)
+    : DEFAULT_ICON_COLOR;
+  if (temporalIconKind) {
+    const iconNodes = createTemporalInputIconNodes(
+      quad,
+      localWidth,
+      localHeight,
+      temporalIconKind,
+      iconStyleColor,
+      node.extractedStyle.opacity,
+      globalIndex + 2
+    );
+    nodes.push(...iconNodes);
+  }
+
   const text = displayText.text.trim();
   if (!text) return nodes;
 
@@ -327,6 +353,149 @@ function extractSingleLineControlGeometry(
   const textNode = createSingleLineTextNode(text, quad, localWidth, localHeight, contentBox, textStyle, cs, globalIndex + 1, align, lineHeight);
   if (textNode) nodes.push(textNode);
   return nodes;
+}
+
+function getTemporalInputIconKind(type: string): "calendar" | "clock" | null {
+  const normalizedType = type.toLowerCase();
+  if (normalizedType === "time") return "clock";
+  if (normalizedType === "date"
+    || normalizedType === "datetime-local"
+    || normalizedType === "month"
+    || normalizedType === "week") {
+    return "calendar";
+  }
+  return null;
+}
+
+function createTemporalInputIconNodes(
+  quad: Quad,
+  localWidth: number,
+  localHeight: number,
+  kind: "calendar" | "clock",
+  color: string,
+  opacity: number | undefined,
+  zIndex: number
+): IRNode[] {
+  const size = clamp(localHeight * 0.42, 9, 14);
+  const rightInset = clamp(localHeight * 0.32, 10, 14);
+  const left = Math.max(0, localWidth - size - rightInset);
+  const top = Math.max(0, (localHeight - size) / 2);
+  const right = left + size;
+  const bottom = top + size;
+  const strokeWidth = `${clamp(size * 0.08, 1, 1.4)}px`;
+
+  if (kind === "calendar") {
+    const binderY = top + size * 0.3;
+    const tabOffset = size * 0.22;
+    const tabWidth = size * 0.14;
+    return [
+      {
+        type: "polyline",
+        points: [
+          mapLocalPoint(quad, left, top, localWidth, localHeight),
+          mapLocalPoint(quad, right, top, localWidth, localHeight),
+          mapLocalPoint(quad, right, bottom, localWidth, localHeight),
+          mapLocalPoint(quad, left, bottom, localWidth, localHeight),
+          mapLocalPoint(quad, left, top, localWidth, localHeight),
+        ],
+        closed: false,
+        style: {
+          stroke: color,
+          strokeWidth,
+          opacity,
+        },
+        zIndex,
+      },
+      {
+        type: "polyline",
+        points: [
+          mapLocalPoint(quad, left, binderY, localWidth, localHeight),
+          mapLocalPoint(quad, right, binderY, localWidth, localHeight),
+        ],
+        closed: false,
+        style: {
+          stroke: color,
+          strokeWidth,
+          opacity,
+        },
+        zIndex,
+      },
+      {
+        type: "polyline",
+        points: [
+          mapLocalPoint(quad, left + tabOffset, top - size * 0.05, localWidth, localHeight),
+          mapLocalPoint(quad, left + tabOffset, top + tabWidth, localWidth, localHeight),
+        ],
+        closed: false,
+        style: {
+          stroke: color,
+          strokeWidth,
+          opacity,
+        },
+        zIndex,
+      },
+      {
+        type: "polyline",
+        points: [
+          mapLocalPoint(quad, right - tabOffset, top - size * 0.05, localWidth, localHeight),
+          mapLocalPoint(quad, right - tabOffset, top + tabWidth, localWidth, localHeight),
+        ],
+        closed: false,
+        style: {
+          stroke: color,
+          strokeWidth,
+          opacity,
+        },
+        zIndex,
+      },
+    ];
+  }
+
+  const centerX = left + size / 2;
+  const centerY = top + size / 2;
+  const radius = size * 0.46;
+  return [
+    {
+      type: "polyline",
+      points: approximateEllipsePoints(quad, centerX, centerY, radius, radius, localWidth, localHeight, 20),
+      closed: true,
+      style: {
+        stroke: color,
+        strokeWidth,
+        fill: undefined,
+        opacity,
+      },
+      zIndex,
+    },
+    {
+      type: "polyline",
+      points: [
+        mapLocalPoint(quad, centerX, centerY, localWidth, localHeight),
+        mapLocalPoint(quad, centerX, centerY - radius * 0.52, localWidth, localHeight),
+      ],
+      closed: false,
+      style: {
+        stroke: color,
+        strokeWidth,
+        opacity,
+      },
+      zIndex,
+    },
+    {
+      type: "polyline",
+      points: [
+        mapLocalPoint(quad, centerX, centerY, localWidth, localHeight),
+        mapLocalPoint(quad, centerX + radius * 0.4, centerY, localWidth, localHeight),
+      ],
+      closed: false,
+      style: {
+        stroke: color,
+        strokeWidth,
+        opacity,
+      },
+      zIndex,
+    },
+  ];
 }
 
 function extractTextAreaGeometry(
@@ -1107,6 +1276,7 @@ function formatTemporalInputDisplayValue(
   type: string,
   value: string
 ): string | null {
+  void input;
   try {
     switch (type) {
       case "date": {
@@ -1147,6 +1317,9 @@ function formatTemporalInputDisplayValue(
       case "week": {
         const parsed = parseWeekValue(value);
         if (!parsed) return null;
+        if (/^de(?:-|$)/i.test(parsed.locale)) {
+          return `Woche ${parsed.isoWeek}, ${parsed.isoYear}`;
+        }
         const rangeFormatter = new Intl.DateTimeFormat(undefined, {
           month: "short",
           day: "numeric",
@@ -1240,7 +1413,13 @@ function parseMonthValue(value: string): Date | null {
   return new Date(year, month - 1, 1, 12, 0, 0, 0);
 }
 
-function parseWeekValue(value: string): { start: Date; end: Date } | null {
+function parseWeekValue(value: string): {
+  start: Date;
+  end: Date;
+  isoYear: number;
+  isoWeek: number;
+  locale: string;
+} | null {
   const match = value.match(/^(\d{4})-W(\d{2})$/);
   if (!match) return null;
 
@@ -1257,8 +1436,9 @@ function parseWeekValue(value: string): { start: Date; end: Date } | null {
   start.setDate(firstWeekMonday.getDate() + (isoWeek - 1) * 7);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
+  const locale = new Intl.DateTimeFormat(undefined).resolvedOptions().locale;
 
-  return { start, end };
+  return { start, end, isoYear, isoWeek, locale };
 }
 
 function defaultButtonLabel(type: string): string {
