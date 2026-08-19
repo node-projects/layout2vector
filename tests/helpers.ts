@@ -127,9 +127,13 @@ export async function injectLibrary(page: Page): Promise<void> {
  * ONLY used in tests — never bundled in production.
  */
 export async function injectBoxQuadsPolyfill(page: Page): Promise<void> {
-  // Firefox has native getBoxQuads — skip the polyfill
-  const browserName = page.context().browser()?.browserType().name();
-  if (browserName === "firefox") return;
+  // Preserve native implementations (Firefox and Chrome Canary with
+  // Experimental Web Platform Features enabled).
+  const hasNativeBoxQuads = await page.evaluate(() =>
+    typeof Element.prototype.getBoxQuads === "function"
+    && typeof Text.prototype.getBoxQuads === "function"
+  );
+  if (hasNativeBoxQuads) return;
 
   // Read the polyfill source from node_modules
   const polyfillPath = path.resolve(

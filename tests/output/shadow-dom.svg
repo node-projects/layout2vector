@@ -17,10 +17,10 @@
 <g clip-path="url(#clip3)"><rect x="0" y="200" width="280" height="39" rx="0" ry="0" fill="rgb(245, 245, 245)"/></g>
 <line x1="0" y1="200" x2="280" y2="200" stroke="rgb(224, 224, 224)" stroke-width="1"/>
 <g clip-path="url(#clip3)"><text x="16" y="214" fill="rgb(136, 136, 136)" dominant-baseline="text-before-edge" font-size="12px" font-family="Arial, sans-serif">Footer text</text></g>
-<g filter="url(#ds4)"><rect x="0" y="263" width="151" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
+<g filter="url(#ds4)"><rect x="0" y="263" width="150.66" height="36" rx="6" ry="6" fill="rgb(30, 136, 229)"/></g>
 <text x="24" y="274" fill="rgb(255, 255, 255)" dominant-baseline="text-before-edge" font-weight="600" font-size="14px" font-family="Arial">Shadow Button</text>
-<rect x="165" y="259" width="10" height="10" rx="5" ry="5" fill="rgb(76, 175, 80)"/>
-<rect x="165" y="269" width="64" height="24" rx="12" ry="12" fill="rgb(232, 245, 233)"/>
+<rect x="165.11" y="259" width="10" height="10" rx="5" ry="5" fill="rgb(76, 175, 80)"/>
+<rect x="165.11" y="269" width="64.47" height="24" rx="12" ry="12" fill="rgb(232, 245, 233)"/>
 <text x="177.11" y="274" fill="rgb(51, 51, 51)" dominant-baseline="text-before-edge" font-weight="500" font-size="14px" font-family="Arial, sans-serif">Online</text>
 <g><rect x="0" y="329" width="320" height="75" rx="8" ry="8" fill="rgb(227, 242, 253)"/><rect x="0" y="329" width="320" height="75" rx="8" ry="8" fill="none" stroke="rgb(144, 202, 249)" stroke-width="2"/></g>
 <text x="2" y="331.5" fill="rgb(21, 101, 192)" dominant-baseline="text-before-edge" font-weight="700" font-size="16px" font-family="Arial, sans-serif">Outer Shadow Root</text>

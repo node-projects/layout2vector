@@ -103,7 +103,9 @@ async function setGeneratedVideo(page: Page, posterColor = "#00ff00"): Promise<v
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const stream = canvas.captureStream(1);
+      // Record enough frames for strict decoders (including Chrome Canary) to
+      // recognize the generated WebM as playable.
+      const stream = canvas.captureStream(30);
       const recorder = new MediaRecorder(stream, { mimeType });
       const chunks: Blob[] = [];
       const stopped = new Promise<Blob>((resolve, reject) => {
@@ -115,7 +117,7 @@ async function setGeneratedVideo(page: Page, posterColor = "#00ff00"): Promise<v
       });
 
       recorder.start();
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       recorder.stop();
 
       const blob = await stopped;

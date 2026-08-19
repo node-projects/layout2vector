@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="693" viewBox="0 0 1200 693">
 <defs>
-<symbol id="imgSym1" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAABDklEQVR4Xu3ZsQ3AIBAEQb7/ojE9TALyOl8LDZcxa+29rv5mbj7eOVyAckEBit5pAwwQBTBvgQGiAOYtMEAUwLwFBogCmLfAAFEA8xYYIApg3gIDRAHMW2CAKIB5C3RA/MPP86sfbF64mwDxlgIMEAUwb4EBogDmLTBAFMC8BQaIApi3wABRAPMWGCAKYN4CA0QBzFtggCiAeQsMEAUwb4EBogDmLTBAFMC8BQaIApi3wABRAPMWGCAKYN4CA0QBzFtggCiAeQsMEAUwb4EBogDmLTBAFMC8BQaIApi3wABRAPMWGCAKYN4CA0QBzFtggCiAeQsMEAUwb4EBogDmLTBAFMC8BQaIApi3QAT8AHIYKFHYI8dDAAAAAElFTkSuQmCC" width="1" height="1" preserveAspectRatio="none"/></symbol>
+<symbol id="imgSym1" viewBox="0 0 1 1" preserveAspectRatio="none"><image href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAAxUlEQVR4Xu3ZsQ0AQQzDsGT/oe+HUJMHyAkMtd6Z9+a03cvzVsBGwEjASMBIwEjASMBIwEjASMBIwEjASMBIwEjASMBIwEjASMDo9N/wBwJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYCRgJGAkYfchgoUVQEH9oAAAAASUVORK5CYII=" width="1" height="1" preserveAspectRatio="none"/></symbol>
 </defs>
 <text x="0" y="1.5" fill="rgb(0, 0, 0)" dominant-baseline="text-before-edge" font-weight="700" font-size="18px" font-family="Arial, sans-serif">Background Image + CSS Transform Demo</text>
 <text x="0" y="46.5" fill="rgb(85, 85, 85)" dominant-baseline="text-before-edge" font-weight="700" font-size="14px" font-family="Arial, sans-serif">SVG background-image with CSS rotation</text>

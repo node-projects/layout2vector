@@ -85,7 +85,8 @@ test.describe("CanvasWriter", () => {
     expect(result.width).toBe(220);
     expect(result.capturedFont).toContain('italic');
     expect(result.capturedFont).toMatch(/\b(?:700|bold)\b/);
-    expect(result.capturedFont).toContain('"Mona Sans", "Segoe UI", sans-serif');
+    // Browsers may normalize optional quotes when reading CanvasRenderingContext2D.font.
+    expect(result.capturedFont.replaceAll('"', "")).toContain("Mona Sans, Segoe UI, sans-serif");
   });
 
   test("renders gradient strokes on polylines", async ({ page }) => {

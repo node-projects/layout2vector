@@ -162,7 +162,7 @@
 
         drawFrame(ctx, "FRAME 1", "#eb3b5a", "#fed330");
 
-        const stream = canvas.captureStream(8);
+        const stream = canvas.captureStream(30);
         const recorder = new MediaRecorder(stream, {
           mimeType,
           videoBitsPerSecond: 300000,
@@ -181,9 +181,9 @@
         });
 
         recorder.start();
-        await delay(180);
+        await delay(500);
         drawFrame(ctx, "FRAME 2", "#2d98da", "#20bf6b");
-        await delay(180);
+        await delay(500);
         recorder.stop();
         await stopped;
         stream.getTracks().forEach((track) => track.stop());

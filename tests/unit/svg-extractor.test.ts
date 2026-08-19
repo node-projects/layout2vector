@@ -189,10 +189,11 @@ test.describe("SVG Geometry Extraction", () => {
       height: Math.max(...ys) - Math.min(...ys),
     };
 
-    expect(extractedRect.left).toBeCloseTo(result.sourceRect.left, 1);
-    expect(extractedRect.top).toBeCloseTo(result.sourceRect.top, 1);
-    expect(extractedRect.width).toBeCloseTo(result.sourceRect.width, 1);
-    expect(extractedRect.height).toBeCloseTo(result.sourceRect.height, 1);
+    // Native SVG text bounds differ by up to one scaled SVG unit between engines.
+    expect(Math.abs(extractedRect.left - result.sourceRect.left)).toBeLessThanOrEqual(2.1);
+    expect(Math.abs(extractedRect.top - result.sourceRect.top)).toBeLessThanOrEqual(2.1);
+    expect(Math.abs(extractedRect.width - result.sourceRect.width)).toBeLessThanOrEqual(2.1);
+    expect(Math.abs(extractedRect.height - result.sourceRect.height)).toBeLessThanOrEqual(2.1);
   });
 
   test("extracts SVG polygon", async ({ page }) => {

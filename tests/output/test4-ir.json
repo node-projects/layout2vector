@@ -23,7 +23,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -96,7 +96,7 @@
       "fill": "rgb(0, 0, 0)",
       "strokeWidth": "0.2px",
       "fontSize": "20px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -153,11 +153,11 @@
         "y": 299
       },
       {
-        "x": 1012,
+        "x": 1011.6875,
         "y": 299
       },
       {
-        "x": 1012,
+        "x": 1011.6875,
         "y": 413
       },
       {
@@ -169,7 +169,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "1px",
       "fontSize": "12px",
-      "fontFamily": "\"Segoe UI\"",
+      "fontFamily": "Segoe UI",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -243,7 +243,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "1px",
       "fontSize": "12px",
-      "fontFamily": "\"Segoe UI\"",
+      "fontFamily": "Segoe UI",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -317,7 +317,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "1px",
       "fontSize": "12px",
-      "fontFamily": "\"Segoe UI\"",
+      "fontFamily": "Segoe UI",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -391,7 +391,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "1px",
       "fontSize": "12px",
-      "fontFamily": "\"Segoe UI\"",
+      "fontFamily": "Segoe UI",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -465,7 +465,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "1px",
       "fontSize": "12px",
-      "fontFamily": "\"Segoe UI\"",
+      "fontFamily": "Segoe UI",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -518,27 +518,27 @@
     "type": "polygon",
     "points": [
       {
-        "x": 763,
-        "y": 297
+        "x": 755,
+        "y": 289
       },
       {
-        "x": 1063,
-        "y": 297
+        "x": 1055,
+        "y": 289
       },
       {
-        "x": 1063,
-        "y": 447
+        "x": 1055,
+        "y": 439
       },
       {
-        "x": 763,
-        "y": 447
+        "x": 755,
+        "y": 439
       }
     ],
     "style": {
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -612,7 +612,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "2px",
       "fontSize": "16px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgba(0, 0, 0, 0)",
@@ -688,7 +688,7 @@
       "stroke": "rgb(0, 0, 0)",
       "strokeWidth": "0px",
       "fontSize": "16px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",
@@ -761,7 +761,7 @@
       "fill": "rgb(0, 0, 0)",
       "strokeWidth": "0.2px",
       "fontSize": "12px",
-      "fontFamily": "\"Times New Roman\"",
+      "fontFamily": "Times New Roman",
       "fontWeight": "400",
       "fontStyle": "normal",
       "color": "rgb(0, 0, 0)",

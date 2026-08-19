@@ -13,8 +13,8 @@
 
 ### Browser Selection
 - **Always use Firefox** for finding rendering issues.
-- The `getBoxQuads` API is only emulated in Chrome and does not accurately reflect real-world behavior, especially for edge cases.
-- Firefox in our tests has enabled native gtBoxQuads API!
+- Chrome tests use Chrome Canary with Experimental Web Platform Features enabled, which exposes native `getBoxQuads`.
+- Firefox tests also enable the native `getBoxQuads` API.
 
 ### Regression Testing
 - When testing for new issues, **always verify that no other renderings are broken**.

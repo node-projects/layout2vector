@@ -71,6 +71,24 @@ export function ensureDirectory(dirPath: string): void {
   }
 }
 
+function writeBinaryFile(filePath: string, data: Uint8Array): void {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    try {
+      fs.writeFileSync(filePath, data);
+      return;
+    } catch (error) {
+      lastError = error;
+      // Windows scanners and preview handlers can briefly retain generated
+      // binaries after a previous test has read them.
+      if ((error as NodeJS.ErrnoException).code !== "UNKNOWN") throw error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
+    }
+  }
+
+  throw lastError;
+}
+
 ensureDirectory(outputRootDir);
 
 export function getProjectOutputDir(browserName: string): string {
@@ -754,28 +772,28 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   expect(emfBytes).toBeInstanceOf(Uint8Array);
   expect(emfBytes.length).toBeGreaterThan(80);
   const emfPath = path.join(outputDir, `${name}.emf`);
-  fs.writeFileSync(emfPath, emfBytes);
+  writeBinaryFile(emfPath, emfBytes);
 
   const emfPlusWriter = new EMFPlusWriter({ width: viewport.width, height: viewport.height });
   const emfPlusBytes = await renderIR(fontFallbackIr, emfPlusWriter);
   expect(emfPlusBytes).toBeInstanceOf(Uint8Array);
   expect(emfPlusBytes.length).toBeGreaterThan(80);
   const emfPlusPath = path.join(outputDir, `${name}-emfplus.emf`);
-  fs.writeFileSync(emfPlusPath, emfPlusBytes);
+  writeBinaryFile(emfPlusPath, emfPlusBytes);
 
   const dwgWriter = new DWGWriter({ maxY: viewport.height });
   const dwgBytes = await renderIR(fontFallbackIr, dwgWriter);
   expect(dwgBytes).toBeInstanceOf(Uint8Array);
   expect(dwgBytes.length).toBeGreaterThan(100);
   const dwgPath = path.join(outputDir, `${name}.dwg`);
-  fs.writeFileSync(dwgPath, dwgBytes);
+  writeBinaryFile(dwgPath, dwgBytes);
 
   const acadDxfWriter = new AcadDXFWriter({ maxY: viewport.height });
   const acadDxfBytes = await renderIR(fontFallbackIr, acadDxfWriter);
   expect(acadDxfBytes).toBeInstanceOf(Uint8Array);
   expect(acadDxfBytes.length).toBeGreaterThan(100);
   const acadDxfPath = path.join(outputDir, `${name}-acad.dxf`);
-  fs.writeFileSync(acadDxfPath, acadDxfBytes);
+  writeBinaryFile(acadDxfPath, acadDxfBytes);
 
   const dxfSize = fs.statSync(dxfPath).size;
   const pdfSize = fs.statSync(pdfPath).size;
