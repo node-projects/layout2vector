@@ -241,9 +241,9 @@ type DXFWriterOptions = {
 new DXFWriter(options?: DXFWriterOptions)
 ```
 
-Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000) is used to flip the Y axis (browser Y-down → DXF Y-up).
+Produces an ASCII-safe DXF string with standard Unicode escapes via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000) is used to flip the Y axis (browser Y-down → DXF Y-up).
 
-- Polygons → closed `LWPOLYLINE` entities
+- Polygons → closed `LWPOLYLINE` entities with optional solid `HATCH` fills
 - Polylines → `LWPOLYLINE` entities (open or closed)
 - Filled SVG shapes → `HATCH` entities with `SOLID` pattern (closed polylines with fill color)
 - Text → `TEXT` entities
@@ -251,7 +251,7 @@ Produces a DXF string via `@tarikjabiri/dxf`. The `maxY` parameter (default 1000
 - Colors → `trueColor` from CSS `backgroundColor` / `color` / SVG fill/stroke
 - Transparent elements (rgba alpha=0, `transparent`) are skipped
 - SVG images in `<img>` tags → converted to native DXF vector entities
-- Raster images → `IMAGE` entities referencing external files. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
+- Raster images → `IMAGE` entities referencing external files by default, or coalesced filled pixel paths with `vectorImages: true`. Transparent pixels are omitted; partial alpha is blended over white. Browser decoding or supplied RGB pixels are required for vector conversion. Access `dxfWriter.imageFiles` (a `Map<string, string>` of path → data URL) after `end()` to save the referenced image files alongside the DXF
 
 
 #### `DWGWriter`
@@ -274,7 +274,9 @@ Produces a `Uint8Array` containing an AutoCAD DWG binary file via `@node-project
 - Rounded rectangles → `LWPOLYLINE` with arc-approximated corners
 - Colors → true color from CSS `backgroundColor` / `color` / SVG fill/stroke
 - Transparent elements (rgba alpha=0, `transparent`) are skipped
-- Output is an AC1032-format (AutoCAD 2018+) DWG file
+- Output defaults to AC1021 (AutoCAD 2007+) for Unicode text; use `acadVersion` to choose another supported version. Explicit true colors are preserved, including black and white fills.
+- Raster icons are converted to coalesced filled paths, with transparent holes retained and partial alpha blended over white.
+- Text styles retain the CSS font family, including Wingdings; the corresponding font must be installed in the CAD viewer.
 
 
 #### `AcadDXFWriter`
@@ -288,7 +290,7 @@ type AcadDXFWriterOptions = {
 new AcadDXFWriter(options?: AcadDXFWriterOptions)
 ```
 
-An alternative DXF writer that uses `@node-projects/acad-ts` instead of `@tarikjabiri/dxf`. Produces a `Uint8Array` containing ASCII DXF bytes with the same entity types as `DWGWriter`:
+An alternative DXF writer that uses `@node-projects/acad-ts` instead of `@tarikjabiri/dxf`. Produces a `Uint8Array` containing ASCII DXF bytes with standard Unicode escapes and the same entity types, font styles, and raster-icon fallback as `DWGWriter`:
 
 - Polygons → closed `LWPOLYLINE` entities with optional solid `HATCH` fill
 - Polylines → `LWPOLYLINE` entities (open or closed)
@@ -745,3 +747,7 @@ Demo files cover: borders, gradients, transforms, SVG shapes, declarative shadow
 ## License
 
 MIT
+
+CAD raster-icon paths are stored once per distinct image/size in a block and reused through INSERT entities. This avoids duplicating bitmap-derived geometry in large diagrams and keeps single-file exports self-contained.
+
+CAD writers require the published `@node-projects/acad-ts` 3.8.0 or later compatible release. The lockfile resolves the official npm package; no local reader archive is required.

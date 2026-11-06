@@ -10,7 +10,7 @@ import { HTMLWriter } from "../../src/writers/html-writer.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import type { IRNode } from "../../src/types.js";
-import { CadUtils, DwgReader, Hatch } from "@node-projects/acad-ts";
+import { CadUtils, DwgReader, DxfReader, TextEntity, Hatch } from "@node-projects/acad-ts";
 
 const EMR_COMMENT = 0x0046;
 const EMR_CREATEBRUSHINDIRECT = 0x0027;
@@ -1041,7 +1041,7 @@ test.describe("Writer Output", () => {
     expect(doc.summaryInfo!.modifiedDate.getTime()).toBe(stableTime);
   });
 
-  test("DWG writer keeps tiny neutral hatches on adaptive color index 7", async () => {
+  test("DWG writer preserves explicit black hatch fills", async () => {
     const ir: IRNode[] = [{
       type: "polyline",
       points: [
@@ -1062,8 +1062,39 @@ test.describe("Writer Output", () => {
     const hatches = Array.from(doc.modelSpace!.entities).filter((entity) => entity instanceof Hatch);
 
     expect(hatches.length).toBe(1);
-    expect(hatches[0].color.isTrueColor).toBe(false);
-    expect(hatches[0].color.index).toBe(7);
+    expect(hatches[0].color.isTrueColor).toBe(true);
+    expect(hatches[0].color.getRgb()).toEqual([0, 0, 0]);
   });
 
+});
+
+for (const format of ['dxf', 'acad', 'dwg'] as const) {
+  test(format + ' preserves CAD symbols, Unicode and raster-icon geometry', async () => {
+    const ir: IRNode[] = [
+      { type: 'text', text: 'Lagerhäuser → − \uF078', quad: [{x:0,y:0},{x:150,y:0},{x:150,y:20},{x:0,y:20}], style: {fontFamily: 'Wingdings',fontSize:'16px',color:'rgb(0,0,0)'}, zIndex:0 },
+      { type: 'image', dataUrl:'data:image/png;base64,', width:2,height:1,rgbData:[220,40,15,255,255,255],quad:[{x:20,y:20},{x:40,y:20},{x:40,y:30},{x:20,y:30}], style:{},zIndex:1 }
+    ];
+    const writer = format === 'dxf' ? new DXFWriter({maxY:100,vectorImages:true}) : format === 'acad' ? new AcadDXFWriter({maxY:100}) : new DWGWriter({maxY:100});
+    const output = await renderIR(ir, writer as any);
+    const bytes = typeof output === 'string' ? new TextEncoder().encode(output) : output as Uint8Array;
+    const doc = format === 'dwg' ? DwgReader.readFromStream(bytes.slice().buffer) : DxfReader.readFromStream(bytes);
+    const entities = Array.from(doc.modelSpace!.entities);
+    const allEntities = Array.from(doc.blockRecords!).flatMap(block => Array.from(block.entities));
+    const text = entities.find(entity => entity instanceof TextEntity) as TextEntity;
+    expect(text.value).toBe('Lagerhäuser → − \uF078'); expect(text.style.filename.toLowerCase()).toBe('wingding.ttf');
+    expect(allEntities.filter(entity => entity instanceof Hatch).map(entity => entity.color.getRgb())).toEqual([[220,40,15],[255,255,255]]);
+    expect(entities.filter(entity => entity.objectName === 'INSERT')).toHaveLength(1);
+    if(format === 'dxf') expect((writer as DXFWriter).imageFiles.size).toBe(0);
+  });
+}
+
+test('standard DXF preserves solid backgrounds for square and rounded HTML boxes', async () => {
+  const ir: IRNode[] = [
+    {type:'polygon', points:[{x:0,y:0},{x:40,y:0},{x:40,y:20},{x:0,y:20}], style:{fill:'rgb(0,128,0)'},zIndex:0},
+    {type:'polygon', points:[{x:50,y:0},{x:90,y:0},{x:90,y:20},{x:50,y:20}], style:{fill:'rgb(20,40,220)',borderRadius:'4px'},zIndex:1},
+  ];
+  const output = await renderIR(ir, new DXFWriter({maxY:100}));
+  const doc = DxfReader.readFromStream(new TextEncoder().encode(output));
+  const fills = Array.from(doc.modelSpace!.entities).filter(entity => entity instanceof Hatch);
+  expect(fills.map(entity => entity.color.getRgb())).toEqual([[0,128,0],[20,40,220]]);
 });

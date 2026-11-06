@@ -15,6 +15,9 @@ import type {
   HatchPattern as HatchPatternType,
   HatchPatternType as HatchPatternTypeEnumType,
   TextEntity as TextEntityType,
+  TextStyle as TextStyleType,
+  Insert as InsertType,
+  BlockRecord as BlockRecordType,
   Color as ColorType,
   XY as XYType,
   XYZ as XYZType,
@@ -23,6 +26,7 @@ import type {
 } from "@node-projects/acad-ts";
 
 import type { Point, Quad, Style, Writer } from "../types.js";
+import { cadImageRectangles, cadImageQuad, cadUnicodeText, cadFontFilename } from "./shared/cad-image.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { parseCssColor, type ParsedCssColor } from "./shared/css-color.js";
@@ -39,6 +43,9 @@ let HatchBoundaryPathPolyline: typeof HatchBoundaryPathPolylineType | undefined;
 let HatchPattern: typeof HatchPatternType | undefined;
 let HatchPatternTypeEnum: typeof HatchPatternTypeEnumType | undefined;
 let TextEntity: typeof TextEntityType | undefined;
+let TextStyle: typeof TextStyleType | undefined;
+let Insert: typeof InsertType | undefined;
+let BlockRecord: typeof BlockRecordType | undefined;
 let Color: typeof ColorType | undefined;
 let XY: typeof XYType | undefined;
 let XYZ: typeof XYZType | undefined;
@@ -58,6 +65,9 @@ async function ensureAcadLoaded() {
     HatchPattern = acad.HatchPattern;
     HatchPatternTypeEnum = acad.HatchPatternType;
     TextEntity = acad.TextEntity;
+    TextStyle = acad.TextStyle;
+    Insert = acad.Insert;
+    BlockRecord = acad.BlockRecord;
     Color = acad.Color;
     XY = acad.XY;
     XYZ = acad.XYZ;
@@ -99,40 +109,6 @@ function cssToAcadColor(color: string | undefined): InstanceType<typeof ColorTyp
   return new Color!(parsed.r, parsed.g, parsed.b);
 }
 
-function toNearestAcadIndexColor(color: InstanceType<typeof ColorType>): InstanceType<typeof ColorType> {
-  if (!color.isTrueColor) return color;
-
-  const [r, g, b] = color.getRgb();
-
-  // AutoCAD index 7 adapts between black and white based on the viewer background.
-  // Prefer it for nearly neutral extremes so tiny solid hatches stay visible.
-  const maxChannel = Math.max(r, g, b);
-  const minChannel = Math.min(r, g, b);
-  if (maxChannel <= 16 || minChannel >= 239) {
-    return new Color!(7);
-  }
-
-  let bestIndex = 7;
-  let bestDistance = Number.POSITIVE_INFINITY;
-
-  for (let index = 1; index <= 255; index++) {
-    const rgb = Color!.getIndexRGB(index);
-    if (!rgb) continue;
-
-    const dr = r - rgb[0];
-    const dg = g - rgb[1];
-    const db = b - rgb[2];
-    const distance = dr * dr + dg * dg + db * db;
-
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      bestIndex = index;
-    }
-  }
-
-  return new Color!(bestIndex);
-}
-
 /** Generate arc points for a rounded corner. */
 function arcPoints(cx: number, cy: number, r: number, startAngle: number, endAngle: number, segments: number): { x: number; y: number }[] {
   const pts: { x: number; y: number }[] = [];
@@ -150,7 +126,7 @@ export type AcadWriterOptions = {
   /** Scale factor applied to the maxY coordinate. */
   zoom?: number;
   /** AutoCAD version for the output file. */
-  acadVersion?: ACadVersionType; // Default to AutoCAD 2018 version for broad compatibility
+  acadVersion?: ACadVersionType; // Default to AutoCAD 2007 for Unicode text.
 };
 
 /**
@@ -161,6 +137,8 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
   private doc!: InstanceType<typeof CadDocumentType>;
   private maxY: number;
   private acadVersion?: ACadVersionType;
+  private fontStyles = new Map<string, InstanceType<typeof TextStyleType>>();
+  private imageBlocks = new Map<string, InstanceType<typeof BlockRecordType>>();
 
   constructor(options?: AcadWriterOptions) {
     const z = options?.zoom ?? 1;
@@ -170,9 +148,11 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
 
   async begin(): Promise<void> {
     await ensureAcadLoaded();
-    this.doc = new CadDocument!(this.acadVersion ?? ACadVersion!.AC1018);
+    this.doc = new CadDocument!(this.acadVersion ?? ACadVersion!.AC1021);
     this.doc.createDefaults();
     normalizeCadMetadata(this.doc);
+    this.fontStyles.clear();
+    this.imageBlocks.clear();
   }
 
   /** Flip Y coordinate for DXF/DWG (Y-up) coordinate system. */
@@ -190,7 +170,7 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
   }
 
   /** Add a solid-filled HATCH for one or more closed boundary paths. */
-  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: InstanceType<typeof ColorType>): void {
+  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: InstanceType<typeof ColorType>, target = this.doc.modelSpace!, maxY = this.maxY): void {
     const hatch = new Hatch!();
     hatch.isSolid = true;
     hatch.patternType = HatchPatternTypeEnum!.SolidFill;
@@ -202,14 +182,14 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
       if (verts.length < 3) continue;
       const boundaryEdge = new HatchBoundaryPathPolyline!();
       boundaryEdge.isClosed = true;
-      boundaryEdge.vertices = verts.map(v => new XYZ!(v.x, this.flipY(v.y), 0));
+      boundaryEdge.vertices = verts.map(v => new XYZ!(v.x, maxY - v.y, 0));
 
       const path = new HatchBoundaryPath!([boundaryEdge]);
       hatch.paths.push(path);
       hasPath = true;
     }
     if (!hasPath) return;
-    this.doc.modelSpace!.entities.add(hatch);
+    target.entities.add(hatch);
   }
 
   async drawPolygon(points: Quad, style: Style): Promise<void> {
@@ -337,15 +317,45 @@ class AcadDocumentBuilder implements Writer<InstanceType<typeof CadDocumentType>
     entity.insertPoint = new XYZ!(bottomLeft.x, this.flipY(bottomLeft.y), 0);
     entity.height = height;
     entity.value = sanitized;
+    const family = style.fontFamily?.split(",")[0]?.replace(/["']/g, "").trim();
+    if (family && !["serif", "sans-serif", "monospace"].includes(family)) {
+      let font = this.fontStyles.get(family);
+      if (!font) {
+        font = new TextStyle!(family);
+        font.filename = cadFontFilename(family);
+        this.doc.textStyles!.add(font); this.fontStyles.set(family, font);
+      }
+      entity.style = font;
+    }
     if (Math.abs(rotationRad) > 0.001) entity.rotation = rotationRad;
     if (textColor) entity.color = textColor;
 
     this.doc.modelSpace!.entities.add(entity);
   }
 
-  async drawImage(_quad: Quad, _dataUrl: string, _width: number, _height: number, _style: Style): Promise<void> {
-    // Image embedding in acad-ts CadDocument is not straightforward — skip for now.
-    // The polyline/hatch/text entities cover the main vector use case.
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style, rgbData?: number[]): Promise<void> {
+    const key = dataUrl + ':' + width + ':' + height;
+    let block = this.imageBlocks.get(key);
+    if (!block) {
+      block = new BlockRecord!('L2V_IMAGE_' + this.imageBlocks.size);
+      this.doc.blockRecords!.add(block);
+      const groups = new Map<string, Point[][]>();
+      const unitQuad: Quad = [{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}];
+      for (const rect of await cadImageRectangles(dataUrl, width, height, rgbData)) {
+        const paths = groups.get(rect.color) ?? [];
+        paths.push(cadImageQuad(rect, unitQuad, width, height)); groups.set(rect.color, paths);
+      }
+      for (const [color, paths] of groups) this.addSolidHatchPaths(paths, cssToAcadColor(color)!, block, 1);
+      this.imageBlocks.set(key, block);
+    }
+    const dx = quad[1].x - quad[0].x, dy = quad[1].y - quad[0].y;
+    const vx = quad[3].x - quad[0].x, vy = quad[3].y - quad[0].y;
+    const insert = new Insert!(); insert.block = block;
+    insert.insertPoint = new XYZ!(quad[3].x, this.flipY(quad[3].y), 0);
+    insert.xScale = Math.hypot(dx, dy);
+    insert.yScale = Math.hypot(vx, vy) * (dx * vy - dy * vx < 0 ? -1 : 1);
+    insert.rotation = -Math.atan2(dy, dx);
+    this.doc.modelSpace!.entities.add(insert);
   }
 
   async end(): Promise<InstanceType<typeof CadDocumentType>> {
@@ -383,28 +393,15 @@ export class DWGWriter implements Writer<Uint8Array> {
     await this.builder.drawText(quad, text, style);
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
-    await this.builder.drawImage(quad, dataUrl, width, height, style);
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void> {
+    await this.builder.drawImage(quad, dataUrl, width, height, style, rgbData);
   }
 
   async end(): Promise<Uint8Array> {
     await ensureAcadLoaded();
     const doc = await this.builder.end();
 
-    for (const entity of doc.modelSpace!.entities) {
-      if (entity instanceof Hatch! && entity.color.isTrueColor) {
-        // Some DWG viewers ignore true-color solid hatch fills but accept indexed hatch colors.
-        entity.color = toNearestAcadIndexColor(entity.color);
-      }
-    }
-
-    // Estimate a generous buffer size for the DWG output
-    const buffer = new ArrayBuffer(10 * 1024 * 1024);
-    const writer = new DwgWriter!(buffer, doc);
-    writer.write();
-    const bytesWritten = writer.bytesWritten;
-    writer.dispose();
-    return new Uint8Array(buffer, 0, bytesWritten);
+    return DwgWriter!.writeToBuffer(doc);
   }
 }
 
@@ -469,13 +466,16 @@ export class AcadDXFWriter implements Writer<Uint8Array> {
     await this.builder.drawText(quad, text, style);
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style): Promise<void> {
-    await this.builder.drawImage(quad, dataUrl, width, height, style);
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, style: Style, rgbData?: number[]): Promise<void> {
+    await this.builder.drawImage(quad, dataUrl, width, height, style, rgbData);
   }
 
   async end(): Promise<Uint8Array> {
     await ensureAcadLoaded();
     const doc = await this.builder.end();
+    for (const entity of doc.modelSpace!.entities) {
+      if (entity instanceof TextEntity!) entity.value = cadUnicodeText(entity.value);
+    }
     return writeAcadDxfBytes(doc);
   }
 }

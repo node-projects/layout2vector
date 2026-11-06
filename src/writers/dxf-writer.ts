@@ -36,6 +36,7 @@ async function ensureDxfLoaded() {
   }
 }
 import type { Point, Quad, Style, Writer } from "../types.js";
+import { cadImageRectangles, cadImageQuad, cadUnicodeText, cadFontFilename } from "./shared/cad-image.js";
 import { roundedQuadPath } from "../geometry.js";
 import { normalizeWhitespaceAwareText } from "../shared/text-whitespace.js";
 import { cssColorToTrueColor } from "./shared/css-color.js";
@@ -87,12 +88,16 @@ export type DXFWriterOptions = {
    * actual image data is available in the `imageFiles` map.
    */
   embedImages?: boolean;
+  /** Convert raster icons into self-contained filled vector paths instead of IMAGE references. */
+  vectorImages?: boolean;
 };
 
 export class DXFWriter implements Writer<string> {
   private dxf!: DxfWriterType;
   private maxY: number;
   private embedImages: boolean;
+  private vectorImages = false;
+  private imageBlocks = new Map<string, string>();
   private imageBasePath: string;
   private imageCounter = 0;
   private fontStyles = new Map<string, string>();
@@ -114,6 +119,7 @@ export class DXFWriter implements Writer<string> {
       const z = optionsOrMaxY.zoom ?? 1;
       this.maxY = (optionsOrMaxY.maxY ?? 1000) * z;
       this.embedImages = optionsOrMaxY.embedImages ?? false;
+      this.vectorImages = optionsOrMaxY.vectorImages ?? false;
       this.imageBasePath = normalizeImageBasePath(optionsOrMaxY.imageBasePath);
     } else {
       const z = zoom ?? 1;
@@ -128,6 +134,7 @@ export class DXFWriter implements Writer<string> {
     this.dxf = new DxfWriter!();
     this.imageCounter = 0;
     this.imageFiles.clear();
+    this.imageBlocks.clear();
     this.fontStyles.clear();
   }
 
@@ -143,13 +150,13 @@ export class DXFWriter implements Writer<string> {
 
     // Create a DXF text style referencing this TrueType font
     const style = this.dxf.tables.addStyle(name);
-    style.fontFileName = name + ".ttf";
+    style.fontFileName = cadFontFilename(name);
     this.fontStyles.set(name, name);
     return name;
   }
 
   /** Add a HATCH entity with SOLID fill for one or more closed boundary paths. */
-  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: number): void {
+  private addSolidHatchPaths(paths: { x: number; y: number }[][], fillColor: number, target: Pick<DxfWriterType, "addHatch"> = this.dxf, maxY = this.maxY): void {
     const BoundaryPaths = HatchBoundaryPaths!;
     const PolylineBoundary = HatchPolylineBoundary!;
     const PredefinedPatterns = HatchPredefinedPatterns!;
@@ -160,7 +167,7 @@ export class DXFWriter implements Writer<string> {
       if (verts.length < 3) continue;
       const polyBoundary = new PolylineBoundary();
       for (const v of verts) {
-        polyBoundary.add({ x: v.x, y: this.flipY(v.y) });
+        polyBoundary.add({ x: v.x, y: maxY - v.y });
       }
       boundary.addPolylineBoundary(polyBoundary);
       hasBoundary = true;
@@ -222,6 +229,7 @@ export class DXFWriter implements Writer<string> {
       // Close
       vertices.push({ point: point2d!(verts[0].x, this.flipY(verts[0].y)) });
 
+      if (fillVisible) this.addSolidHatchPaths([verts], fillColor!);
       this.dxf.addLWPolyline(vertices, opts);
       return;
     }
@@ -266,6 +274,7 @@ export class DXFWriter implements Writer<string> {
       point: point2d!(points[0].x, this.flipY(points[0].y)),
     });
 
+    if (fillVisible) this.addSolidHatchPaths([points], fillColor!);
     this.dxf.addLWPolyline(vertices, opts);
   }
 
@@ -358,7 +367,30 @@ export class DXFWriter implements Writer<string> {
     }
   }
 
-  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style): Promise<void> {
+  async drawImage(quad: Quad, dataUrl: string, width: number, height: number, _style: Style, rgbData?: number[]): Promise<void> {
+    if (this.vectorImages) {
+      const key = dataUrl + ':' + width + ':' + height;
+      let name = this.imageBlocks.get(key);
+      if (!name) {
+        name = 'L2V_IMAGE_' + this.imageBlocks.size;
+        const block = this.dxf.addBlock(name);
+        const groups = new Map<string, Point[][]>();
+        const unitQuad: Quad = [{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}];
+        for (const rect of await cadImageRectangles(dataUrl, width, height, rgbData)) {
+          const paths = groups.get(rect.color) ?? [];
+          paths.push(cadImageQuad(rect, unitQuad, width, height)); groups.set(rect.color, paths);
+        }
+        for (const [color, paths] of groups) this.addSolidHatchPaths(paths, cssColorToTrueColor(color)!, block, 1);
+        this.imageBlocks.set(key, name);
+      }
+      const dx = quad[1].x - quad[0].x, dy = quad[1].y - quad[0].y;
+      const vx = quad[3].x - quad[0].x, vy = quad[3].y - quad[0].y;
+      this.dxf.addInsert(name, point3d!(quad[3].x, this.flipY(quad[3].y), 0), {
+        scaleFactor: { x: Math.hypot(dx, dy), y: Math.hypot(vx, vy) * (dx * vy - dy * vx < 0 ? -1 : 1), z: 1 },
+        rotationAngle: -Math.atan2(dy, dx) * 180 / Math.PI,
+      });
+      return;
+    }
     const idx = ++this.imageCounter;
     let imagePath: string;
 
@@ -405,7 +437,7 @@ export class DXFWriter implements Writer<string> {
   }
 
   async end(): Promise<string> {
-    return this.dxf.stringify();
+    return cadUnicodeText(this.dxf.stringify());
   }
 
   /** Flip Y coordinate for DXF (Y-up) coordinate system. */

@@ -138,3 +138,5 @@ External sources reviewed on 2026-04-15:
 - [SnapDOM GitHub repository / README](https://github.com/zumerlab/snapdom)
 
 When a cell says `Not documented`, it means I did not find an explicit claim in the upstream public docs above. It does not necessarily mean the feature fails in practice.
+CAD raster icons can be exported as coalesced filled paths: use `DXFWriter({ vectorImages: true })`; acad-ts DXF/DWG writers use this fallback automatically. DXF Unicode escapes and font styles preserve symbols. DWG defaults to AC1021 for Unicode and retains explicit true colors.
+Repeated CAD bitmap symbols share block definitions and use INSERT placements rather than duplicating pixel paths.
