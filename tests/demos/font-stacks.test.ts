@@ -32,16 +32,9 @@ function expectQuadClose(actual: Quad, expected: Quad, digits = 1): void {
   }
 }
 
-function getQuoteLineNodes(ir: IRNode[]): Array<Extract<IRNode, { type: "text" }>> {
-  const quoteLines = new Set([
-    "Native quads carry rotated text geometry,",
-    "so transformed runs can keep their live layout",
-    "when the browser exposes `getBoxQuads()`",
-    "directly.",
-  ]);
-
+function getQuoteLineNodes(ir: IRNode[], transform: string): Array<Extract<IRNode, { type: "text" }>> {
   return ir
-    .filter((node): node is Extract<IRNode, { type: "text" }> => node.type === "text" && quoteLines.has(node.text))
+    .filter((node): node is Extract<IRNode, { type: "text" }> => node.type === "text" && node.style.transform === transform)
     .sort((left, right) => left.quad[0].y - right.quad[0].y);
 }
 
@@ -97,8 +90,13 @@ test("font stack demo keeps transformed text quads and writer font stacks in fir
   expect(ribbon).toBeDefined();
   expect(isAxisAligned(ribbon!.quad)).toBe(false);
 
-  const quoteLines = getQuoteLineNodes(ir);
-  expect(quoteLines).toHaveLength(4);
+  const quote = await page.locator(".quote").evaluate((element) => ({
+    text: element.textContent!.replace(/\s+/g, " ").trim(),
+    transform: getComputedStyle(element).transform,
+  }));
+  const quoteLines = getQuoteLineNodes(ir, quote.transform);
+  expect(quoteLines.length).toBeGreaterThan(1);
+  expect(quoteLines.map((line) => line.text.trim()).join(" ")).toBe(quote.text);
   expect(quoteLines.slice(0, -1).every((line) => line.style.textAlign === "justify")).toBe(true);
   expect(quoteLines.at(-1)?.style.textAlign).toBeUndefined();
 
@@ -152,7 +150,7 @@ test("font stack demo keeps transformed text quads and writer font stacks in fir
   expect(svg).toMatch(/RTL SIGNAL<\/text>/);
   expect(svg).toMatch(/transform="matrix\(-0\.1,0\.99,-0\.99,-0\.1|transform="matrix\(-0\.1,0\.99,-1,-0\.1/);
   expect(svg).toMatch(/<text[^>]*transform="matrix\([^"]+\)"[^>]*>VARIABLE CADENCE<\/text>/);
-  expect((svg.match(/lengthAdjust="spacing"/g) ?? []).length).toBe(3);
+  expect((svg.match(/lengthAdjust="spacing"/g) ?? []).length).toBe(quoteLines.length - 1);
 
   expect(html).toContain("Mona Sans");
   expect(html).toContain("Segoe UI");
@@ -162,8 +160,21 @@ test("font stack demo keeps transformed text quads and writer font stacks in fir
   expect(html).toContain("RTL SIGNAL");
   expect(html).toContain("transform:matrix(");
   expect(html).toMatch(/RTL SIGNAL<\/div>/);
-  expect((html.match(/text-align:justify;text-align-last:justify/g) ?? []).length).toBe(3);
+  expect((html.match(/text-align:justify;text-align-last:justify/g) ?? []).length).toBe(quoteLines.length - 1);
   expect(html).not.toMatch(/position:relative;left:-\d/);
-  expect((html.match(/position:absolute;left:56px;top:286\.5px;width:590px;height:613\.5px;overflow:hidden;border-radius:28px/g) ?? []).length).toBe(1);
-  expect((html.match(/position:absolute;left:674px;top:286\.5px;width:590px;height:613\.5px;overflow:hidden;border-radius:28px/g) ?? []).length).toBe(1);
+  const panelClips = await page.evaluate((output) => {
+    const root = document.getElementById("root")!.getBoundingClientRect();
+    const parsed = new DOMParser().parseFromString(output, "text/html");
+    const clips = Array.from(parsed.querySelectorAll<HTMLElement>("[style]"))
+      .filter(({ style }) => style.position === "absolute" && style.overflow === "hidden" && style.borderRadius === "28px")
+      .map(({ style }) => ({ x: parseFloat(style.left), y: parseFloat(style.top), w: parseFloat(style.width), h: parseFloat(style.height) }));
+    return Array.from(document.querySelectorAll(".panel")).map((element) => {
+      const rect = element.getBoundingClientRect();
+      return clips.filter((clip) => Math.abs(clip.x - (rect.left - root.left)) < 0.1
+        && Math.abs(clip.y - (rect.top - root.top)) < 0.1
+        && Math.abs(clip.w - rect.width) < 0.1
+        && Math.abs(clip.h - rect.height) < 0.1).length;
+    });
+  }, html);
+  expect(panelClips).toEqual([1, 1]);
 });
