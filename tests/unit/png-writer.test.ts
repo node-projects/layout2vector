@@ -87,7 +87,7 @@ test.describe("PNG Writer Output", () => {
       }], writer);
 
       await pngResult.finalize();
-      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const ctx: CanvasRenderingContext2D = pngResult.getCanvas().getContext("2d")!;
       return {
         topSample: Array.from(ctx.getImageData(90, 15, 1, 1).data),
         underlineSample: Array.from(ctx.getImageData(90, 38, 1, 1).data),
@@ -156,7 +156,7 @@ test.describe("PNG Writer Output", () => {
       const writer = new (window as any).__HC.PNGWriter(100, 100);
       const pngResult = await (window as any).__HC.renderIR(ir, writer);
       await pngResult.finalize();
-      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const ctx: CanvasRenderingContext2D = pngResult.getCanvas().getContext("2d")!;
       return {
         outer: Array.from(ctx.getImageData(20, 20, 1, 1).data),
         hole: Array.from(ctx.getImageData(50, 50, 1, 1).data),
@@ -195,7 +195,7 @@ test.describe("PNG Writer Output", () => {
       }], writer);
 
       await pngResult.finalize();
-      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const ctx: CanvasRenderingContext2D = pngResult.getCanvas().getContext("2d")!;
       const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
       return {
         center: sample(36, 36),
@@ -249,7 +249,7 @@ test.describe("PNG Writer Output", () => {
       ], writer);
 
       await pngResult.finalize();
-      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const ctx: CanvasRenderingContext2D = pngResult.getCanvas().getContext("2d")!;
       return Array.from(ctx.getImageData(40, 40, 1, 1).data);
     }, RED_PIXEL_PNG);
 
@@ -295,7 +295,7 @@ test.describe("PNG Writer Output", () => {
       ], writer);
 
       await pngResult.finalize();
-      const ctx = pngResult.getCanvas().getContext("2d")!;
+      const ctx: CanvasRenderingContext2D = pngResult.getCanvas().getContext("2d")!;
       const sample = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data);
       return {
         controlOutside: sample(34, 60),

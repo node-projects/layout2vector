@@ -31,7 +31,7 @@ test.describe("CanvasWriter", () => {
         includeText: false,
       });
       const writer = new (window as any).__HC.CanvasWriter({ width: 40, height: 20 });
-      const canvas = await (window as any).__HC.renderIR(ir, writer);
+      const canvas: HTMLCanvasElement = await (window as any).__HC.renderIR(ir, writer);
       const pixel = Array.from(canvas.getContext("2d")!.getImageData(20, 10, 1, 1).data);
       return { width: canvas.width, height: canvas.height, pixel };
     });
@@ -72,7 +72,7 @@ test.describe("CanvasWriter", () => {
             fontStyle: "italic",
           },
         );
-        const canvas = await writer.end();
+        const canvas: HTMLCanvasElement = await writer.end();
         return {
           capturedFont,
           width: canvas.width,
@@ -107,7 +107,7 @@ test.describe("CanvasWriter", () => {
           strokeWidth: "8px",
         },
       );
-      const canvas = await writer.end();
+      const canvas: HTMLCanvasElement = await writer.end();
       const ctx = canvas.getContext("2d")!;
       return {
         left: Array.from(ctx.getImageData(15, 15, 1, 1).data),
@@ -170,7 +170,7 @@ test.describe("CanvasWriter", () => {
           includeText: false,
         });
         const writer = new (window as any).__HC.CanvasWriter({ width: 100, height: 100 });
-        const canvas = await (window as any).__HC.renderIR(ir, writer);
+        const canvas: HTMLCanvasElement = await (window as any).__HC.renderIR(ir, writer);
         const ctx = canvas.getContext("2d")!;
         return {
           inside: Array.from(ctx.getImageData(inside[0], inside[1], 1, 1).data),

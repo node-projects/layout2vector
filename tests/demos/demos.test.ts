@@ -1,7 +1,7 @@
 /**
  * Demo conversion tests.
  * Loads each demo HTML file in a real browser, extracts the IR,
- * and converts to both DXF and PDF output files.
+ * and converts through all supported output writers, including editable draw.io XML.
  */
 import { test, expect } from "@playwright/test";
 import * as fs from "node:fs";
@@ -121,7 +121,7 @@ for (const demoFile of demoFiles) {
     }
 
     console.log(
-      `  \u2713 ${name}: ${summary.irCount} IR nodes \u2192 DXF (${summary.fileSizes.dxf} bytes), PDF (${summary.fileSizes.pdf} bytes), PNG (${summary.fileSizes.png !== null ? summary.fileSizes.png + " bytes" : "skipped"}), SVG (${summary.fileSizes.svg} bytes), HTML (${summary.fileSizes.html} bytes), EMF (${summary.fileSizes.emf} bytes), EMF+ (${summary.fileSizes.emfPlus} bytes), DWG (${summary.fileSizes.dwg} bytes), AcadDXF (${summary.fileSizes.acadDxf} bytes)`
+      `  \u2713 ${name}: ${summary.irCount} IR nodes \u2192 DXF (${summary.fileSizes.dxf} bytes), PDF (${summary.fileSizes.pdf} bytes), PNG (${summary.fileSizes.png !== null ? summary.fileSizes.png + " bytes" : "skipped"}), SVG (${summary.fileSizes.svg} bytes), draw.io (${summary.fileSizes.drawio} bytes), HTML (${summary.fileSizes.html} bytes), EMF (${summary.fileSizes.emf} bytes), EMF+ (${summary.fileSizes.emfPlus} bytes), DWG (${summary.fileSizes.dwg} bytes), AcadDXF (${summary.fileSizes.acadDxf} bytes)`
     );
   });
 }

@@ -10,6 +10,7 @@ import { DXFWriter } from "../../src/writers/dxf-writer.js";
 import { PDFWriter } from "../../src/writers/pdf-writer.js";
 import { SVGWriter } from "../../src/writers/svg-writer.js";
 import { HTMLWriter } from "../../src/writers/html-writer.js";
+import { DrawIOWriter } from "../../src/writers/drawio-writer.js";
 import { EMFWriter } from "../../src/writers/emf-writer.js";
 import { EMFPlusWriter } from "../../src/writers/emfplus-writer.js";
 import { AcadDXFWriter, DWGWriter } from "../../src/writers/acad-writer.js";
@@ -37,6 +38,7 @@ export interface ConversionSummary {
     pdf: number;
     png: number | null;
     svg: number;
+    drawio: number;
     html: number;
     emf: number;
     emfPlus: number;
@@ -776,6 +778,19 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   const svgPath = path.join(outputDir, `${name}.svg`);
   fs.writeFileSync(svgPath, svgContent, "utf-8");
 
+  const drawioContent = await renderIR(ir, new DrawIOWriter({
+    width: viewport.width,
+    height: viewport.height,
+    pageName: name,
+  }));
+  expect(drawioContent).toContain('<mxfile host="app.diagrams.net" compressed="false">');
+  expect(await page.evaluate(xml => {
+    const doc = new DOMParser().parseFromString(xml, "application/xml");
+    return !doc.querySelector("parsererror") && !!doc.querySelector("diagram > mxGraphModel > root");
+  }, drawioContent)).toBe(true);
+  const drawioPath = path.join(outputDir, `${name}.drawio`);
+  fs.writeFileSync(drawioPath, drawioContent, "utf-8");
+
   const htmlWriter = new HTMLWriter({
     width: viewport.width,
     height: viewport.height,
@@ -819,6 +834,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   const dxfSize = fs.statSync(dxfPath).size;
   const pdfSize = fs.statSync(pdfPath).size;
   const svgSize = fs.statSync(svgPath).size;
+  const drawioSize = fs.statSync(drawioPath).size;
   const htmlSize = fs.statSync(htmlPath).size;
   const emfSize = fs.statSync(emfPath).size;
   const emfPlusSize = fs.statSync(emfPlusPath).size;
@@ -829,6 +845,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
   expect(pdfSize).toBeGreaterThan(0);
   if (pngSize !== null) expect(pngSize).toBeGreaterThan(0);
   expect(svgSize).toBeGreaterThan(0);
+  expect(drawioSize).toBeGreaterThan(0);
   expect(htmlSize).toBeGreaterThan(0);
   expect(emfSize).toBeGreaterThan(0);
   expect(emfPlusSize).toBeGreaterThan(0);
@@ -842,6 +859,7 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
       pdf: pdfSize,
       png: pngSize,
       svg: svgSize,
+      drawio: drawioSize,
       html: htmlSize,
       emf: emfSize,
       emfPlus: emfPlusSize,

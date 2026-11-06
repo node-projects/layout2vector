@@ -1032,7 +1032,7 @@ test.describe("Writer Output", () => {
 
     expect(Buffer.from(firstDwg)).toEqual(Buffer.from(secondDwg));
 
-    const doc = new DwgReader(Buffer.from(firstDwg)).read();
+    const doc = new DwgReader(Uint8Array.from(firstDwg).buffer).read();
     const stableTime = STABLE_CAD_DATE.getTime();
     expect(doc.header!.createDateTime.getTime()).toBe(stableTime);
     expect(doc.header!.updateDateTime.getTime()).toBe(stableTime);
@@ -1058,7 +1058,7 @@ test.describe("Writer Output", () => {
     }];
 
     const bytes = await renderIR(ir, new DWGWriter({ maxY: 100 }));
-    const doc = new DwgReader(Buffer.from(bytes)).read();
+    const doc = new DwgReader(Uint8Array.from(bytes).buffer).read();
     const hatches = Array.from(doc.modelSpace!.entities).filter((entity) => entity instanceof Hatch);
 
     expect(hatches.length).toBe(1);

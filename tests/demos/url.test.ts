@@ -72,7 +72,7 @@ test("convert url to all writers", async ({ browser, browserName }) => {
     });
 
     console.log(
-      `  \u2713 ${parsedUrl.href}${requestedColorScheme ? ` [${requestedColorScheme}]` : ""}: ${summary.irCount} IR nodes \u2192 DXF (${summary.fileSizes.dxf} bytes), PDF (${summary.fileSizes.pdf} bytes), PNG (${summary.fileSizes.png !== null ? summary.fileSizes.png + " bytes" : `skipped${summary.errors.png ? `: ${summary.errors.png}` : ""}`}), SVG (${summary.fileSizes.svg} bytes), HTML (${summary.fileSizes.html} bytes), EMF (${summary.fileSizes.emf} bytes), EMF+ (${summary.fileSizes.emfPlus} bytes), DWG (${summary.fileSizes.dwg} bytes), AcadDXF (${summary.fileSizes.acadDxf} bytes)`
+      `  \u2713 ${parsedUrl.href}${requestedColorScheme ? ` [${requestedColorScheme}]` : ""}: ${summary.irCount} IR nodes \u2192 DXF (${summary.fileSizes.dxf} bytes), PDF (${summary.fileSizes.pdf} bytes), PNG (${summary.fileSizes.png !== null ? summary.fileSizes.png + " bytes" : `skipped${summary.errors.png ? `: ${summary.errors.png}` : ""}`}), SVG (${summary.fileSizes.svg} bytes), draw.io (${summary.fileSizes.drawio} bytes), HTML (${summary.fileSizes.html} bytes), EMF (${summary.fileSizes.emf} bytes), EMF+ (${summary.fileSizes.emfPlus} bytes), DWG (${summary.fileSizes.dwg} bytes), AcadDXF (${summary.fileSizes.acadDxf} bytes)`
     );
   } finally {
     await context.close();

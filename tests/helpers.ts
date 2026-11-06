@@ -49,6 +49,7 @@ export async function injectLibrary(page: Page): Promise<void> {
         import { HTMLWriter } from "../src/writers/html-writer.ts";
         import { ImageWriter, ImageResult } from "../src/writers/image-writer.ts";
         import { SVGWriter } from "../src/writers/svg-writer.ts";
+        import { DrawIOWriter } from "../src/writers/drawio-writer.ts";
 
         window.__HC = {
           extractIR,
@@ -83,6 +84,7 @@ export async function injectLibrary(page: Page): Promise<void> {
           ImageWriter,
           ImageResult,
           SVGWriter,
+          DrawIOWriter,
         };
       `,
       loader: "ts",
@@ -130,8 +132,8 @@ export async function injectBoxQuadsPolyfill(page: Page): Promise<void> {
   // Preserve native implementations (Firefox and Chrome Canary with
   // Experimental Web Platform Features enabled).
   const hasNativeBoxQuads = await page.evaluate(() =>
-    typeof Element.prototype.getBoxQuads === "function"
-    && typeof Text.prototype.getBoxQuads === "function"
+    "getBoxQuads" in Element.prototype && typeof Element.prototype.getBoxQuads === "function"
+    && "getBoxQuads" in Text.prototype && typeof Text.prototype.getBoxQuads === "function"
   );
   if (hasNativeBoxQuads) return;
 

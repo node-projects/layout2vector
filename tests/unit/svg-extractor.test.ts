@@ -157,7 +157,7 @@ test.describe("SVG Geometry Extraction", () => {
     );
 
     const result = await page.evaluate(async () => {
-      const el = document.getElementById("target") as SVGSVGElement;
+      const el = document.querySelector<SVGSVGElement>("#target")!;
       const textEl = el.querySelector("text") as SVGTextElement;
       const rect = textEl.getBoundingClientRect();
       const ctm = textEl.getScreenCTM();

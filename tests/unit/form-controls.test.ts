@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { setupPage } from "../helpers.js";
+import type { IRNode } from "../../src/types.js";
 
 test.describe("Form control conversion", () => {
   test("is opt-in and preserves control values and states", async ({ page }) => {
@@ -41,19 +42,19 @@ test.describe("Form control conversion", () => {
 
       async function summarize(id: string, convertFormControls = true) {
         const el = document.getElementById(id)!;
-        const ir = await HC.extractIR(el, {
+        const ir: IRNode[] = await HC.extractIR(el, {
           includeText: true,
           convertFormControls,
         });
 
         return {
-          texts: ir.filter((node: any) => node.type === "text").map((node: any) => node.text),
-          polygons: ir.filter((node: any) => node.type === "polygon"),
-          polygonCount: ir.filter((node: any) => node.type === "polygon").length,
-          closedPolylines: ir.filter((node: any) => node.type === "polyline" && node.closed).length,
+          texts: ir.filter(node => node.type === "text").map(node => node.text),
+          polygons: ir.filter((node) => node.type === "polygon"),
+          polygonCount: ir.filter((node) => node.type === "polygon").length,
+          closedPolylines: ir.filter((node) => node.type === "polyline" && node.closed).length,
           openPolylinePointCounts: ir
-            .filter((node: any) => node.type === "polyline" && !node.closed)
-            .map((node: any) => node.points.length),
+            .filter((node): node is Extract<IRNode, { type: "polyline" }> => node.type === "polyline" && !node.closed)
+            .map((node) => node.points.length),
         };
       }
 

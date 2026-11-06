@@ -218,7 +218,8 @@ test.describe("HTML Geometry Extraction", () => {
         .filter((node: any) => node.type === "polygon")
         .find((node: any) => Math.min(...node.points.map((point: any) => point.y)) < 0);
 
-      return pseudo ? { points: pseudo.points, clipBounds: pseudo.style.clipBounds } : null;
+      if (!pseudo) throw new Error("Expected a clipped pseudo-element polygon");
+      return { points: pseudo.points, clipBounds: pseudo.style.clipBounds };
     });
 
     expect(summary).toBeDefined();

@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/%40node-projects%2Flayout2vector)](https://www.npmjs.com/package/%40node-projects%2Flayout2vector)
 
-A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **DWG**, **EMF**, **EMF+**, **PDF**, **Canvas**, **PNG**, **SVG**, or **HTML**.
+A TypeScript (ESM) library that extracts rendered layout geometry from a live DOM — including HTML, SVG, CSS transforms, Shadow DOM, and opt-in same-origin iframe traversal — and converts it to **DXF**, **DWG**, **EMF**, **EMF+**, **PDF**, **Canvas**, **PNG**, **SVG**, **draw.io**, or **HTML**.
 
 ## Overview
 
@@ -10,7 +10,7 @@ layout2vector works in three stages:
 
 1. **DOM Extraction** — Traverses the live DOM (including open Shadow DOM trees and, optionally, same-origin iframe documents), computes stacking context order, and uses `getBoxQuads()` / `getBoundingClientRect()` for HTML geometry and SVG-native APIs (`getCTM`, `getBBox`, `getTotalLength`, `getPointAtLength`) for SVG geometry.
 2. **Intermediate Representation (IR)** — A flat, renderer-independent array of typed nodes (`polygon`, `polyline`, `text`, `image`) ordered by paint order, each carrying a style subset.
-3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF and EMF+ (Windows Enhanced Metafile variants), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, and HTML. Implement the `Writer<T>` interface to add your own.
+3. **Writers** — Pluggable output backends. Built-in writers for DXF (via `@tarikjabiri/dxf`), DXF/DWG (via `@node-projects/acad-ts`), EMF and EMF+ (Windows Enhanced Metafile variants), PDF (custom lightweight PDF generator), Canvas, PNG/JPEG/WEBP (via Canvas 2D API), SVG, draw.io (editable uncompressed XML), and HTML. Implement the `Writer<T>` interface to add your own.
 
 For a feature-by-feature comparison with html2canvas, html2canvas-pro, and SnapDOM, including output-model tradeoffs, see [FEATURES.md](./FEATURES.md).
 
@@ -40,7 +40,7 @@ Before the first release, configure a GitHub Actions trusted publisher for `@nod
 ## Quick Start
 
 ```ts
-import { extractIR, renderIR, DXFWriter, DWGWriter, AcadDXFWriter, EMFWriter, EMFPlusWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter } from "@node-projects/layout2vector";
+import { extractIR, renderIR, DXFWriter, DWGWriter, AcadDXFWriter, EMFWriter, EMFPlusWriter, PDFWriter, CanvasWriter, ImageWriter, SVGWriter, HTMLWriter, DrawIOWriter } from "@node-projects/layout2vector";
 
 // In a browser context (e.g. Playwright, Puppeteer, or a web page):
 const root = document.getElementById("my-element")!;
@@ -107,6 +107,20 @@ const acadDxfWriter = new AcadDXFWriter({ maxY: document.documentElement.scrollH
 const acadDxfBytes = await renderIR(ir, acadDxfWriter);
 // acadDxfBytes is a complete .dxf file as a Uint8Array
 
+```
+
+## Editable draw.io export
+
+```ts
+import { extractIR, renderIR, DrawIOWriter } from "@node-projects/layout2vector";
+
+const ir = await extractIR(document.getElementById("my-element")!, { includeImages: true });
+const xml = await renderIR(ir, new DrawIOWriter({
+  width: 800,
+  height: 600,
+  pageName: "Layout",
+}));
+// Save xml as layout.drawio and open it in diagrams.net.
 ```
 
 ## Preserving Webfonts
@@ -454,6 +468,28 @@ Duplicate `<clipPath>` definitions are deduplicated (shared by reference). Dupli
 
 
 
+#### `DrawIOWriter`
+
+```ts
+type DrawIOWriterOptions = {
+  width?: number;     // page width in CSS pixels; default 850
+  height?: number;    // page height in CSS pixels; default 1100
+  pageName?: string;  // default "Page-1"
+};
+new DrawIOWriter(options?: DrawIOWriterOptions)
+```
+
+Returns a complete, uncompressed `.drawio` XML document (`Promise<string>` from `renderIR`). Page dimensions must be positive finite numbers. The writer works in browsers and Node.js without additional dependencies.
+
+- Boxes become native rectangles, including uniform rounded corners. Uniform borders stay on the shape; mixed border sides become separate editable lines.
+- Arbitrary polygons and compound paths become native custom stencil shapes with editable fill/stroke and shape XML. Stencil fields use draw.io's required base64/DEFLATE encoding; the diagram XML itself stays uncompressed.
+- Open polylines become unattached native edges with editable waypoints and no arrowheads. Connector relationships are not inferred.
+- Text stays editable, with font family, size, bold/italic, underline/strike-through, color, alignment, and opacity. Fonts must be installed on the editing system; fonts are not embedded.
+- Images become individual image cells with embedded data URLs. Image position, size, and rotation remain editable; bitmap pixels do not become vector geometry.
+- Paint order and optional source metadata are retained. Rectangular text/image quads retain rotation; skewed or reflected quads use axis-aligned bounds.
+
+This writer targets editable layouts. Gradients, clipping/masks, shadows/filters, blend modes, complex corner shapes, per-corner radii, and advanced text layout are not reproduced. Compound fill rules follow draw.io's stencil renderer. Use SVG or PDF when visual fidelity is the priority.
+
 #### `HTMLWriter`
 
 ```ts
@@ -727,7 +763,7 @@ npm run test:demos
 
 ### Demo Conversion
 
-The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, `.png`, `.svg`, `.html`, and `.emf` files to `tests/output/`.
+The `test:demos` suite loads HTML demo files from `tests/demos/`, extracts IR in a real Chromium browser, and writes `.dxf`, `.pdf`, `.png`, `.svg`, `.drawio`, `.html`, and `.emf` files to `tests/output/`.
 
 For GitHub-friendly browsing of the generated HTML, PDF, and preview screenshots, see [tests/output/README.md](./tests/output/README.md).
 

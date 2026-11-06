@@ -29,6 +29,7 @@
     <section class="panel">
       <span class="tag">DXF</span>
       <span class="tag">SVG</span>
+      <span class="tag">draw.io</span>
       <span class="tag">HTML</span>
       <span class="tag">PNG</span>
       <h2>Code</h2>
@@ -38,6 +39,7 @@
   DXFWriter,
   SVGWriter,
   HTMLWriter,
+  DrawIOWriter,
   ImageWriter
 } from "@node-projects/layout2vector";
 
@@ -53,6 +55,7 @@ async function exportAll(root) {
 
   const dxf = await renderIR(ir, new DXFWriter({ maxY: Math.ceil(bounds.height) }));
   const svg = await renderIR(ir, new SVGWriter({ width: bounds.width, height: bounds.height }));
+  const drawio = await renderIR(ir, new DrawIOWriter({ width: bounds.width, height: bounds.height }));
   const html = await renderIR(ir, new HTMLWriter({ width: bounds.width, height: bounds.height }));
 
   const image = await renderIR(ir, new ImageWriter({
@@ -63,7 +66,7 @@ async function exportAll(root) {
   await image.finalize();
   const pngBytes = image.toBytes();
 
-  return { dxf, svg, html, pngBytes };
+  return { dxf, svg, drawio, html, pngBytes };
 }</div>
     </section>
 

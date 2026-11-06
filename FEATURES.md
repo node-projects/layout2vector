@@ -32,6 +32,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | PNG | Yes | Yes | Yes | Yes | html2canvas and html2canvas-pro export PNG through the returned canvas. SnapDOM exposes `toPng()`. |
 | JPEG | Yes | Yes | Yes | Yes | html2canvas and html2canvas-pro export JPEG through canvas APIs. SnapDOM exposes `toJpg()`. |
 | WEBP | Yes | Yes | Yes | Yes | html2canvas and html2canvas-pro export WEBP where the browser canvas implementation supports it. SnapDOM exposes `toWebp()`. |
+| draw.io / diagrams.net | Yes | No | No | No | Native editable shapes, text, image cells, and line waypoints in uncompressed XML; custom polygon stencils use standard encoded stencil fields. |
 | SVG | Yes | No | No | Yes | `layout2vector` writes a standalone SVG document from IR. SnapDOM exports a self-contained SVG snapshot built around cloned DOM plus `foreignObject`. |
 | HTML | Yes | No | No | No | Native writer in `layout2vector`. |
 | Canvas object | Yes | Yes | Yes | Yes | `layout2vector` has `CanvasWriter`; SnapDOM exposes `toCanvas()`. |
@@ -42,7 +43,7 @@ This matrix lists the concrete output formats discussed in this comparison.
 | --- | --- | --- | --- | --- | --- |
 | Core rendering model | Structured DOM -> IR -> writer pipeline | DOM -> canvas reconstruction | DOM -> canvas reconstruction | Clone -> style/resource inlining -> SVG `foreignObject` -> export | `layout2vector` exposes typed IR nodes and writer backends; the others are screenshot-first. |
 | Requires a temporary cloned document/container | No | Yes | Yes | Yes | html2canvas exposes clone-oriented options such as `onclone` and `removeContainer`. html2canvas-pro stays clone-based and adds `iframeContainer` plus document-cloner fixes. SnapDOM explicitly documents a clone-based capture flow. |
-| Built-in output formats | DXF, DWG, EMF, EMF+, PDF, PNG, JPEG, WEBP, SVG, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | SVG, PNG, JPG, WEBP, Canvas, Blob | SnapDOM's PDF story is plugin-based, not a built-in core writer. |
+| Built-in output formats | DXF, DWG, EMF, EMF+, PDF, PNG, JPEG, WEBP, SVG, draw.io, HTML, Canvas | `HTMLCanvasElement` output | `HTMLCanvasElement` output | SVG, PNG, JPG, WEBP, Canvas, Blob | SnapDOM's PDF story is plugin-based, not a built-in core writer. |
 | Structured IR / custom backends | Yes | No | No | Partial | `layout2vector` exposes `polygon`, `polyline`, `text`, and `image` IR nodes plus a `Writer<T>` interface. SnapDOM can add custom exports through beta plugins, but it does not expose a typed scene graph. |
 | Plugin / hook system around capture | No | No | No | Yes | SnapDOM documents `beforeSnap`, `beforeClone`, `afterClone`, `beforeRender`, `afterRender`, `beforeExport`, `afterExport`, and `defineExports`. |
 | Keeps text as text/vector objects | Yes | No | No | No | html2canvas, html2canvas-pro, and SnapDOM are screenshot-oriented. `layout2vector` preserves text nodes for text-capable writers, including extracted font-family stacks plus optional collected `@font-face` assets in HTML, SVG, and PDF output. |
