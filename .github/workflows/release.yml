@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build and publish package
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Update npm for trusted publishing
+        run: npm install --global npm@11
+
+      - name: Validate release version
+        id: release
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+          const version = process.env.RELEASE_TAG.replace(/^v/, '');
+          const identifier = '(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)';
+          const semver = new RegExp(`^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-${identifier}(?:\\.${identifier})*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$`);
+          if (!semver.test(version) || version.includes('+')) {
+            throw new Error('Release tag must be an npm-compatible SemVer version, optionally prefixed with v, without build metadata.');
+          }
+          const tag = process.env.RELEASE_PRERELEASE === 'true' || version.includes('-') ? 'next' : 'latest';
+          appendFileSync(process.env.GITHUB_OUTPUT, `version=${version}\ndist-tag=${tag}\n`);
+          NODE
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set package version from release
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: npm version "$RELEASE_VERSION" --no-git-tag-version --allow-same-version --ignore-scripts
+
+      - name: Build package and minified bundle
+        run: npm run prepublishOnly
+
+      - name: Install test browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run tests
+        run: npm test
+
+      - name: Pack release artifact
+        id: package
+        shell: bash
+        run: |
+          npm pack --json > "$RUNNER_TEMP/npm-pack.json"
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const packages = JSON.parse(readFileSync(join(process.env.RUNNER_TEMP, 'npm-pack.json'), 'utf8'));
+          const [pkg] = Array.isArray(packages) ? packages : Object.values(packages);
+          appendFileSync(process.env.GITHUB_OUTPUT, `filename=${pkg.filename}\n`);
+          NODE
+
+      - name: Upload package to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PACKAGE_FILE: ${{ steps.package.outputs.filename }}
+        run: gh release upload "$RELEASE_TAG" "$PACKAGE_FILE" --clobber
+
+      - name: Publish package to npm
+        env:
+          PACKAGE_FILE: ${{ steps.package.outputs.filename }}
+          NPM_DIST_TAG: ${{ steps.release.outputs.dist-tag }}
+        run: npm publish "./$PACKAGE_FILE" --access public --tag "$NPM_DIST_TAG"

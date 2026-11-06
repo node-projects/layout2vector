@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@node-projects/acad-ts": "^3.8.0",
-    "@tarikjabiri/dxf": "^2.8.9"
+    "@tarikjabiri/dxf": "^2.10.0"
   },
   "peerDependencies": {
     "@chenglou/pretext": ">=0.0.6",
@@ -50,9 +50,9 @@
     }
   },
   "devDependencies": {
-    "@chenglou/pretext": ">=0.0.8",
-    "@playwright/test": "^1.62.1",
-    "@types/node": "^26.2.0",
+    "@chenglou/pretext": "^1.0.0",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
     "esbuild": "^0.28.2",
     "get-box-quads-polyfill": "^4.47.0",
     "typescript": "^7.0.2"

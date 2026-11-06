@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outputDir = path.resolve(__dirname, "../output");
 
 test("generate HTML and PDF previews", async ({ page }) => {
-  test.setTimeout(120000);
+  test.setTimeout(600000);
 
   const htmlFiles = fs
     .readdirSync(outputDir)

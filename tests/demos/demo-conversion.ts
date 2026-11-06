@@ -612,6 +612,27 @@ export async function convertPageToAllWriters(options: ConvertPageToAllWritersOp
     const fontFallbackIr = fontAssets
       ? await (window as any).__HC.rasterizeFontTextNodes(ir, fontAssets)
       : ir;
+    // Extraction omits RGB arrays for large images. Node-side CAD writers
+    // cannot decode those data URLs, so prepare their pixels in the browser.
+    for (const node of fontFallbackIr) {
+      if (node.type !== "image" || node.rgbData?.length === node.width * node.height * 3) continue;
+      const image = new Image();
+      image.src = node.dataUrl;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = node.width;
+      canvas.height = node.height;
+      const context = canvas.getContext("2d")!;
+      context.drawImage(image, 0, 0, node.width, node.height);
+      const rgba = context.getImageData(0, 0, node.width, node.height).data;
+      node.rgbData = new Array(node.width * node.height * 3);
+      for (let i = 0, j = 0; i < rgba.length; i += 4, j += 3) {
+        const alpha = rgba[i + 3] / 255;
+        for (let channel = 0; channel < 3; channel++) {
+          node.rgbData[j + channel] = Math.round(rgba[i + channel] * alpha + 255 * (1 - alpha));
+        }
+      }
+    }
     return {
       ir,
       fontFallbackIr,

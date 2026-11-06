@@ -22,6 +22,21 @@ Package: [@node-projects/layout2vector](https://www.npmjs.com/package/%40node-pr
 npm install @node-projects/layout2vector
 ```
 
+## Development and releases
+
+```bash
+npm ci
+npm run prepublishOnly
+npx playwright install chromium firefox
+CI=1 npm test
+```
+
+On PowerShell, use `$env:CI = "1"` before `npm test`. Without `CI`, Chromium projects use locally installed Chrome Canary. GitHub Actions builds the library and minified bundle and runs all Playwright projects on pushes to `main`/`master` and pull requests.
+
+To publish, create and publish a GitHub release with a tag such as `v5.30.0` or `5.30.0`. The release workflow uses the tag's version for `package.json` and the lockfile in its checkout, builds and tests the package, attaches the npm `.tgz` to that GitHub release, and publishes the same archive to npmjs.com. It does not commit the version change back to the repository. Prerelease versions or GitHub releases marked as prereleases use npm's `next` tag; stable releases use `latest`. Tags must be valid SemVer without build metadata.
+
+Before the first release, configure a GitHub Actions trusted publisher for `@node-projects/layout2vector` on npmjs.com: owner `node-projects`, repository `layout2vector`, workflow `release.yml`, and no environment. The workflow uses OIDC, so no `NPM_TOKEN` secret is needed. See [npm's trusted publishing setup](https://docs.npmjs.com/trusted-publishers/).
+
 ## Quick Start
 
 ```ts

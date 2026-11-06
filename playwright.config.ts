@@ -2,7 +2,8 @@ import { defineConfig } from "@playwright/test";
 
 const chromeCanary = {
   browserName: "chromium" as const,
-  channel: "chrome-canary",
+  // Canary is a local development option; CI installs Playwright's Chromium.
+  channel: process.env.CI ? undefined : "chrome-canary",
   launchOptions: {
     args: ["--enable-experimental-web-platform-features"],
   },
@@ -19,8 +20,10 @@ const firefox = {
 
 export default defineConfig({
   testDir: "./tests",
-  timeout: 30000,
+  timeout: 60000,
   retries: 0,
+  forbidOnly: !!process.env.CI,
+  workers: process.env.CI ? 2 : undefined,
   use: {
     headless: true,
   },
@@ -43,6 +46,7 @@ export default defineConfig({
     {
       name: "demos",
       testMatch: "demos/**/*.test.ts",
+      testIgnore: "**/screenshot.test.ts",
       use: chromeCanary,
     },
     // Firefox projects — use native getBoxQuads (no polyfill needed)
@@ -64,7 +68,14 @@ export default defineConfig({
     {
       name: "firefox-demos",
       testMatch: "demos/**/*.test.ts",
+      testIgnore: "**/screenshot.test.ts",
       use: firefox,
+    },
+    {
+      name: "previews",
+      testMatch: "demos/screenshot.test.ts",
+      dependencies: ["demos", "firefox-demos"],
+      use: chromeCanary,
     },
   ],
 });
